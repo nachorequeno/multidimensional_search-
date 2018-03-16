@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pickle
+import time
 
 class ResultSet:
   suffix_Yup = 'up'
@@ -92,6 +93,7 @@ class ResultSet:
   def toMatPlot(self, file='', xaxe=0, yaxe=1):
       fig1 = plt.figure()
       ax1 = fig1.add_subplot(111, aspect='equal')
+      ax1.set_title('Approximation of the Pareto front')
 
       pathpatch_yup = self.toMatPlotYup(xaxe, yaxe)
       pathpatch_ylow = self.toMatPlotYlow(xaxe, yaxe)
@@ -105,7 +107,9 @@ class ResultSet:
       #print(pathpatch)
       for pathpatch_i in pathpatch:
           ax1.add_patch(pathpatch_i)
-      ax1.set_title('Approximation of the Pareto front')
+          ## ax1.autoscale_view()
+          ## plt.show()
+          ## time.sleep(1)
       ax1.autoscale_view()
 
       if file != '':
