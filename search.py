@@ -1,8 +1,9 @@
-from segment import *
 from rectangle import *
-import time
+import itertools
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+from resultset import *
+import pickle
+import time
 
 def metric(lset):
     # lsizes = map(lambda item: item.norm(), lset)
@@ -12,129 +13,8 @@ def metric(lset):
 def staircase_oracle(xs, ys):
     return lambda p: any(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
 
-def line_oracle():
-    return lambda point: all(point(0) >= x for x in point)
-
-    #def line_oracle(point1, point2):
-    #minim = min(point1, point2)
-    #maxi = max(point1, point2)
-    #diagonal = subtract(maxi, minim)
-    #return lambda p: any(p[0] >= x for x in diagonal)
-
-def line_oracle2(xyz, abc):
-    #x = x0 + a*t
-    #y = y0 + b*t
-    #z = z0 + c*t
-    #...
-    return lambda point: all(x >= x0 + a*point(0) for x, x0, a in zip(point, xyz, abc))
-
-
-class ResulSet(object):
-  def __init__(self, border, ylow, yup):
-     self.border = border
-     self.ylow = ylow
-     self.yup = yup
-
-  def toGNUPlotYup(self):
-    print('set title \'Yup\'')
-    for i, rect in enumerate(self.yup):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("green"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-
-  def toGNUPlotYlow(self):
-    print('set title \'Ylow\'')
-    for i, rect in enumerate(self.ylow):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("red"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-  def toGNUPlotBorder(self):
-    print('set title \'Border\'')
-    for i, rect in enumerate(self.border):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("blu"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-
-  def toGNUPlot(self):
-      print('set title \'Xspace\'')
-      i = 0
-      for rect in self.ylow:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("red"))
-          i += 1
-
-      for rect in self.yup:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("green"))
-          i += 1
-
-      for rect in self.border:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot() + ' ' + rect.toGnuPlotColor("blu"))
-          i += 1
-
-      #print('set ' + xspace.toGnuPlotXrange())
-      #print('set ' + xspace.toGnuPlotYrange())
-      print('set xzeroaxis')
-      print('set yzeroaxis')
-
-      print('plot x')
-
-  def toMatPlotYup(self):
-    patches = []
-    for rect in self.yup:
-        patches += [rect.toMatplot('green')]
-    return patches
-
-  def toMatPlotYlow(self):
-    patches = []
-    for rect in self.ylow:
-        patches += [rect.toMatplot('red')]
-    return patches
-
-  def toMatPlotBorder(self):
-    patches = []
-    for rect in self.border:
-        patches += [rect.toMatplot('blue')]
-    return patches
-
-  def toMatPlot(self):
-      fig1 = plt.figure()
-      ax1 = fig1.add_subplot(111, aspect='equal')
-
-      pathpatch_yup = self.toMatPlotYup()
-      pathpatch_ylow = self.toMatPlotYlow()
-      pathpatch_border = self.toMatPlotBorder()
-
-      pathpatch = pathpatch_yup
-      pathpatch += pathpatch_ylow
-      pathpatch += pathpatch_border
-
-      #print('Pathpatch: ')
-      #print(pathpatch)
-      for pathpatch_i in pathpatch:
-          ax1.add_patch(pathpatch_i)
-      ax1.set_title('Approximation of the Pareto front')
-      ax1.autoscale_view()
-
-      plt.show()
-      #fig1.savefig('rect1.png', dpi=90, bbox_inches='tight')
-
+def staircase_oracle_2(xs, ys):
+    return lambda p: all(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -205,7 +85,6 @@ def algorithm_2(xspace, oracle, epsilon=EPS, delta=DELTA):
 
         lsorted = sorted(l, key=Rectangle.volume)
         # lsorted = sorted(l, key=Rectangle.volume, reverse=True)
-        # lsorted = sorted(l, key=Rectangle.norm, reverse=True)
         # print('lsorted: ', lsorted)
 
         xrectangle = lsorted.pop()
@@ -245,7 +124,6 @@ def algorithm_2(xspace, oracle, epsilon=EPS, delta=DELTA):
             print(r.volume())
         print ('end volumes')
 
-        #TO SOLVE: Can the metric increase at the end of every step?
         prev_met = met
         met = metric(l)
         if (met <= delta) or (met == prev_met):
@@ -253,4 +131,4 @@ def algorithm_2(xspace, oracle, epsilon=EPS, delta=DELTA):
 
         #print("\n")
         #time.sleep(1)
-    return ResulSet(l, ylow, yup)
+    return ResultSet(l, ylow, yup)

@@ -1,16 +1,8 @@
-import itertools
-from point import *
 from segment import *
 from functools import reduce
 import math
 
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
-import numpy as np
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-import matplotlib.pyplot as plt
 
 # Rectangle
 # Rectangular Half-Space
@@ -81,7 +73,6 @@ class Rectangle:
         return int(math.pow(2, self.dim()))
 
     def vertices(self):
-        zero_vertex = (0.0,) * self.dim()
         deltas = self.diag()
         vertex = self.min_corner
         vertices = [] * self.numVertices()
@@ -97,10 +88,13 @@ class Rectangle:
         return Segment(self.min_corner, self.max_corner)
 
     # GnuPlot functions
-    def toGnuPlot(self):
+    def toGnuPlot(self, xaxe=0, yaxe=1):
         #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner) + ' fs empty border 1'
         #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner) + ' fc lt 1'
-        string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner)
+        #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner)
+        minc = (self.min_corner[xaxe], self.min_corner[yaxe],)
+        maxc = (self.max_corner[xaxe], self.max_corner[yaxe],)
+        string1 = 'rect from ' + str(minc) + ' to ' + str(maxc)
         string2 = string1.replace("(", "")
         string = string2.replace(")", "")
         return string
@@ -109,22 +103,25 @@ class Rectangle:
         return 'fc rgb \"' + color + '\"'
         #return 'fc lt 1 rgb \"' + color + '\"'
 
-    def toGnuPlotXrange(self):
-        return 'xrange[' + str(self.min_corner[0]) + ':' + str(self.max_corner[0]) + ']'
+    def toGnuPlotXrange(self, index=0):
+        return 'xrange[' + str(self.min_corner[index]) + ':' + str(self.max_corner[index]) + ']'
 
-    def toGnuPlotYrange(self):
-        return 'yrange[' + str(self.min_corner[1]) + ':' + str(self.max_corner[1]) + ']'
+    def toGnuPlotYrange(self, index=1):
+        return 'yrange[' + str(self.min_corner[index]) + ':' + str(self.max_corner[index]) + ']'
 
     # Matplot functions
-    def toMatplot(self, c='red'):
-        assert (self.dim() >= 2), "index out of range"
+    def toMatplot(self, c='red', xaxe=0, yaxe=1):
+        assert (self.dim() >= 2), "Dimension required >= 2"
+        mc = (self.min_corner[xaxe], self.min_corner[yaxe], )
+        width = self.diag()[xaxe]
+        height = self.diag()[yaxe]
         return patches.Rectangle(
-            self.min_corner,  # (x,y)
-            self.diag()[0],  # width
-            self.diag()[1],  # height
+            mc,  # (x,y)
+            width,  # width
+            height,  # height
             #color = c, #color
-            facecolor=c,  # face color
-            edgecolor='black'  # edge color
+            facecolor = c,  # face color
+            edgecolor = 'black'  # edge color
         )
 # Auxiliary functions
 def cpoint(i, alphai, xpoint, xspace):

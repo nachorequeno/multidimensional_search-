@@ -1,6 +1,3 @@
-import itertools
-
-
 # Point = n-dimensional tuple
 def dim(x):
     return len(x)
