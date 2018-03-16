@@ -15,8 +15,9 @@ def staircase_oracle(xs, ys):
 
 #TODO: Consider that (x,y) is inside rectangle rect
 #TODO: Consider that (p0,p1) is close to (x,y): for instance, less than a 'delta'
-def membership_oracle(xs, ys, rect):
-    return lambda p: any(p[0] == x and p[1] == y for x, y in zip(xs, ys))
+def membership_oracle(xs, ys):
+    EPS2 = 1e-1
+    return lambda p: any((abs(p[0]-x) <= EPS2) and (abs(p[1]-y) <= EPS2) for x, y in zip(xs, ys))
 
 def search(x, member, epsilon=EPS):
     # x, y = segments
