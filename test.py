@@ -1,48 +1,11 @@
 from search import *
+from oracles import *
 import random
+
+import matplotlib.pyplot as plt
 
 EPS = 1e-5
 DELTA = 1e-5
-
-def polynomial_function(xpoints, slopes, offset, minc, maxc):
-    ypoints = ()
-    for i in xpoints:
-        str_temp = 'y = '
-        # ypoint = min(minc[1], offset)
-        ypoint = minc[1]
-        if offset >= minc[1]:
-            str_temp += str(offset)
-            ypoint = offset
-        for index, j in enumerate(slopes):
-            str_temp += ' + ' + str(slopes[index]) + 'x^' + str(index+1)
-            ypoint += math.pow(i,index+1)*slopes[index]
-        ypoints += (ypoint % maxc[1], )
-        print(str_temp)
-        print('(x,y): (' + str(i) + ',' + str(ypoint % maxc[1]) + ')')
-    return ypoints
-
-def line_function(xpoints, slope, offset, minc, maxc):
-    ypoints = ()
-    for i in xpoints:
-        str_temp = 'y = '
-        #ypoint = min(minc[1], offset)
-        ypoint = minc[1]
-        if offset >= minc[1]:
-            str_temp += str(offset)
-            ypoint = offset
-        str_temp += ' + ' + str(slope) + 'x'
-        ypoint += i*slope
-        ypoints += (ypoint % maxc[1], )
-        print(str_temp)
-        print('(x,y): (' + str(i) + ',' + str(ypoint % maxc[1]) + ')')
-    return ypoints
-
-def set_random_points(min_corner, max_corner, num_random_points):
-    random.seed()
-    xpoints = ()
-    for i in range(num_random_points):
-        xpoints += (random.uniform(min_corner, max_corner), )
-    return xpoints
 
 def main1():
     x = (0.0,) * 2
@@ -63,8 +26,9 @@ def main2():
     t2 = (0.8, 0.2)
 
     f = staircase_oracle(t1, t2)
+    #f = membership_oracle(t1, t2)
 
-    rs = algorithm_2(xyspace, f)
+    rs = multidim_search(xyspace, f)
     rs.toMatPlot()
     #rs.toGNUPlot()
     #print("\n")
@@ -87,9 +51,10 @@ def main3(min_corner = 0.0,
     x = set_random_points(min_corner, max_corner, num_random_points)
     y = line_function(x, slope, offset, minc, maxc)
 
-    f = staircase_oracle(x, y)
+    #f = staircase_oracle(x, y)
+    f = membership_oracle(x, y)
 
-    rs = algorithm_2(xyspace, f, epsilon, delta, verbose)
+    rs = multidim_search(xyspace, f, epsilon, delta, verbose)
     rs.toMatPlot()
     #rs.toFile("/home/requenoj/Desktop/result_main3")
     #rs.toGNUPlot()
@@ -117,11 +82,10 @@ def main4(min_corner = 0.0,
     #f = staircase_oracle(x, y)
     f = membership_oracle(x, y)
 
-    rs = algorithm_2(xyspace, f, epsilon, delta, verbose)
-    rs.toMatPlot()
-    #rs.toFile("/home/requenoj/Desktop/result_main3")
+    rs = multidim_search(xyspace, f, epsilon, delta, verbose)
+    rs.toMatPlot(targetx=list(x), targety=list(y), blocking=True)
     #rs.toGNUPlot()
-    #print("\n")
+    #rs.toFile("/home/requenoj/Desktop/result_main3")
     return 0
 
 # z = Rectangle(x, y)

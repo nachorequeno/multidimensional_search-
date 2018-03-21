@@ -1,9 +1,11 @@
 from rectangle import *
-import itertools
 from resultset import *
+import itertools
 
-EPS = 1e-5
+
 DELTA = 1e-5
+EPS = 1e-5
+EPS2 = 1e-1
 
 def metric(lset):
     # lsizes = map(lambda item: item.norm(), lset)
@@ -13,11 +15,9 @@ def metric(lset):
 def staircase_oracle(xs, ys):
     return lambda p: any(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
 
-#TODO: Consider that (x,y) is inside rectangle rect
-#TODO: Consider that (p0,p1) is close to (x,y): for instance, less than a 'delta'
-def membership_oracle(xs, ys):
-    EPS2 = 1e-1
-    return lambda p: any((abs(p[0]-x) <= EPS2) and (abs(p[1]-y) <= EPS2) for x, y in zip(xs, ys))
+# Point (p0,p1) is closer than a 'epsilon' to point (x,y), which is member point
+def membership_oracle(xs, ys, epsilon=EPS2):
+    return lambda p: any((abs(p[0]-x) <= epsilon) and (abs(p[1]-y) <= epsilon) for x, y in zip(xs, ys))
 
 def search(x, member, epsilon=EPS):
     # x, y = segments
@@ -34,7 +34,7 @@ def search(x, member, epsilon=EPS):
 
 
 # The search returns a set of Rectangles in Yup, Ylow and Border
-def algorithm_2(xspace,
+def multidim_search(xspace,
                 oracle,
                 epsilon=EPS,
                 delta=DELTA,
@@ -143,5 +143,6 @@ def algorithm_2(xspace,
             break
 
         vprint('\n')
-        #time.sleep(1)
+        rs = ResultSet(l, ylow, yup)
+        rs.toMatPlot()
     return ResultSet(l, ylow, yup)

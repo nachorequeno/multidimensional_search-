@@ -90,10 +90,17 @@ class ResultSet:
         patches += [rect.toMatplot('blue', xaxe, yaxe)]
     return patches
 
-  def toMatPlot(self, file='', xaxe=0, yaxe=1):
+  def toMatPlot(self,
+                file='',
+                xaxe=0,
+                yaxe=1,
+                targetx=[],
+                targety=[],
+                blocking=False,
+                sec=1):
       fig1 = plt.figure()
       ax1 = fig1.add_subplot(111, aspect='equal')
-      ax1.set_title('Approximation of the Pareto front')
+      ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
       pathpatch_yup = self.toMatPlotYup(xaxe, yaxe)
       pathpatch_ylow = self.toMatPlotYlow(xaxe, yaxe)
@@ -114,8 +121,11 @@ class ResultSet:
 
       if file != '':
           fig1.savefig(file, dpi=90, bbox_inches='tight')
-      plt.show()
-      return 0
+      plt.plot(targetx, targety, 'kp')
+      plt.show(block=blocking)
+      time.sleep(sec)
+      plt.close()
+      return plt
 
   # Saving/loading results
   def toFileYup(self, file):

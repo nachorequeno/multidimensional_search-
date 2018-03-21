@@ -2,6 +2,11 @@
 def dim(x):
     return len(x)
 
+# Euclidean distance between two points
+def distance(x, xprime):
+    temp = subtract(x, xprime)
+    _sum = reduce(lambda si, sj: abs(si) + abs(sj), temp)
+    return _sum
 
 # Binary operations between points
 def subtract(x, xprime):
