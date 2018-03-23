@@ -81,7 +81,7 @@ class Rectangle:
             deltai = select(delta_index, deltas)
             temp_vertex = add(vertex, deltai)
             vertices += [temp_vertex]
-        assert (len(vertices) == self.numVertices())
+        assert (len(vertices) == self.numVertices()), "Error in the number of vertices"
         return vertices
 
     def diagToSegment(self):
