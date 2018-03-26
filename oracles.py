@@ -32,7 +32,7 @@ class Condition:
     # inequality = (sympy.Poly(f - g), op)
     comparison = set(['>', '>=', '<', '<=', '==', '!='])
 
-    def __init__(self, f, op, g):
+    def __init__(self, f='x', op='==', g='0'):
         # type: (_, str, str, str) -> None
         assert (op in self.comparison), "Operator " + op + " must be any of: {'>', '>=', '<', '<=', '==', '!='}"
         assert (not f.isdigit() or not g.isdigit()), \
@@ -76,9 +76,9 @@ class Condition:
         ## type: (_, file) -> None
         assert (finput is not None), "File object should not be null"
 
-        _temp = pickle.load(finput)
-        print('temp')
-        self = _temp
+        self.f = pickle.load(finput)
+        self.op = pickle.load(finput)
+        self.g = pickle.load(finput)
 
     def fromFileHumRead(self, finput = None):
         ## type: (_, file) -> None
@@ -108,16 +108,16 @@ class Condition:
         ## type: (_, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
-        pickle.dump(self, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.f, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.op, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.g, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
         ## type: (_, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         # str(self.f) + self.op + str(self.g)
-        print(str(self))
-        print(self.str())
-        foutput.write(str(self))
+        foutput.write(str(self) + '\n')
 
 class ConditionList:
     # List of conditions:
@@ -126,6 +126,17 @@ class ConditionList:
     def __init__(self):
         self.l = []
         self.solution = None
+
+    def __str__(self):
+        return self.toStr()
+
+    def toStr(self):
+        _string = "["
+        for i, item in enumerate(self.l):
+            _string += str(item)
+            if i < (len(self.l)-1): _string += ', '
+        _string += "]"
+        return _string
 
     def add(self, cond):
         # type: (_, Condition) -> None
@@ -176,17 +187,24 @@ class ConditionList:
         # type: (_, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
-        self = pickle.load(finput)
+        self.l = pickle.load(finput)
+        self.solution = pickle.load(finput)
 
     def fromFileHumRead(self, finput = None):
         # type: (_, file) -> None
         assert (finput is not None), "File object should not be null"
 
+        # init
+        self.l = []
+        self.solution = None
+
         # <num_constraints_dimension_i>
-        num_constr_dim_i = finput.readline()
+        num_constr_dim_i = int(finput.readline())
         for j in range(num_constr_dim_i):
-            num_constr_dim_i = finput.readline()
-            literal_eval()
+            string_cond = finput.readline()
+            cond = Condition()
+            cond.initFromString(string_cond)
+            self.l.append(cond)
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (_, str, bool, bool) -> None
@@ -208,23 +226,41 @@ class ConditionList:
         # type: (_, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
-        pickle.dump(self, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.l, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.solution, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
         # type: (_, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         # <num_constraints_dimension_i>
-        foutput.write(str(len(self.l)))
-        for cond_i in range(len(self.l)):
-            foutput.write(str(cond_i))
+        foutput.write(str(len(self.l)) + '\n')
+
+        #foutput.write(str(self.l) + '\n')
+        ##for cond_i in range(len(self.l)):
+        ##    foutput.write(str(cond_i) + '\n')
+        for cond_i in self.l:
+            cond_i.toFileHumRead(foutput)
 
 class Oracle:
     # An Oracle is an array of ConditionList, i.e., Oracle[i] contains the ConditionList for i-dimension
     # For each one of the n-dimensions, we should have a ConditionList
+
     # Dimension = [0,..,n-1]
     def __init__(self):
         self.oracle = {}
+
+    def __str__(self):
+        return self.toStr()
+
+    def toStr(self):
+        last_key = self.oracle.keys()[-1]
+        _string = "["
+        for key in self.oracle.keys():
+            _string += str(self.oracle[key])
+            if key != last_key: _string += ', '
+        _string += "]"
+        return _string
 
     def add(self, condlist, idimension):
         # type: (_, ConditionList, int) -> None
@@ -232,7 +268,7 @@ class Oracle:
 
     def member(self, xpoint):
         # type: (dict, tuple) -> _
-        assert (len(self.oracle) >= xpoint.dim()), "Oracle is not prepared for points of dimension " + str(xpoint.dim())
+        assert (len(self.oracle) >= len(xpoint)), "Oracle is not prepared for points of dimension " + str(len(xpoint))
         ismember = True
         #for i, condlist in enumerate(self.oracle):
         for i, condlist in self.oracle.iteritems():
@@ -259,14 +295,14 @@ class Oracle:
         # type: (_, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
-        self = pickle.load(finput)
+        self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput = None):
         # type: (_, file) -> None
         assert (finput is not None), "File object should not be null"
 
         # <num_dimensions>
-        num_dim = finput.readline()
+        num_dim = int(finput.readline())
         self.oracle = dict.fromkeys(range(num_dim))
         for i in range(num_dim):
             self.oracle[i] = ConditionList()
@@ -292,7 +328,7 @@ class Oracle:
         # type: (_, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
-        pickle.dump(self, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
 
 
     def toFileHumRead(self, foutput = None):
@@ -300,7 +336,7 @@ class Oracle:
         assert (foutput  is not None), "File object should not be null"
 
         # <num_dimensions>
-        foutput.write(str(len(self.oracle)))
+        foutput.write(str(len(self.oracle)) + '\n')
         for i, condlist_i in self.oracle.iteritems():
              condlist_i.toFileHumRead(foutput)
 
