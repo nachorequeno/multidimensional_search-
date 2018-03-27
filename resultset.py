@@ -97,7 +97,7 @@ class ResultSet:
                 targetx=[],
                 targety=[],
                 blocking=False,
-                sec=1):
+                sec=0):
       fig1 = plt.figure()
       ax1 = fig1.add_subplot(111, aspect='equal')
       ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
@@ -123,7 +123,8 @@ class ResultSet:
           fig1.savefig(file, dpi=90, bbox_inches='tight')
       plt.plot(targetx, targety, 'kp')
       plt.show(block=blocking)
-      time.sleep(sec)
+      if sec > 0:
+          time.sleep(sec)
       plt.close()
       return plt
 

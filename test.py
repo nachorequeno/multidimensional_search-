@@ -142,6 +142,71 @@ def main5():
     ora2.fromFile(nfile3, human_readable=False)
     print('ora2 ' + str(ora2))
 
+def main51():
+    nfile = '/home/requenoj/Desktop/oracle.txt'
+    nfile2 = '/home/requenoj/Desktop/oracle2.txt'
+    nfile3 = '/home/requenoj/Desktop/oracle3.txt'
+    # ftemp = open(nfile, 'wb')
+    c1 = Condition('x', '>', '2')
+    c2 = Condition('x', '>', '5')
+    cl = ConditionList()
+    cl.add(c1)
+    cl.add(c2)
+    # Condition
+    c1.toFile(nfile, append=False, human_readable=True)
+    c3 = Condition()
+    c3.fromFile(nfile, human_readable=True)
+    print('c3 ' + str(c3))
+
+    # ConditionList
+    cl.toFile(nfile2, append=False, human_readable=True)
+    cl2 = ConditionList()
+    cl2.fromFile(nfile2, human_readable=True)
+    print('cl2 ' + str(cl2))
+
+    # Oracle
+    ora = Oracle()
+    ora.add(cl, 1)
+    ora.add(cl, 2)
+    ora.toFile(nfile3, append=False, human_readable=True)
+    ora2 = Oracle()
+    ora2.fromFile(nfile3, human_readable=True)
+    print('ora2 ' + str(ora2))
+
+def main52():
+    nfile = '/home/requenoj/Desktop/oracle.txt'
+    nfile2 = '/home/requenoj/Desktop/oracle2.txt'
+    nfile3 = '/home/requenoj/Desktop/oracle3.txt'
+    # ftemp = open(nfile, 'wb')
+    c1 = Condition('x', '>', '2')
+    c2 = Condition('x', '>', '5')
+    cl = ConditionList()
+    cl.add(c1)
+    cl.add(c2)
+
+    # Condition
+    print('c1 ' + str(c1))
+    c1.toFile(nfile, append=False, human_readable=False)
+    c3 = Condition()
+    c3.fromFile(nfile, human_readable=False)
+    print('c3 ' + str(c3))
+
+    # ConditionList
+    print('cl ' + str(cl))
+    cl.toFile(nfile2, append=False, human_readable=False)
+    cl2 = ConditionList()
+    cl2.fromFile(nfile2, human_readable=False)
+    print('cl2 ' + str(cl2))
+
+    #Oracle
+    ora = Oracle()
+    ora.add(cl, 1)
+    ora.add(cl, 2)
+    ora.toFile(nfile3, append=False, human_readable=False)
+    ora2 = Oracle()
+    ora2.fromFile(nfile3, human_readable=False)
+    print('ora2 ' + str(ora2))
+
 def main6():
     c1 = Condition('x', '>', '2')
     c2 = Condition('x', '>', '5')
@@ -165,6 +230,38 @@ def main6():
     fora((2,5))
     fora((3,5))
     fora((3,6))
+
+def main7(min_corner = 0.0,
+          max_corner = 1.0,
+          nfile='/home/requenoj/Desktop/test.txt',
+          npoints=50,
+          epsilon = EPS,
+          delta = DELTA,
+          verbose=False,
+          blocking=False,
+          sleep=0):
+
+    minc = (min_corner,) * 2
+    maxc = (max_corner,) * 2
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    #list_x = ora.list_n_points(npoints, 0)
+    #list_y = ora.list_n_points(npoints, 1)
+    #print(list_x)
+    #print(list_y)
+    #rs.toMatPlot(targetx=list_x, targety=list_y, blocking=True)
+    #rs.toMatPlot(blocking=blocking, sec=sleep)
+##    rs.toMatPlot(blocking=True)
+    #rs.toMatPlot(targetx=list(x), targety=list(y), blocking=True)
+    #rs.toGNUPlot()
+    #rs.toFile("/home/requenoj/Desktop/result_main3")
+    return 0
+
 # z = Rectangle(x, y)
 # if __name__ == '__main__':
 #    test1()

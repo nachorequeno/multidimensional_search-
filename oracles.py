@@ -1,26 +1,11 @@
 import random
-import math
 import re
 import pickle
+import sys
 
-from ast import literal_eval
-from sympy import Poly, simplify
-from sympy.solvers.inequalities import solve_poly_inequalities
-
-
-# seek(offset, from)
-# from =
-# 0: means your reference point is the beginning of the file
-# 1: means your reference point is the current file position
-# 2: means your reference point is the end of the file
-# if append:
-#    output.seek(0, 2)
-
-
-def fromFiletest(finput):
-    if finput is None:
-        finput = open("/home/requenoj/Desktop/oracle.txt", 'rb')
-
+import numpy as np
+from sympy import Poly, simplify, S, default_sort_key, Intersection, Union
+from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
 class Condition:
     # Condition = f op g
@@ -58,6 +43,56 @@ class Condition:
             self.op = result.group('op')
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
+
+    def eval_tuple(self, xpoint):
+        # type: (_, tuple, _) -> _
+        #expr = str(self.f) - str(self.g)
+        expr = self.f - self.g
+        keys_fv = sorted(expr.free_symbols, key=default_sort_key)
+        di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
+
+        print('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
+        print('di ' + str(di))
+        return self.eval_dict(di)
+
+    def eval_dict(self, d = None):
+        # type: (_, _) -> _
+        expr = self.f - self.g
+        keys_fv = sorted(expr.free_symbols, key=default_sort_key)
+        if d is None:
+            #di = dict.fromkeys(expr.free_symbols)
+            di = {key: 0 for key in keys_fv}
+        else:
+            di = d
+            keys = set(d.keys())
+            assert keys.issuperset(keys_fv), "Keys in dictionary " \
+                                             + str(d) \
+                                             + " do not match with the variables in the condition"
+        res = expr.subs(di)
+        ex = str(res) + self.op + '0'
+        #print('expresion ' + ex)
+        return simplify(ex)
+
+    def eval_var_val(self, var=None, val='0'):
+        # type: (_, _, int) -> _
+        # expr = str(self.f) - str(self.g)
+        expr = self.f - self.g
+        if var is None:
+            fvset = sorted(expr.free_symbols, key=default_sort_key)
+            fv = fvset.pop()
+        else: fv = var
+        res = expr.subs(fv, val)
+        ex = str(res) + self.op + '0'
+        return simplify(ex)
+
+    def eval2(self, x):
+        # type: (_, int) -> _
+        expr = str(self.f) + self.op + str(self.g)
+        _poly = Poly(expr)
+        fvset = sorted( _poly.free_symbols, key=default_sort_key)
+        # fvset should have only one variable 'x'
+        fv = fvset.pop()
+        return _poly.subs(fv, x)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
@@ -142,6 +177,29 @@ class ConditionList:
         # type: (_, Condition) -> None
         self.l.append(cond)
 
+    def eval_tuple(self, xpoint):
+        # type: (_, tuple) -> _
+        _eval = True
+        for i in self.l:
+            _eval = _eval and i.eval_tuple(xpoint)
+
+        print('condition list ' + self.toStr() +' evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        return _eval
+
+    def eval_dict(self, d = None):
+        # type: (_, _) -> _
+        _eval = True
+        for i in self.l:
+            _eval = _eval and i.eval_dict(d)
+        return _eval
+
+    def eval_var_val(self, var=None, val='0'):
+        # type: (_, _, int) -> _
+        _eval = True
+        for i in self.l:
+            _eval = _eval and i.eval_var_val(var, val)
+        return _eval
+
     def solve(self):
         # returns set of floats satisfying (c1 and c2 and ... and cn)
         # side-efect: stores the result in a local variable
@@ -149,30 +207,64 @@ class ConditionList:
         # example:
         # ineq1 = (Poly(x ** 2 - 3), ">")
         # ineq2 = (Poly(-x ** 2 + 1), ">")
-        # solve_poly_inequalities((
+        # solve_poly((
         #     ineq1,
         #     ineq2,
         # ))
         if self.solution == None:
             _ineq_list = ()
             for poly_ineq in self.l:
-                _ineq = (Poly(poly_ineq.f - poly_ineq.g), poly_ineq.op)
+                _ineq = (Poly(poly_ineq.f - poly_ineq.g, domain='RR'), poly_ineq.op)
                 _ineq_list += (_ineq, )
-            self.solution = solve_poly_inequalities(_ineq_list)
+            print(_ineq_list)
+            self.solution = self.solve_poly(_ineq_list)
         return self.solution
 
+    def solve_poly(self, polys):
+        #return self.solve_poly_inequalities_and(polys)
+        return self.solve_poly_inequalities_or(polys)
 
-    def member(self, x):
+    def solve_poly_inequalities_and(self, polys):
+        return Intersection(*[solve_poly_inequality(*p) for p in polys])
+
+    def solve_poly_inequalities_or(self, polys):
+        #return Union(*[solve_poly_inequality(*p) for p in polys])
+        return solve_poly_inequalities(polys)
+
+    #TODO
+    def list_n_points(self, npoints):
+        self.solve()
+        mi = self.solution.inf
+        ma = self.solution.sup
+        #if isinstance(mi, sympy.core.numbers.NegativeInfinity):
+        if isinstance(mi, type(S.NegativeInfinity)):
+            mi = -sys.float_info.max
+        #if isinstance(mi, core.numbers.Infinity):
+        if isinstance(mi, type(S.Infinity)):
+            ma = sys.float_info.max
+
+        #list(Range(0, 10, 1).intersect(self.solution))
+        step = float(ma-mi)/float(npoints)
+        t1 = np.arange(mi, ma, step)
+        t2 = [i for i in t1 if self.member(i)]
+        return t2
+
+    # Membership functions
+    def member(self, xpoint):
+        # type: (_, tuple) -> _
+        return self.eval_tuple(xpoint)
+
+    def member2(self, x):
         # type: (_, int) -> _
         self.solve()
         return x in self.solution
 
     def membership(self):
-        return lambda x: self.member(x)
+        return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
-        # type: (_, str, _, bool) -> None
+        # type: (_, str, bool) -> None
         assert (fname != ''), "Filename should not be null"
 
         mode = 'rb'
@@ -191,7 +283,7 @@ class ConditionList:
         self.solution = pickle.load(finput)
 
     def fromFileHumRead(self, finput = None):
-        # type: (_, file) -> None
+        # type: (_, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         # init
@@ -243,7 +335,7 @@ class ConditionList:
             cond_i.toFileHumRead(foutput)
 
 class Oracle:
-    # An Oracle is an array of ConditionList, i.e., Oracle[i] contains the ConditionList for i-dimension
+    # An Oracle is an array of ConditionList, i.e., Oracle[i] contains the ConditionList for ith-dimension
     # For each one of the n-dimensions, we should have a ConditionList
 
     # Dimension = [0,..,n-1]
@@ -266,7 +358,41 @@ class Oracle:
         # type: (_, ConditionList, int) -> None
         self.oracle[idimension] = condlist
 
+    def eval_tuple(self, xpoint):
+        # type: (_, tuple) -> _
+        _eval = True
+        for i in self.oracle:
+            _eval = _eval and self.oracle[i].eval_tuple(xpoint)
+        print('oracle evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        return _eval
+
+    def eval_dict(self, d = None):
+        # type: (_, _) -> _
+        _eval = True
+        for i in self.oracle:
+            _eval = _eval and i.eval_dict(d)
+        return _eval
+
+    def eval_var_val(self, var=None, val='0'):
+        # type: (_, _, int) -> _
+        _eval = True
+        for i in self.oracle:
+            _eval = _eval and i.eval_var_val(var, val)
+        return _eval
+
+    def solve(self, idimension):
+        return self.oracle[idimension].solve()
+
+    #TODO
+    def list_n_points(self, npoints, idimension):
+        return self.oracle[idimension].list_n_points(npoints)
+
+    # Membership functions
     def member(self, xpoint):
+        # type: (_, tuple) -> _
+        return self.eval_tuple(xpoint)
+
+    def member2(self, xpoint):
         # type: (dict, tuple) -> _
         assert (len(self.oracle) >= len(xpoint)), "Oracle is not prepared for points of dimension " + str(len(xpoint))
         ismember = True
@@ -339,48 +465,3 @@ class Oracle:
         foutput.write(str(len(self.oracle)) + '\n')
         for i, condlist_i in self.oracle.iteritems():
              condlist_i.toFileHumRead(foutput)
-
-
-#############################################################
-
-def polynomial_function(xpoints, slopes, offset, minc, maxc):
-    ypoints = ()
-    for i in xpoints:
-        str_temp = 'y = '
-        # ypoint = min(minc[1], offset)
-        ypoint = minc[1]
-        if offset >= minc[1]:
-            str_temp += str(offset)
-            ypoint = offset
-        for index, j in enumerate(slopes):
-            str_temp += ' + ' + str(slopes[index]) + 'x^' + str(index + 1)
-            ypoint += math.pow(i, index + 1) * slopes[index]
-        ypoints += (ypoint % maxc[1],)
-        print(str_temp)
-        print('(x,y): (' + str(i) + ',' + str(ypoint % maxc[1]) + ')')
-    return ypoints
-
-
-def line_function(xpoints, slope, offset, minc, maxc):
-    ypoints = ()
-    for i in xpoints:
-        str_temp = 'y = '
-        # ypoint = min(minc[1], offset)
-        ypoint = minc[1]
-        if offset >= minc[1]:
-            str_temp += str(offset)
-            ypoint = offset
-        str_temp += ' + ' + str(slope) + 'x'
-        ypoint += i * slope
-        ypoints += (ypoint % maxc[1],)
-        print(str_temp)
-        print('(x,y): (' + str(i) + ',' + str(ypoint % maxc[1]) + ')')
-    return ypoints
-
-
-def set_random_points(min_corner, max_corner, num_random_points):
-    random.seed()
-    xpoints = ()
-    for i in range(num_random_points):
-        xpoints += (random.uniform(min_corner, max_corner),)
-    return xpoints

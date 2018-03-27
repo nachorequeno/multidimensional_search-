@@ -23,7 +23,7 @@ def search(x, member, epsilon=EPS):
     # x, y = segments
     y = x
     error = (epsilon,) * x.dim()
-    while greater_equal(y.diag(), error):
+    while not incomparable(y.diag(), error) and greater_equal(y.diag(), error):
         yval = div(add(y.l, y.h), 2)
         # We need a oracle() for guiding the search
         if member(yval):
@@ -38,14 +38,16 @@ def multidim_search(xspace,
                 oracle,
                 epsilon=EPS,
                 delta=DELTA,
-                verbose=False):
+                verbose=False,
+                blocking=False,
+                sleep=0):
     if verbose:
         def vprint(*args):
             # Print each argument separately so caller doesn't need to
             # stuff everything to be printed into a single string
             for arg in args:
                 print arg,
-    #        print
+            print
     else:
         vprint = lambda *a: None  # do-nothing function
 
@@ -144,5 +146,5 @@ def multidim_search(xspace,
 
         vprint('\n')
         rs = ResultSet(l, ylow, yup)
-        rs.toMatPlot()
+        rs.toMatPlot(blocking=blocking, sec=sleep)
     return ResultSet(l, ylow, yup)

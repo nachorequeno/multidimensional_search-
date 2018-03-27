@@ -57,6 +57,13 @@ def create_random_point_ndimension(min_val, max_val, ndimension):
 def create_random_points_ndimension(min_val, max_val, ndimension, num_random_points):
     return [create_random_point_ndimension(min_val, max_val, ndimension) for _ in range(num_random_points)]
 
+def set_random_points(min_corner, max_corner, num_random_points):
+    random.seed()
+    xpoints = ()
+    for i in range(num_random_points):
+        xpoints += (random.uniform(min_corner, max_corner),)
+    return xpoints
+
 # Polynomial functions
 def create_n_random_poly_functions(min_val, max_val, pol_degree, n):
     #sympy.polys.specialpolys.random_poly(x, n, inf, sup, domain=ZZ, polys=False)
