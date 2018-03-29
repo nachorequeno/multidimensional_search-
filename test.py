@@ -262,6 +262,142 @@ def main7(min_corner = 0.0,
     #rs.toFile("/home/requenoj/Desktop/result_main3")
     return 0
 
+def main71(min_cornerx = 0.0,
+          min_cornery = 0.0,
+          max_cornerx = 1.0,
+          max_cornery = 1.0,
+          nfile='/home/requenoj/Desktop/test.txt',
+          npoints=50,
+          epsilon = EPS,
+          delta = DELTA,
+          verbose=False,
+          blocking=False,
+          sleep=0):
+
+    minc = (min_cornerx, min_cornery)
+    maxc = (max_cornerx, max_cornery)
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    #rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, 0)
+    rs.toMatPlot(blocking=True)
+    return 0
+
+def main8(min_corner = 0.0,
+          max_corner = 1.0,
+          nfile='/home/requenoj/Desktop/test4.txt',
+          npoints=50,
+          dim = 2,
+          epsilon = EPS,
+          delta = DELTA,
+          verbose=False,
+          blocking=False,
+          sleep=0):
+
+    minc = (min_corner,) * dim
+    maxc = (max_corner,) * dim
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    #list_x = ora.list_n_points(npoints, 0)
+    #list_y = ora.list_n_points(npoints, 1)
+    #print(list_x)
+    #print(list_y)
+    #rs.toMatPlot(targetx=list_x, targety=list_y, blocking=True)
+    #rs.toMatPlot(blocking=blocking, sec=sleep)
+
+    def f(t):
+        return [x*x for x in t]
+
+    t1 = np.arange(min_corner, max_corner, 0.1)
+
+    rs.toMatPlot(targetx=t1, targety=f(t1), blocking=True)
+
+    #rs.toMatPlot(targetx=list(x), targety=list(y), blocking=True)
+    #rs.toGNUPlot()
+    #rs.toFile("/home/requenoj/Desktop/result_main3")
+    return 0
+
+def main81(min_cornerx = 0.0,
+          min_cornery = 0.0,
+          min_cornerz = 0.0,
+          max_cornerx = 1.0,
+          max_cornery = 1.0,
+          max_cornerz = 1.0,
+          nfile='/home/requenoj/Desktop/test4.txt',
+          npoints=50,
+          epsilon = EPS,
+          delta = DELTA,
+          verbose=False,
+          blocking=False,
+          sleep=0):
+
+    minc = (min_cornerx, min_cornery, min_cornerz)
+    maxc = (max_cornerx, max_cornery, max_cornerz)
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    #rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, 1)
+    rs.toMatPlot(xaxe=0, yaxe=1, blocking=True, opacity=0.7)
+    rs.toMatPlot(xaxe=0, yaxe=2, blocking=True, opacity=0.7)
+    rs.toMatPlot(xaxe=1, yaxe=2, blocking=True, opacity=0.7)
+    return 0
+
+
+def main9(min_cornerx=0.0,
+           min_cornery=0.0,
+           min_cornerz=0.0,
+           max_cornerx=1.0,
+           max_cornery=1.0,
+           max_cornerz=1.0,
+           nfile='/home/requenoj/Desktop/test4.txt',
+           npoints=50,
+           epsilon=EPS,
+           delta=DELTA,
+           verbose=False,
+           blocking=False,
+           sleep=0):
+    minc = (min_cornerx, min_cornery, min_cornerz)
+    maxc = (max_cornerx, max_cornery, max_cornerz)
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+
+    #TODO: Generate points that belong to Yup, Ylow or Border
+    def y(t):
+        return [0.5 - x for x in t]
+
+    def z(t):
+        return [x * x for x in t]
+
+    t1 = np.arange(min_cornerx, max_cornerx, 0.1)
+    t2 = [y(i) for i in t1]
+    t3 = [z(i) for i in t1]
+
+    for xpoint in zip(t1, t2, t3):
+        print("xpoint %s is member of Yup: %s", str(xpoint), str(rs.MemberYup(xpoint)))
+        print("xpoint %s is member of Ylow: %s", str(xpoint), str(rs.MemberYlow(xpoint)))
+        print("xpoint %s is member of Border: %s", str(xpoint), str(rs.MemberBorder(xpoint)))
+
+
+    return 0
+
 # z = Rectangle(x, y)
 # if __name__ == '__main__':
 #    test1()

@@ -87,9 +87,8 @@ def select(x, xprime):
 # Integer to binary notation
 def int2binlist(x, pad=0):
     temp1 = [int(i) for i in bin(x)[2:]]
-    if pad == 0:
-        pad == len(temp1)
-    temp2 = [0] * (pad - len(temp1)) + temp1
+    pad_temp = pad if pad > 0 else len(temp1)
+    temp2 = [0] * (pad_temp - len(temp1)) + temp1
     return temp2
 
 def int2bintuple(x, pad=0):

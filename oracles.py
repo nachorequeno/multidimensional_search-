@@ -7,6 +7,21 @@ import numpy as np
 from sympy import Poly, simplify, S, default_sort_key, Intersection, Union
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
+from point import *
+from data_generator import *
+
+VERBOSE=False
+
+if VERBOSE:
+    def vprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+            print arg,
+        print
+else:
+    vprint = lambda *a: None  # do-nothing function
+
 class Condition:
     # Condition = f op g
     # type(f) = sympy.Expr
@@ -33,7 +48,7 @@ class Condition:
         #op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         #f_regex = r'(\s*\w\s*)+'
         #g_regex = r'(\s*\w\s*)+'
-        op_regex = r'(=|>|<|>=|<|<=|<>)'
+        op_regex = r'(==|>|<|>=|<|<=|<>)'
         f_regex = r'[^%s]+' % op_regex
         g_regex = r'[^%s]+' % op_regex
         regex = r'(?P<f>(%s))(?P<op>(%s))(?P<g>(%s))' % (f_regex, op_regex, g_regex)
@@ -44,21 +59,27 @@ class Condition:
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
 
+    def get_variables(self):
+        # type: (_) -> _
+        expr = self.f - self.g
+        return sorted(expr.free_symbols, key=default_sort_key)
+
+    def get_expresion(self):
+        # type: (_) -> _
+        return simplify(self.f - self.g)
+
     def eval_tuple(self, xpoint):
         # type: (_, tuple, _) -> _
-        #expr = str(self.f) - str(self.g)
-        expr = self.f - self.g
-        keys_fv = sorted(expr.free_symbols, key=default_sort_key)
+        keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        print('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
-        print('di ' + str(di))
+        vprint('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
+        vprint('di ' + str(di))
         return self.eval_dict(di)
 
     def eval_dict(self, d = None):
         # type: (_, _) -> _
-        expr = self.f - self.g
-        keys_fv = sorted(expr.free_symbols, key=default_sort_key)
+        keys_fv = self.get_variables()
         if d is None:
             #di = dict.fromkeys(expr.free_symbols)
             di = {key: 0 for key in keys_fv}
@@ -68,19 +89,19 @@ class Condition:
             assert keys.issuperset(keys_fv), "Keys in dictionary " \
                                              + str(d) \
                                              + " do not match with the variables in the condition"
+        expr = self.f - self.g
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        #print('expresion ' + ex)
+        #vprint('expresion ' + ex)
         return simplify(ex)
 
     def eval_var_val(self, var=None, val='0'):
         # type: (_, _, int) -> _
-        # expr = str(self.f) - str(self.g)
-        expr = self.f - self.g
         if var is None:
-            fvset = sorted(expr.free_symbols, key=default_sort_key)
+            fvset = self.get_variables()
             fv = fvset.pop()
         else: fv = var
+        expr = self.f - self.g
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
         return simplify(ex)
@@ -177,13 +198,20 @@ class ConditionList:
         # type: (_, Condition) -> None
         self.l.append(cond)
 
+    def get_variables(self):
+        # type: (_) -> _
+        fv = set()
+        for i in self.l:
+            fv = fv.union(i.get_variables())
+        return list(fv)
+
     def eval_tuple(self, xpoint):
         # type: (_, tuple) -> _
         _eval = True
         for i in self.l:
             _eval = _eval and i.eval_tuple(xpoint)
 
-        print('condition list ' + self.toStr() +' evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        vprint('condition list ' + self.toStr() +' evaluates ' + str(xpoint) + ' to ' + str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
@@ -216,7 +244,7 @@ class ConditionList:
             for poly_ineq in self.l:
                 _ineq = (Poly(poly_ineq.f - poly_ineq.g, domain='RR'), poly_ineq.op)
                 _ineq_list += (_ineq, )
-            print(_ineq_list)
+            vprint(_ineq_list)
             self.solution = self.solve_poly(_ineq_list)
         return self.solution
 
@@ -232,7 +260,20 @@ class ConditionList:
         return solve_poly_inequalities(polys)
 
     #TODO
-    def list_n_points(self, npoints):
+    def list_n_points(self, npoints, min_val, max_val):
+        # type: (_, int) -> _
+        variables = self.get_variables()
+        ndim = variables.count()
+        point = (min_val,) * ndim
+
+        #list(Range(0, 10, 1).intersect(self.solution))
+        step = float(max_val-min_val)/float(npoints)
+        t1 = np.arange(min_val, max_val, step)
+        t2 = [i for i in t1 if self.member(i)]
+        return t2
+
+    def list_n_points2(self, npoints):
+        # type: (_, int) -> _
         self.solve()
         mi = self.solution.inf
         ma = self.solution.sup
@@ -252,8 +293,13 @@ class ConditionList:
     # Membership functions
     def member(self, xpoint):
         # type: (_, tuple) -> _
-        return self.eval_tuple(xpoint)
+        # return self.eval_tuple(xpoint)
+        keys = self.get_variables()
+        di = {key: xpoint[i] for i, key in enumerate(keys)}
+        # di = dict.fromkeys(keys)
+        return self.eval_dict(di)
 
+    # TOREMOVE
     def member2(self, x):
         # type: (_, int) -> _
         self.solve()
@@ -339,8 +385,11 @@ class Oracle:
     # For each one of the n-dimensions, we should have a ConditionList
 
     # Dimension = [0,..,n-1]
-    def __init__(self):
-        self.oracle = {}
+    def __init__(self, ndimension=1):
+        # type: (_, int) -> None
+        # self.oracle = {}
+        keys = range(ndimension)
+        self.oracle = {key: None for key in keys}
 
     def __str__(self):
         return self.toStr()
@@ -354,23 +403,54 @@ class Oracle:
         _string += "]"
         return _string
 
+    # Addition of ConditionLists.
+    # Overwrites previous ConditionLists
     def add(self, condlist, idimension):
         # type: (_, ConditionList, int) -> None
         self.oracle[idimension] = condlist
+
+    # TODO
+    def add_set_points(self, setpoints):
+        # type: (_, set, int) -> None
+        sample = setpoints.pop()
+        setpoints.add(sample)
+
+        dimension = dim(sample)
+        vs = list_n_variables(dimension)
+
+        for i in range(dimension):
+            cl = ConditionList() if i not in self.oracle.keys() else self.oracle[i]
+            for point in setpoints:
+                c = Condition(vs[i], '==', point[i])
+                cl.add(c)
+            self.oracle[i] = cl
+
+    def get_variables(self):
+        # type: (_) -> _
+        # By construction,
+        # dimension = number of keys in self.oracle (or, at least, the key with highest value, in case that intermediate dimensions do not have conditions)
+        # dimension = number of variables in all the ConditionLists
+        highest_key = sorted(self.oracle.keys()).pop()
+        fv = set()
+        for i in self.oracle:
+            fv = fv.union(self.oracle[i].get_variables())
+        assert (highest_key == (len(fv) - 1)), \
+            "Number of dimensions in Oracle do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
+        return list(fv)
 
     def eval_tuple(self, xpoint):
         # type: (_, tuple) -> _
         _eval = True
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_tuple(xpoint)
-        print('oracle evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        vprint('oracle evaluates ' + str(xpoint) + ' to ' + str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
         # type: (_, _) -> _
         _eval = True
         for i in self.oracle:
-            _eval = _eval and i.eval_dict(d)
+            _eval = _eval and self.oracle[i].eval_dict(d)
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
@@ -390,8 +470,13 @@ class Oracle:
     # Membership functions
     def member(self, xpoint):
         # type: (_, tuple) -> _
-        return self.eval_tuple(xpoint)
+        # return self.eval_tuple(xpoint)
+        keys = self.get_variables()
+        di = {key: xpoint[i] for i, key in enumerate(keys)}
+        # di = dict.fromkeys(keys)
+        return self.eval_dict(di)
 
+    #TOREMOVE
     def member2(self, xpoint):
         # type: (dict, tuple) -> _
         assert (len(self.oracle) >= len(xpoint)), "Oracle is not prepared for points of dimension " + str(len(xpoint))
@@ -465,3 +550,11 @@ class Oracle:
         foutput.write(str(len(self.oracle)) + '\n')
         for i, condlist_i in self.oracle.iteritems():
              condlist_i.toFileHumRead(foutput)
+
+EPS = 1e-1
+def staircase_oracle(xs, ys):
+    return lambda p: any(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
+
+# Point (p0,p1) is closer than a 'epsilon' to point (x,y), which is member point
+def membership_oracle(xs, ys, epsilon=EPS):
+    return lambda p: any((abs(p[0]-x) <= epsilon) and (abs(p[1]-y) <= epsilon) for x, y in zip(xs, ys))

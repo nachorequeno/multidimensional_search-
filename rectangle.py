@@ -87,30 +87,8 @@ class Rectangle:
     def diagToSegment(self):
         return Segment(self.min_corner, self.max_corner)
 
-    # GnuPlot functions
-    def toGnuPlot(self, xaxe=0, yaxe=1):
-        #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner) + ' fs empty border 1'
-        #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner) + ' fc lt 1'
-        #string1 = 'rect from ' + str(self.min_corner) + ' to ' + str(self.max_corner)
-        minc = (self.min_corner[xaxe], self.min_corner[yaxe],)
-        maxc = (self.max_corner[xaxe], self.max_corner[yaxe],)
-        string1 = 'rect from ' + str(minc) + ' to ' + str(maxc)
-        string2 = string1.replace("(", "")
-        string = string2.replace(")", "")
-        return string
-
-    def toGnuPlotColor(self, color):
-        return 'fc rgb \"' + color + '\"'
-        #return 'fc lt 1 rgb \"' + color + '\"'
-
-    def toGnuPlotXrange(self, index=0):
-        return 'xrange[' + str(self.min_corner[index]) + ':' + str(self.max_corner[index]) + ']'
-
-    def toGnuPlotYrange(self, index=1):
-        return 'yrange[' + str(self.min_corner[index]) + ':' + str(self.max_corner[index]) + ']'
-
     # Matplot functions
-    def toMatplot(self, c='red', xaxe=0, yaxe=1):
+    def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
         assert (self.dim() >= 2), "Dimension required >= 2"
         mc = (self.min_corner[xaxe], self.min_corner[yaxe], )
         width = self.diag()[xaxe]
@@ -121,7 +99,8 @@ class Rectangle:
             height,  # height
             #color = c, #color
             facecolor = c,  # face color
-            edgecolor = 'black'  # edge color
+            edgecolor = 'black',  # edge color
+            alpha = opacity
         )
 # Auxiliary functions
 def cpoint(i, alphai, xpoint, xspace):

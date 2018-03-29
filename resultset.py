@@ -12,82 +12,45 @@ class ResultSet:
      self.ylow = ylow
      self.yup = yup
 
-  # GNUPlot Graphics
-  def toGNUPlotYup(self, xaxe=0, yaxe=1):
-    print('set title \'Yup\'')
-    for i, rect in enumerate(self.yup):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("green"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-  def toGNUPlotYlow(self, xaxe=0, yaxe=1):
-    print('set title \'Ylow\'')
-    for i, rect in enumerate(self.ylow):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("red"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-  def toGNUPlotBorder(self, xaxe=0, yaxe=1):
-    print('set title \'Border\'')
-    for i, rect in enumerate(self.border):
-        print('set object ' + str(i+1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("blu"))
-
-    #print('set ' + xspace.toGnuPlotXrange())
-    #print('set ' + xspace.toGnuPlotYrange())
-    print('set xzeroaxis')
-    print('set yzeroaxis')
-
-    print('plot x')
-
-  def toGNUPlot(self, xaxe=0, yaxe=1):
-      print('set title \'Xspace\'')
-      i = 0
-      for rect in self.ylow:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("red"))
-          i += 1
-
+  # Membership functions
+  def MemberYup(self, xpoint):
+      # type: (_, tuple) -> bool
+      isMember = False
       for rect in self.yup:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("green"))
-          i += 1
+          isMember = isMember or (xpoint in rect)
+      return isMember
 
+  def MemberYlow(self, xpoint):
+      # type: (_, tuple) -> bool
+      isMember = False
+      for rect in self.ylow:
+          isMember = isMember or (xpoint in rect)
+      return isMember
+
+  def MemberBorder(self, xpoint):
+      # type: (_, tuple) -> bool
+      isMember = False
       for rect in self.border:
-          print('set object ' + str(i + 1) + ' ' + rect.toGnuPlot(xaxe, yaxe) + ' ' + rect.toGnuPlotColor("blu"))
-          i += 1
-
-      #print('set ' + xspace.toGnuPlotXrange(xaxe))
-      #print('set ' + xspace.toGnuPlotYrange(yaxe))
-      print('set xzeroaxis')
-      print('set yzeroaxis')
-
-      print('plot x')
+          isMember = isMember or (xpoint in rect)
+      return isMember
 
   # MatPlot Graphics
-  def toMatPlotYup(self, xaxe=0, yaxe=1):
+  def toMatPlotYup(self, xaxe=0, yaxe=1, opacity=1.0):
     patches = []
     for rect in self.yup:
-        patches += [rect.toMatplot('green', xaxe, yaxe)]
+        patches += [rect.toMatplot('green', xaxe, yaxe, opacity)]
     return patches
 
-  def toMatPlotYlow(self, xaxe=0, yaxe=1):
+  def toMatPlotYlow(self, xaxe=0, yaxe=1, opacity=1.0):
     patches = []
     for rect in self.ylow:
-        patches += [rect.toMatplot('red', xaxe, yaxe)]
+        patches += [rect.toMatplot('red', xaxe, yaxe, opacity)]
     return patches
 
-  def toMatPlotBorder(self, xaxe=0, yaxe=1):
+  def toMatPlotBorder(self, xaxe=0, yaxe=1, opacity=1.0):
     patches = []
     for rect in self.border:
-        patches += [rect.toMatplot('blue', xaxe, yaxe)]
+        patches += [rect.toMatplot('blue', xaxe, yaxe, opacity)]
     return patches
 
   def toMatPlot(self,
@@ -97,14 +60,15 @@ class ResultSet:
                 targetx=[],
                 targety=[],
                 blocking=False,
-                sec=0):
+                sec=0,
+                opacity=1.0):
       fig1 = plt.figure()
       ax1 = fig1.add_subplot(111, aspect='equal')
       ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
-      pathpatch_yup = self.toMatPlotYup(xaxe, yaxe)
-      pathpatch_ylow = self.toMatPlotYlow(xaxe, yaxe)
-      pathpatch_border = self.toMatPlotBorder(xaxe, yaxe)
+      pathpatch_yup = self.toMatPlotYup(xaxe, yaxe, opacity)
+      pathpatch_ylow = self.toMatPlotYlow(xaxe, yaxe, opacity)
+      pathpatch_border = self.toMatPlotBorder(xaxe, yaxe, opacity)
 
       pathpatch = pathpatch_yup
       pathpatch += pathpatch_ylow

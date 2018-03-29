@@ -2,24 +2,18 @@ from rectangle import *
 from resultset import *
 import itertools
 
-
 DELTA = 1e-5
 EPS = 1e-5
-EPS2 = 1e-1
 
 def metric(lset):
     # lsizes = map(lambda item: item.norm(), lset)
     lsizes = map(lambda item: item.volume(), lset)
     return reduce(lambda x, y: x + y, lsizes)
 
-def staircase_oracle(xs, ys):
-    return lambda p: any(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
-
-# Point (p0,p1) is closer than a 'epsilon' to point (x,y), which is member point
-def membership_oracle(xs, ys, epsilon=EPS2):
-    return lambda p: any((abs(p[0]-x) <= epsilon) and (abs(p[1]-y) <= epsilon) for x, y in zip(xs, ys))
-
-def search(x, member, epsilon=EPS):
+def search(x,
+           member,
+           epsilon=EPS,
+           ):
     # x, y = segments
     y = x
     error = (epsilon,) * x.dim()
@@ -146,5 +140,8 @@ def multidim_search(xspace,
 
         vprint('\n')
         rs = ResultSet(l, ylow, yup)
-        rs.toMatPlot(blocking=blocking, sec=sleep)
+        if sleep > 0:
+            for i in range(1, n):
+                rs.toMatPlot(blocking=blocking, sec=sleep, yaxe=i, opacity=0.7)
+
     return ResultSet(l, ylow, yup)
