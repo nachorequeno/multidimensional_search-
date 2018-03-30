@@ -12,6 +12,29 @@ class ResultSet:
      self.ylow = ylow
      self.yup = yup
 
+
+  # Volume functions
+  def VolumeYup(self):
+      # type: (_) -> float
+      vol = 0.0
+      for rect in self.yup:
+          vol = vol + rect.volume()
+      return vol
+
+  def VolumeYlow(self):
+      # type: (_) -> float
+      vol = 0.0
+      for rect in self.ylow:
+          vol = vol + rect.volume()
+      return vol
+
+  def VolumeBorder(self):
+      # type: (_) -> float
+      vol = 0.0
+      for rect in self.border:
+          vol = vol + rect.volume()
+      return vol
+
   # Membership functions
   def MemberYup(self, xpoint):
       # type: (_, tuple) -> bool

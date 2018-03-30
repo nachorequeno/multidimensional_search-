@@ -22,7 +22,9 @@ class Rectangle:
 
     # Membership function
     def __contains__(self, xpoint):
-        return (greater_equal(xpoint, self.min_corner) and
+        return (not incomparable(xpoint, self.min_corner) and
+                not incomparable(xpoint, self.max_corner) and
+                greater_equal(xpoint, self.min_corner) and
                 less_equal(xpoint, self.max_corner))
 
     # Printers

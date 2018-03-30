@@ -380,20 +380,43 @@ def main9(min_cornerx=0.0,
     rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
     #TODO: Generate points that belong to Yup, Ylow or Border
+    def y2(t):
+        return 1/float(t) if t > 0 else 1000
+
     def y(t):
-        return [0.5 - x for x in t]
+        return 0.5
+        #return 0.5 - float(t)
 
     def z(t):
-        return [x * x for x in t]
+        return 1
 
-    t1 = np.arange(min_cornerx, max_cornerx, 0.1)
+    #t0 = np.arange(min_cornerx, max_cornerx, 0.1)
+    t0 = [float(i) / 10 for i in range(int(min_cornerx*10), int(max_cornerx*10))]
+    t1 = [float(i) for i in t0]
     t2 = [y(i) for i in t1]
     t3 = [z(i) for i in t1]
 
+    testYup = False
+    testYlow = False
+    testBorder = False
     for xpoint in zip(t1, t2, t3):
-        print("xpoint %s is member of Yup: %s", str(xpoint), str(rs.MemberYup(xpoint)))
-        print("xpoint %s is member of Ylow: %s", str(xpoint), str(rs.MemberYlow(xpoint)))
-        print("xpoint %s is member of Border: %s", str(xpoint), str(rs.MemberBorder(xpoint)))
+        testYup = testYup or rs.MemberYup(xpoint)
+        testYlow = testYlow or rs.MemberYlow(xpoint)
+        testBorder = testBorder or rs.MemberBorder(xpoint)
+        print 'Testing ', str(xpoint)
+        print ('(inYup, inYlow, inBorder): (%s, %s, %s)'
+                    % (str(rs.MemberYup(xpoint)), str(rs.MemberYlow(xpoint)), str(rs.MemberBorder(xpoint))) )
+        #print("xpoint %s is member of Yup: %s", str(xpoint), str(rs.MemberYup(xpoint)))
+        #print("xpoint %s is member of Ylow: %s", str(xpoint), str(rs.MemberYlow(xpoint)))
+        #print("xpoint %s is member of Border: %s", str(xpoint), str(rs.MemberBorder(xpoint)))
+    #print 'Report Yup: ', str(testYup)
+    #print 'Report Ylow: ', str(testYlow)
+    #print 'Report Border: ', str(testBorder)
+    print ('Report: (%s, %s, %s)\n'
+                    % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder())) ),
+    print 'Report Yup: ', str(testYup)
+    print 'Report Ylow: ', str(testYlow)
+    print 'Report Border: ', str(testBorder)
 
 
     return 0
