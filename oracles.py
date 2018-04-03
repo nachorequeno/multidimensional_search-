@@ -21,6 +21,7 @@ if VERBOSE:
         print
 else:
     vprint = lambda *a: None  # do-nothing function
+    print('No verbose')
 
 class Condition:
     # Condition = f op g
@@ -30,7 +31,7 @@ class Condition:
     #
     # Example
     # inequality = (sympy.Poly(f - g), op)
-    comparison = set(['>', '>=', '<', '<=', '==', '!='])
+    comparison = ['>', '>=', '<', '<=', '==', '!=']
 
     def __init__(self, f='x', op='==', g='0'):
         # type: (_, str, str, str) -> None
@@ -73,8 +74,10 @@ class Condition:
         keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        vprint('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
-        vprint('di ' + str(di))
+        #vprint('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
+        #vprint('di ' + str(di))
+        vprint('condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
+        vprint('di ', str(di))
         return self.eval_dict(di)
 
     def eval_dict(self, d = None):
@@ -92,7 +95,7 @@ class Condition:
         expr = self.f - self.g
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        #vprint('expresion ' + ex)
+        #vprint('expresion ', ex)
         return simplify(ex)
 
     def eval_var_val(self, var=None, val='0'):
@@ -211,7 +214,7 @@ class ConditionList:
         for i in self.l:
             _eval = _eval and i.eval_tuple(xpoint)
 
-        vprint('condition list ' + self.toStr() +' evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        vprint('condition list ', self.toStr(), ' evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
@@ -443,7 +446,7 @@ class Oracle:
         _eval = True
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_tuple(xpoint)
-        vprint('oracle evaluates ' + str(xpoint) + ' to ' + str(_eval))
+        vprint('oracle evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
