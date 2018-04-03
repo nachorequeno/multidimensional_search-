@@ -130,6 +130,7 @@ def multidim_search(xspace,
 
         yrectangle = Rectangle(y.l, y.h)
         i = irect(incomparable, yrectangle, xrectangle)
+        #i = pirect(incomparable, yrectangle, xrectangle)
         l = l.union(i)
         vprint('i: ', i)
 

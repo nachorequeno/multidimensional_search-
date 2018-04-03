@@ -1,3 +1,4 @@
+from multiprocessing import Pool, cpu_count
 from segment import *
 from functools import reduce
 import math
@@ -104,6 +105,8 @@ class Rectangle:
             edgecolor = 'black',  # edge color
             alpha = opacity
         )
+
+
 # Auxiliary functions
 def cpoint(i, alphai, xpoint, xspace):
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
@@ -165,3 +168,21 @@ def irect(alphaincomp_list, xrectangle, xspace):
     #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp_list)
+
+def pirect(alphaincomp_list, xrectangle, xspace):
+    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
+        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
+    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
+        "xspace.min_corner and xspace.max_corner do not share the same dimension"
+    #assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
+    #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
+    #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
+    #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
+    pool = Pool(cpu_count())
+    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in alphaincomp_list]
+    pool.close()
+    pool.join()
+    res = set()
+    for pres in parallel_results:
+        res.add(pres.get())
+    return res
