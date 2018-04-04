@@ -145,4 +145,5 @@ def multidim_search(xspace,
             for i in range(1, n):
                 rs.toMatPlot(blocking=blocking, sec=sleep, yaxe=i, opacity=0.7)
 
-    return ResultSet(l, ylow, yup)
+    return rs
+    #return ResultSet(l, ylow, yup)

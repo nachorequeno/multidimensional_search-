@@ -97,8 +97,6 @@ class ResultSet:
       pathpatch += pathpatch_ylow
       pathpatch += pathpatch_border
 
-      #print('Pathpatch: ')
-      #print(pathpatch)
       for pathpatch_i in pathpatch:
           ax1.add_patch(pathpatch_i)
           ## ax1.autoscale_view()
@@ -108,7 +106,8 @@ class ResultSet:
 
       if file != '':
           fig1.savefig(file, dpi=90, bbox_inches='tight')
-      plt.plot(targetx, targety, 'kp')
+      if len(targetx) > 0 and len(targety) > 0:
+          plt.plot(targetx, targety, 'kp')
       plt.show(block=blocking)
       if sec > 0:
           time.sleep(sec)

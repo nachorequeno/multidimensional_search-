@@ -71,30 +71,3 @@ class Segment:
         square_diagonal = map(lambda si: si * si, diagonal)
         _sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)
-
-    # Matplot functions
-    def toMatplot(self,
-                  fig = plt.figure(),
-                  c='black',
-                  xaxe=0,
-                  yaxe=1,
-                  blocking=False,
-                  sec=0):
-        assert (self.dim() >= 2), "Dimension required >= 2"
-        ax1 = fig.add_subplot(111, aspect='equal')
-        ax1.set_title('Segment intersection (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
-
-        xs = [self.l[xaxe], self.h[xaxe]]
-        ys = [self.l[yaxe], self.h[yaxe]]
-
-        l1 = lines.Line2D(xs, ys, transform=fig.transFigure, figure=fig)
-        fig.lines.extend([l1])
-
-        ax1.autoscale_view()
-        plt.show(block=blocking)
-        if sec > 0:
-            time.sleep(sec)
-        plt.close()
-
-        return fig
-

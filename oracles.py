@@ -21,7 +21,6 @@ if VERBOSE:
         print
 else:
     vprint = lambda *a: None  # do-nothing function
-    print('No verbose')
 
 class Condition:
     # Condition = f op g
@@ -31,7 +30,7 @@ class Condition:
     #
     # Example
     # inequality = (sympy.Poly(f - g), op)
-    comparison = ['>', '>=', '<', '<=', '==', '!=']
+    comparison = ['==', '>', '<', '>=',  '<=', '<>']
 
     def __init__(self, f='x', op='==', g='0'):
         # type: (_, str, str, str) -> None
@@ -49,7 +48,7 @@ class Condition:
         #op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         #f_regex = r'(\s*\w\s*)+'
         #g_regex = r'(\s*\w\s*)+'
-        op_regex = r'(==|>|<|>=|<|<=|<>)'
+        op_regex = r'(==|>|<|>=|<=|<>)'
         f_regex = r'[^%s]+' % op_regex
         g_regex = r'[^%s]+' % op_regex
         regex = r'(?P<f>(%s))(?P<op>(%s))(?P<g>(%s))' % (f_regex, op_regex, g_regex)
@@ -74,8 +73,6 @@ class Condition:
         keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        #vprint('condition ' + str(self) + ' evaluates ' + str(xpoint) + ' to ' + str(self.eval_dict(di)))
-        #vprint('di ' + str(di))
         vprint('condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
         vprint('di ', str(di))
         return self.eval_dict(di)
@@ -92,10 +89,10 @@ class Condition:
             assert keys.issuperset(keys_fv), "Keys in dictionary " \
                                              + str(d) \
                                              + " do not match with the variables in the condition"
-        expr = self.f - self.g
+        expr = self.get_expresion()
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        #vprint('expresion ', ex)
+        vprint('expresion ', str(simplify(ex)))
         return simplify(ex)
 
     def eval_var_val(self, var=None, val='0'):
@@ -104,19 +101,10 @@ class Condition:
             fvset = self.get_variables()
             fv = fvset.pop()
         else: fv = var
-        expr = self.f - self.g
+        expr = self.get_expresion()
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
         return simplify(ex)
-
-    def eval2(self, x):
-        # type: (_, int) -> _
-        expr = str(self.f) + self.op + str(self.g)
-        _poly = Poly(expr)
-        fvset = sorted( _poly.free_symbols, key=default_sort_key)
-        # fvset should have only one variable 'x'
-        fv = fvset.pop()
-        return _poly.subs(fv, x)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
@@ -214,11 +202,12 @@ class ConditionList:
         for i in self.l:
             _eval = _eval and i.eval_tuple(xpoint)
 
-        vprint('condition list ', self.toStr(), ' evaluates ', str(xpoint), ' to ', str(_eval))
+        vprint('Condition list ', self.toStr(), ' evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
         # type: (_, _) -> _
+        vprint('Condition list ', self.toStr())
         _eval = True
         for i in self.l:
             _eval = _eval and i.eval_dict(d)
@@ -226,6 +215,7 @@ class ConditionList:
 
     def eval_var_val(self, var=None, val='0'):
         # type: (_, _, int) -> _
+        vprint('Condition list ', self.toStr())
         _eval = True
         for i in self.l:
             _eval = _eval and i.eval_var_val(var, val)
@@ -377,9 +367,6 @@ class ConditionList:
         # <num_constraints_dimension_i>
         foutput.write(str(len(self.l)) + '\n')
 
-        #foutput.write(str(self.l) + '\n')
-        ##for cond_i in range(len(self.l)):
-        ##    foutput.write(str(cond_i) + '\n')
         for cond_i in self.l:
             cond_i.toFileHumRead(foutput)
 
@@ -446,11 +433,12 @@ class Oracle:
         _eval = True
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_tuple(xpoint)
-        vprint('oracle evaluates ', str(xpoint), ' to ', str(_eval))
+        vprint('Oracle evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d = None):
         # type: (_, _) -> _
+        vprint('Oracle evaluates ', self.toStr())
         _eval = True
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_dict(d)
@@ -458,6 +446,7 @@ class Oracle:
 
     def eval_var_val(self, var=None, val='0'):
         # type: (_, _, int) -> _
+        vprint('Oracle evaluates ', self.toStr())
         _eval = True
         for i in self.oracle:
             _eval = _eval and i.eval_var_val(var, val)
@@ -474,6 +463,7 @@ class Oracle:
     def member(self, xpoint):
         # type: (_, tuple) -> _
         # return self.eval_tuple(xpoint)
+        vprint(xpoint)
         keys = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys)}
         # di = dict.fromkeys(keys)
