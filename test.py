@@ -1,3 +1,4 @@
+from ndtree import *
 from search import *
 from oracles import *
 import random
@@ -189,7 +190,6 @@ def test2D(min_cornerx = 0.0,
           max_cornerx = 1.0,
           max_cornery = 1.0,
           nfile=os.path.abspath("tests/2D/test0.txt"),
-          npoints=50,
           epsilon = EPS,
           delta = DELTA,
           verbose=False,
@@ -221,7 +221,6 @@ def test3D(min_cornerx=0.0,
            max_cornery=1.0,
            max_cornerz=1.0,
            nfile=os.path.abspath("tests/3D/test4.txt"),
-           npoints=50,
            epsilon=EPS,
            delta=DELTA,
            verbose=False,
@@ -328,5 +327,26 @@ def testNdim(min_corner = 0.0,
     rs.toMatPlot(targetx=t1, targety=f(t1), blocking=True)
     return 0
 
+# Test ND-Tree structure
+def testNDTree(min_corner = 0.0,
+          max_corner = 1.0):
+
+    def f2(t):
+        return [x*x for x in t]
+
+    def f(x):
+        return x*x
+
+    xs = np.arange(min_corner, max_corner, 0.1)
+    ys = [f(x) for x in xs]
+
+    ndtree = NDTree()
+
+    for x, y in zip(xs, ys):
+        point = (x,y)
+        print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+
+    print ('NDTree %s' % (str(ndtree)))
 # if __name__ == '__main__':
 #    test1()

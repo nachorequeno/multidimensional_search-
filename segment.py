@@ -68,6 +68,10 @@ class Segment:
 
     def norm(self):
         diagonal = self.diag()
+        return norm(diagonal)
+
+    def norm2(self):
+        diagonal = self.diag()
         square_diagonal = map(lambda si: si * si, diagonal)
         _sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)

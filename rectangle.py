@@ -1,4 +1,4 @@
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Process, Queue
 from segment import *
 from functools import reduce
 import math
@@ -90,6 +90,14 @@ class Rectangle:
     def diagToSegment(self):
         return Segment(self.min_corner, self.max_corner)
 
+    def center(self):
+        return div(self.diag(), 2)
+
+    def distanceToCenter(self, xpoint):
+        middle_point = self.center()
+        euclidean_dist = distance(xpoint, middle_point)
+        return euclidean_dist
+
     # Matplot functions
     def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
         assert (self.dim() >= 2), "Dimension required >= 2"
@@ -157,6 +165,8 @@ def brect(alpha, xrectangle, xspace):
         temp1 = temp2
     return temp1
 
+def pbrect(queue, alpha, xrectangle, xspace):
+    queue.put(brect(alpha, xrectangle, xspace))
 
 def irect(alphaincomp_list, xrectangle, xspace):
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
@@ -169,7 +179,42 @@ def irect(alphaincomp_list, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp_list)
 
+
 def pirect(alphaincomp_list, xrectangle, xspace):
+    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
+        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
+    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
+        "xspace.min_corner and xspace.max_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
+    #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
+    #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
+    nproc = cpu_count()
+    Pool(nproc)
+    processes = []
+    rets = []
+    q = Queue()
+
+    for alphaincomp_i in alphaincomp_list:
+        p = Process(target=pbrect, args=(q, alphaincomp_i, xrectangle, xspace))
+        processes.append(p)
+        p.start()
+        if len(processes) > nproc:
+            for p in processes:
+                ret = q.get()  # will block
+                rets.append(ret)
+            for p in processes:
+                p.join()
+
+    for p in processes:
+        ret = q.get()  # will block
+        rets.append(ret)
+    for p in processes:
+        p.join()
+    return rets
+
+
+def pirect2(alphaincomp_list, xrectangle, xspace):
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \

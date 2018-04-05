@@ -1,6 +1,13 @@
+import math
+
 # Point = n-dimensional tuple
 def dim(x):
     return len(x)
+
+def norm(x):
+    square_element_i = map(lambda si: si * si, x)
+    _sum = reduce(lambda si, sj: si + sj, square_element_i)
+    return math.sqrt(_sum)
 
 # Euclidean distance between two points
 def distance(x, xprime):
