@@ -331,22 +331,44 @@ def testNdim(min_corner = 0.0,
 def testNDTree(min_corner = 0.0,
           max_corner = 1.0):
 
-    def f2(t):
-        return [x*x for x in t]
+    def f1(x):
+        return 1/x if x > 0.0 else 1000
 
-    def f(x):
-        return x*x
+    def f2(x):
+        return 0.1+1/x if x > 0.0 else 1000
+
+    def f3(x):
+        return 0.2+1/x if x > 0.0 else 1000
 
     xs = np.arange(min_corner, max_corner, 0.1)
-    ys = [f(x) for x in xs]
+    y1s = [f1(x) for x in xs]
+    y2s = [f2(x) for x in xs]
+    y3s = [f3(x) for x in xs]
 
     ndtree = NDTree()
 
-    for x, y in zip(xs, ys):
+    print('Round 1')
+    for x, y in zip(xs, y1s):
         point = (x,y)
-        print ('Inserting %s into NDTree' % (str(point)))
+        #print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+    print ('NDTree %s' % (str(ndtree)))
+
+    print('Round 2')
+    for x, y in zip(xs, y1s):
+        point = (x,y)
+        #print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+    print ('NDTree %s' % (str(ndtree)))
+
+    print('Round 3')
+    for x, y in zip(xs, y1s):
+        point = (x,y)
+        #print ('Inserting %s into NDTree' % (str(point)))
         ndtree.update(point)
 
     print ('NDTree %s' % (str(ndtree)))
+
+    ndtree.report()
 # if __name__ == '__main__':
 #    test1()
