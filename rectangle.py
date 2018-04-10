@@ -1,5 +1,6 @@
 from multiprocessing import Pool, cpu_count, Process, Queue
 from segment import *
+from point import *
 from functools import reduce
 import math
 
@@ -14,8 +15,12 @@ class Rectangle:
     def __init__(self, min_corner, max_corner):
         assert dim(min_corner) == dim(max_corner)
         if incomparable(min_corner, max_corner):
-            self.min_corner = min_corner
-            self.max_corner = max_corner
+            min_c = min_corner if min_corner[0] <= max_corner[0] else max_corner
+            max_c = max_corner if min_corner[0] <= max_corner[0] else min_corner
+            self.min_corner = min_c
+            self.max_corner = max_c
+            #self.min_corner = min_corner
+            #self.max_corner = max_corner
         else:
             self.min_corner = min(min_corner, max_corner)
             self.max_corner = max(min_corner, max_corner)

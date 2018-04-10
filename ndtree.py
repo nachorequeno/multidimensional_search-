@@ -1,6 +1,7 @@
 from rectangle import *
 from point import *
 
+VERBOSE=False
 VERBOSE=True
 
 if VERBOSE:
@@ -60,7 +61,7 @@ class NDTree:
         points_smaller_than_p = [ppoint for ppoint in set_points if greater_equal(p, ppoint)]
         if len(points_greater_than_p) == 0:
             #self.root.insertPoint(p)
-            self.update(p)
+            self.updateNode(p)
             for ppoint in points_smaller_than_p:
                 #self.root.removePointRec(ppoint)
                 self.removePoint(ppoint)
@@ -74,7 +75,6 @@ class Node:
     def __init__(self, parent=None):
         zero = (0, )
         self.rect = Rectangle(zero, zero)
-        #self.parent = parent
         if parent is not None: parent.addNode(self)
         self.setParent(parent)
         self.nodes = []
@@ -129,16 +129,19 @@ class Node:
 
     # Report functions
     def report(self):
-        vprint('\tCurrent ', type(self)) #id(self)
-        vprint('\tParent ', type(self.parent)) #id(self.parent)
+        vprint('\tCurrent ', id(self) ) #self type(self).__name__
+        vprint('\tParent ', id(self.parent)) #self.parent type(self.parent).__name__
         vprint('\tNum Successors ', len(self.nodes))
+        vprint('\tSuccessors ', [id(n) for n in self.nodes])
         vprint('\tNum Points ', len(self.L))
+        vprint('\tPoints ', self.L)
         vprint('\tRect ', str(self.rect))
 
     def reportRec(self):
         # type: (Node) -> None
-        [n.report() for n in self.nodes]
         self.report()
+        vprint('\n')
+        [n.reportRec() for n in self.nodes]
 
     # Rectangle
     def getRectangleSn(self):
@@ -288,28 +291,31 @@ class Node:
 
     def insert(self, x):
         # type: (Node, tuple) -> None
-        vprint('Inserting ', x)
+        vprint('Inserting\n', x)
         if self.isLeaf():
             self.addPoint(x)
             self.updateIdealNadir(x)
-            vprint('Leaf ', self.toStr())
+            vprint('Leaf\n', self.toStrRec())
             if self.numPoints() > self.MAX_POINTS:
                 self.split()
         else:
-            vprint('Internal ', self.toStr())
+            vprint('Internal\n', self.toStrRec())
             np = self.findClosestNode(x)
-            vprint('Closest node ', np.toStr())
+            vprint('Closest node\n', np.toStrRec())
+            vprint('with rectangle ', np.getRectangleSn())
             np.insert(x)
 
     def findPointHighestAverageEuclideanDistance(self):
         # type: (Node) -> (Node, int)
-        y = Node()
+        #y = Node()
+        d = dim(self.L[0]) if self.numPoints() > 0 else 1
+        y = (0,) * d
         mean_max_distance = 0
         for yp in self.L:
             max_distance = 0
             for xp in self.L:
                 max_distance += distance(yp, xp)
-            temp_mean_max_distance = max_distance / (len(self.nodes) - 1)
+            temp_mean_max_distance = max_distance / (self.numPoints() - 1)
             if temp_mean_max_distance > mean_max_distance:
                 mean_max_distance = temp_mean_max_distance
                 y = yp
@@ -317,41 +323,56 @@ class Node:
 
     def split(self):
         # type: (Node) -> None
-        vprint('Splitting ', self.toStr())
-        y = self.findPointHighestAverageEuclideanDistance()
+        parent = self.getParent()
+        vprint('Splitting\n', self.toStrRec())
+        y, _ = self.findPointHighestAverageEuclideanDistance()
+        vprint('Point Highets Avg Eucl Dist', y)
         np = Node(self)
-        self.addNode(np)
+        #self.addNode(np)
         np.addPoint(y)
+        vprint('New node\n%s\nwith y: %s' % (np.toStrRec(), y))
         np.updateIdealNadir(y)
         self.removePoint(y)
+        vprint('Adding subnode\n', np.toStrRec())
+        vprint('Current status of\n', self.toStrRec())
         while self.numSubnodes() < self.MIN_CHILDREN:
-            y = self.findPointHighestAverageEuclideanDistance()
+            y, _ = self.findPointHighestAverageEuclideanDistance()
             np = Node(self)
-            self.addNode(np)
+            #self.addNode(np)
             np.addPoint(y)
+            vprint('New node\n%s\nwith y: %s' % (np.toStrRec(), y))
             np.updateIdealNadir(y)
             self.removePoint(y)
+            vprint('Adding subnode\n', np.toStrRec())
+            vprint('Current status of\n', self.toStrRec())
         while not self.isEmptySolution():
-            y = self.L.pop()
+            #y = self.L.pop()
+            #y, _ = self.findPointHighestAverageEuclideanDistance()
+            y = self.L[0]
             np = self.findClosestNode(y)
+            vprint('Closest node\n%s' % (np.toStrRec()))
             np.addPoint(y)
             np.updateIdealNadir(y)
+            vprint('Removing point %s from node\n%s' % (y, self.toStrRec()))
             self.removePoint(y)
-        vprint('After splitting ', self.toStr())
+            vprint('Current status of\n', self.toStrRec())
+        vprint('After splitting\n', parent.toStrRec() if parent is not None else '')
 
     def updateNode(self, x):
         # type: (Node, tuple) -> bool
         # n = self
         rect = self.getRectangleSn()
+        vprint('Updating ', str(x))
         if greater_equal(rect.max_corner, x):
             # x is rejected
             vprint('Point ', str(x), ' rejected (1)')
             return False
         elif greater_equal(x, rect.min_corner):
             # remove n and its whole sub-tree
-            vprint('Removing node ', self.toStr())
+            vprint('Removing node\n', self.toStrRec())
             nparent = self.getParent()
             nparent.removeNode(self) if nparent is not None else None
+            vprint('After removing \n', nparent.toStrRec() if nparent is not None else '')
         elif greater_equal(rect.min_corner, x) or greater_equal(x, rect.max_corner):
             if self.isLeaf():
                 for y in self.L:
@@ -368,17 +389,17 @@ class Node:
                         return False
                     else:
                         if np.isEmptySolution():
-                            vprint('Removing node ', np.toStr())
+                            vprint('Removing node\n', np.toStrRec())
                             self.removeNode(np)
                 if self.numSubnodes() == 1:
-                    vprint('Simplifying ', self.toStr())
+                    vprint('Simplifying\n', self.toStrRec())
                     # Remove node n and use np in place of n
                     np = self.getSubnode()
                     nparent = self.getParent()
                     nparent.replaceNode(self, np)
         else:
             # Skip this node
-            vprint('Skipping ', self.toStr())
+            vprint('Skipping\n', self.toStrRec())
             None
         return True
 
@@ -402,10 +423,13 @@ class Node:
 
     def S(self):
         # type: (Node) -> set
+        #vprint("Node " + str(self))
         if self.isLeaf():
+            #vprint("L " + str(self.L))
             return set(self.L)
         else:
             temp = set()
             for i in self.nodes:
-                temp.union(i.S())
+                temp = temp.union(i.S())
+                #vprint("temp " + str(temp))
             return temp

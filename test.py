@@ -280,8 +280,9 @@ def test3D(min_cornerx=0.0,
     end = time.time()
     time2 = end - start
 
-    print ('Volume report : (%s, %s, %s)\n'
-                    % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder())) ),
+    vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
+    print ('Volume report : (%s, %s, %s, %s)\n'
+                    % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
     print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
     print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
     print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
@@ -352,22 +353,33 @@ def testNDTree(min_corner = 0.0,
         point = (x,y)
         #print ('Inserting %s into NDTree' % (str(point)))
         ndtree.update(point)
-    print ('NDTree %s' % (str(ndtree)))
+    print ('NDTree')
+    print (str(ndtree))
+    #print ('NDTree %s' % (str(ndtree)))
 
     print('Round 2')
-    for x, y in zip(xs, y1s):
-        point = (x,y)
-        #print ('Inserting %s into NDTree' % (str(point)))
-        ndtree.update(point)
-    print ('NDTree %s' % (str(ndtree)))
+    point = (xs[0],y1s[0])
+    ndtree.update(point)
+    print ('NDTree')
+    print (str(ndtree))
 
-    print('Round 3')
-    for x, y in zip(xs, y1s):
-        point = (x,y)
-        #print ('Inserting %s into NDTree' % (str(point)))
-        ndtree.update(point)
+    #print('Round 2')
+    #for x, y in zip(xs, y1s):
+    #    point = (x,y)
+    #    #print ('Inserting %s into NDTree' % (str(point)))
+    #    ndtree.update(point)
+    #print ('NDTree')
+    #print (str(ndtree))
+    ##print ('NDTree %s' % (str(ndtree)))
 
-    print ('NDTree %s' % (str(ndtree)))
+    #print('Round 3')
+    #for x, y in zip(xs, y1s):
+    #    point = (x,y)
+    #    #print ('Inserting %s into NDTree' % (str(point)))
+    #    ndtree.update(point)
+    #print ('NDTree')
+    #print (str(ndtree))
+    ##print ('NDTree %s' % (str(ndtree)))
 
     ndtree.report()
 # if __name__ == '__main__':
