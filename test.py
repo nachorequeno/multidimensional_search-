@@ -213,6 +213,21 @@ def test2D(min_cornerx = 0.0,
     #rs.toMatPlot(targetx=list_x, targety=list_y, blocking=True)
     return 0
 
+# Auxiliar function for 3-Dimensional testing
+def OracleTest(fora, rs, xpoint):
+    test1 = fora(xpoint) and (rs.MemberYup(xpoint) or rs.MemberBorder(xpoint))
+    test2 = (not fora(xpoint)) and (rs.MemberYlow(xpoint) or rs.MemberBorder(xpoint))
+    if (test1 or test2):
+        None
+    else:
+        print 'Warning! '
+        print 'Testing ', str(xpoint)
+        print ('(inYup, inYlow, inBorder): (%s, %s, %s)'
+               % (str(rs.MemberYup(xpoint)), str(rs.MemberYlow(xpoint)), str(rs.MemberBorder(xpoint))))
+        print 'Expecting '
+        print ('(inYup, inYlow): (%s, %s)'
+               % (str(fora(xpoint)), str(not fora(xpoint))))
+
 # Test 3-Dimensional Oracles
 def test3D(min_cornerx=0.0,
            min_cornery=0.0,
@@ -225,6 +240,7 @@ def test3D(min_cornerx=0.0,
            delta=DELTA,
            verbose=False,
            blocking=False,
+           test=False,
            sleep=0):
     minc = (min_cornerx, min_cornery, min_cornerz)
     maxc = (max_cornerx, max_cornery, max_cornerz)
@@ -251,37 +267,27 @@ def test3D(min_cornerx=0.0,
     nYlow = 0
     nBorder = 0
 
+    print ('Starting tests\n')
     start = time.time()
-    for t1p in t1:
-        for t2p in t2:
-            for t3p in t3:
-                xpoint = (t1p, t2p, t3p)
-                testYup = testYup or rs.MemberYup(xpoint)
-                testYlow = testYlow or rs.MemberYlow(xpoint)
-                testBorder = testBorder or rs.MemberBorder(xpoint)
+    if test:
+        for t1p in t1:
+            for t2p in t2:
+                for t3p in t3:
+                    xpoint = (t1p, t2p, t3p)
+                    testYup = testYup or rs.MemberYup(xpoint)
+                    testYlow = testYlow or rs.MemberYlow(xpoint)
+                    testBorder = testBorder or rs.MemberBorder(xpoint)
 
-                test1 = fora(xpoint) and (rs.MemberYup(xpoint) or rs.MemberBorder(xpoint))
-                test2 = (not fora(xpoint)) and (rs.MemberYlow(xpoint) or rs.MemberBorder(xpoint))
+                    nYup = nYup + 1 if rs.MemberYup(xpoint) else nYup
+                    nYlow = nYlow + 1 if rs.MemberYlow(xpoint) else nYlow
+                    nBorder = nBorder + 1 if rs.MemberBorder(xpoint) else nBorder
 
-                nYup = nYup + 1 if rs.MemberYup(xpoint) else nYup
-                nYlow = nYlow + 1 if rs.MemberYlow(xpoint) else nYlow
-                nBorder = nBorder + 1 if rs.MemberBorder(xpoint) else nBorder
-
-                if (test1 or test2):
-                    None
-                else:
-                    print 'Warning! '
-                    print 'Testing ', str(xpoint)
-                    print ('(inYup, inYlow, inBorder): (%s, %s, %s)'
-                                % (str(rs.MemberYup(xpoint)), str(rs.MemberYlow(xpoint)), str(rs.MemberBorder(xpoint))) )
-                    print 'Expecting '
-                    print ('(inYup, inYlow): (%s, %s)'
-                                % (str(fora(xpoint)), str(not fora(xpoint))))
+                    OracleTest(fora, rs, xpoint)
     end = time.time()
     time2 = end - start
 
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
-    print ('Volume report : (%s, %s, %s, %s)\n'
+    print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
                     % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
     print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
     print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
@@ -290,6 +296,90 @@ def test3D(min_cornerx=0.0,
     print 'Time tests: ', str(time2)
     return 0
 
+def test3D_map(min_cornerx=0.0,
+           min_cornery=0.0,
+           min_cornerz=0.0,
+           max_cornerx=1.0,
+           max_cornery=1.0,
+           max_cornerz=1.0,
+           nfile=os.path.abspath("tests/3D/test4.txt"),
+           epsilon=EPS,
+           delta=DELTA,
+           verbose=False,
+           blocking=False,
+           test=False,
+           sleep=0):
+    minc = (min_cornerx, min_cornery, min_cornerz)
+    maxc = (max_cornerx, max_cornery, max_cornerz)
+    xyspace = Rectangle(minc, maxc)
+
+    ora = Oracle()
+    ora.fromFile(nfile, human_readable=True)
+    fora = ora.membership()
+
+    start = time.time()
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    end = time.time()
+    time1 = end - start
+
+    t1 = np.arange(min_cornerx, max_cornerx, 0.1)
+    t2 = np.arange(min_cornery, max_cornery, 0.1)
+    t3 = np.arange(min_cornerz, max_cornerz, 0.1)
+
+    #testYup = False
+    #testYlow = False
+    #testBorder = False
+
+    nYup = 0
+    nYlow = 0
+    nBorder = 0
+
+    print ('Starting tests\n')
+    start = time.time()
+    if test:
+        list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
+
+        ##############
+        #list_test_Yup = map(rs.MemberYup, list_test_points)
+        #list_test_Ylow = map(rs.MemberYlow, list_test_points)
+        #list_test_Border = map(rs.MemberBorder, list_test_points)
+
+        #testYup = reduce(lambda i, j: i or j, list_test_Yup)
+        #testYlow = reduce(lambda i, j: i or j, list_test_Ylow)
+        #testBorder = reduce(lambda i, j: i or j, list_test_Border)
+        ##############
+
+        ##############
+        print ('Phase 1\n', time.time())
+        f1 = lambda point: 1 if rs.MemberYup(point) else 0
+        f2 = lambda point: 1 if rs.MemberYlow(point) else 0
+        f3 = lambda point: 1 if rs.MemberBorder(point) else 0
+
+        list_nYup = map(f1, list_test_points)
+        list_nYlow = map(f2, list_test_points)
+        list_nBorder = map(f3, list_test_points)
+
+        nYup = reduce(lambda i, j: i + j, list_nYup)
+        nYlow = reduce(lambda i, j: i + j, list_nYlow)
+        nBorder = reduce(lambda i, j: i + j, list_nBorder)
+        ##############
+
+        ##############
+        print ('Phase 2\n', time.time())
+        [OracleTest(fora, rs, point) for point in list_test_points]
+        ##############
+    end = time.time()
+    time2 = end - start
+
+    vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
+    print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
+                    % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
+    print 'Report Ylow: %s' % (str(nYlow))
+    print 'Report Yup: %s' % (str(nYup))
+    print 'Report Border: %s' % (str(nBorder))
+    print 'Time multidim search: ', str(time1)
+    print 'Time tests: ', str(time2)
+    return 0
 
 # Test N-Dimensional Oracles
 def testNdim(min_corner = 0.0,

@@ -10,6 +10,7 @@ from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequal
 from point import *
 from data_generator import *
 
+VERBOSE=True
 VERBOSE=False
 
 if VERBOSE:
@@ -48,16 +49,22 @@ class Condition:
         #op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         #f_regex = r'(\s*\w\s*)+'
         #g_regex = r'(\s*\w\s*)+'
-        op_regex = r'(==|>|<|>=|<=|<>)'
-        f_regex = r'[^%s]+' % op_regex
-        g_regex = r'[^%s]+' % op_regex
+        vprint('Polynomial string ', poly_function)
+
+        op_comp = "|".join(self.comparison)
+        op_regex = r'(%s)' % op_comp
+        f_regex = r'[^%s]+' % op_comp
+        g_regex = r'[^%s]+' % op_comp
         regex = r'(?P<f>(%s))(?P<op>(%s))(?P<g>(%s))' % (f_regex, op_regex, g_regex)
         regex_comp = re.compile(regex)
         result = regex_comp.match(poly_function)
-        if regex_comp is not None:
+        vprint('Parsing result ', str(result))
+        #if regex_comp is not None:
+        if result is not None:
             self.op = result.group('op')
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
+        vprint('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
     def get_variables(self):
         # type: (_) -> _
