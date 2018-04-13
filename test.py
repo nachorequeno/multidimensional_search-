@@ -439,7 +439,7 @@ def testNDTree(min_corner = 0.0,
     ndtree = NDTree()
 
     print('Round 1')
-    for x, y in zip(xs, y1s):
+    for x, y in zip(xs, y3s):
         point = (x,y)
         #print ('Inserting %s into NDTree' % (str(point)))
         ndtree.update(point)
@@ -447,30 +447,37 @@ def testNDTree(min_corner = 0.0,
     print (str(ndtree))
     #print ('NDTree %s' % (str(ndtree)))
 
-    print('Round 2')
-    point = (xs[0],y1s[0])
-    ndtree.update(point)
-    print ('NDTree')
-    print (str(ndtree))
+    ndtree.report()
 
     #print('Round 2')
-    #for x, y in zip(xs, y1s):
-    #    point = (x,y)
-    #    #print ('Inserting %s into NDTree' % (str(point)))
-    #    ndtree.update(point)
+    #point = (xs[0],y1s[0])
+    #ndtree.update(point)
     #print ('NDTree')
     #print (str(ndtree))
-    ##print ('NDTree %s' % (str(ndtree)))
 
-    #print('Round 3')
-    #for x, y in zip(xs, y1s):
-    #    point = (x,y)
-    #    #print ('Inserting %s into NDTree' % (str(point)))
-    #    ndtree.update(point)
-    #print ('NDTree')
-    #print (str(ndtree))
+    #ndtree.report()
+
+    print('Round 2')
+    for x, y in zip(xs, y2s):
+        point = (x,y)
+        #print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+    print ('NDTree')
+    print (str(ndtree))
     ##print ('NDTree %s' % (str(ndtree)))
 
     ndtree.report()
+
+    print('Round 3')
+    for x, y in zip(xs, y1s):
+        point = (x,y)
+        #print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+    print ('NDTree')
+    print (str(ndtree))
+    ##print ('NDTree %s' % (str(ndtree)))
+
+    ndtree.report()
+
 # if __name__ == '__main__':
 #    test1()

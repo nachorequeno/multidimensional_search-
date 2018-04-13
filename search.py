@@ -6,14 +6,15 @@ DELTA = 1e-5
 EPS = 1e-5
 
 def metric(lset):
+    # type: (set) -> float
     # lsizes = map(lambda item: item.norm(), lset)
     lsizes = map(lambda item: item.volume(), lset)
     return reduce(lambda x, y: x + y, lsizes)
 
 def search(x,
            member,
-           epsilon=EPS,
-           ):
+           epsilon=EPS):
+    # type: (Segment, _, float) -> Segment
     # x, y = segments
     y = x
     error = (epsilon,) * x.dim()
@@ -35,6 +36,8 @@ def multidim_search(xspace,
                 verbose=False,
                 blocking=False,
                 sleep=0):
+    # type: (Rectangle, _, float, float, bool, bool, float) -> ResultSet
+
     if verbose:
         def vprint(*args):
             # Print each argument separately so caller doesn't need to
@@ -145,5 +148,4 @@ def multidim_search(xspace,
             for i in range(1, n):
                 rs.toMatPlot(blocking=blocking, sec=sleep, yaxe=i, opacity=0.7)
 
-    return rs
-    #return ResultSet(l, ylow, yup)
+    return ResultSet(l, ylow, yup)

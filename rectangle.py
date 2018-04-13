@@ -13,6 +13,7 @@ import matplotlib.patches as patches
 class Rectangle:
     # min_corner, max_corner
     def __init__(self, min_corner, max_corner):
+        # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
         if incomparable(min_corner, max_corner):
             min_c = min_corner if min_corner[0] <= max_corner[0] else max_corner
@@ -28,6 +29,7 @@ class Rectangle:
 
     # Membership function
     def __contains__(self, xpoint):
+        # type: (Rectangle, tuple) -> bool
         return (not incomparable(xpoint, self.min_corner) and
                 not incomparable(xpoint, self.max_corner) and
                 greater_equal(xpoint, self.min_corner) and
@@ -35,6 +37,7 @@ class Rectangle:
 
     # Printers
     def toStr(self):
+        # type: (Rectangle) -> str
         _string = "["
         _string += str(self.min_corner)
         _string += ', '
@@ -43,44 +46,55 @@ class Rectangle:
         return _string
 
     def __repr__(self):
+        # type: (Rectangle) -> str
         return self.toStr()
 
     def __str__(self):
+        # type: (Rectangle) -> str
         return self.toStr()
 
     # Equality functions
     def __eq__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
         return (other.min_corner == self.min_corner) and (other.max_corner == self.max_corner)
 
     def __ne__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
         return not self.__eq__(other)
 
     # Identity function (via hashing)
     def __hash__(self):
+        # type: (Rectangle) -> int
         return hash((self.min_corner, self.max_corner))
 
     # Rectangle properties
     def dim(self):
+        # type: (Rectangle) -> int
         return dim(self.min_corner)
 
     def diag(self):
+        # type: (Rectangle) -> tuple
         return subtract(self.max_corner, self.min_corner)
 
     def norm(self):
+        # type: (Rectangle) -> float
         diagonal = self.diag()
         square_diagonal = map(lambda si: si * si, diagonal)
         _sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)
 
     def volume(self):
+        # type: (Rectangle) -> float
         diagonal = self.diag()
         _prod = reduce(lambda si, sj: si * sj, diagonal)
         return abs(_prod)
 
     def numVertices(self):
+        # type: (Rectangle) -> int
         return int(math.pow(2, self.dim()))
 
     def vertices(self):
+        # type: (Rectangle) -> list
         deltas = self.diag()
         vertex = self.min_corner
         vertices = [] * self.numVertices()
@@ -93,18 +107,23 @@ class Rectangle:
         return vertices
 
     def diagToSegment(self):
+        # type: (Rectangle) -> Segment
         return Segment(self.min_corner, self.max_corner)
 
     def center(self):
-        return div(self.diag(), 2)
+        # type: (Rectangle) -> tuple
+        offset = div(self.diag(), 2)
+        return add(self.min_corner, offset)
 
     def distanceToCenter(self, xpoint):
+        # type: (Rectangle, tuple) -> float
         middle_point = self.center()
         euclidean_dist = distance(xpoint, middle_point)
         return euclidean_dist
 
     # Matplot functions
     def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
+        # type: (Rectangle, string, int, int, int) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
         mc = (self.min_corner[xaxe], self.min_corner[yaxe], )
         width = self.diag()[xaxe]
@@ -122,6 +141,7 @@ class Rectangle:
 
 # Auxiliary functions
 def cpoint(i, alphai, xpoint, xspace):
+    # type: (int, int, tuple, Rectangle) -> Rectangle
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
     if alphai == 0:
         result_xspace.max_corner = subt(i, xspace.max_corner, xpoint)
@@ -133,6 +153,7 @@ def cpoint(i, alphai, xpoint, xspace):
 
 
 def crect(i, alphai, xrectangle, xspace):
+    # type: (int, int, Rectangle, Rectangle) -> Rectangle
     if alphai == 0:
         return cpoint(i, alphai, xrectangle.max_corner, xspace)
     if alphai == 1:
@@ -140,6 +161,7 @@ def crect(i, alphai, xrectangle, xspace):
 
 
 def bpoint(alpha, xpoint, xspace):
+    # type: (set, tuple, Rectangle) -> Rectangle
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xpoint)), \
@@ -154,6 +176,7 @@ def bpoint(alpha, xpoint, xspace):
 
 
 def brect(alpha, xrectangle, xspace):
+    # type: (set, Rectangle, Rectangle) -> Rectangle
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -171,9 +194,11 @@ def brect(alpha, xrectangle, xspace):
     return temp1
 
 def pbrect(queue, alpha, xrectangle, xspace):
+    # type: (Queue, set, Rectangle, Rectangle) -> None
     queue.put(brect(alpha, xrectangle, xspace))
 
-def irect(alphaincomp_list, xrectangle, xspace):
+def irect(alphaincomp, xrectangle, xspace):
+    # type: (set, Rectangle, Rectangle) -> set
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -182,10 +207,11 @@ def irect(alphaincomp_list, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
     #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp_list)
+    return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp)
 
 
-def pirect(alphaincomp_list, xrectangle, xspace):
+def pirect(alphaincomp, xrectangle, xspace):
+    # type: (set, Rectangle, Rectangle) -> set
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -200,7 +226,7 @@ def pirect(alphaincomp_list, xrectangle, xspace):
     rets = []
     q = Queue()
 
-    for alphaincomp_i in alphaincomp_list:
+    for alphaincomp_i in alphaincomp:
         p = Process(target=pbrect, args=(q, alphaincomp_i, xrectangle, xspace))
         processes.append(p)
         p.start()
@@ -216,10 +242,11 @@ def pirect(alphaincomp_list, xrectangle, xspace):
         rets.append(ret)
     for p in processes:
         p.join()
-    return rets
+    return set(rets)
 
 
-def pirect2(alphaincomp_list, xrectangle, xspace):
+def pirect2(alphaincomp, xrectangle, xspace):
+    # type: (set, Rectangle, Rectangle) -> set
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -229,7 +256,7 @@ def pirect2(alphaincomp_list, xrectangle, xspace):
     #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     pool = Pool(cpu_count())
-    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in alphaincomp_list]
+    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in alphaincomp]
     pool.close()
     pool.join()
     res = set()

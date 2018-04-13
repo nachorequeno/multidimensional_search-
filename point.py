@@ -15,6 +15,12 @@ def norm(x):
 def distance(x, xprime):
     # type: (tuple, tuple) -> float
     temp = subtract(x, xprime)
+    return norm(temp)
+
+# Hamming distance between two points
+def distanceHamming(x, xprime):
+    # type: (tuple, tuple) -> float
+    temp = subtract(x, xprime)
     _sum = reduce(lambda si, sj: abs(si) + abs(sj), temp)
     return _sum
 
@@ -22,7 +28,6 @@ def distance(x, xprime):
 def subtract(x, xprime):
     # type: (tuple, tuple) -> tuple
     return tuple(xi[0] - xi[1] for xi in zip(x, xprime))
-
 
 def add(x, xprime):
     # type: (tuple, tuple) -> tuple

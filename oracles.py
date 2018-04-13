@@ -4,7 +4,7 @@ import pickle
 import sys
 
 import numpy as np
-from sympy import Poly, simplify, S, default_sort_key, Intersection, Union
+from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Union
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
 from point import *
@@ -14,14 +14,24 @@ VERBOSE=True
 VERBOSE=False
 
 if VERBOSE:
+    # Verbose print (stdout)
     def vprint(*args):
         # Print each argument separately so caller doesn't need to
         # stuff everything to be printed into a single string
         for arg in args:
             print arg,
         print
+
+    # Error print (stderr)
+    def eprint(*args):
+        for arg in args:
+            print >> sys.stderr, arg
+        print >> sys.stderr
+
 else:
     vprint = lambda *a: None  # do-nothing function
+    eprint = lambda *a: None  # do-nothing function
+
 
 class Condition:
     # Condition = f op g
@@ -41,6 +51,10 @@ class Condition:
         self.op = op
         self.f = simplify(f)
         self.g = simplify(g)
+
+        if not self.all_coeff_are_positive():
+            eprint("WARNING! Expression '%s' contains negative coefficients: %s"
+                   % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
     def __str__(self):
         return str(self.f) + self.op + str(self.g)
@@ -64,23 +78,73 @@ class Condition:
             self.op = result.group('op')
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
-        vprint('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
+            vprint('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
-    def get_variables(self):
+            if not self.all_coeff_are_positive():
+                eprint("WARNING! Expression '%s' contains negative coefficients: %s"
+                       % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+
+    def all_coeff_are_positive(self):
+        # type: (_) -> bool
+        coeffs = self.get_coeff_of_expression()
+        all_positives = True
+        for i in coeffs:
+            all_positives = all_positives and (coeffs[i] >= 0)
+        return all_positives
+
+    def get_coeff_of_expression(self):
+        # type: (_) -> dict
+        expr = self.get_expression()
+        expanded_expr = expand(expr)
+        simpl_expr = simplify(expanded_expr)
+        coeffs = simpl_expr.as_coefficients_dict()
+        return coeffs
+
+    def get_positive_coeff_of_expression(self):
+        # type: (_) -> dict
+        expr = self.get_expression()
+        expanded_expr = expand(expr)
+        simpl_expr = simplify(expanded_expr)
+        coeffs = simpl_expr.as_coefficients_dict()
+        positive_coeff = {i: coeffs[i] for i in coeffs if coeffs[i] >= 0}
+        return positive_coeff
+
+    def get_negative_coeff_of_expression(self):
+        # type: (_) -> dict
+        expr = self.get_expression()
+        expanded_expr = expand(expr)
+        simpl_expr = simplify(expanded_expr)
+        coeffs = simpl_expr.as_coefficients_dict()
+        negative_coeff = {i: coeffs[i] for i in coeffs if coeffs[i] < 0}
+        return negative_coeff
+
+    def get_expression_with_negative_coeff(self):
         # type: (_) -> _
-        expr = self.f - self.g
-        return sorted(expr.free_symbols, key=default_sort_key)
+        negative_coeff = self.get_negative_coeff_of_expression()
+        list = ['%s * %s' %(negative_coeff[i], i) for i in negative_coeff]
+        return simplify(''.join(list))
 
-    def get_expresion(self):
+    def get_expression_with_positive_coeff(self):
+        # type: (_) -> _
+        positive_coeff = self.get_positive_coeff_of_expression()
+        list = ['%s * %s' %(positive_coeff[i], i) for i in positive_coeff]
+        return simplify('+'.join(list))
+
+    def get_expression(self):
         # type: (_) -> _
         return simplify(self.f - self.g)
 
+    def get_variables(self):
+        # type: (_) -> _
+        expr = self.get_expression()
+        return sorted(expr.free_symbols, key=default_sort_key)
+
     def eval_tuple(self, xpoint):
-        # type: (_, tuple, _) -> _
+        # type: (_, tuple) -> _
         keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        vprint('condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
+        vprint('Condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
         vprint('di ', str(di))
         return self.eval_dict(di)
 
@@ -96,10 +160,10 @@ class Condition:
             assert keys.issuperset(keys_fv), "Keys in dictionary " \
                                              + str(d) \
                                              + " do not match with the variables in the condition"
-        expr = self.get_expresion()
+        expr = self.get_expression()
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        vprint('expresion ', str(simplify(ex)))
+        vprint('Expression ', str(simplify(ex)))
         return simplify(ex)
 
     def eval_var_val(self, var=None, val='0'):
@@ -108,9 +172,10 @@ class Condition:
             fvset = self.get_variables()
             fv = fvset.pop()
         else: fv = var
-        expr = self.get_expresion()
+        expr = self.get_expression()
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
+        vprint('Expression ', str(simplify(ex)))
         return simplify(ex)
 
     # Read/Write file functions
@@ -216,8 +281,10 @@ class ConditionList:
         # type: (_, _) -> _
         vprint('Condition list ', self.toStr())
         _eval = True
+        #_eval = False
         for i in self.l:
             _eval = _eval and i.eval_dict(d)
+            #_eval = _eval or i.eval_dict(d)
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
@@ -242,7 +309,8 @@ class ConditionList:
         if self.solution == None:
             _ineq_list = ()
             for poly_ineq in self.l:
-                _ineq = (Poly(poly_ineq.f - poly_ineq.g, domain='RR'), poly_ineq.op)
+                #_ineq = (Poly(poly_ineq.f - poly_ineq.g, domain='RR'), poly_ineq.op)
+                _ineq = (Poly(poly_ineq.get_expression(), domain='RR'), poly_ineq.op)
                 _ineq_list += (_ineq, )
             vprint(_ineq_list)
             self.solution = self.solve_poly(_ineq_list)
@@ -431,8 +499,8 @@ class Oracle:
         fv = set()
         for i in self.oracle:
             fv = fv.union(self.oracle[i].get_variables())
-        assert (highest_key == (len(fv) - 1)), \
-            "Number of dimensions in Oracle do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
+#        assert (highest_key == (len(fv) - 1)), \
+#            "Number of dimensions in Oracle do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
         return list(fv)
 
     def eval_tuple(self, xpoint):
@@ -447,8 +515,10 @@ class Oracle:
         # type: (_, _) -> _
         vprint('Oracle evaluates ', self.toStr())
         _eval = True
+        #_eval = False
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_dict(d)
+            #_eval = _eval or self.oracle[i].eval_dict(d)
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
