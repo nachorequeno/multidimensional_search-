@@ -12,13 +12,14 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 
+
 # Segment
 class Segment:
     # l, h are points
     def __init__(self, low, high):
         # type: (Segment, tuple, tuple) -> _
-        self.l = min(low,high)
-        self.h = max(low,high)
+        self.l = min(low, high)
+        self.h = max(low, high)
         assert dim(self.l) == dim(self.h)
         assert greater_equal(self.h, self.l)
 
@@ -71,7 +72,7 @@ class Segment:
         # type: (Segment) -> int
         return dim(self.l)
 
-    #def __len__(self):
+    # def __len__(self):
     def diag(self):
         # type: (Segment) -> tuple
         return subtract(self.h, self.l)

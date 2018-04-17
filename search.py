@@ -5,11 +5,13 @@ import itertools
 DELTA = 1e-5
 EPS = 1e-5
 
+
 def metric(lset):
     # type: (set) -> float
     # lsizes = map(lambda item: item.norm(), lset)
     lsizes = map(lambda item: item.volume(), lset)
     return reduce(lambda x, y: x + y, lsizes)
+
 
 def search(x,
            member,
@@ -30,12 +32,12 @@ def search(x,
 
 # The search returns a set of Rectangles in Yup, Ylow and Border
 def multidim_search(xspace,
-                oracle,
-                epsilon=EPS,
-                delta=DELTA,
-                verbose=False,
-                blocking=False,
-                sleep=0):
+                    oracle,
+                    epsilon=EPS,
+                    delta=DELTA,
+                    verbose=False,
+                    blocking=False,
+                    sleep=0):
     # type: (Rectangle, _, float, float, bool, bool, float) -> ResultSet
 
     if verbose:
@@ -98,7 +100,7 @@ def multidim_search(xspace,
         vprint('l volumes: ')
         for r in l:
             vprint(r.volume())
-        vprint ('end volumes')
+        vprint('end volumes')
 
         lsorted = sorted(l, key=Rectangle.volume)
         # lsorted = sorted(l, key=Rectangle.volume, reverse=True)
@@ -115,7 +117,7 @@ def multidim_search(xspace,
         y = search(xrectangle.diagToSegment(), f, epsilon)
         vprint('y: ', y)
 
-        #b0 = Rectangle(xspace.min_corner, y.l)
+        # b0 = Rectangle(xspace.min_corner, y.l)
         b0 = Rectangle(xrectangle.min_corner, y.l)
         b0_set = set()
         b0_set.add(b0)
@@ -123,7 +125,7 @@ def multidim_search(xspace,
         vprint('ylow: ', ylow)
         vprint('b0: ', b0)
 
-        #b1 = Rectangle(y.h, xspace.max_corner)
+        # b1 = Rectangle(y.h, xspace.max_corner)
         b1 = Rectangle(y.h, xrectangle.max_corner)
         b1_set = set()
         b1_set.add(b1)
@@ -133,7 +135,7 @@ def multidim_search(xspace,
 
         yrectangle = Rectangle(y.l, y.h)
         i = irect(incomparable, yrectangle, xrectangle)
-        #i = pirect(incomparable, yrectangle, xrectangle)
+        # i = pirect(incomparable, yrectangle, xrectangle)
         l = l.union(i)
         vprint('i: ', i)
 

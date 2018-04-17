@@ -6,6 +6,7 @@ import math
 
 import matplotlib.patches as patches
 
+
 # Rectangle
 # Rectangular Half-Space
 # Rectangular Cones
@@ -20,8 +21,8 @@ class Rectangle:
             max_c = max_corner if min_corner[0] <= max_corner[0] else min_corner
             self.min_corner = min_c
             self.max_corner = max_c
-            #self.min_corner = min_corner
-            #self.max_corner = max_corner
+            # self.min_corner = min_corner
+            # self.max_corner = max_corner
         else:
             self.min_corner = min(min_corner, max_corner)
             self.max_corner = max(min_corner, max_corner)
@@ -123,19 +124,19 @@ class Rectangle:
 
     # Matplot functions
     def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
-        # type: (Rectangle, string, int, int, int) -> patches.Rectangle
+        # type: (Rectangle, str, int, int, int) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
-        mc = (self.min_corner[xaxe], self.min_corner[yaxe], )
+        mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
         width = self.diag()[xaxe]
         height = self.diag()[yaxe]
         return patches.Rectangle(
             mc,  # (x,y)
             width,  # width
             height,  # height
-            #color = c, #color
-            facecolor = c,  # face color
-            edgecolor = 'black',  # edge color
-            alpha = opacity
+            # color = c, #color
+            facecolor=c,  # face color
+            edgecolor='black',  # edge color
+            alpha=opacity
         )
 
 
@@ -145,9 +146,9 @@ def cpoint(i, alphai, xpoint, xspace):
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
     if alphai == 0:
         result_xspace.max_corner = subt(i, xspace.max_corner, xpoint)
-        #result_xspace.min_corner = xspace.min_corner
+        # result_xspace.min_corner = xspace.min_corner
     if alphai == 1:
-        #result_xspace.max_corner = xspace.max_corner
+        # result_xspace.max_corner = xspace.max_corner
         result_xspace.min_corner = subt(i, xspace.min_corner, xpoint)
     return result_xspace
 
@@ -161,12 +162,12 @@ def crect(i, alphai, xrectangle, xspace):
 
 
 def bpoint(alpha, xpoint, xspace):
-    # type: (set, tuple, Rectangle) -> Rectangle
+    # type: (tuple, tuple, Rectangle) -> Rectangle
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xpoint)), \
         "xspace.min_corner and xpoint do not share the same dimension"
-    #assert (dim(xspace.max_corner) == dim(xpoint)), \
+    # assert (dim(xspace.max_corner) == dim(xpoint)), \
     #    "xspace.max_corner and xpoint do not share the same dimension"
     temp1 = Rectangle(xspace.min_corner, xspace.max_corner)
     for i, alphai in enumerate(alpha):
@@ -176,7 +177,7 @@ def bpoint(alpha, xpoint, xspace):
 
 
 def brect(alpha, xrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> Rectangle
+    # type: (tuple, Rectangle, Rectangle) -> Rectangle
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -185,7 +186,7 @@ def brect(alpha, xrectangle, xspace):
         "alpha and xrectangle.min_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xrectangle.min_corner)), \
         "xspace.min_corner and xrectangle.min_corner do not share the same dimension"
-    #assert (dim(xspace.max_corner) == dim(xrectangle.max_corner)), \
+    # assert (dim(xspace.max_corner) == dim(xrectangle.max_corner)), \
     #    "xspace.max_corner and xrectangle.max_corner do not share the same dimension"
     temp1 = Rectangle(xspace.min_corner, xspace.max_corner)
     for i, alphai in enumerate(alpha):
@@ -193,9 +194,11 @@ def brect(alpha, xrectangle, xspace):
         temp1 = temp2
     return temp1
 
+
 def pbrect(queue, alpha, xrectangle, xspace):
-    # type: (Queue, set, Rectangle, Rectangle) -> None
+    # type: (Queue, tuple, Rectangle, Rectangle) -> None
     queue.put(brect(alpha, xrectangle, xspace))
+
 
 def irect(alphaincomp, xrectangle, xspace):
     # type: (set, Rectangle, Rectangle) -> set
@@ -203,9 +206,9 @@ def irect(alphaincomp, xrectangle, xspace):
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    #assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
+    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
-    #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
+    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp)
 
@@ -251,12 +254,13 @@ def pirect2(alphaincomp, xrectangle, xspace):
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    #assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
+    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
-    #assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
+    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     pool = Pool(cpu_count())
-    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in alphaincomp]
+    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in
+                        alphaincomp]
     pool.close()
     pool.join()
     res = set()
