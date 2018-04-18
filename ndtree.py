@@ -1,6 +1,7 @@
 from rectangle import *
 from point import *
 import sys
+import __builtin__
 
 VERBOSE = True
 VERBOSE = False
@@ -151,38 +152,6 @@ class Node:
         self.report()
         vprint('\n')
         [n.reportRec() for n in self.nodes]
-
-    # Rectangle
-    def getRectangleSn(self):
-        # type: (Node) -> Rectangle
-        sn = self.S()
-        vprint('S(n) ', str(sn))
-        p1 = sn.pop()
-        sn.add(p1)
-        n = dim(p1)
-
-        vprint('Point ', str(p1))
-        vprint('Dimension ', str(n))
-
-        # Nadir point
-        max_c = ()
-        # Ideal point
-        min_c = ()
-
-        for i in range(n):
-            max_i = float("-inf")
-            min_i = float("inf")
-            for point in sn:
-                max_i = point[i] if point[i] > max_i else max_i
-                min_i = point[i] if point[i] < min_i else min_i
-            max_c = max_c + (max_i,)
-            min_c = min_c + (min_i,)
-
-        vprint('Max ', str(max_c))
-        vprint('Min ', str(min_c))
-        self.rect = Rectangle(min_c, max_c)
-        vprint('Rectangle ', str(self.rect))
-        return self.rect
 
     # Functions for checking the type of node
     def isRoot(self):
@@ -477,8 +446,38 @@ class Node:
             vprint_string += 'Point tested: ' + str(x)
         vprint(vprint_string)
 
-
+    # Rectangle
     def getRectangleSn(self):
+        # type: (Node) -> Rectangle
+        sn = self.S()
+        vprint('S(n) ', str(sn))
+        p1 = sn.pop()
+        n = dim(p1)
+
+        vprint('Point ', str(p1))
+        vprint('Dimension ', str(n))
+
+        # Nadir point
+        #max_c = [float("-inf")] * n
+        max_c = list(p1)
+
+        # Ideal point
+        #min_c = [float("inf")] * n
+        min_c = list(p1)
+
+        for i in range(n):
+            for point in sn:
+                max_c[i] = __builtin__.max(point[i], max_c[i])
+                min_c[i] = __builtin__.min(point[i], min_c[i])
+
+        vprint('Max ', str(max_c))
+        vprint('Min ', str(min_c))
+        self.rect = Rectangle(tuple(min_c), tuple(max_c))
+        vprint('Rectangle ', str(self.rect))
+        return self.rect
+
+
+    def getRectangleSn2(self):
         # type: (Node) -> Rectangle
         sn = self.S()
         vprint('S(n) ', str(sn))
@@ -509,25 +508,19 @@ class Node:
         vprint('Rectangle ', str(self.rect))
         return self.rect
 
-    def updateIdealNadir2(self, x):
-        # type: (Node, tuple) -> None
-        self.rect = self.getRectangleSn()
-        updateIdeal = less(x, self.rect.min_corner)
-        updateNadir = greater(x, self.rect.max_corner)
-        vprint_string = 'Updating rectangle ' + str(self.rect)
-        self.rect.min_corner = x if updateIdeal else self.rect.min_corner
-        self.rect.max_corner = x if updateNadir else self.rect.max_corner
-        vprint_string += ' to ' + str(self)
-        if updateIdeal or updateNadir:
-            if not self.isRoot():
-                np = self.getParent()
-                np.updateIdealNadir(x)
-        else:
-            vprint_string = 'Rectangle ' + str(self.rect) + ' remains constant\n'
-            vprint_string += 'Point tested: ' + str(x)
-        vprint(vprint_string)
-
     def S(self):
+        # type: (Node) -> set
+        vprint("Node " + str(self))
+        if self.isLeaf():
+            vprint("L " + str(self.L))
+            return set(self.L)
+        else:
+            temp_list = [i.S() for i in self.nodes]
+            temp = set.union(*temp_list)
+            vprint("temp " + str(temp))
+            return temp
+
+    def S2(self):
         # type: (Node) -> set
         vprint("Node " + str(self))
         if self.isLeaf():
