@@ -1,5 +1,7 @@
 from ndtree import *
 import pickle
+import sys
+import resource
 
 VERBOSE = True
 VERBOSE = False
@@ -31,9 +33,9 @@ class OraclePoint:
     # For each one of the n-dimensions, we should have a ConditionList
 
     # Dimension = [0,..,n-1]
-    def __init__(self):
-        # type: (OraclePoint) -> None
-        self.oracle = NDTree()
+    def __init__(self, MAX_P=2, MIN_CH=2):
+        # type: (OraclePoint, int, int) -> None
+        self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
 
     def __str__(self):
         # type: (OraclePoint) -> str
@@ -90,6 +92,12 @@ class OraclePoint:
         # type: (OraclePoint, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
+        # Setting maximum recursion. It is required for the NDTree build
+        # sys.getrecursionlimit()
+        max_rec = 0x100000
+        resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
+        sys.setrecursionlimit(max_rec)
+
         self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
@@ -97,13 +105,15 @@ class OraclePoint:
         assert (finput is not None), "File object should not be null"
 
         self.oracle = NDTree()
-        for line in finput.readlines():
+        #for line in finput.readlines():
+        for i, line in enumerate(finput):
             line = line.replace('(', '')
             line = line.replace(')', '')
             line = line.split(',')
             point = tuple(float(pi) for pi in line)
-            vprint(point)
+            vprint("Adding: ", i, point)
             self.oracle.update(point)
+        vprint("numPoints: ", i)
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (OraclePoint, str, bool, bool) -> None
@@ -124,6 +134,12 @@ class OraclePoint:
     def toFileNonHumRead(self, foutput=None):
         # type: (OraclePoint, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
+
+        # Setting maximum recursion. It is required for the NDTree build
+        # sys.getrecursionlimit()
+        max_rec = 0x100000
+        resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
+        sys.setrecursionlimit(max_rec)
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
 

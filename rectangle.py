@@ -80,9 +80,7 @@ class Rectangle:
     def norm(self):
         # type: (Rectangle) -> float
         diagonal = self.diag()
-        square_diagonal = map(lambda si: si * si, diagonal)
-        _sum = reduce(lambda si, sj: si + sj, square_diagonal)
-        return math.sqrt(_sum)
+        return norm(diagonal)
 
     def volume(self):
         # type: (Rectangle) -> float

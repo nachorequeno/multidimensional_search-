@@ -1,6 +1,7 @@
 from rectangle import *
 from point import *
 import sys
+import resource
 import __builtin__
 
 VERBOSE = True
@@ -35,10 +36,16 @@ class NDTree:
         self.MAX_POINTS = MAX_P
         self.MIN_CHILDREN = MIN_CH
 
+        # Setting maximum recursion. It is required for the NDTree build
+        # sys.getrecursionlimit()
+        max_rec = 0x100000
+        resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
+        sys.setrecursionlimit(max_rec)
+
     # Membership
     def __contains__(self, p):
         # type: (NDTree, tuple) -> bool
-        return self.root.hasPointRec(p)
+        return self.root.hasPointRec(p) if self.root is not None else False
         # return item in self.root
 
     # Printers
@@ -50,7 +57,7 @@ class NDTree:
 
     # Report functions
     def report(self):
-        self.root.reportRec()
+        self.root.reportRec() if self.root is not None else ""
 
     def getPoints(self):
         # type: (NDTree) -> set
@@ -92,7 +99,6 @@ class Node:
     # Membership function
     def hasPoint(self, x):
         # type: (Node, tuple) -> bool
-        # return item in self.rect
         return x in self.L
 
     def hasPointRec(self, x):
@@ -205,9 +211,11 @@ class Node:
 
     def getSubnodesRec(self):
         # type: (Node) -> set
-        nodes = set(x.getSubnodesRec() for x in self.nodes)
+        nodes = set()
+        for n in self.nodes:
+            nodes = nodes.union(n.getSubnodesRec())
         return nodes.union(self.getSubnodes())
-
+      
     def numSubnodes(self):
         # type: (Node) -> int
         return len(self.nodes)
@@ -264,10 +272,20 @@ class Node:
             points = points.union(n.getPointsRec())
         return points.union(self.getPoints())
 
-    def getPointsRec2(self):
+    # Set of points
+    def S(self):
         # type: (Node) -> set
-        points = set(n.getPointsRec() for n in self.nodes)
-        return points.union(self.getPoints())
+        vprint("Node " + str(self))
+        # if n == leaf, S(n) == L(n)
+        if self.isLeaf():
+            vprint("L " + str(self.L))
+            return set(self.L)
+        # if n == internal, S(n) == U S(m) for all m in descendent(n)
+        else:
+            temp_list = [i.S() for i in self.nodes]
+            temp = set.union(*temp_list)
+            vprint("temp " + str(temp))
+            return temp
 
     def numPoints(self):
         # type: (Node) -> int
@@ -278,8 +296,7 @@ class Node:
         vprint("None") if self is None else None
         return (self is not None) and (len(self.L) > 0)
 
-        # Relationship functions
-
+    # Relationship functions
     def getParent(self):
         # type: (Node) -> Node
         return self.parent
@@ -287,6 +304,15 @@ class Node:
     def setParent(self, parent):
         # type: (Node, Node) -> None
         self.parent = parent
+
+    # Rectangle Operations
+    def getRectangleSn(self):
+        # type: (Node) -> Rectangle
+        return self.rect
+
+    def setRectangleSn(self, rect):
+        # type: (Node, Rectangle) -> None
+        self.rect = rect
 
     # NDTree operations
     def findClosestNode(self, x):
@@ -301,7 +327,6 @@ class Node:
         if self.isLeaf():
             self.addPoint(x)
             self.updateIdealNadir(x)
-            #self.addPoint(x) #
             vprint('Leaf\n', self.toStrRec())
             if self.numPoints() > self.MAX_POINTS:
                 self.split()
@@ -337,7 +362,6 @@ class Node:
         np = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
         np.addPoint(y)
         np.updateIdealNadir(y)
-        #np.addPoint(y)
         self.removePoint(y)
         vprint('Current status of self', self.L)
         vprint(self.toStrRec())
@@ -347,7 +371,6 @@ class Node:
             np = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
             np.addPoint(y)
             np.updateIdealNadir(y)
-            #np.addPoint(y)
             self.removePoint(y)
             vprint('Current status of self', self.L)
             vprint(self.toStrRec())
@@ -358,7 +381,6 @@ class Node:
             vprint('Closest node\n%s' % (np.toStrRec()))
             np.addPoint(y)
             np.updateIdealNadir(y)
-            #np.addPoint(y)
             self.removePoint(y)
             vprint('Current status of self after removing point\n', self.L)
             vprint(self.toStrRec())
@@ -369,12 +391,10 @@ class Node:
         nout = self
         rect = self.getRectangleSn()
         vprint('Updating ', str(x))
-        #if greater_equal(rect.max_corner, x):
         if less_equal(rect.max_corner, x):
             # x is rejected
             vprint('Point ', str(x), ' rejected (1)')
             return nout, False
-        #elif greater_equal(x, rect.min_corner):
         elif less_equal(x, rect.min_corner):
             # remove n and its whole sub-tree
             vprint('Removing node\n', self.toStrRec())
@@ -383,7 +403,6 @@ class Node:
             # create empty node
             nout = Node(MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
             vprint('After removing \n', nparent.toStrRec() if nparent is not None else '')
-        #elif greater_equal(rect.min_corner, x) or greater_equal(x, rect.max_corner):
         elif less_equal(rect.min_corner, x) or less_equal(x, rect.max_corner):
             if self.isLeaf():
                 for y in self.L:
@@ -419,116 +438,43 @@ class Node:
     def updateIdealNadir(self, x):
         # type: (Node, tuple) -> None
         self.rect = self.getRectangleSn()
-        ideal = self.rect.min_corner
-        nadir = self.rect.max_corner
+        if self.rect is None:
+            # New Ideal and Nadir points
+            # dim(ideal) == dim(nadir) == dim(x)
+            n = dim(x)
+            ideal = (float("inf"), ) * n
+            nadir = (float("-inf"), ) * n
+            # Delayed creation of Rectangle.
+            # Before this point, we do not the dim(x)
+            self.rect = Rectangle(ideal, nadir)
+        else:
+            ideal = self.rect.min_corner
+            nadir = self.rect.max_corner
 
         # Test if the current rectangle already includes the components from x
         # (i.e., condition '<='/'>=' in the comparisons).
         # This comparison allows triggering the rectangle update recursively in parent nodes.
-        updateIdeal = any(xi <= ideali for xi, ideali in zip(x, ideal))
-        updateNadir = any(xi >= nadiri for xi, nadiri in zip(x, nadir))
+        updateIdeal = any(xi < ideali for xi, ideali in zip(x, ideal))
+        updateNadir = any(xi > nadiri for xi, nadiri in zip(x, nadir))
 
-        # We only effectively update ideal and nadir points if the components from x are strictly lesser or greater
-        # than current components of the rectangle.
-        ideal = tuple(xi if xi < ideali else ideali for xi, ideali in zip(x, ideal))
-        nadir = tuple(xi if xi > nadiri else nadiri for xi, nadiri in zip(x, nadir))
-
-        vprint_string = 'Updating rectangle ' + str(self.rect)
-        self.rect.min_corner = ideal
-        self.rect.max_corner = nadir
-        vprint_string += ' to ' + str(self.rect)
         if updateIdeal or updateNadir:
+            # We only effectively update ideal and nadir points if the components from x are strictly lesser or greater
+            # than current components of the rectangle.
+            # ideal = tuple(xi if xi < ideali else ideali for xi, ideali in zip(x, ideal))
+            # nadir = tuple(xi if xi > nadiri else nadiri for xi, nadiri in zip(x, nadir))
+            ideal = tuple(__builtin__.min(xi, ideali) for xi, ideali in zip(x, ideal))
+            nadir = tuple(__builtin__.max(xi, nadiri) for xi, nadiri in zip(x, nadir))
+
+            vprint_string = 'Updating rectangle ' + str(self.rect)
+            self.rect.min_corner = ideal
+            self.rect.max_corner = nadir
+            vprint_string += ' to ' + str(self.rect)
+            vprint(vprint_string)
+
             if not self.isRoot():
                 np = self.getParent()
                 np.updateIdealNadir(x)
         else:
             vprint_string = 'Rectangle ' + str(self.rect) + ' remains constant\n'
             vprint_string += 'Point tested: ' + str(x)
-        vprint(vprint_string)
-
-    # Rectangle
-    def getRectangleSn(self):
-        # type: (Node) -> Rectangle
-        sn = self.S()
-        vprint('S(n) ', str(sn))
-        p1 = sn.pop()
-        n = dim(p1)
-
-        vprint('Point ', str(p1))
-        vprint('Dimension ', str(n))
-
-        # Nadir point
-        #max_c = [float("-inf")] * n
-        max_c = list(p1)
-
-        # Ideal point
-        #min_c = [float("inf")] * n
-        min_c = list(p1)
-
-        for i in range(n):
-            for point in sn:
-                max_c[i] = __builtin__.max(point[i], max_c[i])
-                min_c[i] = __builtin__.min(point[i], min_c[i])
-
-        vprint('Max ', str(max_c))
-        vprint('Min ', str(min_c))
-        self.rect = Rectangle(tuple(min_c), tuple(max_c))
-        vprint('Rectangle ', str(self.rect))
-        return self.rect
-
-
-    def getRectangleSn2(self):
-        # type: (Node) -> Rectangle
-        sn = self.S()
-        vprint('S(n) ', str(sn))
-        p1 = sn.pop()
-        sn.add(p1)
-        n = dim(p1)
-
-        vprint('Point ', str(p1))
-        vprint('Dimension ', str(n))
-
-        # Nadir point
-        max_c = ()
-        # Ideal point
-        min_c = ()
-
-        for i in range(n):
-            max_i = float("-inf")
-            min_i = float("inf")
-            for point in sn:
-                max_i = point[i] if point[i] > max_i else max_i
-                min_i = point[i] if point[i] < min_i else min_i
-            max_c = max_c + (max_i,)
-            min_c = min_c + (min_i,)
-
-        vprint('Max ', str(max_c))
-        vprint('Min ', str(min_c))
-        self.rect = Rectangle(min_c, max_c)
-        vprint('Rectangle ', str(self.rect))
-        return self.rect
-
-    def S(self):
-        # type: (Node) -> set
-        vprint("Node " + str(self))
-        if self.isLeaf():
-            vprint("L " + str(self.L))
-            return set(self.L)
-        else:
-            temp_list = [i.S() for i in self.nodes]
-            temp = set.union(*temp_list)
-            vprint("temp " + str(temp))
-            return temp
-
-    def S2(self):
-        # type: (Node) -> set
-        vprint("Node " + str(self))
-        if self.isLeaf():
-            vprint("L " + str(self.L))
-            return set(self.L)
-        else:
-            temp = set()
-            for i in self.nodes:
-                temp = temp.union(i.S())
-                vprint("temp " + str(temp))
-            return temp
+            vprint(vprint_string)

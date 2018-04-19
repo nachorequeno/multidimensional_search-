@@ -2,6 +2,7 @@ from ndtree import *
 from search import *
 from oracles import *
 from oraclepoint import *
+import __builtin__
 
 import random
 import os
@@ -191,13 +192,6 @@ def testFileOraclePointRead(min_corner=0.0,
     print('ora2 ' + str(ora2))
     print('ora2 rect' + str(ora2.oracle.root.rect))
 
-def testFileOraclePointReadOnlyLoad():
-    nfile = os.path.abspath("tests/OraclePoint/oracle2.txt")
-
-    ora2 = OraclePoint()
-    ora2.fromFile(nfile, human_readable=True)
-    print('ora2 ' + str(ora2))
-    print('ora2 rect' + str(ora2.oracle.root.rect))
 
 def testFileOraclePointNoRead(min_corner=0.0,
                               max_corner=1.0):
@@ -221,6 +215,47 @@ def testFileOraclePointNoRead(min_corner=0.0,
     ora2 = OraclePoint()
     ora2.fromFile(nfile, human_readable=False)
     print('ora2 ' + str(ora2))
+
+
+def testInOutFileOraclePoint(infile=os.path.abspath("tests/OraclePoint/oracle2.txt"),
+                                    outfile=os.path.abspath("tests/OraclePoint/oracle2_bin.txt")):
+
+    def readTupleFile(nfile):
+        mode = 'rb'
+        finput = open(nfile, mode)
+
+        setpoints = set()
+        for i, line in enumerate(finput):
+            line = line.replace('(', '')
+            line = line.replace(')', '')
+            line = line.split(',')
+            point = tuple(float(pi) for pi in line)
+            setpoints.add(point)
+        return setpoints
+
+    #ora2 = OraclePoint()
+    ora2 = OraclePoint(5, 4)
+    ora2.fromFile(infile, human_readable=True)
+    ora2.toFile(outfile, human_readable=False)
+    points = ora2.getPoints()
+
+    #print('ora2 ' + str(ora2))
+    print('ora2 rect' + str(ora2.oracle.root.rect))
+    print('numPoints: ' + str(len(points)))
+
+    x = [point[0] for point in points]
+    y = [point[1] for point in points]
+
+    rs = ResultSet()
+    rs.toMatPlot(targetx=x, targety=y, blocking=True)
+
+    originalPoints = readTupleFile(infile)
+
+    x = [point[0] for point in originalPoints]
+    y = [point[1] for point in originalPoints]
+
+    rs.toMatPlot(targetx=x, targety=y, blocking=True)
+
 
 
 def testMembershipCondition():
@@ -505,6 +540,17 @@ def testNDTree(min_corner=0.0,
 
     ndtree = NDTree()
 
+    print('Round 0')
+    for x, y in zip(xs, y3s):
+        point = (x, y)
+        # print ('Inserting %s into NDTree' % (str(point)))
+        ndtree.update(point)
+    print ('NDTree')
+    print (str(ndtree))
+    print ('Rectangle')
+    print (ndtree.root.rect)
+    # print ('NDTree %s' % (str(ndtree)))
+
     print('Round 1')
     for x, y in zip(xs, y3s):
         point = (x, y)
@@ -554,7 +600,7 @@ def testNDTree(min_corner=0.0,
 
 
 # Test OraclePoint
-def test2DOraclePoint(min_corner=0.0,
+def test2DOraclePoint_1X(min_corner=0.0,
            max_corner=1.0,
            epsilon=EPS,
            delta=DELTA,
@@ -602,14 +648,10 @@ def test2DOraclePoint(min_corner=0.0,
         ora.addPoint(point)
 
     print ('End step 3\n')
-
-    fora = ora.membership()
-
     print ('OraclePoint \n')
     print(str(ora))
 
-    time.sleep(1.0)
-
+    fora = ora.membership()
     print ('Starting multidimensional search\n')
     start = time.time()
     rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
@@ -654,6 +696,86 @@ def test2DOraclePoint(min_corner=0.0,
     print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
     print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
     print 'Time multidim search: ', str(time1)
+    print 'Time tests: ', str(time2)
+    return 0
+
+def test2DOraclePoint(min_corner=0.0,
+           max_corner=1.0,
+           nfile=os.path.abspath("tests/OraclePoint/oracle4_xy_bin.txt"),
+           epsilon=EPS,
+           delta=DELTA,
+           verbose=False,
+           blocking=False,
+           test=False,
+           sleep=0):
+
+    print ('Creating OraclePoint')
+    start = time.time()
+    ora = OraclePoint()
+    ora.fromFile(nfile, human_readable=False)
+    end = time.time()
+    time0 = end - start
+    print 'Time reading Oracle: ', str(time0)
+
+    points = ora.getPoints()
+    xs = [point[0] for point in points]
+    ys = [point[1] for point in points]
+
+    minx = __builtin__.min(xs)
+    miny = __builtin__.min(ys)
+
+    maxx = __builtin__.max(xs)
+    maxy = __builtin__.max(ys)
+
+    minc = (__builtin__.min(minx, min_corner), __builtin__.min(miny, min_corner))
+    maxc = (__builtin__.max(maxx, max_corner), __builtin__.max(maxy, max_corner))
+    xyspace = Rectangle(minc, maxc)
+
+    fora = ora.membership()
+    print ('Starting multidimensional search')
+    start = time.time()
+    rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    end = time.time()
+    time1 = end - start
+    print 'Time multidim search: ', str(time1)
+
+    rs.toMatPlot(targetx=xs, targety=ys, blocking=True)
+
+    t1 = np.arange(min_corner, max_corner, 0.1)
+    t2 = np.arange(min_corner, max_corner, 0.1)
+
+    testYup = False
+    testYlow = False
+    testBorder = False
+
+    nYup = 0
+    nYlow = 0
+    nBorder = 0
+
+    print ('Starting tests')
+    start = time.time()
+    if test:
+        for t1p in t1:
+            for t2p in t2:
+                xpoint = (t1p, t2p)
+                testYup = testYup or rs.MemberYup(xpoint)
+                testYlow = testYlow or rs.MemberYlow(xpoint)
+                testBorder = testBorder or rs.MemberBorder(xpoint)
+
+                nYup = nYup + 1 if rs.MemberYup(xpoint) else nYup
+                nYlow = nYlow + 1 if rs.MemberYlow(xpoint) else nYlow
+                nBorder = nBorder + 1 if rs.MemberBorder(xpoint) else nBorder
+
+                OracleTest(fora, rs, xpoint)
+    end = time.time()
+    time2 = end - start
+
+    vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
+    print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
+           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
+    print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
+    print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
+    print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
     print 'Time tests: ', str(time2)
     return 0
 

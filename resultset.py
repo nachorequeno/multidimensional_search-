@@ -8,7 +8,7 @@ class ResultSet:
     suffix_Ylow = 'low'
     suffix_Border = 'border'
 
-    def __init__(self, border, ylow, yup):
+    def __init__(self, border=set(), ylow=set(), yup=set()):
         # type: (ResultSet, set, set, set) -> None
         self.border = border
         self.ylow = ylow
