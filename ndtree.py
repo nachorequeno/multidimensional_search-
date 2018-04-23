@@ -1,8 +1,10 @@
-from rectangle import *
-from point import *
 import sys
 import resource
 import __builtin__
+
+from rectangle import *
+from point import *
+
 
 VERBOSE = True
 VERBOSE = False

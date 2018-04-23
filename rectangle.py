@@ -1,11 +1,15 @@
+import math
 from multiprocessing import Pool, cpu_count, Process, Queue
+
+from functools import reduce
+import numpy as np
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d import Axes3D
+
 from segment import *
 from point import *
-from functools import reduce
-import math
-
-import matplotlib.patches as patches
-
 
 # Rectangle
 # Rectangular Half-Space
@@ -96,10 +100,10 @@ class Rectangle:
         # type: (Rectangle) -> list
         deltas = self.diag()
         vertex = self.min_corner
-        vertices = [] * self.numVertices()
+        vertices = []
         for i in range(self.numVertices()):
             delta_index = int2bintuple(i, self.dim())
-            deltai = select(delta_index, deltas)
+            deltai = select(deltas, delta_index)
             temp_vertex = add(vertex, deltai)
             vertices += [temp_vertex]
         assert (len(vertices) == self.numVertices()), "Error in the number of vertices"
@@ -122,7 +126,7 @@ class Rectangle:
 
     # Matplot functions
     def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
-        # type: (Rectangle, str, int, int, int) -> patches.Rectangle
+        # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
         width = self.diag()[xaxe]
@@ -136,6 +140,34 @@ class Rectangle:
             edgecolor='black',  # edge color
             alpha=opacity
         )
+
+    def toMatplot3D(self, c='red', xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+        # type: (Rectangle, str, int, int, int, float) -> Poly3DCollection
+        assert (self.dim() >= 3), "Dimension required >= 3"
+
+        minc = (self.min_corner[xaxe], self.min_corner[yaxe], self.min_corner[zaxe], )
+        maxc = (self.max_corner[xaxe], self.max_corner[yaxe], self.max_corner[zaxe],)
+        r = Rectangle(minc, maxc)
+
+        # sorted(vertices) =
+        # [(0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
+        points = np.array(sorted(r.vertices()))
+
+        edges = [
+                [points[0], points[1], points[3], points[2]],
+                [points[2], points[3], points[7], points[6]],
+                [points[6], points[4], points[5], points[7]],
+                [points[4], points[5], points[1], points[0]],
+                [points[0], points[4], points[6], points[2]],
+                [points[1], points[5], points[7], points[3]]
+        ]
+
+        faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
+        # faces.set_facecolor((0,0,1,0.1))
+        # faces.set_facecolor("r")
+        faces.set_facecolor(c)
+        faces.set_alpha(opacity)
+        return faces
 
 
 # Auxiliary functions
@@ -210,6 +242,8 @@ def irect(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp)
 
+nproc = cpu_count()
+pool = Pool(nproc)
 
 def pirect(alphaincomp, xrectangle, xspace):
     # type: (set, Rectangle, Rectangle) -> set
@@ -221,8 +255,8 @@ def pirect(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
     # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    nproc = cpu_count()
-    Pool(nproc)
+    #nproc = cpu_count()
+    #pool = Pool(nproc)
     processes = []
     rets = []
     q = Queue()
@@ -256,7 +290,8 @@ def pirect2(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
     # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    pool = Pool(cpu_count())
+    #nproc = cpu_count()
+    #pool = Pool(nproc)
     parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in
                         alphaincomp]
     pool.close()

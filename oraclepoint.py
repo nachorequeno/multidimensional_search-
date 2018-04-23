@@ -1,7 +1,9 @@
-from ndtree import *
-import pickle
 import sys
 import resource
+
+import pickle
+
+from ndtree import *
 
 VERBOSE = True
 VERBOSE = False

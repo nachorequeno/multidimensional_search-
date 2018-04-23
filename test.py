@@ -1,13 +1,14 @@
+import os
+import random
+import __builtin__
+
+import multiprocessing
+import matplotlib.pyplot as plt
+
 from ndtree import *
 from search import *
 from oracles import *
 from oraclepoint import *
-import __builtin__
-
-import random
-import os
-
-import matplotlib.pyplot as plt
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -355,6 +356,9 @@ def test3D(min_cornerx=0.0,
     end = time.time()
     time1 = end - start
 
+    #
+    rs.toMatPlot3D(blocking=True)
+    #
     t1 = np.arange(min_cornerx, max_cornerx, 0.1)
     t2 = np.arange(min_cornery, max_cornery, 0.1)
     t3 = np.arange(min_cornerz, max_cornerz, 0.1)
@@ -517,7 +521,7 @@ def testNdim(min_corner=0.0,
     # t1 = np.arange(min_corner, max_corner, 0.1)
     t1 = np.arange(0, 2, 0.1)
 
-    rs.toMatPlot(targetx=t1, targety=f(t1), blocking=True)
+    rs.toMatPlot(targetx=list(t1), targety=f(t1), blocking=True)
     return 0
 
 
@@ -772,12 +776,89 @@ def test2DOraclePoint(min_corner=0.0,
 
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
     print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
-           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
+           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total))
     print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
     print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
     print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
     print 'Time tests: ', str(time2)
     return 0
+
+def perfinfopoint(ora, point):
+        start = time.time()
+        ora.addPoint(point)
+        end = time.time()
+        return end - start
+
+def perfinfosavefile(ora, file):
+        start = time.time()
+        ora.toFile(file)
+        end1 = time.time()
+        ora.fromFile(file)
+        end2 = time.time()
+
+        t1 = end1 - start
+        t2 = end2 - end1
+        return t1, t2
+
+def exectest(data):
+        d, numpoints, inoutfile = data
+        ora = OraclePoint()
+        setpoints = create_random_points_ndimension(0.0, 1.0, d, numpoints)
+        perfInfoList = [perfinfopoint(ora, point) for point in setpoints]
+        total_time = sum(perfInfoList)
+        mean_time = total_time / float(len(perfInfoList))
+        min_time = __builtin__.min(perfInfoList)
+        max_time = __builtin__.max(perfInfoList)
+        #min_time = 0
+        #max_time = 0
+        filename = inoutfile + '_%s_%s.txt' % (str(d), str(numpoints))
+        t1, t2 = perfinfosavefile(ora, filename)
+        #t1, t2 = (0,0)
+        strout = '(dim, npoints, orapoints, Tmin, Tmax, Tmean, Ttotal, Tsave, Tread): (%s, %s, %s, %s, %s, %s, %s, %s, %s)'\
+                 % (str(d), str(numpoints), len(ora.getPoints()), str(min_time),
+                    str(max_time), str(mean_time), str(total_time), str(t1), str(t2))
+        return strout
+
+def generateOraclePoint(inoutfile=os.path.abspath("tests/OraclePoint/scalability_results/scalability")):
+
+    pool = Pool(processes=3)
+    datalist = [(d, numpoints, inoutfile) for d in range(2, 10) for numpoints in range(10000, 11000, 1000)]
+    #datalist = [(d, numpoints, inoutfile) for d in range(2, 4) for numpoints in range(1000, 3000, 1000)]
+    resultlist = pool.map(exectest, datalist)
+    for ri in resultlist:
+        print(ri)
+
+
+def generateOraclePoint2(inoutfile=os.path.abspath("tests/OraclePoint/scalability_results/scalability")):
+    def perfinfopoint(ora, point):
+        start = time.time()
+        ora.addPoint(point)
+        end = time.time()
+        return end - start
+
+    def perfinfosavefile(ora, file):
+        start = time.time()
+        ora.toFile(file)
+        end1 = time.time()
+        ora.fromFile(file)
+        end2 = time.time()
+
+        t1 = end1 - start
+        t2 = end2 - end1
+        return t1, t2
+
+    for d in range(2,10):
+        for numpoints in range(1000, 10000, 1000):
+            setpoints = create_random_points_ndimension(0.0, 1.0, d, numpoints)
+            ora = OraclePoint()
+            perfInfoList = [perfinfopoint(ora, point) for point in setpoints]
+            total_time = sum(perfInfoList)
+            mean_time = total_time / float(len(perfInfoList))
+            filename = inoutfile + '_%s_%s.txt' % (str(d), str(numpoints))
+            t1, t2 = perfinfosavefile(ora, filename)
+            print ('(dim, npoints, orapoints, Tmin, Tmax, Tmean, Ttotal, Tsave, Tread): (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            % (str(d), str(numpoints), len(ora.getPoints()), str(__builtin__.min(perfInfoList)),
+               str(__builtin__.max(perfInfoList)), str(mean_time), str(total_time), str(t1), str(t2)))
 
 # if __name__ == '__main__':
 #    test1()
