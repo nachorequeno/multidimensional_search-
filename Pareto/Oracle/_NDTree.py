@@ -2,9 +2,8 @@ import sys
 import resource
 import __builtin__
 
-from rectangle import *
-from point import *
-
+from Pareto.Geometry.Rectangle import *
+from Pareto.Geometry.Point import *
 
 VERBOSE = True
 VERBOSE = False
@@ -28,7 +27,6 @@ if VERBOSE:
 else:
     vprint = lambda *a: None  # do-nothing function
     eprint = lambda *a: None  # do-nothing function
-
 
 class NDTree:
     # root: Node

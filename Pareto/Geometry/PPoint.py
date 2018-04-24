@@ -1,15 +1,17 @@
-import math
+import numpy as np
+from numpy import linalg as LA
+
 
 # Point = n-dimensional tuple
 def dim(x):
     # type: (tuple) -> int
     return len(x)
 
+
 def norm(x):
     # type: (tuple) -> float
-    square_element_i = tuple(xi * xi for xi in x)
-    _sum = reduce(lambda si, sj: si + sj, square_element_i)
-    return math.sqrt(_sum)
+    return LA.norm(x)
+
 
 # Euclidean distance between two points
 def distance(x, xprime):
@@ -29,43 +31,43 @@ def distanceHamming(x, xprime):
 # Binary operations between points
 def subtract(x, xprime):
     # type: (tuple, tuple) -> tuple
-    return tuple(xi[0] - xi[1] for xi in zip(x, xprime))
+    return tuple(np.array(x)-np.array(xprime))
 
 
 def add(x, xprime):
     # type: (tuple, tuple) -> tuple
-    return tuple(xi[0] + xi[1] for xi in zip(x, xprime))
+    return tuple(np.array(x) + np.array(xprime))
 
 
-def mult(x, int):
+def mult(x, i):
     # type: (tuple, int) -> tuple
-    return tuple(xi * int for xi in x)
+    return tuple(np.array(x) * i)
 
 
-def div(x, int):
+def div(x, i):
     # type: (tuple, int) -> tuple
-    return tuple(xi / int for xi in x)
+    return tuple(np.array(x) / i)
 
 
 # Comparing the coordinates of two points
 def greater(x, xprime):
     # type: (tuple, tuple) -> bool
-    return all(xi[0] > xi[1] for xi in zip(x, xprime))
+    return all(np.array(x) > np.array(xprime))
 
 
 def greater_equal(x, xprime):
     # type: (tuple, tuple) -> bool
-    return all(xi[0] >= xi[1] for xi in zip(x, xprime))
+    return all(np.array(x) >= np.array(xprime))
 
 
 def less(x, xprime):
     # type: (tuple, tuple) -> bool
-    return all(xi[0] < xi[1] for xi in zip(x, xprime))
+    return all(np.array(x) < np.array(xprime))
 
 
 def less_equal(x, xprime):
     # type: (tuple, tuple) -> bool
-    return all(xi[0] <= xi[1] for xi in zip(x, xprime))
+    return all(np.array(x) <= np.array(xprime))
 
 
 def incomparable(x, xprime):
@@ -79,7 +81,6 @@ def max(x, xprime):
         return x
     else:
         return xprime
-
 
 def min(x, xprime):
     # type: (tuple, tuple) -> tuple
@@ -95,10 +96,9 @@ def subt(i, x, xprime):
     n = len(x)
     m = len(xprime)
     assert ((0 <= i) and (i < n) and (i < m)), "index out of range"
-    tup1 = x[0:i]
-    tup2 = (xprime[i],)
-    tup3 = x[(i + 1):]
-    return tup1 + tup2 + tup3
+    out = np.array(x)
+    out[i] = xprime[i]
+    return tuple(out)
 
 
 def select(x, xprime):
@@ -109,7 +109,8 @@ def select(x, xprime):
     n = len(x)
     m = len(xprime)
     assert (n == m), "index out of range"
-    return tuple(xi if yi > 0 else 0 for xi, yi in zip(x, xprime))
+    return tuple(np.array(x) * np.array(xprime))
+
 
 def select2(x, xprime):
     # type: (tuple, tuple) -> tuple
@@ -119,13 +120,7 @@ def select2(x, xprime):
     n = len(x)
     m = len(xprime)
     assert (n == m), "index out of range"
-    temp = ()
-    for xi, yi in zip(x, xprime):
-        if (yi > 0):
-            temp += (xi,)
-        else:
-            temp += (0,)
-    return temp
+    return tuple(xi if yi > 0 else 0 for xi, yi in zip(x, xprime))
 
 
 # Integer to binary notation

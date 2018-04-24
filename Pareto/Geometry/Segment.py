@@ -1,19 +1,7 @@
-# from collections import namedtuple
-# Particle = namedtuple('Particle', 'mass position velocity force')
-# p = Particle(1, 2, 3, 4)
-# print p.velocity
-
-# import numpy
-from point import *
 from functools import reduce
-import math
-import time
 
-import matplotlib.pyplot as plt
-import matplotlib.lines as lines
+from Point import *
 
-
-# Segment
 class Segment:
     # l, h are points
     def __init__(self, low, high):

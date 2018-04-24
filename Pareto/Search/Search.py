@@ -1,6 +1,7 @@
-from rectangle import *
-from resultset import *
 import itertools
+
+from Rectangle import *
+from ResultSet import *
 
 DELTA = 1e-5
 EPS = 1e-5

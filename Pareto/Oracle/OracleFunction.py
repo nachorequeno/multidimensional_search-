@@ -1,13 +1,10 @@
-import random
 import re
-import pickle
 import sys
 
-import numpy as np
-from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Union, Interval, Expr, Symbol
+from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Interval, Expr, Symbol
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
-from point import *
+from Pareto.Geometry.Point import *
 from data_generator import *
 
 VERBOSE = True
@@ -122,8 +119,8 @@ class Condition:
     def get_expression_with_negative_coeff(self):
         # type: (Condition) -> Expr
         negative_coeff = self.get_negative_coeff_of_expression()
-        list = ['%s * %s' % (negative_coeff[i], i) for i in negative_coeff]
-        return simplify(''.join(list))
+        l = ['%s * %s' % (negative_coeff[i], i) for i in negative_coeff]
+        return simplify(''.join(l))
 
     def get_expression_with_positive_coeff(self):
         # type: (Condition) -> Expr
@@ -167,13 +164,13 @@ class Condition:
         vprint('Expression ', str(simplify(ex)))
         return simplify(ex)
 
-    def eval_var_val(self, var=None, val='0'):
+    def eval_var_val(self, variable=None, val='0'):
         # type: (Condition, Symbol, int) -> Expr
-        if var is None:
+        if variable is None:
             fvset = self.get_variables()
             fv = fvset.pop()
         else:
-            fv = var
+            fv = variable
         expr = self.get_expression()
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
@@ -418,23 +415,23 @@ class ConditionList:
             cond_i.toFileHumRead(foutput)
 
 
-class Oracle:
-    # An Oracle is an array of ConditionList, i.e., Oracle[i] contains the ConditionList for ith-dimension
+class OracleFunction:
+    # An OracleFunction is an array of ConditionList, i.e., OracleFunction[i] contains the ConditionList for ith-dimension
     # For each one of the n-dimensions, we should have a ConditionList
 
     # Dimension = [0,..,n-1]
     def __init__(self, ndimension=1):
-        # type: (Oracle, int) -> None
+        # type: (OracleFunction, int) -> None
         # self.oracle = {}
         keys = range(ndimension)
         self.oracle = {key: None for key in keys}
 
     def __str__(self):
-        # type: (Oracle) -> str
+        # type: (OracleFunction) -> str
         return self.toStr()
 
     def toStr(self):
-        # type: (Oracle) -> str
+        # type: (OracleFunction) -> str
         last_key = self.oracle.keys()[-1]
         _string = "["
         for key in self.oracle.keys():
@@ -446,7 +443,7 @@ class Oracle:
     # Addition of ConditionLists.
     # Overwrites previous ConditionLists
     def add(self, condlist, idimension):
-        # type: (Oracle, ConditionList, int) -> None
+        # type: (OracleFunction, ConditionList, int) -> None
         self.oracle[idimension] = condlist
 
     # TODO
@@ -466,7 +463,7 @@ class Oracle:
             self.oracle[i] = cl
 
     def get_variables(self):
-        # type: (Oracle) -> list
+        # type: (OracleFunction) -> list
         # By construction,
         # dimension = number of keys in self.oracle (or, at least, the key with highest value, in case that intermediate dimensions do not have conditions)
         # dimension = number of variables in all the ConditionLists
@@ -475,20 +472,20 @@ class Oracle:
         for i in self.oracle:
             fv = fv.union(self.oracle[i].get_variables())
         #        assert (highest_key == (len(fv) - 1)), \
-        #            "Number of dimensions in Oracle do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
+        #            "Number of dimensions in OracleFunction do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
         return list(fv)
 
     def eval_tuple(self, xpoint):
-        # type: (Oracle, tuple) -> Expr
+        # type: (OracleFunction, tuple) -> Expr
         _eval = True
         for i in self.oracle:
             _eval = _eval and self.oracle[i].eval_tuple(xpoint)
-        vprint('Oracle evaluates ', str(xpoint), ' to ', str(_eval))
+        vprint('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
-        # type: (Oracle, dict) -> Expr
-        vprint('Oracle evaluates ', self.toStr())
+        # type: (OracleFunction, dict) -> Expr
+        vprint('OracleFunction evaluates ', self.toStr())
         _eval = True
         # _eval = False
         for i in self.oracle:
@@ -497,8 +494,8 @@ class Oracle:
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
-        # type: (Oracle, Symbol, int) -> Expr
-        vprint('Oracle evaluates ', self.toStr())
+        # type: (OracleFunction, Symbol, int) -> Expr
+        vprint('OracleFunction evaluates ', self.toStr())
         _eval = True
         for i in self.oracle:
             _eval = _eval and i.eval_var_val(var, val)
@@ -513,7 +510,7 @@ class Oracle:
 
     # Membership functions
     def member(self, xpoint):
-        # type: (Oracle, tuple) -> Expr
+        # type: (OracleFunction, tuple) -> Expr
         # return self.eval_tuple(xpoint)
         vprint(xpoint)
         keys = self.get_variables()
@@ -523,8 +520,8 @@ class Oracle:
 
     # TOREMOVE
     def member2(self, xpoint):
-        # type: (Oracle, tuple) -> Expr
-        assert (len(self.oracle) >= len(xpoint)), "Oracle is not prepared for points of dimension " + str(len(xpoint))
+        # type: (OracleFunction, tuple) -> Expr
+        assert (len(self.oracle) >= len(xpoint)), "OracleFunction is not prepared for points of dimension " + str(len(xpoint))
         ismember = True
         # for i, condlist in enumerate(self.oracle):
         for i, condlist in self.oracle.iteritems():
@@ -532,12 +529,12 @@ class Oracle:
         return ismember
 
     def membership(self):
-        # type: (Oracle) -> function
+        # type: (OracleFunction) -> function
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
-        # type: (Oracle, str, bool) -> None
+        # type: (OracleFunction, str, bool) -> None
         assert (fname != ''), "Filename should not be null"
 
         mode = 'rb'
@@ -549,13 +546,13 @@ class Oracle:
         finput.close()
 
     def fromFileNonHumRead(self, finput=None):
-        # type: (Oracle, BinaryIO) -> None
+        # type: (OracleFunction, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (Oracle, file) -> None
+        # type: (OracleFunction, file) -> None
         assert (finput is not None), "File object should not be null"
 
         # <num_dimensions>
@@ -566,7 +563,7 @@ class Oracle:
             self.oracle[i].fromFileHumRead(finput)
 
     def toFile(self, fname='', append=False, human_readable=False):
-        # type: (Oracle, str, bool, bool) -> None
+        # type: (OracleFunction, str, bool, bool) -> None
         assert (fname != ''), "Filename should not be null"
 
         if append:
@@ -582,13 +579,13 @@ class Oracle:
         foutput.close()
 
     def toFileNonHumRead(self, foutput=None):
-        # type: (Oracle, BinaryIO) -> None
+        # type: (OracleFunction, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
-        # type: (Oracle, BinaryIO) -> None
+        # type: (OracleFunction, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         # <num_dimensions>
@@ -597,7 +594,6 @@ class Oracle:
             condlist_i.toFileHumRead(foutput)
 
 EPS = 1e-1
-
 
 def staircase_oracle(xs, ys):
     # type: (tuple, tuple) -> function

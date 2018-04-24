@@ -5,10 +5,10 @@ import __builtin__
 import multiprocessing
 import matplotlib.pyplot as plt
 
-from ndtree import *
-from search import *
-from oracles import *
-from oraclepoint import *
+from NDTree import *
+from Search import *
+from OracleFunction import *
+from OraclePoint import *
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -320,11 +320,11 @@ def OracleTest(fora, rs, xpoint):
     if (test1 or test2):
         None
     else:
-        print 'Warning! '
-        print 'Testing ', str(xpoint)
+        print ('Warning! ')
+        print ('Testing ', str(xpoint))
         print ('(inYup, inYlow, inBorder): (%s, %s, %s)'
                % (str(rs.MemberYup(xpoint)), str(rs.MemberYlow(xpoint)), str(rs.MemberBorder(xpoint))))
-        print 'Expecting '
+        print ('Expecting ')
         print ('(inYup, inYlow): (%s, %s)'
                % (str(fora(xpoint)), str(not fora(xpoint))))
 
@@ -392,12 +392,12 @@ def test3D(min_cornerx=0.0,
 
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
     print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
-           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
-    print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
-    print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
-    print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
-    print 'Time multidim search: ', str(time1)
-    print 'Time tests: ', str(time2)
+           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total))
+    print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
+    print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
+    print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
+    print ('Time multidim search: ', str(time1))
+    print ('Time tests: ', str(time2))
     return 0
 
 
@@ -479,11 +479,11 @@ def test3D_map(min_cornerx=0.0,
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
     print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
            % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
-    print 'Report Ylow: %s' % (str(nYlow))
-    print 'Report Yup: %s' % (str(nYup))
-    print 'Report Border: %s' % (str(nBorder))
-    print 'Time multidim search: ', str(time1)
-    print 'Time tests: ', str(time2)
+    print ( 'Report Ylow: %s' % (str(nYlow)) )
+    print ( 'Report Yup: %s' % (str(nYup)) )
+    print ( 'Report Border: %s' % (str(nBorder)) )
+    print ( 'Time multidim search: ', str(time1) )
+    print ( 'Time tests: ', str(time2) )
     return 0
 
 
@@ -695,12 +695,12 @@ def test2DOraclePoint_1X(min_corner=0.0,
 
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
     print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
-           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total)),
-    print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
-    print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
-    print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
-    print 'Time multidim search: ', str(time1)
-    print 'Time tests: ', str(time2)
+           % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total))
+    print ( 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow)) )
+    print ( 'Report Yup: %s, %s' % (str(testYup), str(nYup)) )
+    print ( 'Report Border: %s, %s' % (str(testBorder), str(nBorder)) )
+    print ( 'Time multidim search: ', str(time1) )
+    print ( 'Time tests: ', str(time2) )
     return 0
 
 def test2DOraclePoint(min_corner=0.0,
@@ -719,7 +719,7 @@ def test2DOraclePoint(min_corner=0.0,
     ora.fromFile(nfile, human_readable=False)
     end = time.time()
     time0 = end - start
-    print 'Time reading Oracle: ', str(time0)
+    print ( 'Time reading Oracle: ', str(time0) )
 
     points = ora.getPoints()
     xs = [point[0] for point in points]
@@ -741,7 +741,7 @@ def test2DOraclePoint(min_corner=0.0,
     rs = multidim_search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
     end = time.time()
     time1 = end - start
-    print 'Time multidim search: ', str(time1)
+    print ( 'Time multidim search: ', str(time1) )
 
     rs.toMatPlot(targetx=xs, targety=ys, blocking=True)
 
@@ -777,10 +777,10 @@ def test2DOraclePoint(min_corner=0.0,
     vol_total = rs.VolumeYlow() + rs.VolumeYup() + rs.VolumeBorder()
     print ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
            % (str(rs.VolumeYlow()), str(rs.VolumeYup()), str(rs.VolumeBorder()), vol_total))
-    print 'Report Ylow: %s, %s' % (str(testYlow), str(nYlow))
-    print 'Report Yup: %s, %s' % (str(testYup), str(nYup))
-    print 'Report Border: %s, %s' % (str(testBorder), str(nBorder))
-    print 'Time tests: ', str(time2)
+    print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
+    print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
+    print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
+    print ('Time tests: ', str(time2))
     return 0
 
 def perfinfopoint(ora, point):

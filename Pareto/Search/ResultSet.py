@@ -3,7 +3,7 @@ import __builtin__
 
 import pickle
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
 
 class ResultSet:
     suffix_Yup = 'up'
@@ -16,11 +16,9 @@ class ResultSet:
         self.ylow = ylow
         self.yup = yup
 
-    # TODO
     # Vertex functions
     def verticesYup(self):
         # type: (ResultSet) -> set
-        #vertices_list = [rect.vertices() for rect in self.yup]
         vertices = set()
         for rect in self.yup:
             vertices = vertices.union(set(rect.vertices()))
@@ -114,7 +112,7 @@ class ResultSet:
         return patches
 
     def toMatPlot(self,
-                  file='',
+                  filename='',
                   xaxe=0,
                   yaxe=1,
                   targetx=[],
@@ -154,8 +152,8 @@ class ResultSet:
         if sec > 0:
             time.sleep(sec)
 
-        if file != '':
-            fig1.savefig(file, dpi=90, bbox_inches='tight')
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
 
         plt.close()
         return plt
@@ -182,7 +180,7 @@ class ResultSet:
         return faces
 
     def toMatPlot3D(self,
-                  file='',
+                  filename='',
                   xaxe=0,
                   yaxe=1,
                   zaxe=2,
@@ -227,57 +225,57 @@ class ResultSet:
         plt.show(block=blocking)
         if sec > 0:
             time.sleep(sec)
-        if file != '':
-            fig1.savefig(file, dpi=90, bbox_inches='tight')
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
         return plt
 
 
     # Saving/loading results
-    def toFileYup(self, file):
+    def toFileYup(self, f):
         # type: (ResultSet, str) -> None
-        with open(file, 'wb') as output:
+        with open(f, 'wb') as output:
             for rect in self.yup:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileYlow(self, file):
+    def toFileYlow(self, f):
         # type: (ResultSet, str) -> None
-        with open(file, 'wb') as output:
+        with open(f, 'wb') as output:
             for rect in self.ylow:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileBorder(self, file):
+    def toFileBorder(self, f):
         # type: (ResultSet, str) -> None
-        with open(file, 'wb') as output:
+        with open(f, 'wb') as output:
             for rect in self.border:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFile(self, file):
+    def toFile(self, f):
         # type: (ResultSet, str) -> None
-        self.toFileYup(file + self.suffix_Yup)
-        self.toFileYlow(file + self.suffix_Ylow)
-        self.toFileBorder(file + self.suffix_Border)
+        self.toFileYup(f + self.suffix_Yup)
+        self.toFileYlow(f + self.suffix_Ylow)
+        self.toFileBorder(f + self.suffix_Border)
 
-    def fromFileYup(self, file):
+    def fromFileYup(self, f):
         # type: (ResultSet, str) -> None
         self.yup = set()
-        with open(file, 'rb') as input:
-            self.yup = pickle.load(input)
+        with open(f, 'rb') as inputfile:
+            self.yup = pickle.load(inputfile)
 
-    def fromFileYlow(self, file):
+    def fromFileYlow(self, f):
         # type: (ResultSet, str) -> None
         self.ylow = set()
-        with open(file, 'rb') as input:
-            self.ylow = pickle.load(input)
+        with open(f, 'rb') as inputfile:
+            self.ylow = pickle.load(inputfile)
 
-    def fromFileBorder(self, file):
+    def fromFileBorder(self, f):
         # type: (ResultSet, str) -> None
         self.border = set()
-        with open(file, 'rb') as input:
-            self.border = pickle.load(input)
+        with open(f, 'rb') as inputfile:
+            self.border = pickle.load(inputfile)
 
-    def fromFile(self, file):
+    def fromFile(self, f):
         # type: (ResultSet, str) -> None
-        self.fromFileYup(file + self.suffix_Yup)
-        self.fromFileYlow(file + self.suffix_Ylow)
-        self.fromFileBorder(file + self.suffix_Border)
+        self.fromFileYup(f + self.suffix_Yup)
+        self.fromFileYlow(f + self.suffix_Ylow)
+        self.fromFileBorder(f + self.suffix_Border)

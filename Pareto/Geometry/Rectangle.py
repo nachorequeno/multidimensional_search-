@@ -1,15 +1,11 @@
-import math
 from multiprocessing import Pool, cpu_count, Process, Queue
 
-from functools import reduce
 import numpy as np
 import matplotlib.patches as patches
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from mpl_toolkits.mplot3d import Axes3D
 
-from segment import *
-from point import *
+from Segment import *
+from Point import *
 
 # Rectangle
 # Rectangular Half-Space
@@ -126,6 +122,7 @@ class Rectangle:
 
     # Matplot functions
     def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
+        ## type: (Rectangle, str, int, int, float) -> patches.Rectangle
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)

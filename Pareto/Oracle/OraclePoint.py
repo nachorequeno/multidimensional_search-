@@ -1,9 +1,6 @@
-import sys
-import resource
-
 import pickle
 
-from ndtree import *
+from _NDTree import *
 
 VERBOSE = True
 VERBOSE = False
