@@ -1,6 +1,6 @@
 import itertools
 
-from Rectangle import *
+from Pareto.Geometry.Rectangle import *
 from ResultSet import *
 
 DELTA = 1e-5
@@ -13,6 +13,20 @@ def metric(lset):
     lsizes = map(lambda item: item.volume(), lset)
     return reduce(lambda x, y: x + y, lsizes)
 
+def search2(x,
+           member,
+           epsilon=EPS):
+    # type: (Segment, _, float) -> Segment
+    # x, y = segments
+    y = x
+    while distance(y.l, y.h) > epsilon:
+        yval = div(add(y.l, y.h), 2)
+        # We need a oracle() for guiding the search
+        if member(yval):
+            y.h = yval
+        else:
+            y.l = yval
+    return y
 
 def search(x,
            member,

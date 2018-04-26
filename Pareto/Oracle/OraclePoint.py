@@ -26,16 +26,18 @@ else:
     eprint = lambda *a: None  # do-nothing function
 
 
-EPS = 1e-1
 class OraclePoint:
-    # An OraclePoint is an array of ConditionList, i.e., OraclePoint[i] contains the ConditionList for ith-dimension
-    # For each one of the n-dimensions, we should have a ConditionList
-
-    # Dimension = [0,..,n-1]
+    # OraclePoint defines membership function based on a cloud of points that belongs to the closure.
+    # OraclePoint saves a set of points in a NDTree
     def __init__(self, MAX_P=2, MIN_CH=2):
         # type: (OraclePoint, int, int) -> None
         self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
 
+	# Printers
+    def __repr__(self):
+        # type: (OraclePoint) -> str
+        return self.toStr()
+		
     def __str__(self):
         # type: (OraclePoint) -> str
         return self.toStr()
@@ -43,10 +45,25 @@ class OraclePoint:
     def toStr(self):
         # type: (OraclePoint) -> str
         return str(self.oracle)
+	
+    # Equality functions
+	def __eq__(self, other):
+        # type: (OraclePoint, OraclePoint) -> bool
+		return (self.oracle == other.oracle)
 
-    def addPoint(self, point):
+    def __ne__(self, other):
+        # type: (OraclePoint, OraclePoint) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (OraclePoint) -> int
+        return hash((self.oracle))
+
+	# Oracle operations
+    def addPoint(self, p):
         # type: (OraclePoint, tuple) -> None
-        self.oracle.update(point)
+        self.oracle.updatePoint(point)
 
     def addPoints(self, setpoints):
         # type: (OraclePoint, set) -> None
@@ -54,25 +71,36 @@ class OraclePoint:
             self.addPoint(point)
 
     def getPoints(self):
+        # type: (OraclePoint) -> set
         return self.oracle.getPoints()
 
-    # Membership functions
-    def member(self, xpoint):
-        # type: (OraclePoint, tuple) -> bool
-        # Returns 'True' if xpoint belongs to the set of points stored in the Pareto archive
-        vprint(xpoint)
-        return xpoint in self.getPoints()
+    def dim(self):
+        # type: (OraclePoint) -> int
+        return self.oracle.dim()
 
-    def dominates(self, xpoint):
+	# Membership functions
+    def __contains__(self, p):
         # type: (OraclePoint, tuple) -> bool
-        # Returns 'True' if xpoint dominates any point of the set of points stored in the Pareto archive
-        vprint(xpoint)
-        return any(greater_equal(xpoint, point) for point in self.getPoints())
+		# set_points = self.getPoints()
+        # return p in set_points
+        return self.member(p)
+		
+    def member(self, p):
+        # type: (OraclePoint, tuple) -> bool
+        # Returns 'True' if p belongs to the set of points stored in the Pareto archive
+        vprint(p)
+        return p in self.getPoints()
+
+    def dominates(self, p):
+        # type: (OraclePoint, tuple) -> bool
+        # Returns 'True' if p dominates any point of the set of points stored in the Pareto archive
+        vprint(p)
+        return any(greater_equal(p, point) for point in self.getPoints())
 
     def membership(self):
         # type: (OraclePoint) -> function
-        #return lambda xpoint: self.member(xpoint)
-        return lambda xpoint: self.dominates(xpoint)
+        #return lambda p: self.member(p)
+        return lambda p: self.dominates(p)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
@@ -104,14 +132,14 @@ class OraclePoint:
         assert (finput is not None), "File object should not be null"
 
         self.oracle = NDTree()
-        #for line in finput.readlines():
+        i = 0
         for i, line in enumerate(finput):
             line = line.replace('(', '')
             line = line.replace(')', '')
             line = line.split(',')
             point = tuple(float(pi) for pi in line)
             vprint("Adding: ", i, point)
-            self.oracle.update(point)
+            self.oracle.updatePoint(point)
         vprint("numPoints: ", i)
 
     def toFile(self, fname='', append=False, human_readable=False):

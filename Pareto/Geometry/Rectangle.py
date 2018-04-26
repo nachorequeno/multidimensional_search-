@@ -4,8 +4,10 @@ import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+
+import Point
+#from Point import *
 from Segment import *
-from Point import *
 
 # Rectangle
 # Rectangular Half-Space
@@ -71,7 +73,7 @@ class Rectangle:
     # Rectangle properties
     def dim(self):
         # type: (Rectangle) -> int
-        return dim(self.min_corner)
+        return Point.dim(self.min_corner)
 
     def diag(self):
         # type: (Rectangle) -> tuple
@@ -80,7 +82,7 @@ class Rectangle:
     def norm(self):
         # type: (Rectangle) -> float
         diagonal = self.diag()
-        return norm(diagonal)
+        return Point.norm(diagonal)
 
     def volume(self):
         # type: (Rectangle) -> float
@@ -120,8 +122,18 @@ class Rectangle:
         euclidean_dist = distance(xpoint, middle_point)
         return euclidean_dist
 
+    def getPoints(self, n):
+        # type: (Rectangle, int) -> list
+        # Return n points along the rectangle diagonal, excluding min/max corners
+        # n internal points = n + 1 internal segments
+        m = n+1
+        diag_step = div(self.diag(), m)
+        min_point = add(self.min_corner, diag_step)
+        point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
+        return point_list
+
     # Matplot functions
-    def toMatplot(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
+    def toMatplot2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
         ## type: (Rectangle, str, int, int, float) -> patches.Rectangle
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
@@ -221,12 +233,6 @@ def brect(alpha, xrectangle, xspace):
         temp1 = temp2
     return temp1
 
-
-def pbrect(queue, alpha, xrectangle, xspace):
-    # type: (Queue, tuple, Rectangle, Rectangle) -> None
-    queue.put(brect(alpha, xrectangle, xspace))
-
-
 def irect(alphaincomp, xrectangle, xspace):
     # type: (set, Rectangle, Rectangle) -> set
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
@@ -239,9 +245,6 @@ def irect(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
     return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp)
 
-nproc = cpu_count()
-pool = Pool(nproc)
-
 def pirect(alphaincomp, xrectangle, xspace):
     # type: (set, Rectangle, Rectangle) -> set
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
@@ -252,45 +255,10 @@ def pirect(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
     # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    #nproc = cpu_count()
-    #pool = Pool(nproc)
-    processes = []
-    rets = []
-    q = Queue()
-
-    for alphaincomp_i in alphaincomp:
-        p = Process(target=pbrect, args=(q, alphaincomp_i, xrectangle, xspace))
-        processes.append(p)
-        p.start()
-        if len(processes) > nproc:
-            for p in processes:
-                ret = q.get()  # will block
-                rets.append(ret)
-            for p in processes:
-                p.join()
-
-    for p in processes:
-        ret = q.get()  # will block
-        rets.append(ret)
-    for p in processes:
-        p.join()
-    return set(rets)
-
-
-def pirect2(alphaincomp, xrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> set
-    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
-        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
-    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
-        "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
-    #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
-    #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    #nproc = cpu_count()
-    #pool = Pool(nproc)
-    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace)) for alphaincomp_i in
-                        alphaincomp]
+    nproc = cpu_count()
+    pool = Pool(nproc)
+    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace))
+                        for alphaincomp_i in alphaincomp]
     pool.close()
     pool.join()
     res = set()

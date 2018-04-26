@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import linalg as LA
+from numpy import linalg as la
 
 
 # Point = n-dimensional tuple
@@ -10,7 +10,7 @@ def dim(x):
 
 def norm(x):
     # type: (tuple) -> float
-    return LA.norm(x)
+    return la.norm(x)
 
 
 # Euclidean distance between two points
@@ -31,7 +31,7 @@ def distanceHamming(x, xprime):
 # Binary operations between points
 def subtract(x, xprime):
     # type: (tuple, tuple) -> tuple
-    return tuple(np.array(x)-np.array(xprime))
+    return tuple(np.array(x) - np.array(xprime))
 
 
 def add(x, xprime):
@@ -82,6 +82,7 @@ def max(x, xprime):
     else:
         return xprime
 
+
 def min(x, xprime):
     # type: (tuple, tuple) -> tuple
     if less_equal(x, xprime):
@@ -110,17 +111,6 @@ def select(x, xprime):
     m = len(xprime)
     assert (n == m), "index out of range"
     return tuple(np.array(x) * np.array(xprime))
-
-
-def select2(x, xprime):
-    # type: (tuple, tuple) -> tuple
-    # x = (5, 6, 7)
-    # xprime = (0, 0, 1)
-    # select(x, xprime) == (0, 0, 7)
-    n = len(x)
-    m = len(xprime)
-    assert (n == m), "index out of range"
-    return tuple(xi if yi > 0 else 0 for xi, yi in zip(x, xprime))
 
 
 # Integer to binary notation

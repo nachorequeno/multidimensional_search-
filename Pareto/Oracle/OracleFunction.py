@@ -1,11 +1,13 @@
 import re
 import sys
+import pickle
 
 from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Interval, Expr, Symbol
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
 from Pareto.Geometry.Point import *
-from data_generator import *
+
+# from data_generator import *
 
 VERBOSE = True
 VERBOSE = False
@@ -245,10 +247,17 @@ class ConditionList:
         self.l = []
         self.solution = None
 
+    # Printers
+    def __repr__(self):
+        # type: (ConditionList) -> str
+        return self.toStr()
+
     def __str__(self):
+        # type: (ConditionList) -> str
         return self.toStr()
 
     def toStr(self):
+        # type: (ConditionList) -> str
         _string = "["
         for i, item in enumerate(self.l):
             _string += str(item)
@@ -256,6 +265,26 @@ class ConditionList:
         _string += "]"
         return _string
 
+    # Equality functions
+    def __eq__(self, other):
+        # type: (ConditionList, ConditionList) -> bool
+        return self.l == other.l
+
+    def __ne__(self, other):
+        # type: (ConditionList, ConditionList) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (ConditionList) -> int
+        return hash(self.l)
+
+    # Membership functions
+    def __contains__(self, cond):
+        # type: (ConditionList, Condition) -> bool
+        return cond in self.l
+
+    # ConditionList functions
     def add(self, cond):
         # type: (ConditionList, Condition) -> None
         self.l.append(cond)
@@ -272,26 +301,25 @@ class ConditionList:
         _eval = True
         for i in self.l:
             _eval = _eval and i.eval_tuple(xpoint)
-
+        # _eval = all(i.eval_tuple(xpoint) for i in self.l)
         vprint('Condition list ', self.toStr(), ' evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
         # type: (ConditionList, dict) -> Expr
-        vprint('Condition list ', self.toStr())
         _eval = True
-        # _eval = False
         for i in self.l:
             _eval = _eval and i.eval_dict(d)
-            # _eval = _eval or i.eval_dict(d)
+        # _eval = all(i.eval_dict(d) for i in self.l)
+        vprint('Condition list ', self.toStr(), ' evaluates ', str(d), ' to ', str(_eval))
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
         # type: (ConditionList, Symbol, int) -> Expr
-        vprint('Condition list ', self.toStr())
         _eval = True
         for i in self.l:
             _eval = _eval and i.eval_var_val(var, val)
+        vprint('Condition list ', self.toStr(), ' evaluates ', str(var), ' with ', str(val), ' to ', str(_eval))
         return _eval
 
     def solve(self):
@@ -426,6 +454,11 @@ class OracleFunction:
         keys = range(ndimension)
         self.oracle = {key: None for key in keys}
 
+    # Printers
+    def __repr__(self):
+        # type: (OracleFunction) -> str
+        return self.toStr()
+
     def __str__(self):
         # type: (OracleFunction) -> str
         return self.toStr()
@@ -440,27 +473,25 @@ class OracleFunction:
         _string += "]"
         return _string
 
+    # Equality functions
+    def __eq__(self, other):
+        # type: (OracleFunction, OracleFunction) -> bool
+        return self.oracle == other.oracle
+
+    def __ne__(self, other):
+        # type: (OracleFunction, OracleFunction) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (OracleFunction) -> int
+        return hash(self.oracle)
+
     # Addition of ConditionLists.
     # Overwrites previous ConditionLists
     def add(self, condlist, idimension):
         # type: (OracleFunction, ConditionList, int) -> None
         self.oracle[idimension] = condlist
-
-    # TODO
-    def add_set_points(self, setpoints):
-        # type: (_, set, int) -> None
-        sample = setpoints.pop()
-        setpoints.add(sample)
-
-        dimension = dim(sample)
-        vs = list_n_variables(dimension)
-
-        for i in range(dimension):
-            cl = ConditionList() if i not in self.oracle.keys() else self.oracle[i]
-            for point in setpoints:
-                c = Condition(vs[i], '==', point[i])
-                cl.add(c)
-            self.oracle[i] = cl
 
     def get_variables(self):
         # type: (OracleFunction) -> list
@@ -474,6 +505,10 @@ class OracleFunction:
         #        assert (highest_key == (len(fv) - 1)), \
         #            "Number of dimensions in OracleFunction do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
         return list(fv)
+
+    def dim(self):
+        # type: (OracleFunction) -> int
+        return len(self.get_variables())
 
     def eval_tuple(self, xpoint):
         # type: (OracleFunction, tuple) -> Expr
@@ -509,6 +544,10 @@ class OracleFunction:
         return self.oracle[idimension].list_n_points(npoints)
 
     # Membership functions
+    def __contains__(self, p):
+        # type: (OracleFunction, tuple) -> bool
+        return self.member(p) is True
+
     def member(self, xpoint):
         # type: (OracleFunction, tuple) -> Expr
         # return self.eval_tuple(xpoint)
@@ -521,7 +560,8 @@ class OracleFunction:
     # TOREMOVE
     def member2(self, xpoint):
         # type: (OracleFunction, tuple) -> Expr
-        assert (len(self.oracle) >= len(xpoint)), "OracleFunction is not prepared for points of dimension " + str(len(xpoint))
+        assert (len(self.oracle) >= len(xpoint)), "OracleFunction is not prepared for points of dimension " + str(
+            len(xpoint))
         ismember = True
         # for i, condlist in enumerate(self.oracle):
         for i, condlist in self.oracle.iteritems():
@@ -593,7 +633,9 @@ class OracleFunction:
         for i, condlist_i in self.oracle.iteritems():
             condlist_i.toFileHumRead(foutput)
 
+
 EPS = 1e-1
+
 
 def staircase_oracle(xs, ys):
     # type: (tuple, tuple) -> function

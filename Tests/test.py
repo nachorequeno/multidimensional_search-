@@ -5,10 +5,11 @@ import __builtin__
 import multiprocessing
 import matplotlib.pyplot as plt
 
-from NDTree import *
-from Search import *
-from OracleFunction import *
-from OraclePoint import *
+from Pareto.Oracle.NDTree import *
+from Pareto.Search.Search import *
+from Pareto.Oracle.OracleFunction import *
+from Pareto.Oracle.OraclePoint import *
+from Pareto.data_generator import *
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -66,11 +67,11 @@ def testFileOracleRead():
     print('cl2 ' + str(cl2))
 
     # Oracle
-    ora = Oracle()
+    ora = OracleFunction()
     ora.add(cl, 1)
     ora.add(cl, 2)
     ora.toFile(nfile3, append=False, human_readable=True)
-    ora2 = Oracle()
+    ora2 = OracleFunction()
     ora2.fromFile(nfile3, human_readable=True)
     print('ora2 ' + str(ora2))
 
@@ -102,11 +103,11 @@ def testFileOracleNoRead():
     print('cl2 ' + str(cl2))
 
     # Oracle
-    ora = Oracle()
+    ora = OracleFunction()
     ora.add(cl, 1)
     ora.add(cl, 2)
     ora.toFile(nfile3, append=False, human_readable=False)
-    ora2 = Oracle()
+    ora2 = OracleFunction()
     ora2.fromFile(nfile3, human_readable=False)
     print('ora2 ' + str(ora2))
 
@@ -136,11 +137,11 @@ def testFileOracle():
     print('cl2 ' + str(cl2))
 
     # Oracle
-    ora = Oracle()
+    ora = OracleFunction()
     ora.add(cl, 1)
     ora.add(cl, 2)
     ora.toFile(nfile3, append=False, human_readable=True)
-    ora2 = Oracle()
+    ora2 = OracleFunction()
     ora2.fromFile(nfile3, human_readable=True)
     print('ora2 ' + str(ora2))
 
@@ -159,11 +160,11 @@ def testFileOracle():
     print('cl2 ' + str(cl2))
 
     # Oracle
-    ora = Oracle()
+    ora = OracleFunction()
     ora.add(cl, 1)
     ora.add(cl, 2)
     ora.toFile(nfile3, append=False, human_readable=False)
-    ora2 = Oracle()
+    ora2 = OracleFunction()
     ora2.fromFile(nfile3, human_readable=False)
     print('ora2 ' + str(ora2))
 
@@ -275,7 +276,7 @@ def testMembershipCondition():
     f2(6)
 
     # Oracle
-    ora = Oracle()
+    ora = OracleFunction()
     ora.add(cl1, 0)
     ora.add(cl2, 1)
     fora = ora.membership()
@@ -299,7 +300,7 @@ def test2D(min_cornerx=0.0,
     maxc = (max_cornerx, max_cornery)
     xyspace = Rectangle(minc, maxc)
 
-    ora = Oracle()
+    ora = OracleFunction()
     ora.fromFile(nfile, human_readable=True)
     fora = ora.membership()
 
@@ -347,7 +348,7 @@ def test3D(min_cornerx=0.0,
     maxc = (max_cornerx, max_cornery, max_cornerz)
     xyspace = Rectangle(minc, maxc)
 
-    ora = Oracle()
+    ora = OracleFunction()
     ora.fromFile(nfile, human_readable=True)
     fora = ora.membership()
 
@@ -418,7 +419,7 @@ def test3D_map(min_cornerx=0.0,
     maxc = (max_cornerx, max_cornery, max_cornerz)
     xyspace = Rectangle(minc, maxc)
 
-    ora = Oracle()
+    ora = OracleFunction()
     ora.fromFile(nfile, human_readable=True)
     fora = ora.membership()
 
@@ -502,7 +503,7 @@ def testNdim(min_corner=0.0,
     maxc = (max_corner,) * dim
     xyspace = Rectangle(minc, maxc)
 
-    ora = Oracle()
+    ora = OracleFunction()
     ora.fromFile(nfile, human_readable=True)
     fora = ora.membership()
 

@@ -31,7 +31,7 @@ else:
 class NDTree:
     # root: Node
     def __init__(self, MAX_P=2, MIN_CH=2):
-        # type: (Node, int, int) -> None
+        # type: (NDTree, int, int) -> None
         self.root = None
         self.MAX_POINTS = MAX_P
         self.MIN_CHILDREN = MIN_CH
@@ -45,19 +45,63 @@ class NDTree:
     # Membership
     def __contains__(self, p):
         # type: (NDTree, tuple) -> bool
-        return self.root.hasPointRec(p) if self.root is not None else False
+        return self.root.hasPointRec(p) if not self.isEmpty() else False
         # return item in self.root
 
     # Printers
     def __repr__(self):
-        return self.root.toStrRec(0) if self.root is not None else ""
+        # type: (NDTree) -> str
+        return self.root.toStrRec(0) if not self.isEmpty() else ""
 
     def __str__(self):
-        return self.root.toStrRec(0) if self.root is not None else ""
+        # type: (NDTree) -> str
+        return self.root.toStrRec(0) if not self.isEmpty() else ""
+
+    # Equality functions
+    def __eq2__(self, other):
+        # type: (NDTree, NDTree) -> bool
+        sameContent = (other.MAX_POINTS == self.MAX_POINTS) and \
+                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
+        if self.isEmpty() or other.isEmpty():
+            return sameContent
+        else:
+            return (other.root == self.root) and sameContent
+			
+	def __eq__(self, other):
+        # type: (NDTree, NDTree) -> bool
+        sameContent = (other.MAX_POINTS == self.MAX_POINTS) and \
+                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
+		return (hash(self.root) == hash(other.root)) and \
+				sameContent
+
+    def __ne__(self, other):
+        # type: (NDTree, NDTree) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (NDTree) -> int
+        return hash((self.root, self.MAX_POINTS, self.MIN_CHILDREN))
 
     # Report functions
     def report(self):
-        self.root.reportRec() if self.root is not None else ""
+        self.root.reportRec() if not self.isEmpty() else ""
+
+    def dim(self):
+        # type: (NDTree) -> int
+        rect = self.getRectangle()
+        if rect is not None:
+            return Rectangle.dim(rect)
+        else:
+            return 0
+
+    def isEmpty(self):
+        # type: (NDTree) -> bool
+        return self.root is None
+
+    def getRectangle(self):
+        # type: (NDTree) -> Rectangle
+        return self.root.getRectangleSn() if not self.isEmpty() else None
 
     def getPoints(self):
         # type: (NDTree) -> set
@@ -68,7 +112,7 @@ class NDTree:
         # type: (NDTree, tuple) -> None
         self.root.removePointRec(p) if self.root is not None else None
 
-    def update(self, p):
+    def updatePoint(self, p):
         # type: (NDTree, tuple) -> None
         n = self.root
         if n is None:
@@ -79,6 +123,7 @@ class NDTree:
             if update:
                 n.insert(p)
         self.root = n
+
 
 class Node:
     # nodes: list(1,..,n) of nodes
@@ -144,6 +189,51 @@ class Node:
         # type: (Node) -> str
         return self.toStrRec(0)
 
+    # Equality functions
+    def __eq2__(self, other):
+        # type: (Node, Node) -> bool
+
+        if (other.rect is not None) and (self.rect is not None):
+            eqRect = (other.rect == self.rect)
+        else:
+            return False
+
+        if (other.parent is not None) and (self.parent is not None):
+            eqParent = (other.parent == self.parent)
+        else:
+            return False
+
+        sameContent = (other.nodes == self.nodes) and \
+                    (other.L == self.L) and \
+                    (other.MAX_POINTS == self.MAX_POINTS) and \
+                    (other.MIN_CHILDREN == self.MIN_CHILDREN)
+
+        return eqRect and \
+               eqParent and \
+               sameContent
+
+	def __eq__(self, other):
+        # type: (Node, Node) -> bool
+        eqRect = (hash(other.rect) == hash(self.rect))
+        eqParent = (hash(other.parent) == hash(self.parent))
+        sameContent = (other.nodes == self.nodes) and \
+                    (other.L == self.L) and \
+                    (other.MAX_POINTS == self.MAX_POINTS) and \
+                    (other.MIN_CHILDREN == self.MIN_CHILDREN)
+
+        return eqRect and \
+               eqParent and \
+               sameContent
+			   
+    def __ne__(self, other):
+        # type: (Node, Node) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (Node) -> int
+        return hash((self.rect, self.parent, self.nodes, self.L, self.MAX_POINTS, self.MIN_CHILDREN))
+
     # Report functions
     def report(self):
         vprint('\tCurrent ', id(self))  # self type(self).__name__
@@ -171,7 +261,7 @@ class Node:
     # Node operations
     def addNode(self, n, pos=-1):
         # type: (Node, Node, int) -> None
-        if n not in self.L:
+        if n not in self.nodes:
             n.setParent(self)
             if (pos >= 0) and (pos < len(self.nodes)):
                 self.nodes.insert(pos, n)
@@ -186,20 +276,20 @@ class Node:
 
     def removeNodeRec(self, n):
         # type: (Node, Node) -> None
-        [np.removeNodeRec(n) for np in self.nodes]
+        [npr.removeNodeRec(n) for npr in self.nodes]
         self.removeNode(n)
 
-    def replaceNode(self, n, np):
+    def replaceNode(self, n, npr):
         # type: (Node, Node, Node) -> None
         if n in self.nodes:
             index = self.nodes.index(n)
-            self.addNode(np, index)
+            self.addNode(npr, index)
             self.removeNode(n)
 
-    def replaceNodeRec(self, n, np):
+    def replaceNodeRec(self, n, npr):
         # type: (Node, Node) -> None
-        [x.replaceNodeRec(n, np) for x in self.nodes]
-        self.replaceNode(n, np)
+        [x.replaceNodeRec(n, npr) for x in self.nodes]
+        self.replaceNode(n, npr)
 
     def getSubnode(self, pos=0):
         # type: (Node, int) -> Node
@@ -332,14 +422,14 @@ class Node:
                 self.split()
         else:
             vprint('Internal\n', self.toStrRec())
-            np = self.findClosestNode(x)
-            vprint('Closest node\n', np.toStrRec())
-            vprint('with rectangle ', np.getRectangleSn())
-            np.insert(x)
+            npr = self.findClosestNode(x)
+            vprint('Closest node\n', npr.toStrRec())
+            vprint('with rectangle ', npr.getRectangleSn())
+            npr.insert(x)
 
     def findPointHighestAverageEuclideanDistance(self):
         # type: (Node) -> (tuple, int)
-        d = dim(self.L[0]) if self.numPoints() > 0 else 1
+        d = Point.dim(self.L[0]) if self.numPoints() > 0 else 1
         y = (0,) * d
         mean_max_distance = 0
         for yp in self.L:
@@ -359,28 +449,28 @@ class Node:
         y, _ = self.findPointHighestAverageEuclideanDistance()
         vprint('Point Highest Avg Eucl Dist', y)
         vprint('New node with point ', y)
-        np = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
-        np.addPoint(y)
-        np.updateIdealNadir(y)
+        npr = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
+        npr.addPoint(y)
+        npr.updateIdealNadir(y)
         self.removePoint(y)
         vprint('Current status of self', self.L)
         vprint(self.toStrRec())
         while self.numSubnodes() < self.MIN_CHILDREN:
             y, _ = self.findPointHighestAverageEuclideanDistance()
             vprint('New node with point ', y)
-            np = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
-            np.addPoint(y)
-            np.updateIdealNadir(y)
+            npr = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
+            npr.addPoint(y)
+            npr.updateIdealNadir(y)
             self.removePoint(y)
             vprint('Current status of self', self.L)
             vprint(self.toStrRec())
         while self.hasPoints():
             # y = self.L.pop()
             y = self.L[0]
-            np = self.findClosestNode(y)
-            vprint('Closest node\n%s' % (np.toStrRec()))
-            np.addPoint(y)
-            np.updateIdealNadir(y)
+            npr = self.findClosestNode(y)
+            vprint('Closest node\n%s' % (npr.toStrRec()))
+            npr.addPoint(y)
+            npr.updateIdealNadir(y)
             self.removePoint(y)
             vprint('Current status of self after removing point\n', self.L)
             vprint(self.toStrRec())
@@ -416,20 +506,20 @@ class Node:
                         vprint('Removing point ', str(y))
                         self.removePoint(y)
             else:
-                for np in self.nodes:
-                    np, update = np.updateNode(x)
+                for npr in self.nodes:
+                    npr, update = npr.updateNode(x)
                     if not update:
                         return nout, False
                     else:
-                        if np.isEmptySolution():
-                            vprint('Removing node\n', np.toStrRec())
-                            self.removeNode(np)
+                        if npr.isEmptySolution():
+                            vprint('Removing node\n', npr.toStrRec())
+                            self.removeNode(npr)
                 if self.numSubnodes() == 1:
                     vprint('Simplifying\n', self.toStrRec())
-                    # Remove node n and use np in place of n
-                    np = self.getSubnode()
+                    # Remove node n and use npr in place of n
+                    npr = self.getSubnode()
                     nparent = self.getParent()
-                    nparent.replaceNode(self, np) if nparent is not None else None
+                    nparent.replaceNode(self, npr) if nparent is not None else None
         else:
             # Skip this node
             vprint('Skipping\n', self.toStrRec())
@@ -472,8 +562,8 @@ class Node:
             vprint(vprint_string)
 
             if not self.isRoot():
-                np = self.getParent()
-                np.updateIdealNadir(x)
+                npr = self.getParent()
+                npr.updateIdealNadir(x)
         else:
             vprint_string = 'Rectangle ' + str(self.rect) + ' remains constant\n'
             vprint_string += 'Point tested: ' + str(x)

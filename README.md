@@ -19,9 +19,9 @@ This library is based on the work-in-progress paper [1].
 
 [1] [Learning Monotone Partitions of Partially-Ordered Domains (Work in Progress) 2017.〈hal-01556243〉] (https://hal.archives-ouvertes.fr/hal-01556243/)
 
-Installation
-------------
-The required libraries are listed in requirements.txt. 
+## Installation
+
+This library requires Python 2.7.9. The dependencies are listed in requirements.txt. 
 If you have the python tool 'pip' installed, then you can run the following command for
 installing the depencencies:
 
@@ -31,11 +31,11 @@ Afterwards you need to run:
 
 \$ python setup.py install
 
-for installing the library. In order to run the tests, you must execute:
+for installing the library. In order to run all the tests, you must execute:
 
 \$ pytest
 
-///////If run from the root of the project folder, this should run all if the tests.////////
+from the root of the project folder.
 
 
 For users that don’t have write permission to the global site-packages directory or 
@@ -71,27 +71,9 @@ finalize the installation.
 
 [2] Installing Python Modules (Legacy version) (https://docs.python.org/2/install/)
 
+## Running
 
-
-
-\$ python3.6 -m venv my_venv
-
-which will make a folder called my_venv. Then you activate the virtual
-enviromnent, which changes which python and libraries are currently
-accessed via:
-
-\$ source my_venv/bin/activate
-
-then you repeat the steps from the previous email. This will ensure
-that everything uses python3.6. When you are done, you can deactivate
-the virtualenv via:
-
-\$ deactivate
-
-Running
--------
-
-###Definition of the Oracle
+### Definition of the Oracle
 The learning algorithm requires the existence of an external *Oracle* that guides 
 the multidimensional search.
 The *Oracle* determines the membership of a point *x=(x1,x2,...,xN)* to any of 
@@ -124,16 +106,41 @@ The
 
 ![alt text][multidim_search]
 
-[cloudpoints]:https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/cloud_points.png "Cloud of points"
-[paretofront]:https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/pareto_front.png "Pareto front"
-[multidim_search]:https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/multidim_search.png "Upper and lower closures"
+[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/cloud_points.png "Cloud of points"
+[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/pareto_front.png "Pareto front"
+[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
 
-###Running the multidimensional search
-A set of running examples can be found in the Test folder.
+### Running the multidimensional search
+The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
+It is implemented by the function:
+ 
+Pareto.Search.multidim_search(xspace,
+                              oracle,
+                              epsilon=EPS,
+                              delta=DELTA,
+                              verbose=False,
+                              blocking=False,
+                              sleep=0)
 
-###Saving and plotting the results
+which takes as input the following parameters:
+* xspace: the N-dimensional space that contains the upper and lower closures.
+* oracle: the external knowledge repository that guides the learning process.
+* epsilon: error representing the maximum distance between a point 'x' of the 
+space and a point 'y' of the Pareto front.
+* delta: error representing the maximum area/volume contained in the border
+ that separates the upper and lower closures.
+* verbose: boolean that specifies if the algorithm must print traces for
+debugging options.
+* blocking: boolean that specifies if the learning algorithm musts plot 
+intermediate results in 2D graphics.
+* sleep: time in seconds that the intermediate 2D graphic must be shown in the screen.
+                    
+As a result, the function returns an object of the class *ResultSet*. 
+A set of running examples for 2D and 3D can be found in the Test folder.
+
+### Saving and plotting the results
 The result of the learning process is saved in an object of the class *ResultSet*.
 This object is a data structure composed of three elements: the upper closure (*X1*), the
 lower closure (*X2*), and the gap between X1 and X2 representing the precision error of the

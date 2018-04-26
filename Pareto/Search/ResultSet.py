@@ -1,7 +1,8 @@
-import time
 import __builtin__
-
+import time
 import pickle
+from itertools import chain
+
 import matplotlib.pyplot as plt
 
 
@@ -15,6 +16,43 @@ class ResultSet:
         self.border = border
         self.ylow = ylow
         self.yup = yup
+
+    # Printers
+    def toStr(self):
+        # type: (ResultSet) -> str
+        # _string = "("
+        # for i, data in enumerate(self.l):
+        #    _string += str(data)
+        #    if i != dim(self.l) - 1:
+        #        _string += ", "
+        # _string += ")"
+        _string = "<"
+        _string += str(self.yup)
+        _string += ', '
+        _string += str(self.ylow)
+        _string += ', '
+        _string += str(self.border)
+        _string += ">"
+        return _string
+
+    def __repr__(self):
+        # type: (ResultSet) -> str
+        return self.toStr()
+
+    def __str__(self):
+        # type: (ResultSet) -> str
+        return self.toStr()
+
+    # Equality functions
+    def __eq__(self, other):
+        # type: (ResultSet) -> bool
+        return (other.yup == self.yup) and \
+               (other.ylow == self.ylow) and \
+               (other.border == self.border)
+
+    def __ne__(self, other):
+        # type: (ResultSet) -> bool
+        return not self.__eq__(other)
 
     # Vertex functions
     def verticesYup(self):
@@ -89,29 +127,53 @@ class ResultSet:
             isMember = isMember or (xpoint in rect)
         return isMember
 
+    # Points of closure
+    def getPointsYup(self, n):
+        # type: (ResultSet, int) -> list
+        m = n / len(self.yup)
+        m = 1 if m < 1 else m
+        point_list = [rect.getPoints(m) for rect in self.yup]
+        # Flatten list
+        # Before
+        # point_list = [ [] , [], ..., [] ]
+        # After
+        # point_list = [ ... ]
+        merged = list(chain.from_iterable(point_list))
+        return merged
+
+    def getPointsYlow(self, n):
+        # type: (ResultSet, int) -> list
+        m = n / len(self.ylow)
+        m = 1 if m < 1 else m
+        point_list = [rect.getPoints(m) for rect in self.ylow]
+        merged = list(chain.from_iterable(point_list))
+        return merged
+
+    def getPointsBorder(self, n):
+        # type: (ResultSet, int) -> list
+        m = n / len(self.border)
+        m = 1 if m < 1 else m
+        point_list = [rect.getPoints(m) for rect in self.border]
+        merged = list(chain.from_iterable(point_list))
+        return merged
+
     # MatPlot Graphics
-    def toMatPlotYup(self, xaxe=0, yaxe=1, opacity=1.0):
+    def toMatPlotYup2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = []
-        for rect in self.yup:
-            patches += [rect.toMatplot('green', xaxe, yaxe, opacity)]
+        patches = [rect.toMatplot2D('green', xaxe, yaxe, opacity) for rect in self.yup]
         return patches
 
-    def toMatPlotYlow(self, xaxe=0, yaxe=1, opacity=1.0):
+    def toMatPlotYlow2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = []
-        for rect in self.ylow:
-            patches += [rect.toMatplot('red', xaxe, yaxe, opacity)]
+        patches = [rect.toMatplot2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
         return patches
 
-    def toMatPlotBorder(self, xaxe=0, yaxe=1, opacity=1.0):
+    def toMatPlotBorder2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = []
-        for rect in self.border:
-            patches += [rect.toMatplot('blue', xaxe, yaxe, opacity)]
+        patches = [rect.toMatplot2D('blue', xaxe, yaxe, opacity) for rect in self.border]
         return patches
 
-    def toMatPlot(self,
+    def toMatPlot2D(self,
                   filename='',
                   xaxe=0,
                   yaxe=1,
@@ -125,9 +187,9 @@ class ResultSet:
         ax1 = fig1.add_subplot(111, aspect='equal')
         ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
-        pathpatch_yup = self.toMatPlotYup(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.toMatPlotYlow(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotBorder(xaxe, yaxe, opacity)
+        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.toMatPlotBorder2D(xaxe, yaxe, opacity)
 
         pathpatch = pathpatch_yup
         pathpatch += pathpatch_ylow
@@ -160,23 +222,17 @@ class ResultSet:
 
     def toMatPlotYup3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = []
-        for rect in self.yup:
-            faces += [rect.toMatplot3D('green', xaxe, yaxe, zaxe, opacity)]
+        faces = [rect.toMatplot3D('green', xaxe, yaxe, zaxe, opacity) for rect in self.yup]
         return faces
 
     def toMatPlotYlow3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = []
-        for rect in self.ylow:
-            faces += [rect.toMatplot3D('red', xaxe, yaxe, zaxe, opacity)]
+        faces = [rect.toMatplot3D('red', xaxe, yaxe, zaxe, opacity) for rect in self.ylow]
         return faces
 
     def toMatPlotBorder3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = []
-        for rect in self.border:
-            faces += [rect.toMatplot3D('blue', xaxe, yaxe, zaxe, opacity)]
+        faces = [rect.toMatplot3D('blue', xaxe, yaxe, zaxe, opacity) for rect in self.border]
         return faces
 
     def toMatPlot3D(self,

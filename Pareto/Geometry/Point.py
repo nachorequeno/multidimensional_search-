@@ -10,9 +10,8 @@ def dim(x):
 def norm(x):
     # type: (tuple) -> float
     square_element_i = tuple(xi * xi for xi in x)
-    _sum = reduce(lambda si, sj: si + sj, square_element_i)
+    _sum = sum(square_element_i)
     return math.sqrt(_sum)
-
 
 # Euclidean distance between two points
 def distance(x, xprime):
@@ -113,23 +112,6 @@ def select(x, xprime):
     m = len(xprime)
     assert (n == m), "index out of range"
     return tuple(xi if yi > 0 else 0 for xi, yi in zip(x, xprime))
-
-
-def select2(x, xprime):
-    # type: (tuple, tuple) -> tuple
-    # x = (5, 6, 7)
-    # xprime = (0, 0, 1)
-    # select(x, xprime) == (0, 0, 7)
-    n = len(x)
-    m = len(xprime)
-    assert (n == m), "index out of range"
-    temp = ()
-    for xi, yi in zip(x, xprime):
-        if (yi > 0):
-            temp += (xi,)
-        else:
-            temp += (0,)
-    return temp
 
 
 # Integer to binary notation
