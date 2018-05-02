@@ -5,44 +5,43 @@ import itertools
 
 import multiprocessing
 
-# import Pareto.Search
-# import Pareto.Oracle
+# import ParetoLib.Search
+# import ParetoLib.Oracle
 
-from Pareto.Search.Search import *
-from Pareto.Oracle.OracleFunction import *
-from Pareto.Oracle.OraclePoint import *
+from ParetoLib.Search.Search import *
+from ParetoLib.Oracle.OracleFunction import *
+from ParetoLib.Oracle.OraclePoint import *
 
 EPS = 1e-5
 DELTA = 1e-5
+
 
 ################
 # Simple tests #
 ################
 
-def testBinSearch():
+def testBinSearch(nfile=os.path.abspath("./Tests/Search/2D/test4.txt")):
     x = (0.0,) * 2
     y = (1.0,) * 2
-    xy = Segment(x, y)
+    xy = Rectangle(x, y)
 
-    t1 = (0.2, 0.8)
-    t2 = (0.8, 0.2)
-    f = staircase_oracle(t1, t2)
+    ora = loadOracleFunction(nfile=nfile, human_readable=True)
+    f = ora.membership()
 
-    return search(xy, f)
+    return search(xy.diagToSegment(), f)
 
 
-def testMultiDimSearch():
+def testMultiDimSearch(nfile=os.path.abspath("./Tests/Search/2D/test4.txt")):
     x = (0.0,) * 2
     y = (1.0,) * 2
     xyspace = Rectangle(x, y)
 
-    t1 = (0.2, 0.8)
-    t2 = (0.8, 0.2)
-    f = staircase_oracle(t1, t2)
+    ora = loadOracleFunction(nfile=nfile, human_readable=True)
+    f = ora.membership()
 
     rs = multidim_search(xyspace, f)
     rs.toMatPlot2D()
-    return 0
+
 
 #################
 # Complex tests #
@@ -61,6 +60,7 @@ def loadOracleFunction(nfile, human_readable):
     print ('Time reading OracleFunction: ', str(time0))
     return ora
 
+
 def loadOraclePoint(nfile, human_readable):
     print ('Creating OraclePoint')
     start = time.time()
@@ -70,6 +70,7 @@ def loadOraclePoint(nfile, human_readable):
     time0 = end - start
     print ('Time reading OraclePoint: ', str(time0))
     return ora
+
 
 # Creation of Spaces
 def create2DSpace(minx, miny, maxx, maxy):
@@ -83,6 +84,7 @@ def create2DSpace(minx, miny, maxx, maxy):
     print ('Time creating Space: ', str(time0))
     return xyspace
 
+
 def create3DSpace(minx, miny, minz, maxx, maxy, maxz):
     print ('Creating Space')
     start = time.time()
@@ -93,6 +95,7 @@ def create3DSpace(minx, miny, minz, maxx, maxy, maxz):
     time0 = end - start
     print ('Time creating Space: ', str(time0))
     return xyspace
+
 
 def createNDSpace(*args):
     # args = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
@@ -106,14 +109,15 @@ def createNDSpace(*args):
     print ('Time creating Space: ', str(time0))
     return xyspace
 
+
 # Multidimensional search
-def search(space,
-           fora,
-           epsilon=EPS,
-           delta=DELTA,
-           verbose=False,
-           blocking=False,
-           sleep=0):
+def msearch(space,
+            fora,
+            epsilon=EPS,
+            delta=DELTA,
+            verbose=False,
+            blocking=False,
+            sleep=0):
     print ('Starting multidimensional search')
     start = time.time()
     rs = multidim_search(space, fora, epsilon, delta, verbose, blocking, sleep)
@@ -121,6 +125,7 @@ def search(space,
     time0 = end - start
     print ('Time multidim search: ', str(time0))
     return rs
+
 
 #  Membership testing function used in verify2D, verify3D and verifyND
 def closureMembershipTest(fora, rs, xpoint):
@@ -137,14 +142,15 @@ def closureMembershipTest(fora, rs, xpoint):
         print ('(inYup, inYlow): (%s, %s)'
                % (str(fora(xpoint)), str(not fora(xpoint))))
 
+
 # Auxiliar function for reporting 2D results
 def verify2D(fora,
-           rs,
-           test=False,
-           min_cornerx=0.0,
-           min_cornery=0.0,
-           max_cornerx=1.0,
-           max_cornery=1.0):
+             rs,
+             test=False,
+             min_cornerx=0.0,
+             min_cornery=0.0,
+             max_cornerx=1.0,
+             max_cornery=1.0):
     t1 = np.arange(min_cornerx, max_cornerx, 0.1)
     t2 = np.arange(min_cornery, max_cornery, 0.1)
 
@@ -181,6 +187,7 @@ def verify2D(fora,
     print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
     print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
     print ('Time tests: ', str(time0))
+
 
 # Auxiliar function for reporting 3D results
 def verify3D(fora,
@@ -231,12 +238,12 @@ def verify3D(fora,
     print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
     print ('Time tests: ', str(time0))
 
+
 # Auxiliar function for reporting ND results
 def verifyND(fora,
              rs,
              list_test_points,
              test=False):
-
     # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
     nYup = 0
     nYlow = 0
@@ -273,23 +280,22 @@ def verifyND(fora,
 
 # OracleFunction
 def test2DOracleFunction(min_cornerx=0.0,
-           min_cornery=0.0,
-           max_cornerx=1.0,
-           max_cornery=1.0,
-           nfile=os.path.abspath("tests/2D/test0.txt"),
-           epsilon=EPS,
-           delta=DELTA,
-           verbose=False,
-           blocking=False,
-           test=False,
-           sleep=0):
-
+                         min_cornery=0.0,
+                         max_cornerx=1.0,
+                         max_cornery=1.0,
+                         nfile=os.path.abspath("tests/2D/test0.txt"),
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0):
     ora = loadOracleFunction(nfile, human_readable=True)
     fora = ora.membership()
 
     xyspace = create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
     n = int((max_cornerx - min_cornerx) / 0.1)
     points = rs.getPointsBorder(n)
@@ -303,25 +309,24 @@ def test2DOracleFunction(min_cornerx=0.0,
 
 
 def test3DOracleFunction(min_cornerx=0.0,
-           min_cornery=0.0,
-           min_cornerz=0.0,
-           max_cornerx=1.0,
-           max_cornery=1.0,
-           max_cornerz=1.0,
-           nfile=os.path.abspath("tests/3D/test4.txt"),
-           epsilon=EPS,
-           delta=DELTA,
-           verbose=False,
-           blocking=False,
-           test=False,
-           sleep=0):
-
+                         min_cornery=0.0,
+                         min_cornerz=0.0,
+                         max_cornerx=1.0,
+                         max_cornery=1.0,
+                         max_cornerz=1.0,
+                         nfile=os.path.abspath("tests/3D/test4.txt"),
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0):
     ora = loadOracleFunction(nfile, human_readable=True)
     fora = ora.membership()
 
     xyspace = create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
     n = int((max_cornerx - min_cornerx) / 0.1)
     points = rs.getPointsBorder(n)
@@ -350,7 +355,7 @@ def testNDOracleFunction(min_corner=0.0,
     maxc = (max_corner,) * dim
     xyspace = Rectangle(minc, maxc)
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
     t = np.arange(min_corner, max_corner, 0.1)
     # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
@@ -358,19 +363,19 @@ def testNDOracleFunction(min_corner=0.0,
 
     verifyND(fora, rs, list_test_points, test)
 
+
 # OraclePoint
 def test2DOraclePoint(min_cornerx=0.0,
-           min_cornery=0.0,
-           max_cornerx=1.0,
-           max_cornery=1.0,
-           nfile=os.path.abspath("tests/OraclePoint/oracle4_xy_bin.txt"),
-           epsilon=EPS,
-           delta=DELTA,
-           verbose=False,
-           blocking=False,
-           test=False,
-           sleep=0):
-
+                      min_cornery=0.0,
+                      max_cornerx=1.0,
+                      max_cornery=1.0,
+                      nfile=os.path.abspath("tests/OraclePoint/oracle4_xy_bin.txt"),
+                      epsilon=EPS,
+                      delta=DELTA,
+                      verbose=False,
+                      blocking=False,
+                      test=False,
+                      sleep=0):
     ora = loadOraclePoint(nfile, human_readable=False)
     fora = ora.membership()
 
@@ -389,7 +394,7 @@ def test2DOraclePoint(min_cornerx=0.0,
                             __builtin__.min(maxx, max_cornerx),
                             __builtin__.min(maxy, max_cornery))
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
     rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
     verify2D(fora, rs, test, min_cornerx, min_cornery, max_cornerx, max_cornery)
 
@@ -430,9 +435,10 @@ def test3DOraclePoint(min_cornerx=0.0,
                             __builtin__.min(maxy, max_cornery),
                             __builtin__.min(maxz, max_cornerz))
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
     rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
     verify3D(fora, rs, test, min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
+
 
 def testNDOraclePoint(nfile=os.path.abspath("tests/3D/test4.txt"),
                       epsilon=EPS,
@@ -452,7 +458,7 @@ def testNDOraclePoint(nfile=os.path.abspath("tests/3D/test4.txt"),
     maxc = sorted_points.pop()
     xyspace = Rectangle(minc, maxc)
 
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
     t = np.arange(minc, maxc, 0.1)
     # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
@@ -463,15 +469,15 @@ def testNDOraclePoint(nfile=os.path.abspath("tests/3D/test4.txt"),
 
 # Test OraclePoint
 def test2DOraclePoint_1X(min_cornerx=0.0,
-                      min_cornery=0.0,
-                      max_cornerx=1.0,
-                      max_cornery=1.0,
-                      epsilon=EPS,
-                      delta=DELTA,
-                      verbose=False,
-                      blocking=False,
-                      test=False,
-                      sleep=0):
+                         min_cornery=0.0,
+                         max_cornerx=1.0,
+                         max_cornery=1.0,
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0):
     minc = (min_cornerx, min_cornery)
     maxc = (max_cornerx, max_cornery)
     xyspace = Rectangle(minc, maxc)
@@ -516,88 +522,76 @@ def test2DOraclePoint_1X(min_cornerx=0.0,
     print(str(ora))
 
     fora = ora.membership()
-    rs = search(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
+    rs = msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
     rs.toMatPlot2D(targetx=list(xs), targety=y1s, blocking=True)
     verify2D(fora, rs, test, min_cornerx, min_cornery, max_cornerx, max_cornery)
 
 
-
 if __name__ == '__main__':
-    test2DOracleFunction(min_cornerx=0.0,
-                         min_cornery=0.0,
-                         max_cornerx=2.0,
-                         max_cornery=2.0,
-                         epsilon=EPS,
-                         delta=DELTA,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath("/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/2D/test0.txt"))
+    # local_path = './Search'
+    # test_2D = local_path + "/2D/test%s.txt"
+    ##nfile=os.path.abspath()
+    # arr_txt = [x for x in os.listdir('.') if x.endswith(".txt")]
 
-    test2DOracleFunction(min_cornerx=0.0,
-                         min_cornery=0.0,
-                         max_cornerx=2.0,
-                         max_cornery=2.0,
-                         epsilon=0.01,
-                         delta=0.01,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath(
-                             "/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/2D/test0.txt"))
+    this_dir = os.getcwd()
+    test_2D_dir = this_dir + '/Search/2D'
+    test_3D_dir = this_dir + '/Search/3D'
+    test_ND_dir = this_dir + '/Search/ND'
 
-    test2DOracleFunction(min_cornerx=0.0,
-                         min_cornery=0.0,
-                         max_cornerx=1.0,
-                         max_cornery=1.0,
-                         epsilon=0.01,
-                         delta=0.01,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath(
-                             "/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/ND/test-2d.txt"))
+    files_path = [os.path.abspath(x) for x in os.listdir(test_2D_dir)]
+    test_2D_txt = [x for x in files_path if x.endswith(".txt")]
 
-    test2DOracleFunction(min_cornerx=0.0,
-                         min_cornery=0.0,
-                         max_cornerx=1.0,
-                         max_cornery=1.0,
-                         epsilon=0.01,
-                         delta=0.01,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath(
-                             "/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/ND/test-2d.txt"))
+    for test in test_2D_txt:
+        test2DOracleFunction(min_cornerx=0.0,
+                             min_cornery=0.0,
+                             max_cornerx=1.0,
+                             max_cornery=1.0,
+                             epsilon=EPS,
+                             delta=DELTA,
+                             verbose=False,
+                             blocking=False,
+                             test=False,
+                             sleep=0,
+                             nfile=test)
 
-    testNDOracleFunction(min_corner=0.0,
-                         max_corner=1.0,
-                         epsilon=0.01,
-                         delta=0.01,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath(
-                             "/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/ND/test-2d.txt"))
+    files_path = [os.path.abspath(x) for x in os.listdir(test_3D_dir)]
+    test_3D_txt = [x for x in files_path if x.endswith(".txt")]
 
-    test3DOracleFunction(min_cornerx=0.0,
-                         min_cornery=0.0,
-                         min_cornerz=0.0,
-                         max_cornerx=1.0,
-                         max_cornery=1.0,
-                         max_cornerz=1.0,
-                         epsilon=0.01,
-                         delta=0.01,
-                         verbose=False,
-                         blocking=False,
-                         test=False,
-                         sleep=0,
-                         nfile=os.path.abspath(
-                             "/home/requenoj/Dropbox_Business/Dropbox/PycharmProjects/multidimensional_search/Tests/ND/test-3d.txt"))
+    for test in test_3D_txt:
+        test2DOracleFunction(min_cornerx=0.0,
+                             min_cornery=0.0,
+                             max_cornerx=1.0,
+                             max_cornery=1.0,
+                             epsilon=EPS,
+                             delta=DELTA,
+                             verbose=False,
+                             blocking=False,
+                             test=False,
+                             sleep=0,
+                             nfile=test)
 
+    files_path = [os.path.abspath(x) for x in os.listdir(test_ND_dir)]
+    test_ND_txt = [x for x in files_path if x.endswith(".txt")]
 
+    for test in test_ND_txt:
+        testNDOracleFunction(min_corner=0.0,
+                             max_corner=1.0,
+                             epsilon=EPS,
+                             delta=DELTA,
+                             verbose=False,
+                             blocking=False,
+                             test=False,
+                             sleep=0,
+                             nfile=test)
+
+    # filename_list = ["./Tests/Search/ND/test-%sd.txt" % i for i in range(2, 11)]
+    # filename_list = ["./Tests/Search/ND/test-%sd.txt" % i for i in range(2, 3)]
+    # [testNDOracleFunction(min_corner=0.0,
+    #                     max_corner=1.0,
+    #                     epsilon=0.01,
+    #                     delta=0.01,
+    #                     verbose=False,
+    #                     blocking=False,
+    #                     test=False,
+    #                     sleep=0,
+    #                     nfile=os.path.abspath(filename)) for filename in filename_list]

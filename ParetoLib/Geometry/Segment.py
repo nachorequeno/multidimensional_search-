@@ -1,6 +1,7 @@
 from functools import reduce
 
-from Point import *
+from ParetoLib.Geometry.Point import *
+#import ParetoLib.Geometry.Point
 
 class Segment:
     # l, h are points
@@ -73,6 +74,8 @@ class Segment:
     def norm2(self):
         # type: (Segment) -> float
         diagonal = self.diag()
-        square_diagonal = map(lambda si: si * si, diagonal)
-        _sum = reduce(lambda si, sj: si + sj, square_diagonal)
+        square_diagonal = tuple(di * di for di in diagonal)
+        _sum = sum(square_diagonal)
+        # square_diagonal = map(lambda si: si * si, diagonal)
+        #_sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)

@@ -33,11 +33,11 @@ class OraclePoint:
         # type: (OraclePoint, int, int) -> None
         self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
 
-	# Printers
+    # Printers
     def __repr__(self):
         # type: (OraclePoint) -> str
         return self.toStr()
-		
+
     def __str__(self):
         # type: (OraclePoint) -> str
         return self.toStr()
@@ -45,11 +45,11 @@ class OraclePoint:
     def toStr(self):
         # type: (OraclePoint) -> str
         return str(self.oracle)
-	
+
     # Equality functions
-	def __eq__(self, other):
+    def __eq__(self, other):
         # type: (OraclePoint, OraclePoint) -> bool
-		return (self.oracle == other.oracle)
+        return (self.oracle == other.oracle)
 
     def __ne__(self, other):
         # type: (OraclePoint, OraclePoint) -> bool
@@ -60,10 +60,10 @@ class OraclePoint:
         # type: (OraclePoint) -> int
         return hash((self.oracle))
 
-	# Oracle operations
+    # Oracle operations
     def addPoint(self, p):
         # type: (OraclePoint, tuple) -> None
-        self.oracle.updatePoint(point)
+        self.oracle.updatePoint(p)
 
     def addPoints(self, setpoints):
         # type: (OraclePoint, set) -> None
@@ -78,13 +78,13 @@ class OraclePoint:
         # type: (OraclePoint) -> int
         return self.oracle.dim()
 
-	# Membership functions
+    # Membership functions
     def __contains__(self, p):
         # type: (OraclePoint, tuple) -> bool
-		# set_points = self.getPoints()
+        # set_points = self.getPoints()
         # return p in set_points
         return self.member(p)
-		
+
     def member(self, p):
         # type: (OraclePoint, tuple) -> bool
         # Returns 'True' if p belongs to the set of points stored in the Pareto archive
@@ -99,7 +99,7 @@ class OraclePoint:
 
     def membership(self):
         # type: (OraclePoint) -> function
-        #return lambda p: self.member(p)
+        # return lambda p: self.member(p)
         return lambda p: self.dominates(p)
 
     # Read/Write file functions

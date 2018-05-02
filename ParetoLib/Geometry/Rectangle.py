@@ -1,13 +1,15 @@
+import __builtin__
 from multiprocessing import Pool, cpu_count, Process, Queue
+#from multiprocessing import Process, Queue
 
 import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
-import Point
-#from Point import *
-from Segment import *
+from ParetoLib.Geometry.Segment import *
+from ParetoLib.Geometry.Point import *
+#import ParetoLib.Geometry.Point
 
 # Rectangle
 # Rectangular Half-Space
@@ -15,7 +17,20 @@ from Segment import *
 
 class Rectangle:
     # min_corner, max_corner
-    def __init__(self, min_corner, max_corner):
+    def __init__(self,
+                 min_corner=(float("-inf"), )*2,
+                 max_corner=(float("-inf"), )*2):
+        # type: (Rectangle, tuple, tuple) -> None
+        assert dim(min_corner) == dim(max_corner)
+
+        self.min_corner = tuple(__builtin__.min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        self.max_corner = tuple(__builtin__.max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+
+        assert greater_equal(self.max_corner, self.min_corner) or \
+               incomparable(self.min_corner, self.max_corner)
+
+
+    def __init__2(self, min_corner, max_corner):
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
         if incomparable(min_corner, max_corner):
@@ -33,6 +48,15 @@ class Rectangle:
     # Membership function
     def __contains__(self, xpoint):
         # type: (Rectangle, tuple) -> bool
+        # xpoint is strictly inside the rectangle (i.e., is not along the border)
+        return (not incomparable(xpoint, self.min_corner) and
+                not incomparable(xpoint, self.max_corner) and
+                greater(xpoint, self.min_corner) and
+                less(xpoint, self.max_corner))
+
+    def inside(self, xpoint):
+        # type: (Rectangle, tuple) -> bool
+        # xpoint is inside the rectangle or along the border
         return (not incomparable(xpoint, self.min_corner) and
                 not incomparable(xpoint, self.max_corner) and
                 greater_equal(xpoint, self.min_corner) and
@@ -73,7 +97,7 @@ class Rectangle:
     # Rectangle properties
     def dim(self):
         # type: (Rectangle) -> int
-        return Point.dim(self.min_corner)
+        return dim(self.min_corner)
 
     def diag(self):
         # type: (Rectangle) -> tuple
@@ -82,7 +106,7 @@ class Rectangle:
     def norm(self):
         # type: (Rectangle) -> float
         diagonal = self.diag()
-        return Point.norm(diagonal)
+        return norm(diagonal)
 
     def volume(self):
         # type: (Rectangle) -> float
@@ -132,9 +156,53 @@ class Rectangle:
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
         return point_list
 
+#    def overlapsStrict(self, other):
+#        # type: (Rectangle, Rectangle) -> bool
+#        other_vertices = other.vertices()
+#        other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
+#        other_overlaps_self = any([other_vertex in self for other_vertex in other_vertices])
+#
+#        self_vertices = self.vertices()
+#        self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
+#        self_overlaps_other = any([self_vertex in other for self_vertex in self_vertices])
+#        return len(other_vertices_inside_self) > 0 and \
+#               len(self_vertices_inside_other) > 0 and \
+#               other_overlaps_self and \
+#               self_overlaps_other
+
+    def overlaps(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        other_vertices = other.vertices()
+        overlap = any([other_vertex in self for other_vertex in other_vertices])
+        #overlap = any([self.strictIn(other_vertex) for other_vertex in other_vertices])
+        return overlap
+
+    def intersection(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        # Create a default rectangle of area/volume = 0
+        #minc = (float("-inf"), ) * self.dim()
+        #maxc = (float("-inf"), ) * self.dim()
+        minc = (float(0),) * self.dim()
+        maxc = (float(0),) * self.dim()
+
+        #if self.overlapsStrict(other):
+        if self.overlaps(other):
+            # At least, one vertex of each rectangle is inside the other rectangle
+            other_vertices = other.vertices()
+            #other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if self.strictIn(other_vertex)]
+            other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
+
+            self_vertices = self.vertices()
+            #self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if other.strictIn(self_vertex)]
+            self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
+            minc = self_vertices_inside_other[0]
+            maxc = other_vertices_inside_self[0]
+
+        r = Rectangle(minc, maxc)
+        return r
+
     # Matplot functions
     def toMatplot2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
-        ## type: (Rectangle, str, int, int, float) -> patches.Rectangle
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), "Dimension required >= 2"
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
@@ -234,7 +302,7 @@ def brect(alpha, xrectangle, xspace):
     return temp1
 
 def irect(alphaincomp, xrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> set
+    # type: (set, Rectangle, Rectangle) -> list
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -243,10 +311,10 @@ def irect(alphaincomp, xrectangle, xspace):
     #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
     # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
     #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    return set(brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp)
+    return [brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp]
 
 def pirect(alphaincomp, xrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> set
+    # type: (set, Rectangle, Rectangle) -> list
     assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -261,7 +329,4 @@ def pirect(alphaincomp, xrectangle, xspace):
                         for alphaincomp_i in alphaincomp]
     pool.close()
     pool.join()
-    res = set()
-    for pres in parallel_results:
-        res.add(pres.get())
-    return res
+    return [pres.get() for pres in parallel_results]

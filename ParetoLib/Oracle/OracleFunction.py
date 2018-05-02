@@ -5,7 +5,7 @@ import pickle
 from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Interval, Expr, Symbol
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
-from Pareto.Geometry.Point import *
+from ParetoLib.Geometry.Point import *
 
 # from data_generator import *
 
@@ -56,9 +56,6 @@ class Condition:
             eprint("WARNING! Expression '%s' contains negative coefficients: %s"
                    % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
-    def __str__(self):
-        return str(self.f) + self.op + str(self.g)
-
     def initFromString(self, poly_function):
         # op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         # f_regex = r'(\s*\w\s*)+'
@@ -83,6 +80,40 @@ class Condition:
             if not self.all_coeff_are_positive():
                 eprint("WARNING! Expression '%s' contains negative coefficients: %s"
                        % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+
+    # Printers
+    def __repr__(self):
+        # type: (Condition) -> str
+        return self.toStr()
+
+    def __str__(self):
+        # type: (Condition) -> str
+        return self.toStr()
+
+    def toStr(self):
+        # type: (Condition) -> str
+        return str(self.f) + self.op + str(self.g)
+
+    # Equality functions
+    def __eq__(self, other):
+        # type: (Condition, Condition) -> bool
+        return (self.f == other.f) and \
+               (self.op == other.op) and \
+               (self.g == other.g)
+
+    def __ne__(self, other):
+        # type: (Condition, Condition) -> bool
+        return not self.__eq__(other)
+
+    # Identity function (via hashing)
+    def __hash__(self):
+        # type: (Condition) -> int
+        return hash((self.f, self.op, self.g))
+
+    # Membership functions
+    def __contains__(self, p):
+        # type: (Condition, tuple) -> bool
+        return self.member(p) is True
 
     def all_coeff_are_positive(self):
         # type: (Condition) -> bool
@@ -179,6 +210,17 @@ class Condition:
         vprint('Expression ', str(simplify(ex)))
         return simplify(ex)
 
+    # Membership functions
+    def member(self, xpoint):
+        # type: (Condition, tuple) -> Expr
+        keys = self.get_variables()
+        di = {key: xpoint[i] for i, key in enumerate(keys)}
+        return self.eval_dict(di)
+
+    def membership(self):
+        # type: (Condition, tuple) -> function
+        return lambda xpoint: self.member(xpoint)
+
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
         # type: (Condition, str, bool) -> None
@@ -201,7 +243,7 @@ class Condition:
         self.g = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (Condition, file) -> None
+        # type: (Condition, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         poly_function = finput.readline()
@@ -277,7 +319,7 @@ class ConditionList:
     # Identity function (via hashing)
     def __hash__(self):
         # type: (ConditionList) -> int
-        return hash(self.l)
+        return hash(tuple(self.l))
 
     # Membership functions
     def __contains__(self, cond):
@@ -371,6 +413,7 @@ class ConditionList:
         return x in self.solution
 
     def membership(self):
+        # type: (ConditionList, tuple) -> function
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
@@ -452,7 +495,8 @@ class OracleFunction:
         # type: (OracleFunction, int) -> None
         # self.oracle = {}
         keys = range(ndimension)
-        self.oracle = {key: None for key in keys}
+        #self.oracle = {key: None for key in keys}
+        self.oracle = {key: ConditionList() for key in keys}
 
     # Printers
     def __repr__(self):
@@ -485,7 +529,7 @@ class OracleFunction:
     # Identity function (via hashing)
     def __hash__(self):
         # type: (OracleFunction) -> int
-        return hash(self.oracle)
+        return hash(tuple(self.oracle))
 
     # Addition of ConditionLists.
     # Overwrites previous ConditionLists
@@ -592,7 +636,7 @@ class OracleFunction:
         self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (OracleFunction, file) -> None
+        # type: (OracleFunction, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         # <num_dimensions>

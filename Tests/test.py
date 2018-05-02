@@ -5,11 +5,11 @@ import __builtin__
 import multiprocessing
 import matplotlib.pyplot as plt
 
-from Pareto.Oracle.NDTree import *
-from Pareto.Search.Search import *
-from Pareto.Oracle.OracleFunction import *
-from Pareto.Oracle.OraclePoint import *
-from Pareto.data_generator import *
+from ParetoLib.Oracle.NDTree import *
+from ParetoLib.Search.Search import *
+from ParetoLib.Oracle.OracleFunction import *
+from ParetoLib.Oracle.OraclePoint import *
+from ParetoLib.data_generator import *
 
 EPS = 1e-5
 DELTA = 1e-5

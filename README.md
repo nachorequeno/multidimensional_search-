@@ -25,15 +25,16 @@ This library requires Python 2.7.9. The dependencies are listed in requirements.
 If you have the python tool 'pip' installed, then you can run the following command for
 installing the depencencies:
 
-\$ pip install -r requirements.txt
+$ pip install -r requirements.txt
 
 Afterwards you need to run:
 
-\$ python setup.py install
+$ python setup.py build
+$ python setup.py install
 
 for installing the library. In order to run all the tests, you must execute:
 
-\$ pytest
+$ pytest
 
 from the root of the project folder.
 
@@ -44,6 +45,7 @@ installation folder with a simple option:
 
 $ pip install -r requirements.txt --user
 
+$ python setup.py build --user
 $ python setup.py install --user
 
 In Unix/Mac OS X environments:, the structure of the installation folders will be the following:
@@ -116,7 +118,7 @@ The
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
 It is implemented by the function:
  
-Pareto.Search.multidim_search(xspace,
+ParetoLib.Search.multidim_search(xspace,
                               oracle,
                               epsilon=EPS,
                               delta=DELTA,

@@ -68,8 +68,8 @@ def check_dependencies ( ) :
         bool
             True if it can continue, False otherwise.
     """
-    # Check if NumPy or Biopython are missing, as they are required for ParetoLib
-    # to work properly
+    # Check if NumPy, Sympy or matplotlib are missing, as they are required for
+    # ParetoLib to work properly
     if ( not can_import('numpy') ) :
         print('Numerical Python (NumPy) is not installed.\nThis package is required for' \
               'ParetoLib.\n\nYou can find NumPy at http://www.numpy.org')
@@ -77,6 +77,10 @@ def check_dependencies ( ) :
     if ( not can_import('sympy') ) :
         print('Symbolic Python (SymPy) is not installed.\nThis package is required for' \
               'ParetoLib.\n\nYou can find SymPy at http://www.sympy.org')
+        return ( False )
+    if ( not can_import('sortedcontainers') ) :
+        print('SortedContainers is not installed.\nThis package is required for' \
+              'ParetoLib.\n\nYou can find SortedContainers at https://pypi.org/project/sortedcontainers/')
         return ( False )
     if ( not can_import('matplotlib') ) :
         print('Matplotlib is not installed.\nThis package is required for' \
@@ -202,12 +206,9 @@ setup_args = { 'name': 'ParetoLib',
                              'build_py': build_py_paretolib,
                              'test': test_paretolib, },
                'packages': [ 'ParetoLib',
-                             'ParetoLib.Align',
-                             'ParetoLib.Cluster',
-                             'ParetoLib.Data',
-                             'ParetoLib.Fetch',
-                             'ParetoLib.Inference',
-                             'ParetoLib.PhyloAssemble',
+                             'ParetoLib.Geometry',
+                             'ParetoLib.Oracle',
+                             'ParetoLib.Search',
                              'ParetoLib._py3k' ],
                'package_data': {'ParetoLib.Data': ['*.gb']}, }
 

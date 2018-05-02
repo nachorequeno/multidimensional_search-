@@ -2,8 +2,8 @@ import sys
 import resource
 import __builtin__
 
-from Pareto.Geometry.Rectangle import *
-from Pareto.Geometry.Point import *
+from ParetoLib.Geometry.Rectangle import *
+from ParetoLib.Geometry.Point import *
 
 VERBOSE = True
 VERBOSE = False
@@ -27,6 +27,7 @@ if VERBOSE:
 else:
     vprint = lambda *a: None  # do-nothing function
     eprint = lambda *a: None  # do-nothing function
+
 
 class NDTree:
     # root: Node
@@ -66,13 +67,13 @@ class NDTree:
             return sameContent
         else:
             return (other.root == self.root) and sameContent
-			
-	def __eq__(self, other):
+
+    def __eq__(self, other):
         # type: (NDTree, NDTree) -> bool
         sameContent = (other.MAX_POINTS == self.MAX_POINTS) and \
                       (other.MIN_CHILDREN == self.MIN_CHILDREN)
-		return (hash(self.root) == hash(other.root)) and \
-				sameContent
+        return (hash(self.root) == hash(other.root)) and \
+               sameContent
 
     def __ne__(self, other):
         # type: (NDTree, NDTree) -> bool
@@ -134,12 +135,13 @@ class Node:
         # type: (Node, Node, int, int) -> None
         # zero = (0, )
         self.rect = None
-        parent.addNode(self) if parent is not None else None
-        self.setParent(parent)
+        self.parent = parent
         self.nodes = []
         self.L = []
         self.MAX_POINTS = MAX_P
         self.MIN_CHILDREN = MIN_CH
+        parent.addNode(self) if parent is not None else None
+        # self.setParent(parent)
 
     # Membership function
     def hasPoint(self, x):
@@ -204,27 +206,23 @@ class Node:
             return False
 
         sameContent = (other.nodes == self.nodes) and \
-                    (other.L == self.L) and \
-                    (other.MAX_POINTS == self.MAX_POINTS) and \
-                    (other.MIN_CHILDREN == self.MIN_CHILDREN)
+                      (other.L == self.L) and \
+                      (other.MAX_POINTS == self.MAX_POINTS) and \
+                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
 
-        return eqRect and \
-               eqParent and \
-               sameContent
+        return eqRect and eqParent and sameContent
 
-	def __eq__(self, other):
+    def __eq__(self, other):
         # type: (Node, Node) -> bool
         eqRect = (hash(other.rect) == hash(self.rect))
         eqParent = (hash(other.parent) == hash(self.parent))
         sameContent = (other.nodes == self.nodes) and \
-                    (other.L == self.L) and \
-                    (other.MAX_POINTS == self.MAX_POINTS) and \
-                    (other.MIN_CHILDREN == self.MIN_CHILDREN)
+                      (other.L == self.L) and \
+                      (other.MAX_POINTS == self.MAX_POINTS) and \
+                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
 
-        return eqRect and \
-               eqParent and \
-               sameContent
-			   
+        return eqRect and eqParent and sameContent
+
     def __ne__(self, other):
         # type: (Node, Node) -> bool
         return not self.__eq__(other)
@@ -232,7 +230,9 @@ class Node:
     # Identity function (via hashing)
     def __hash__(self):
         # type: (Node) -> int
-        return hash((self.rect, self.parent, self.nodes, self.L, self.MAX_POINTS, self.MIN_CHILDREN))
+        # hash cannot be computed over 'list'; use 'tuple' instead
+        #return hash((self.rect, self.parent, tuple(self.nodes), tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
+        return hash((self.rect, self.parent, tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
 
     # Report functions
     def report(self):
@@ -305,7 +305,7 @@ class Node:
         for n in self.nodes:
             nodes = nodes.union(n.getSubnodesRec())
         return nodes.union(self.getSubnodes())
-      
+
     def numSubnodes(self):
         # type: (Node) -> int
         return len(self.nodes)
@@ -319,9 +319,12 @@ class Node:
     # Point operations
     def addPoint(self, x, pos=-1):
         # type: (Node, tuple, int) -> None
-        if (pos >= 0) and (pos < len(self.nodes)):
+        vprint("x ", x, " pos ", pos, " len ", len(self.L) )
+        if (pos >= 0) and (pos < len(self.L)):
+            vprint("1")
             self.L.insert(pos, x)
         else:
+            vprint("2")
             self.L.append(x)
 
     def removePoint(self, x):
@@ -429,7 +432,7 @@ class Node:
 
     def findPointHighestAverageEuclideanDistance(self):
         # type: (Node) -> (tuple, int)
-        d = Point.dim(self.L[0]) if self.numPoints() > 0 else 1
+        d = dim(self.L[0]) if self.numPoints() > 0 else 1
         y = (0,) * d
         mean_max_distance = 0
         for yp in self.L:
@@ -450,6 +453,7 @@ class Node:
         vprint('Point Highest Avg Eucl Dist', y)
         vprint('New node with point ', y)
         npr = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
+        vprint('Parent ', id(self), " est: ", id(npr.getParent()))
         npr.addPoint(y)
         npr.updateIdealNadir(y)
         self.removePoint(y)
@@ -459,7 +463,9 @@ class Node:
             y, _ = self.findPointHighestAverageEuclideanDistance()
             vprint('New node with point ', y)
             npr = Node(parent=self, MAX_P=self.MAX_POINTS, MIN_CH=self.MIN_CHILDREN)
+            vprint('Parent ', id(self), " est: ", id(npr.getParent()))
             npr.addPoint(y)
+            vprint('Point added ')
             npr.updateIdealNadir(y)
             self.removePoint(y)
             vprint('Current status of self', self.L)
@@ -496,12 +502,12 @@ class Node:
         elif less_equal(rect.min_corner, x) or less_equal(x, rect.max_corner):
             if self.isLeaf():
                 for y in self.L:
-                    #if greater_equal(y, x):
+                    # if greater_equal(y, x):
                     if less_equal(y, x):
                         # x is rejected
                         vprint('Point ', str(x), ' rejected (2)')
                         return nout, False
-                    #elif greater_equal(x, y):
+                    # elif greater_equal(x, y):
                     elif less_equal(x, y):
                         vprint('Removing point ', str(y))
                         self.removePoint(y)
@@ -531,9 +537,10 @@ class Node:
         if self.rect is None:
             # New Ideal and Nadir points
             # dim(ideal) == dim(nadir) == dim(x)
+            # n = Point.dim(x)
             n = dim(x)
-            ideal = (float("inf"), ) * n
-            nadir = (float("-inf"), ) * n
+            ideal = (float("inf"),) * n
+            nadir = (float("-inf"),) * n
             # Delayed creation of Rectangle.
             # Before this point, we do not the dim(x)
             self.rect = Rectangle(ideal, nadir)
