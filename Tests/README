@@ -1,9 +1,9 @@
 
-    README file of the Test suite for MEvoLib
+    README file of the Test suite for ParetoLib
 """""""""""""""""""""""""""""""""""""""""""""""""
 
 The following file contains information about every data file used in the test
-suite of MEvoLib:
+suite of ParetoLib:
 
     - f001.* >  clpA allel of Borrelia burgdorferi s.l. (downloaded from PubMLST
                     http://pubmlst.org/borrelia).
