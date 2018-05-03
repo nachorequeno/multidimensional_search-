@@ -14,44 +14,12 @@ EPS = 1e-5
 DELTA = 1e-5
 
 
-################
-# Simple tests #
-################
+class SearchTestCase(unittest.TestCase):
 
-def testBinSearch(nfile):
-    x = (0.0,) * 2
-    y = (1.0,) * 2
-    xy = Rectangle(x, y)
-
-    ora = loadOracleFunction(nfile=nfile, human_readable=True)
-    f = ora.membership()
-
-    return search(xy.diagToSegment(), f)
-
-
-def testMultiDimSearch(nfile):
-    x = (0.0,) * 2
-    y = (1.0,) * 2
-    xyspace = Rectangle(x, y)
-
-    ora = loadOracleFunction(nfile=nfile, human_readable=True)
-    f = ora.membership()
-
-    rs = multidim_search(xyspace, f)
-    rs.toMatPlot2D()
-
-
-#################
-# Complex tests #
-#################
-
-class SearchTestCase (unittest.TestCase):
-
-    def setUp ( self ) :
+    def setUp(self):
         None
 
-
-    def tearDown ( self ) :
+    def tearDown(self):
         None
 
     # Multidimensional search
@@ -258,12 +226,16 @@ class SearchTestCase (unittest.TestCase):
         print ('Time tests: ', str(time0))
 
 
-class SearchOracleFunctionTestCase (SearchTestCase):
+class SearchOracleFunctionTestCase(SearchTestCase):
+
+    def setUp(self):
+        super(SearchOracleFunctionTestCase, self).setUp()
+        self.this_dir = "Search/OracleFunction"
 
     # Loading Oracles
     def loadOracleFunction(self,
                            nfile,
-                           human_readable):
+                           human_readable=True):
         print ('Creating OracleFunction')
         start = time.time()
         ora = OracleFunction()
@@ -275,18 +247,19 @@ class SearchOracleFunctionTestCase (SearchTestCase):
 
     # Dimensional tests
     def OracleFunction2D(self,
-                             nfile,
-                             min_cornerx=0.0,
-                             min_cornery=0.0,
-                             max_cornerx=1.0,
-                             max_cornery=1.0,
-                             epsilon=EPS,
-                             delta=DELTA,
-                             verbose=False,
-                             blocking=False,
-                             test=False,
-                             sleep=0):
-        ora = self.loadOracleFunction(nfile, human_readable=True)
+                         nfile,
+                         human_readable=True,
+                         min_cornerx=0.0,
+                         min_cornery=0.0,
+                         max_cornerx=1.0,
+                         max_cornery=1.0,
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0):
+        ora = self.loadOracleFunction(nfile, human_readable=human_readable)
         fora = ora.membership()
 
         xyspace = self.create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
@@ -304,20 +277,22 @@ class SearchOracleFunctionTestCase (SearchTestCase):
         self.verify2D(fora, rs, test, min_cornerx, min_cornery, max_cornerx, max_cornery)
 
     def OracleFunction3D(self,
-                             nfile,
-                             min_cornerx=0.0,
-                             min_cornery=0.0,
-                             min_cornerz=0.0,
-                             max_cornerx=1.0,
-                             max_cornery=1.0,
-                             max_cornerz=1.0,
-                             epsilon=EPS,
-                             delta=DELTA,
-                             verbose=False,
-                             blocking=False,
-                             test=False,
-                             sleep=0):
-        ora = self.loadOracleFunction(nfile, human_readable=True)
+                         nfile,
+                         human_readable=True,
+                         min_cornerx=0.0,
+                         min_cornery=0.0,
+                         min_cornerz=0.0,
+                         max_cornerx=1.0,
+                         max_cornery=1.0,
+                         max_cornerz=1.0,
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0,
+                         ):
+        ora = self.loadOracleFunction(nfile, human_readable=human_readable)
         fora = ora.membership()
 
         xyspace = self.create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
@@ -334,97 +309,104 @@ class SearchOracleFunctionTestCase (SearchTestCase):
         self.verify3D(fora, rs, test, min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
     def OracleFunctionND(self,
-                             nfile,
-                             min_corner=0.0,
-                             max_corner=1.0,
-                             epsilon=EPS,
-                             delta=DELTA,
-                             verbose=False,
-                             blocking=False,
-                             test=False,
-                             sleep=0):
-        ora = self.loadOracleFunction(nfile, human_readable=True)
+                         nfile,
+                         human_readable=True,
+                         min_corner=0.0,
+                         max_corner=1.0,
+                         epsilon=EPS,
+                         delta=DELTA,
+                         verbose=False,
+                         blocking=False,
+                         test=False,
+                         sleep=0,
+                         ):
+        ora = self.loadOracleFunction(nfile, human_readable=human_readable)
         fora = ora.membership()
-        dim = ora.dim()
+        d = ora.dim()
 
-        minc = (min_corner,) * dim
-        maxc = (max_corner,) * dim
+        minc = (min_corner,) * d
+        maxc = (max_corner,) * d
         xyspace = Rectangle(minc, maxc)
 
         rs = self.msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
 
         t = np.arange(min_corner, max_corner, 0.1)
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
-        list_test_points = list(itertools.product(t, repeat=dim))
+        list_test_points = list(itertools.product(t, repeat=d))
 
         self.verifyND(fora, rs, list_test_points, test)
 
     def test_2D(self):
-        this_dir = os.getcwd() + '/Search/OracleFunction'
-        test_2D_dir = this_dir + '/2D'
-
-        files_path = [os.path.abspath(x) for x in os.listdir(test_2D_dir)]
-        test_2D_txt = [x for x in files_path if x.endswith(".txt")]
+        test_2D_dir = self.this_dir + "/2D/"
+        files_path = os.listdir(test_2D_dir)
+        test_2D_txt = [test_2D_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_2D_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OracleFunction2D(min_cornerx=0.0,
-                                 min_cornery=0.0,
-                                 max_cornerx=1.0,
-                                 max_cornery=1.0,
-                                 epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                                  min_cornery=0.0,
+                                  max_cornerx=1.0,
+                                  max_cornery=1.0,
+                                  epsilon=EPS,
+                                  delta=DELTA,
+                                  verbose=False,
+                                  blocking=False,
+                                  test=False,
+                                  sleep=0,
+                                  nfile=test,
+                                  human_readable=True)
 
     def test_3D(self):
-        this_dir = os.getcwd() + '/Search/OracleFunction'
-        test_3D_dir = this_dir + '/3D'
-
-        files_path = [os.path.abspath(x) for x in os.listdir(test_3D_dir)]
-        test_3D_txt = [x for x in files_path if x.endswith(".txt")]
+        test_3D_dir = self.this_dir + "/3D/"
+        files_path = os.listdir(test_3D_dir)
+        test_3D_txt = [test_3D_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_3D_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OracleFunction3D(min_cornerx=0.0,
-                                 min_cornery=0.0,
-                                 min_cornerz=0.0,
-                                 max_cornerx=1.0,
-                                 max_cornery=1.0,
-                                 max_cornerz=1.0,
-                                 epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                                  min_cornery=0.0,
+                                  min_cornerz=0.0,
+                                  max_cornerx=1.0,
+                                  max_cornery=1.0,
+                                  max_cornerz=1.0,
+                                  epsilon=EPS,
+                                  delta=DELTA,
+                                  verbose=False,
+                                  blocking=False,
+                                  test=False,
+                                  sleep=0,
+                                  nfile=test,
+                                  human_readable=True)
 
     def test_ND(self):
-        this_dir = os.getcwd() + '/Search/OracleFunction'
-        test_ND_dir = this_dir + '/ND'
-        files_path = [os.path.abspath(x) for x in os.listdir(test_ND_dir)]
-        test_ND_txt = [x for x in files_path if x.endswith(".txt")]
+        test_ND_dir = self.this_dir + "/ND/"
+        files_path = os.listdir(test_ND_dir)
+        test_ND_txt = [test_ND_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_ND_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OracleFunctionND(min_corner=0.0,
-                                 max_corner=1.0,
-                                 epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                                  max_corner=1.0,
+                                  epsilon=EPS,
+                                  delta=DELTA,
+                                  verbose=False,
+                                  blocking=False,
+                                  test=False,
+                                  sleep=0,
+                                  nfile=test,
+                                  human_readable=True)
 
 
 class SearchOraclePointTestCase(SearchTestCase):
 
+    def setUp(self):
+        super(SearchOraclePointTestCase, self).setUp()
+        self.this_dir = "Search/OraclePoint"
+
     # Loading Oracles
     def loadOraclePoint(self,
                         nfile,
-                        human_readable):
+                        human_readable=False):
         print ('Creating OraclePoint')
         start = time.time()
         ora = OraclePoint()
@@ -436,18 +418,19 @@ class SearchOraclePointTestCase(SearchTestCase):
 
     # Dimensional tests
     def OraclePoint2D(self,
-                          nfile,
-                          min_cornerx=0.0,
-                          min_cornery=0.0,
-                          max_cornerx=1.0,
-                          max_cornery=1.0,
-                          epsilon=EPS,
-                          delta=DELTA,
-                          verbose=False,
-                          blocking=False,
-                          test=False,
-                          sleep=0):
-        ora = self.loadOraclePoint(nfile, human_readable=False)
+                      nfile,
+                      human_readable=False,
+                      min_cornerx=0.0,
+                      min_cornery=0.0,
+                      max_cornerx=1.0,
+                      max_cornery=1.0,
+                      epsilon=EPS,
+                      delta=DELTA,
+                      verbose=False,
+                      blocking=False,
+                      test=False,
+                      sleep=0):
+        ora = self.loadOraclePoint(nfile, human_readable=human_readable)
         fora = ora.membership()
 
         points = ora.getPoints()
@@ -461,29 +444,30 @@ class SearchOraclePointTestCase(SearchTestCase):
         maxy = __builtin__.max(ys)
 
         xyspace = self.create2DSpace(__builtin__.min(minx, min_cornerx),
-                                __builtin__.min(miny, min_cornery),
-                                __builtin__.min(maxx, max_cornerx),
-                                __builtin__.min(maxy, max_cornery))
+                                     __builtin__.min(miny, min_cornery),
+                                     __builtin__.min(maxx, max_cornerx),
+                                     __builtin__.min(maxy, max_cornery))
 
         rs = self.msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
         rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
         self.verify2D(fora, rs, test, min_cornerx, min_cornery, max_cornerx, max_cornery)
 
     def OraclePoint3D(self,
-                          nfile,
-                          min_cornerx=0.0,
-                          min_cornery=0.0,
-                          min_cornerz=0.0,
-                          max_cornerx=1.0,
-                          max_cornery=1.0,
-                          max_cornerz=1.0,
-                          epsilon=EPS,
-                          delta=DELTA,
-                          verbose=False,
-                          blocking=False,
-                          test=False,
-                          sleep=0):
-        ora = self.loadOraclePoint(nfile, human_readable=False)
+                      nfile,
+                      human_readable=False,
+                      min_cornerx=0.0,
+                      min_cornery=0.0,
+                      min_cornerz=0.0,
+                      max_cornerx=1.0,
+                      max_cornery=1.0,
+                      max_cornerz=1.0,
+                      epsilon=EPS,
+                      delta=DELTA,
+                      verbose=False,
+                      blocking=False,
+                      test=False,
+                      sleep=0):
+        ora = self.loadOraclePoint(nfile, human_readable=human_readable)
         fora = ora.membership()
 
         points = ora.getPoints()
@@ -500,27 +484,28 @@ class SearchOraclePointTestCase(SearchTestCase):
         maxz = __builtin__.max(zs)
 
         xyspace = self.create3DSpace(__builtin__.min(minx, min_cornerx),
-                                __builtin__.min(miny, min_cornery),
-                                __builtin__.min(minz, min_cornerz),
-                                __builtin__.min(maxx, max_cornerx),
-                                __builtin__.min(maxy, max_cornery),
-                                __builtin__.min(maxz, max_cornerz))
+                                     __builtin__.min(miny, min_cornery),
+                                     __builtin__.min(minz, min_cornerz),
+                                     __builtin__.min(maxx, max_cornerx),
+                                     __builtin__.min(maxy, max_cornery),
+                                     __builtin__.min(maxz, max_cornerz))
 
         rs = self.msearch(xyspace, fora, epsilon, delta, verbose, blocking, sleep)
         rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
         self.verify3D(fora, rs, test, min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
     def OraclePointND(self,
-                          nfile,
-                          epsilon=EPS,
-                          delta=DELTA,
-                          verbose=False,
-                          blocking=False,
-                          test=False,
-                          sleep=0):
-        ora = self.loadOraclePoint(nfile, human_readable=False)
+                      nfile,
+                      human_readable=False,
+                      epsilon=EPS,
+                      delta=DELTA,
+                      verbose=False,
+                      blocking=False,
+                      test=False,
+                      sleep=0):
+        ora = self.loadOraclePoint(nfile, human_readable=human_readable)
         fora = ora.membership()
-        dim = ora.dim()
+        d = ora.dim()
 
         points = ora.getPoints()
         sorted_points = sorted(points)
@@ -533,70 +518,70 @@ class SearchOraclePointTestCase(SearchTestCase):
 
         t = np.arange(minc, maxc, 0.1)
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
-        list_test_points = list(itertools.product(t, repeat=dim))
+        list_test_points = list(itertools.product(t, repeat=d))
 
         self.verifyND(fora, rs, list_test_points, test)
 
     def test_2D(self):
-        this_dir = os.getcwd() + '/Search/OraclePoint'
-        test_2D_dir = this_dir + '/2D'
-
-        files_path = [os.path.abspath(x) for x in os.listdir(test_2D_dir)]
-        test_2D_txt = [x for x in files_path if x.endswith(".txt")]
+        test_2D_dir = self.this_dir + "/2D/"
+        files_path = os.listdir(test_2D_dir)
+        test_2D_txt = [test_2D_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_2D_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OraclePoint2D(min_cornerx=0.0,
-                                 min_cornery=0.0,
-                                 max_cornerx=1.0,
-                                 max_cornery=1.0,
-                                 epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                               min_cornery=0.0,
+                               max_cornerx=1.0,
+                               max_cornery=1.0,
+                               epsilon=EPS,
+                               delta=DELTA,
+                               verbose=False,
+                               blocking=False,
+                               test=False,
+                               sleep=0,
+                               nfile=test,
+                               human_readable=False)
 
     def test_3D(self):
-        this_dir = os.getcwd() + '/Search/OraclePoint'
-        test_3D_dir = this_dir + '/3D'
-
-        files_path = [os.path.abspath(x) for x in os.listdir(test_3D_dir)]
-        test_3D_txt = [x for x in files_path if x.endswith(".txt")]
+        test_3D_dir = self.this_dir + "/3D/"
+        files_path = os.listdir(test_3D_dir)
+        test_3D_txt = [test_3D_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_3D_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OraclePoint3D(min_cornerx=0.0,
-                                 min_cornery=0.0,
-                                 min_cornerz=0.0,
-                                 max_cornerx=1.0,
-                                 max_cornery=1.0,
-                                 max_cornerz=1.0,
-                                 epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                               min_cornery=0.0,
+                               min_cornerz=0.0,
+                               max_cornerx=1.0,
+                               max_cornery=1.0,
+                               max_cornerz=1.0,
+                               epsilon=EPS,
+                               delta=DELTA,
+                               verbose=False,
+                               blocking=False,
+                               test=False,
+                               sleep=0,
+                               nfile=test,
+                               human_readable=False)
 
     def test_ND(self):
-        this_dir = os.getcwd() + '/Search/OraclePoint'
-        test_ND_dir = this_dir + '/ND'
-        files_path = [os.path.abspath(x) for x in os.listdir(test_ND_dir)]
-        test_ND_txt = [x for x in files_path if x.endswith(".txt")]
+        test_ND_dir = self.this_dir + "/ND/"
+        files_path = os.listdir(test_ND_dir)
+        test_ND_txt = [test_ND_dir + x for x in files_path if x.endswith(".txt")]
 
         for test in test_ND_txt:
+            self.assertTrue(os.path.isfile(test), test)
             self.OraclePointND(epsilon=EPS,
-                                 delta=DELTA,
-                                 verbose=False,
-                                 blocking=False,
-                                 test=False,
-                                 sleep=0,
-                                 nfile=test)
+                               delta=DELTA,
+                               verbose=False,
+                               blocking=False,
+                               test=False,
+                               sleep=0,
+                               nfile=test,
+                               human_readable=False)
 
 
 if __name__ == '__main__':
-
     runner = unittest.TextTestRunner(verbosity=2)
     unittest.main(testRunner=runner)
 

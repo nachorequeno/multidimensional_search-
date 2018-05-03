@@ -106,11 +106,11 @@ class OracleFunctionTestCase (unittest.TestCase):
 
     def test_files ( self) :
 
-        self.read_write_files_test(False)
-        self.read_write_files_test(True)
+        self.read_write_files(False)
+        self.read_write_files(True)
 
-    def read_write_files_test(self,
-                            human_readable=False):
+    def read_write_files(self,
+                         human_readable=False):
         # type: (_, bool) -> _
 
         # Condition

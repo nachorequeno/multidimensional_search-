@@ -36,6 +36,8 @@ class OraclePointTestCase (unittest.TestCase):
     def test_NDTree(self,
                    min_corner=0.0,
                    max_corner=1.0):
+        # type: (_, float, float) -> _
+
         def f1(x):
             return 1 / x if x > 0.0 else 1000
 
@@ -95,15 +97,16 @@ class OraclePointTestCase (unittest.TestCase):
 
 
     # Test OraclePoint
-    def test_OraclePoint(self):
-        self.OraclePoint_test(human_readable=False)
-        self.OraclePoint_test(human_readable=True)
+    def test_OraclePoints(self):
+        self.read_write_files(human_readable=False)
+        self.read_write_files(human_readable=True)
 
 
-    def OraclePoint_test(self,
+    def read_write_files(self,
                         min_corner=0.0,
                         max_corner=1.0,
                         human_readable=False):
+        # type: (_, float, float, bool) -> _
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 

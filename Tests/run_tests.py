@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 #
-#   MEvoLib  Copyright (C) 2016  J. Alvarez-Jarreta
+#   ParetoLib  Copyright (C) 2018  J. Ignacio Requeno
 #
 #   This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 #   This is free software, and you are welcome to redistribute it under certain
@@ -8,7 +8,7 @@
 #
 #-------------------------------------------------------------------------------
 # File :  run_tests.py
-# Last version :  v1.00 ( 17/Jul/2016 )
+# Last version :  v1.0 ( 23/Apr/2018 )
 # Description :  Run a set of PyUnit-based regression tests.
 #       This will find all modules whose name is "test_*.py" in the test
 #       directory, and run them. Various command line options provide additional
@@ -23,9 +23,9 @@
 #-------------------------------------------------------------------------------
 # Historical report :
 #
-#   DATE :  17/Jul/2016
-#   VERSION :  v1.00
-#   AUTHOR(s) :  J. Alvarez-Jarreta
+#   DATE :  23/Apr/2018
+#   VERSION :  v1.0
+#   AUTHOR(s) :  J. Ignacio Requeno
 #
 #-------------------------------------------------------------------------------
 # Note :  The content of this file has been created using "run_tests.py" from
@@ -53,9 +53,9 @@ import unittest
 import distutils.util
 import traceback
 
-# If we want to be able to call "run_tests.py" BEFORE MEvoLib is installed, we
+# If we want to be able to call "run_tests.py" BEFORE ParetoLib is installed, we
 # can't use this:
-#     from MEvoLib._py3k import StringIO
+#     from ParetoLib._py3k import StringIO
 try:
     from StringIO import StringIO  # Python 2 (byte strings)
 except ImportError:
@@ -85,7 +85,7 @@ def main ( argv ) :
         int
             Number of failures.
     """
-    # Insert MEvoLib's paths in sys.path: '../build/lib.*' and '..'
+    # Insert ParetoLib's paths in sys.path: '../build/lib.*' and '..'
     test_path = sys.path[0] or '.'
     source_path = os.path.abspath('{}/..'.format(test_path))
     sys.path.insert(1, source_path)
@@ -170,9 +170,9 @@ class TestRunner ( unittest.TextTestRunner ) :
                     # New in Python 3.5: we don't always get an exception.
                     # Instead this is a list of error messages as strings
                     for msg in loader.errors :
-                        if ( 'MEvoLib.MissingExtDependencyError: ' in msg ) :
+                        if ( 'ParetoLib.MissingExtDependencyError: ' in msg ) :
                             # Remove the traceback, etc.
-                            msg = msg[msg.find('MEvoLib.Missing'):]
+                            msg = msg[msg.find('ParetoLib.Missing'):]
                             msg = msg[msg.find('Error: '):]
                             sys.stderr.write('skipping. {}\n'.format(msg))
                             return ( True )

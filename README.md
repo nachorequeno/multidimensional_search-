@@ -30,9 +30,14 @@ $ pip install -r requirements.txt
 Afterwards you need to run:
 
 $ python setup.py build
+
 $ python setup.py install
 
 for installing the library. In order to run all the tests, you must execute:
+
+$ python setup.py install
+
+or
 
 $ pytest
 
@@ -45,7 +50,8 @@ installation folder with a simple option:
 
 $ pip install -r requirements.txt --user
 
-$ python setup.py build --user
+$ python setup.py build
+
 $ python setup.py install --user
 
 In Unix/Mac OS X environments:, the structure of the installation folders will be the following:
@@ -102,15 +108,15 @@ frontier. The Pareto front is obtained by a NDTree [3].
 ![alt text][paretofront]
 
 Finally, the last image shows the partitioning that is learnt by our algorithm thanks to
-the *Oracle* guidance. The green side corresponds to *X1*, the red side corresponds 
-to *X2* and a gap in blue, which corresponds to the border between the two closures.
-The 
+the *Oracle* guidance. The green side corresponds to *X1* and the red side corresponds 
+to *X2*. A gap in blue may appear between the two closures, which corresponds to the border 
+and can be set arbitrarily small depending on the accuracy required by the user.
 
 ![alt text][multidim_search]
 
-[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/cloud_points.png "Cloud of points"
-[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/pareto_front.png "Pareto front"
-[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/master/doc/multidim_search.png "Upper and lower closures"
+[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/cloud_points.png "Cloud of points"
+[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/pareto_front.png "Pareto front"
+[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
 
@@ -118,9 +124,9 @@ The
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
 It is implemented by the function:
  
-ParetoLib.Search.multidim_search(xspace,
+ParetoLib.Search.Search.multidim_search(xspace,
                               oracle,
-                              epsilon=EPS,
+                              epsilon=EPSILON,
                               delta=DELTA,
                               verbose=False,
                               blocking=False,
@@ -136,14 +142,14 @@ space and a point 'y' of the Pareto front.
 * verbose: boolean that specifies if the algorithm must print traces for
 debugging options.
 * blocking: boolean that specifies if the learning algorithm musts plot 
-intermediate results in 2D graphics.
-* sleep: time in seconds that the intermediate 2D graphic must be shown in the screen.
+intermediate results in 2D/3D graphics.
+* sleep: time in seconds that the intermediate 2D/3D graphic must be shown in the screen.
                     
 As a result, the function returns an object of the class *ResultSet*. 
 A set of running examples for 2D and 3D can be found in the Test folder.
 
 ### Saving and plotting the results
-The result of the learning process is saved in an object of the class *ResultSet*.
+The result of the learning process is saved in an object of the *ResultSet* class.
 This object is a data structure composed of three elements: the upper closure (*X1*), the
 lower closure (*X2*), and the gap between X1 and X2 representing the precision error of the
 learning process. 
