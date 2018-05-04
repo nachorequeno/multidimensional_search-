@@ -35,9 +35,11 @@ $ python setup.py install
 
 for installing the library. In order to run all the tests, you must execute:
 
-$ python setup.py install
+$ python setup.py test
 
 or
+
+$ cd Tests
 
 $ pytest
 
@@ -100,23 +102,27 @@ The second *Oracle*, named *OraclePoint*, defines the membership of point *x*
 to the closure *X1* based on a cloud of points. For instance, next image shows a dense
 cloud of points in *X1* (dark side).
 
-![alt text][cloudpoints]
+![alt text](https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/cloud_points.png "Cloud of points")
 
 The Pareto front is abbreviated by the following image, which only shows the points in the 
 frontier. The Pareto front is obtained by a NDTree [3].
 
-![alt text][paretofront]
+![alt text](https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/pareto_front.png "Pareto front")
 
 Finally, the last image shows the partitioning that is learnt by our algorithm thanks to
 the *Oracle* guidance. The green side corresponds to *X1* and the red side corresponds 
 to *X2*. A gap in blue may appear between the two closures, which corresponds to the border 
 and can be set arbitrarily small depending on the accuracy required by the user.
 
-![alt text][multidim_search]
+![alt text](https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/multidim_search.png "Upper and lower closures")
 
-[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/cloud_points.png "Cloud of points"
-[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/pareto_front.png "Pareto front"
-[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/multidim_search.png "Upper and lower closures"
+
+Samples of *OracleFunction* and *OraclePoint* definitions can be found in 
+Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
+
+[comment]: <> [cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/cloud_points.png "Cloud of points"
+[comment]: <> [paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/pareto_front.png "Pareto front"
+[comment]: <> [multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
 
@@ -146,7 +152,9 @@ intermediate results in 2D/3D graphics.
 * sleep: time in seconds that the intermediate 2D/3D graphic must be shown in the screen.
                     
 As a result, the function returns an object of the class *ResultSet*. 
-A set of running examples for 2D and 3D can be found in the Test folder.
+*SearchOracleFunction* and *SearchOraclePoint* classes are wrappers that simplify 
+and automatize the calling to this function for *OracleFunction* and *OraclePoint* oracles.
+A set of running examples for 2D, 3D and ND can be found in Test/test_Search.py.
 
 ### Saving and plotting the results
 The result of the learning process is saved in an object of the *ResultSet* class.

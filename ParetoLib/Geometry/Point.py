@@ -13,6 +13,7 @@ def norm(x):
     _sum = sum(square_element_i)
     return math.sqrt(_sum)
 
+
 # Euclidean distance between two points
 def distance(x, xprime):
     # type: (tuple, tuple) -> float

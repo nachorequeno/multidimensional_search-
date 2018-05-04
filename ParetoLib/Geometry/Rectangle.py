@@ -1,15 +1,16 @@
 import __builtin__
 from multiprocessing import Pool, cpu_count, Process, Queue
-#from multiprocessing import Process, Queue
+# from multiprocessing import Process, Queue
 
 import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Point import *
-#import ParetoLib.Geometry.Point
+
+
+# import ParetoLib.Geometry.Point
 
 # Rectangle
 # Rectangular Half-Space
@@ -18,8 +19,8 @@ from ParetoLib.Geometry.Point import *
 class Rectangle:
     # min_corner, max_corner
     def __init__(self,
-                 min_corner=(float("-inf"), )*2,
-                 max_corner=(float("-inf"), )*2):
+                 min_corner=(float("-inf"),) * 2,
+                 max_corner=(float("-inf"),) * 2):
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
 
@@ -28,22 +29,6 @@ class Rectangle:
 
         assert greater_equal(self.max_corner, self.min_corner) or \
                incomparable(self.min_corner, self.max_corner)
-
-
-    def __init__2(self, min_corner, max_corner):
-        # type: (Rectangle, tuple, tuple) -> None
-        assert dim(min_corner) == dim(max_corner)
-        if incomparable(min_corner, max_corner):
-            min_c = min_corner if min_corner[0] <= max_corner[0] else max_corner
-            max_c = max_corner if min_corner[0] <= max_corner[0] else min_corner
-            self.min_corner = min_c
-            self.max_corner = max_c
-            # self.min_corner = min_corner
-            # self.max_corner = max_corner
-        else:
-            self.min_corner = min(min_corner, max_corner)
-            self.max_corner = max(min_corner, max_corner)
-            assert greater_equal(self.max_corner, self.min_corner)
 
     # Membership function
     def __contains__(self, xpoint):
@@ -150,50 +135,50 @@ class Rectangle:
         # type: (Rectangle, int) -> list
         # Return n points along the rectangle diagonal, excluding min/max corners
         # n internal points = n + 1 internal segments
-        m = n+1
+        m = n + 1
         diag_step = div(self.diag(), m)
         min_point = add(self.min_corner, diag_step)
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
         return point_list
 
-#    def overlapsStrict(self, other):
-#        # type: (Rectangle, Rectangle) -> bool
-#        other_vertices = other.vertices()
-#        other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
-#        other_overlaps_self = any([other_vertex in self for other_vertex in other_vertices])
-#
-#        self_vertices = self.vertices()
-#        self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
-#        self_overlaps_other = any([self_vertex in other for self_vertex in self_vertices])
-#        return len(other_vertices_inside_self) > 0 and \
-#               len(self_vertices_inside_other) > 0 and \
-#               other_overlaps_self and \
-#               self_overlaps_other
+    #    def overlapsStrict(self, other):
+    #        # type: (Rectangle, Rectangle) -> bool
+    #        other_vertices = other.vertices()
+    #        other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
+    #        other_overlaps_self = any([other_vertex in self for other_vertex in other_vertices])
+    #
+    #        self_vertices = self.vertices()
+    #        self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
+    #        self_overlaps_other = any([self_vertex in other for self_vertex in self_vertices])
+    #        return len(other_vertices_inside_self) > 0 and \
+    #               len(self_vertices_inside_other) > 0 and \
+    #               other_overlaps_self and \
+    #               self_overlaps_other
 
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
         other_vertices = other.vertices()
         overlap = any([other_vertex in self for other_vertex in other_vertices])
-        #overlap = any([self.strictIn(other_vertex) for other_vertex in other_vertices])
+        # overlap = any([self.strictIn(other_vertex) for other_vertex in other_vertices])
         return overlap
 
     def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
         # Create a default rectangle of area/volume = 0
-        #minc = (float("-inf"), ) * self.dim()
-        #maxc = (float("-inf"), ) * self.dim()
+        # minc = (float("-inf"), ) * self.dim()
+        # maxc = (float("-inf"), ) * self.dim()
         minc = (float(0),) * self.dim()
         maxc = (float(0),) * self.dim()
 
-        #if self.overlapsStrict(other):
+        # if self.overlapsStrict(other):
         if self.overlaps(other):
             # At least, one vertex of each rectangle is inside the other rectangle
             other_vertices = other.vertices()
-            #other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if self.strictIn(other_vertex)]
+            # other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if self.strictIn(other_vertex)]
             other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
 
             self_vertices = self.vertices()
-            #self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if other.strictIn(self_vertex)]
+            # self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if other.strictIn(self_vertex)]
             self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
             minc = self_vertices_inside_other[0]
             maxc = other_vertices_inside_self[0]
@@ -222,7 +207,7 @@ class Rectangle:
         # type: (Rectangle, str, int, int, int, float) -> Poly3DCollection
         assert (self.dim() >= 3), "Dimension required >= 3"
 
-        minc = (self.min_corner[xaxe], self.min_corner[yaxe], self.min_corner[zaxe], )
+        minc = (self.min_corner[xaxe], self.min_corner[yaxe], self.min_corner[zaxe],)
         maxc = (self.max_corner[xaxe], self.max_corner[yaxe], self.max_corner[zaxe],)
         r = Rectangle(minc, maxc)
 
@@ -231,12 +216,12 @@ class Rectangle:
         points = np.array(sorted(r.vertices()))
 
         edges = [
-                [points[0], points[1], points[3], points[2]],
-                [points[2], points[3], points[7], points[6]],
-                [points[6], points[4], points[5], points[7]],
-                [points[4], points[5], points[1], points[0]],
-                [points[0], points[4], points[6], points[2]],
-                [points[1], points[5], points[7], points[3]]
+            [points[0], points[1], points[3], points[2]],
+            [points[2], points[3], points[7], points[6]],
+            [points[6], points[4], points[5], points[7]],
+            [points[4], points[5], points[1], points[0]],
+            [points[0], points[4], points[6], points[2]],
+            [points[1], points[5], points[7], points[3]]
         ]
 
         faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
@@ -248,84 +233,86 @@ class Rectangle:
 
 
 # Auxiliary functions
-def cpoint(i, alphai, xpoint, xspace):
+def cpoint(i, alphai, ypoint, xspace):
     # type: (int, int, tuple, Rectangle) -> Rectangle
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
     if alphai == 0:
-        result_xspace.max_corner = subt(i, xspace.max_corner, xpoint)
+        result_xspace.max_corner = subt(i, xspace.max_corner, ypoint)
         # result_xspace.min_corner = xspace.min_corner
     if alphai == 1:
         # result_xspace.max_corner = xspace.max_corner
-        result_xspace.min_corner = subt(i, xspace.min_corner, xpoint)
+        result_xspace.min_corner = subt(i, xspace.min_corner, ypoint)
     return result_xspace
 
 
-def crect(i, alphai, xrectangle, xspace):
+def crect(i, alphai, yrectangle, xspace):
     # type: (int, int, Rectangle, Rectangle) -> Rectangle
     if alphai == 0:
-        return cpoint(i, alphai, xrectangle.max_corner, xspace)
+        return cpoint(i, alphai, yrectangle.max_corner, xspace)
     if alphai == 1:
-        return cpoint(i, alphai, xrectangle.min_corner, xspace)
+        return cpoint(i, alphai, yrectangle.min_corner, xspace)
 
 
-def bpoint(alpha, xpoint, xspace):
+def bpoint(alpha, ypoint, xspace):
     # type: (tuple, tuple, Rectangle) -> Rectangle
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    assert (dim(xspace.min_corner) == dim(xpoint)), \
+    assert (dim(xspace.min_corner) == dim(ypoint)), \
         "xspace.min_corner and xpoint do not share the same dimension"
-    # assert (dim(xspace.max_corner) == dim(xpoint)), \
-    #    "xspace.max_corner and xpoint do not share the same dimension"
+    # assert (dim(ypoint.max_corner) == dim(ypoint)), \
+    #    "xspace.max_corner and ypoint do not share the same dimension"
     temp1 = Rectangle(xspace.min_corner, xspace.max_corner)
     for i, alphai in enumerate(alpha):
-        temp2 = cpoint(i, alphai, xpoint, temp1)
+        temp2 = cpoint(i, alphai, ypoint, temp1)
         temp1 = temp2
     return temp1
 
 
-def brect(alpha, xrectangle, xspace):
+def brect(alpha, yrectangle, xspace):
     # type: (tuple, Rectangle, Rectangle) -> Rectangle
-    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
+    assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    assert (dim(alpha) == dim(xrectangle.min_corner)), \
+    assert (dim(alpha) == dim(yrectangle.min_corner)), \
         "alpha and xrectangle.min_corner do not share the same dimension"
-    assert (dim(xspace.min_corner) == dim(xrectangle.min_corner)), \
+    assert (dim(xspace.min_corner) == dim(yrectangle.min_corner)), \
         "xspace.min_corner and xrectangle.min_corner do not share the same dimension"
-    # assert (dim(xspace.max_corner) == dim(xrectangle.max_corner)), \
-    #    "xspace.max_corner and xrectangle.max_corner do not share the same dimension"
+    # assert (dim(xspace.max_corner) == dim(yrectangle.max_corner)), \
+    #    "xspace.max_corner and yrectangle.max_corner do not share the same dimension"
     temp1 = Rectangle(xspace.min_corner, xspace.max_corner)
     for i, alphai in enumerate(alpha):
-        temp2 = crect(i, alphai, xrectangle, temp1)
+        temp2 = crect(i, alphai, yrectangle, temp1)
         temp1 = temp2
     return temp1
 
-def irect(alphaincomp, xrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> list
-    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
-        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
-    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
-        "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
-    #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
-    #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
-    return [brect(alphaincomp_i, xrectangle, xspace) for alphaincomp_i in alphaincomp]
 
-def pirect(alphaincomp, xrectangle, xspace):
+def irect(alphaincomp, yrectangle, xspace):
     # type: (set, Rectangle, Rectangle) -> list
-    assert (dim(xrectangle.min_corner) == dim(xrectangle.max_corner)), \
+    assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
         "xspace.min_corner and xspace.max_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.min_corner)), \
-    #    "alphaincomp_list and xrectangle.min_corner do not share the same dimension"
-    # assert (dim(alphaincomp_list) == dim(xrectangle.max_corner)), \
-    #    "alphaincomp_list and xrectangle.max_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(yrectangle.min_corner)), \
+    #    "alphaincomp_list and yrectangle.min_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(yrectangle.max_corner)), \
+    #    "alphaincomp_list and yrectangle.max_corner do not share the same dimension"
+    return [brect(alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp]
+
+
+def pirect(alphaincomp, yrectangle, xspace):
+    # type: (set, Rectangle, Rectangle) -> list
+    assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
+        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
+    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
+        "xspace.min_corner and xspace.max_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(yrectangle.min_corner)), \
+    #    "alphaincomp_list and yrectangle.min_corner do not share the same dimension"
+    # assert (dim(alphaincomp_list) == dim(yrectangle.max_corner)), \
+    #    "alphaincomp_list and yrectangle.max_corner do not share the same dimension"
     nproc = cpu_count()
     pool = Pool(nproc)
-    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, xrectangle, xspace))
+    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, yrectangle, xspace))
                         for alphaincomp_i in alphaincomp]
     pool.close()
     pool.join()

@@ -1,7 +1,7 @@
 from functools import reduce
 
 from ParetoLib.Geometry.Point import *
-#import ParetoLib.Geometry.Point
+
 
 class Segment:
     # l, h are points
@@ -77,5 +77,5 @@ class Segment:
         square_diagonal = tuple(di * di for di in diagonal)
         _sum = sum(square_diagonal)
         # square_diagonal = map(lambda si: si * si, diagonal)
-        #_sum = reduce(lambda si, sj: si + sj, square_diagonal)
+        # _sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)

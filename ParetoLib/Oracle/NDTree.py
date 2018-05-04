@@ -5,28 +5,8 @@ import __builtin__
 from ParetoLib.Geometry.Rectangle import *
 from ParetoLib.Geometry.Point import *
 
-VERBOSE = True
-VERBOSE = False
-
-if VERBOSE:
-    # Verbose print (stdout)
-    def vprint(*args):
-        # Print each argument separately so caller doesn't need to
-        # stuff everything to be printed into a single string
-        for arg in args:
-            print arg,
-        print
-
-
-    # Error print (stderr)
-    def eprint(*args):
-        for arg in args:
-            print >> sys.stderr, arg
-        print >> sys.stderr
-
-else:
-    vprint = lambda *a: None  # do-nothing function
-    eprint = lambda *a: None  # do-nothing function
+# from ParetoLib.Oracle import vprint
+from . import vprint
 
 
 class NDTree:
@@ -59,15 +39,6 @@ class NDTree:
         return self.root.toStrRec(0) if not self.isEmpty() else ""
 
     # Equality functions
-    def __eq2__(self, other):
-        # type: (NDTree, NDTree) -> bool
-        sameContent = (other.MAX_POINTS == self.MAX_POINTS) and \
-                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
-        if self.isEmpty() or other.isEmpty():
-            return sameContent
-        else:
-            return (other.root == self.root) and sameContent
-
     def __eq__(self, other):
         # type: (NDTree, NDTree) -> bool
         sameContent = (other.MAX_POINTS == self.MAX_POINTS) and \
@@ -192,26 +163,6 @@ class Node:
         return self.toStrRec(0)
 
     # Equality functions
-    def __eq2__(self, other):
-        # type: (Node, Node) -> bool
-
-        if (other.rect is not None) and (self.rect is not None):
-            eqRect = (other.rect == self.rect)
-        else:
-            return False
-
-        if (other.parent is not None) and (self.parent is not None):
-            eqParent = (other.parent == self.parent)
-        else:
-            return False
-
-        sameContent = (other.nodes == self.nodes) and \
-                      (other.L == self.L) and \
-                      (other.MAX_POINTS == self.MAX_POINTS) and \
-                      (other.MIN_CHILDREN == self.MIN_CHILDREN)
-
-        return eqRect and eqParent and sameContent
-
     def __eq__(self, other):
         # type: (Node, Node) -> bool
         eqRect = (hash(other.rect) == hash(self.rect))
@@ -231,7 +182,7 @@ class Node:
     def __hash__(self):
         # type: (Node) -> int
         # hash cannot be computed over 'list'; use 'tuple' instead
-        #return hash((self.rect, self.parent, tuple(self.nodes), tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
+        # return hash((self.rect, self.parent, tuple(self.nodes), tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
         return hash((self.rect, self.parent, tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
 
     # Report functions
@@ -319,12 +270,10 @@ class Node:
     # Point operations
     def addPoint(self, x, pos=-1):
         # type: (Node, tuple, int) -> None
-        vprint("x ", x, " pos ", pos, " len ", len(self.L) )
+        vprint("x ", x, " pos ", pos, " len ", len(self.L))
         if (pos >= 0) and (pos < len(self.L)):
-            vprint("1")
             self.L.insert(pos, x)
         else:
-            vprint("2")
             self.L.append(x)
 
     def removePoint(self, x):

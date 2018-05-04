@@ -1,37 +1,18 @@
 import re
-import sys
 import pickle
 
+from sortedcontainers import SortedSet
 from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Interval, Expr, Symbol
 from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
 
 from ParetoLib.Geometry.Point import *
 
+import ParetoLib.Oracle.Oracle
+# from ParetoLib.Oracle import vprint
+from . import vprint, eprint
+
+
 # from data_generator import *
-
-VERBOSE = True
-VERBOSE = False
-
-if VERBOSE:
-    # Verbose print (stdout)
-    def vprint(*args):
-        # Print each argument separately so caller doesn't need to
-        # stuff everything to be printed into a single string
-        for arg in args:
-            print arg,
-        print
-
-
-    # Error print (stderr)
-    def eprint(*args):
-        for arg in args:
-            print >> sys.stderr, arg
-        print >> sys.stderr
-
-else:
-    vprint = lambda *a: None  # do-nothing function
-    eprint = lambda *a: None  # do-nothing function
-
 
 class Condition:
     # Condition = f op g
@@ -41,10 +22,10 @@ class Condition:
     #
     # Example
     # inequality = (sympy.Poly(f - g), op)
-    comparison = ['==', '>', '<', '>=', '<=', '<>']
 
     def __init__(self, f='x', op='==', g='0'):
         # type: (_, str, str, str) -> None
+        self.comparison = ['==', '>', '<', '>=', '<=', '<>']
         assert (op in self.comparison), "Operator " + op + " must be any of: {'>', '>=', '<', '<=', '==', '!='}"
         assert (not f.isdigit() or not g.isdigit()), \
             "At least '" + f + "' or '" + g + "' must be a polynomial expression (i.e., not a single number)"
@@ -281,222 +262,14 @@ class Condition:
         foutput.write(str(self) + '\n')
 
 
-class ConditionList:
-    # List of conditions:
-    # [c1, c2,..., cn]
-
-    def __init__(self):
-        self.l = []
-        self.solution = None
-
-    # Printers
-    def __repr__(self):
-        # type: (ConditionList) -> str
-        return self.toStr()
-
-    def __str__(self):
-        # type: (ConditionList) -> str
-        return self.toStr()
-
-    def toStr(self):
-        # type: (ConditionList) -> str
-        _string = "["
-        for i, item in enumerate(self.l):
-            _string += str(item)
-            if i < (len(self.l) - 1): _string += ', '
-        _string += "]"
-        return _string
-
-    # Equality functions
-    def __eq__(self, other):
-        # type: (ConditionList, ConditionList) -> bool
-        return self.l == other.l
-
-    def __ne__(self, other):
-        # type: (ConditionList, ConditionList) -> bool
-        return not self.__eq__(other)
-
-    # Identity function (via hashing)
-    def __hash__(self):
-        # type: (ConditionList) -> int
-        return hash(tuple(self.l))
-
-    # Membership functions
-    def __contains__(self, cond):
-        # type: (ConditionList, Condition) -> bool
-        return cond in self.l
-
-    # ConditionList functions
-    def add(self, cond):
-        # type: (ConditionList, Condition) -> None
-        self.l.append(cond)
-
-    def get_variables(self):
-        # type: (ConditionList) -> list
-        fv = set()
-        for i in self.l:
-            fv = fv.union(i.get_variables())
-        return list(fv)
-
-    def eval_tuple(self, xpoint):
-        # type: (ConditionList, tuple) -> Expr
-        _eval = True
-        for i in self.l:
-            _eval = _eval and i.eval_tuple(xpoint)
-        # _eval = all(i.eval_tuple(xpoint) for i in self.l)
-        vprint('Condition list ', self.toStr(), ' evaluates ', str(xpoint), ' to ', str(_eval))
-        return _eval
-
-    def eval_dict(self, d=None):
-        # type: (ConditionList, dict) -> Expr
-        _eval = True
-        for i in self.l:
-            _eval = _eval and i.eval_dict(d)
-        # _eval = all(i.eval_dict(d) for i in self.l)
-        vprint('Condition list ', self.toStr(), ' evaluates ', str(d), ' to ', str(_eval))
-        return _eval
-
-    def eval_var_val(self, var=None, val='0'):
-        # type: (ConditionList, Symbol, int) -> Expr
-        _eval = True
-        for i in self.l:
-            _eval = _eval and i.eval_var_val(var, val)
-        vprint('Condition list ', self.toStr(), ' evaluates ', str(var), ' with ', str(val), ' to ', str(_eval))
-        return _eval
-
-    def solve(self):
-        # type: (ConditionList) -> Interval
-        # returns set of floats satisfying (c1 and c2 and ... and cn)
-        # side-efect: stores the result in a local variable
-        #
-        # example:
-        # ineq1 = (Poly(x ** 2 - 3), ">")
-        # ineq2 = (Poly(-x ** 2 + 1), ">")
-        # solve_poly((
-        #     ineq1,
-        #     ineq2,
-        # ))
-        if self.solution == None:
-            _ineq_list = ()
-            for poly_ineq in self.l:
-                # _ineq = (Poly(poly_ineq.f - poly_ineq.g, domain='RR'), poly_ineq.op)
-                _ineq = (Poly(poly_ineq.get_expression(), domain='RR'), poly_ineq.op)
-                _ineq_list += (_ineq,)
-            vprint(_ineq_list)
-            self.solution = self.solve_poly(_ineq_list)
-        return self.solution
-
-    def solve_poly(self, polys):
-        # return self.solve_poly_inequalities_and(polys)
-        return self.solve_poly_inequalities_or(polys)
-
-    def solve_poly_inequalities_and(self, polys):
-        return Intersection(*[solve_poly_inequality(*p) for p in polys])
-
-    def solve_poly_inequalities_or(self, polys):
-        # return Union(*[solve_poly_inequality(*p) for p in polys])
-        return solve_poly_inequalities(polys)
-
-    # Membership functions
-    def member(self, xpoint):
-        # type: (ConditionList, tuple) -> Expr
-        # return self.eval_tuple(xpoint)
-        keys = self.get_variables()
-        di = {key: xpoint[i] for i, key in enumerate(keys)}
-        # di = dict.fromkeys(keys)
-        return self.eval_dict(di)
-
-    # TOREMOVE
-    def member2(self, x):
-        # type: (ConditionList, int) -> _
-        self.solve()
-        return x in self.solution
-
-    def membership(self):
-        # type: (ConditionList, tuple) -> function
-        return lambda xpoint: self.member(xpoint)
-
-    # Read/Write file functions
-    def fromFile(self, fname='', human_readable=False):
-        # type: (ConditionList, str, bool) -> None
-        assert (fname != ''), "Filename should not be null"
-
-        mode = 'rb'
-        finput = open(fname, mode)
-        if human_readable:
-            self.fromFileHumRead(finput)
-        else:
-            self.fromFileNonHumRead(finput)
-        finput.close()
-
-    def fromFileNonHumRead(self, finput=None):
-        # type: (ConditionList, BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
-
-        self.l = pickle.load(finput)
-        self.solution = pickle.load(finput)
-
-    def fromFileHumRead(self, finput=None):
-        # type: (ConditionList, BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
-
-        # init
-        self.l = []
-        self.solution = None
-
-        # <num_constraints_dimension_i>
-        num_constr_dim_i = int(finput.readline())
-        for j in range(num_constr_dim_i):
-            string_cond = finput.readline()
-            cond = Condition()
-            cond.initFromString(string_cond)
-            self.l.append(cond)
-
-    def toFile(self, fname='', append=False, human_readable=False):
-        # type: (ConditionList, str, bool, bool) -> None
-        assert (fname != ''), "Filename should not be null"
-
-        if append:
-            mode = 'ab'
-        else:
-            mode = 'wb'
-
-        foutput = open(fname, mode)
-        if human_readable:
-            self.toFileHumRead(foutput)
-        else:
-            self.toFileNonHumRead(foutput)
-        foutput.close()
-
-    def toFileNonHumRead(self, foutput=None):
-        # type: (ConditionList, BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
-
-        pickle.dump(self.l, foutput, pickle.HIGHEST_PROTOCOL)
-        pickle.dump(self.solution, foutput, pickle.HIGHEST_PROTOCOL)
-
-    def toFileHumRead(self, foutput=None):
-        # type: (ConditionList, BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
-
-        # <num_constraints_dimension_i>
-        foutput.write(str(len(self.l)) + '\n')
-
-        for cond_i in self.l:
-            cond_i.toFileHumRead(foutput)
-
-
+# class OracleFunction(ParetoLib.Oracle.Oracle):
 class OracleFunction:
-    # An OracleFunction is an array of ConditionList, i.e., OracleFunction[i] contains the ConditionList for ith-dimension
-    # For each one of the n-dimensions, we should have a ConditionList
-
-    # Dimension = [0,..,n-1]
-    def __init__(self, ndimension=1):
+    # An OracleFunction is a set of Conditions
+    def __init__(self):
         # type: (OracleFunction, int) -> None
-        # self.oracle = {}
-        keys = range(ndimension)
-        #self.oracle = {key: None for key in keys}
-        self.oracle = {key: ConditionList() for key in keys}
+        #self.variables = set()
+        self.variables = SortedSet(key=default_sort_key)
+        self.oracle = set()
 
     # Printers
     def __repr__(self):
@@ -509,13 +282,7 @@ class OracleFunction:
 
     def toStr(self):
         # type: (OracleFunction) -> str
-        last_key = self.oracle.keys()[-1]
-        _string = "["
-        for key in self.oracle.keys():
-            _string += str(self.oracle[key])
-            if key != last_key: _string += ', '
-        _string += "]"
-        return _string
+        return str(self.oracle)
 
     # Equality functions
     def __eq__(self, other):
@@ -531,61 +298,53 @@ class OracleFunction:
         # type: (OracleFunction) -> int
         return hash(tuple(self.oracle))
 
-    # Addition of ConditionLists.
-    # Overwrites previous ConditionLists
-    def add(self, condlist, idimension):
-        # type: (OracleFunction, ConditionList, int) -> None
-        self.oracle[idimension] = condlist
+    # Addition of a new condition
+    def add(self, cond):
+        # type: (OracleFunction, Condition) -> None
+        self.variables = self.variables.union(cond.get_variables())
+        self.oracle.add(cond)
 
     def get_variables(self):
         # type: (OracleFunction) -> list
-        # By construction,
-        # dimension = number of keys in self.oracle (or, at least, the key with highest value, in case that intermediate dimensions do not have conditions)
-        # dimension = number of variables in all the ConditionLists
-        highest_key = sorted(self.oracle.keys()).pop()
-        fv = set()
-        for i in self.oracle:
-            fv = fv.union(self.oracle[i].get_variables())
-        #        assert (highest_key == (len(fv) - 1)), \
-        #            "Number of dimensions in OracleFunction do not match. Got " + str(highest_key) + ". Expected: " + str(len(fv) - 1)
-        return list(fv)
+        #variable_list = sorted(self.variables, key=default_sort_key)
+        variable_list = list(self.variables)
+        return variable_list
 
     def dim(self):
         # type: (OracleFunction) -> int
         return len(self.get_variables())
 
     def eval_tuple(self, xpoint):
-        # type: (OracleFunction, tuple) -> Expr
-        _eval = True
-        for i in self.oracle:
-            _eval = _eval and self.oracle[i].eval_tuple(xpoint)
+        # type: (OracleFunction, tuple) -> bool
+        #_eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
+        _eval_list = [cond.eval_tuple(xpoint) == True for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        #_eval = any(_eval_list)
         vprint('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
-        # type: (OracleFunction, dict) -> Expr
-        vprint('OracleFunction evaluates ', self.toStr())
-        _eval = True
-        # _eval = False
-        for i in self.oracle:
-            _eval = _eval and self.oracle[i].eval_dict(d)
-            # _eval = _eval or self.oracle[i].eval_dict(d)
+        # type: (OracleFunction, dict) -> bool
+        #_eval_list = [cond.eval_dict(d) for cond in self.oracle]
+        _eval_list = [cond.eval_dict(d) == True for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        #_eval = any(_eval_list)
+        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.toStr(), ' to ', str(_eval))
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
-        # type: (OracleFunction, Symbol, int) -> Expr
-        vprint('OracleFunction evaluates ', self.toStr())
-        _eval = True
-        for i in self.oracle:
-            _eval = _eval and i.eval_var_val(var, val)
+        # type: (OracleFunction, Symbol, int) -> bool
+        _eval_list = [cond.eval_var_val(var, val) == True for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        # _eval = any(_eval_list)
+        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.toStr(), ' to ', str(_eval))
         return _eval
-
-    def solve(self, idimension):
-        return self.oracle[idimension].solve()
-
-    # TODO
-    def list_n_points(self, npoints, idimension):
-        return self.oracle[idimension].list_n_points(npoints)
 
     # Membership functions
     def __contains__(self, p):
@@ -593,24 +352,14 @@ class OracleFunction:
         return self.member(p) is True
 
     def member(self, xpoint):
-        # type: (OracleFunction, tuple) -> Expr
+        # type: (OracleFunction, tuple) -> bool
         # return self.eval_tuple(xpoint)
         vprint(xpoint)
-        keys = self.get_variables()
+        #keys = self.get_variables()
+        keys = self.variables
         di = {key: xpoint[i] for i, key in enumerate(keys)}
         # di = dict.fromkeys(keys)
         return self.eval_dict(di)
-
-    # TOREMOVE
-    def member2(self, xpoint):
-        # type: (OracleFunction, tuple) -> Expr
-        assert (len(self.oracle) >= len(xpoint)), "OracleFunction is not prepared for points of dimension " + str(
-            len(xpoint))
-        ismember = True
-        # for i, condlist in enumerate(self.oracle):
-        for i, condlist in self.oracle.iteritems():
-            ismember = ismember and condlist.member(xpoint[i])
-        return ismember
 
     def membership(self):
         # type: (OracleFunction) -> function
@@ -634,17 +383,17 @@ class OracleFunction:
         assert (finput is not None), "File object should not be null"
 
         self.oracle = pickle.load(finput)
+        self.variables = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
         # type: (OracleFunction, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
-        # <num_dimensions>
-        num_dim = int(finput.readline())
-        self.oracle = dict.fromkeys(range(num_dim))
-        for i in range(num_dim):
-            self.oracle[i] = ConditionList()
-            self.oracle[i].fromFileHumRead(finput)
+        # Each line has a Condition
+        for line in finput:
+            cond = Condition()
+            cond.initFromString(line)
+            self.add(cond)
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (OracleFunction, str, bool, bool) -> None
@@ -667,15 +416,15 @@ class OracleFunction:
         assert (foutput is not None), "File object should not be null"
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.variables, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
         # type: (OracleFunction, BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
-        # <num_dimensions>
-        foutput.write(str(len(self.oracle)) + '\n')
-        for i, condlist_i in self.oracle.iteritems():
-            condlist_i.toFileHumRead(foutput)
+        # Each line has a Condition
+        for cond in self.oracle:
+            cond.toFileHumRead(foutput)
 
 
 EPS = 1e-1

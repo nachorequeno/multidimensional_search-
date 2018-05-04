@@ -1,31 +1,13 @@
 import pickle
 
-from _NDTree import *
+from ParetoLib.Oracle.NDTree import *
 
-VERBOSE = True
-VERBOSE = False
-
-if VERBOSE:
-    # Verbose print (stdout)
-    def vprint(*args):
-        # Print each argument separately so caller doesn't need to
-        # stuff everything to be printed into a single string
-        for arg in args:
-            print arg,
-        print
+import ParetoLib.Oracle.Oracle
+# from ParetoLib.Oracle import vprint
+from . import vprint
 
 
-    # Error print (stderr)
-    def eprint(*args):
-        for arg in args:
-            print >> sys.stderr, arg
-        print >> sys.stderr
-
-else:
-    vprint = lambda *a: None  # do-nothing function
-    eprint = lambda *a: None  # do-nothing function
-
-
+# class OraclePoint(ParetoLib.Oracle.Oracle):
 class OraclePoint:
     # OraclePoint defines membership function based on a cloud of points that belongs to the closure.
     # OraclePoint saves a set of points in a NDTree

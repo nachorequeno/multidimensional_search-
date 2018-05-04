@@ -8,24 +8,21 @@ import matplotlib.pyplot as plt
 
 from ParetoLib.Geometry.Rectangle import *
 
-#p = Pool(cpu_count())
 
-
-#def volume(x):
-#    return Rectangle.volume(x)
+# p = Pool(cpu_count())
 
 class ResultSet:
-    suffix_Yup = 'up'
-    suffix_Ylow = 'low'
-    suffix_Border = 'border'
-    suffix_Space = 'space'
-
-    def __init__(self, border=set(), ylow=set(), yup=set(), xspace=Rectangle()):
-        # type: (ResultSet, set, set, set, Rectangle) -> None
+    def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
+        # type: (ResultSet, list, list, list, Rectangle) -> None
         self.border = border
         self.ylow = ylow
         self.yup = yup
         self.xspace = xspace
+
+        self.suffix_Yup = 'up'
+        self.suffix_Ylow = 'low'
+        self.suffix_Border = 'border'
+        self.suffix_Space = 'space'
 
     # Printers
     def toStr(self):
@@ -105,106 +102,125 @@ class ResultSet:
         # remove pairs (recti, recti) from previous list
         pairs_of_rect_filt = [pair for pair in pairs_of_rect if pair[0] != pair[1]]
         overlapping_rect = [r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt]
-        #vol_overlapping_rect = p.map(Rectangle.volume, overlapping_rect)
+        # vol_overlapping_rect = p.map(Rectangle.volume, overlapping_rect)
         vol_overlapping_rect = [rect.volume() for rect in overlapping_rect]
         return sum(vol_overlapping_rect)
-        #vol_overlapping_rect = p.map_async(volume, overlapping_rect)
-        #vol_overlapping_rect.wait()
-        #return sum(vol_overlapping_rect.get())
+        # vol_overlapping_rect = p.map_async(volume, overlapping_rect)
+        # vol_overlapping_rect.wait()
+        # return sum(vol_overlapping_rect.get())
 
-    def OverlappingVolumeYup(self):
+    def overlappingVolumeYup(self):
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
         pairs_of_rect = list(combinations_with_replacement(self.yup, 2))
-        #pairs_of_rect = list(product(self.yup, 2))
+        # pairs_of_rect = list(product(self.yup, 2))
         return self._overlappingVolume(pairs_of_rect)
 
-    def OverlappingVolumeYlow(self):
+    def overlappingVolumeYlow(self):
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
         pairs_of_rect = list(combinations_with_replacement(self.ylow, 2))
-        #pairs_of_rect = list(product(self.ylow, 2))
+        # pairs_of_rect = list(product(self.ylow, 2))
         return self._overlappingVolume(pairs_of_rect)
 
-    def OverlappingVolumeBorder(self):
+    def overlappingVolumeBorder(self):
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
         pairs_of_rect = list(combinations_with_replacement(self.border, 2))
-        #pairs_of_rect = list(product(self.border, 2))
+        # pairs_of_rect = list(product(self.border, 2))
         return self._overlappingVolume(pairs_of_rect)
 
-    def VolumeYup(self):
+    def volumeYup(self):
         # type: (ResultSet) -> float
-        #vol_list = p.map(Rectangle.volume, self.yup)
+        # vol_list = p.map(Rectangle.volume, self.yup)
         vol_list = [rect.volume() for rect in self.yup]
         return sum(vol_list)
-        #return sum(vol_list) - self.OverlappingVolumeYup()
-        #vol_list = p.map_async(volume, self.yup)
-        #vol_list.wait()
-        #return sum(vol_list.get())
+        # return sum(vol_list) - self.overlappingVolumeYup()
+        # vol_list = p.map_async(volume, self.yup)
+        # vol_list.wait()
+        # return sum(vol_list.get())
 
-    def VolumeYlow(self):
+    def volumeYlow(self):
         # type: (ResultSet) -> float
-        #vol_list = p.map(Rectangle.volume, self.ylow)
+        # vol_list = p.map(Rectangle.volume, self.ylow)
         vol_list = [rect.volume() for rect in self.ylow]
         return sum(vol_list)
-        #return sum(vol_list) - self.OverlappingVolumeYlow()
-        #vol_list = p.map_async(volume, self.ylow)
-        #vol_list.wait()
-        #return sum(vol_list.get())
+        # return sum(vol_list) - self.overlappingVolumeYlow()
+        # vol_list = p.map_async(volume, self.ylow)
+        # vol_list.wait()
+        # return sum(vol_list.get())
 
-
-    def VolumeBorder(self):
+    def volumeBorder(self):
         # type: (ResultSet) -> float
         vol_total = self.xspace.volume()
-        vol_ylow = self.VolumeYlow()
-        vol_yup = self.VolumeYup()
+        vol_ylow = self.volumeYlow()
+        vol_yup = self.volumeYup()
         return vol_total - vol_ylow - vol_yup
 
     # By construction, overlapping of rectangles only happens in the boundary
-    def VolumeBorderExact(self):
+    def volumeBorderExact(self):
         # type: (ResultSet) -> float
-        #vol_list = p.map(Rectangle.volume, self.border)
+        # vol_list = p.map(Rectangle.volume, self.border)
         vol_list = [rect.volume() for rect in self.border]
-        return sum(vol_list) - self.OverlappingVolumeBorder()
-        #vol_list = p.map_async(volume, self.border)
-        #vol_overlapping = self.OverlappingVolumeBorder()
-        #vol_list.wait()
-        #return sum(vol_list.get()) - vol_overlapping
+        return sum(vol_list) - self.overlappingVolumeBorder()
+        # vol_list = p.map_async(volume, self.border)
+        # vol_overlapping = self.overlappingVolumeBorder()
+        # vol_list.wait()
+        # return sum(vol_list.get()) - vol_overlapping
+
+    def volumeTotal(self):
+        # type: (ResultSet) -> float
+        vol_total = self.xspace.volume()
+        return vol_total
+
+    # By construction, overlapping of rectangles only happens in the boundary
+    def volumeTotalExact(self):
+        # type: (ResultSet) -> float
+        # vol_list = p.map(Rectangle.volume, self.border)
+        vol_total = self.volumeYlow() + self.volumeYup() + self.volumeBorder()
+        return vol_total
+
+    def volumeReport(self):
+        # type: (ResultSet) -> str
+        vol_report = ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
+                      % (
+                          str(self.volumeYlow()), str(self.volumeYup()), str(self.volumeBorder()),
+                          str(self.volumeTotal())))
+        return vol_report
 
     # Membership functions
     def __contains__(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         # xpoint is inside the upper/lower closure or in the border
-        return self.MemberBorder(xpoint) or \
-               self.MemberYlow(xpoint) or \
-               self.MemberYup(xpoint)
+        return self.memberBorder(xpoint) or \
+               self.memberYlow(xpoint) or \
+               self.memberYup(xpoint)
 
-    def MemberYup(self, xpoint):
+    def memberYup(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.yup:
             isMember = isMember or (xpoint in rect)
         return isMember
 
-    def MemberYlow(self, xpoint):
+    def memberYlow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.ylow:
             isMember = isMember or (xpoint in rect)
         return isMember
 
-    def MemberBorder(self, xpoint):
+    def memberBorder(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.border:
             isMember = isMember or (xpoint in rect)
         return isMember
 
-    def MemberSpace(self, xpoint):
+    def memberSpace(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         return xpoint in self.xspace
 
@@ -258,14 +274,14 @@ class ResultSet:
         return patches
 
     def toMatPlot2D(self,
-                  filename='',
-                  xaxe=0,
-                  yaxe=1,
-                  targetx=[],
-                  targety=[],
-                  blocking=False,
-                  sec=0.0,
-                  opacity=1.0):
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    targetx=list(),
+                    targety=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111, aspect='equal')
@@ -319,16 +335,16 @@ class ResultSet:
         return faces
 
     def toMatPlot3D(self,
-                  filename='',
-                  xaxe=0,
-                  yaxe=1,
-                  zaxe=2,
-                  targetx=[],
-                  targety=[],
-                  targetz=[],
-                  blocking=False,
-                  sec=0.0,
-                  opacity=1.0):
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    zaxe=2,
+                    targetx=list(),
+                    targety=list(),
+                    targetz=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
@@ -358,8 +374,8 @@ class ResultSet:
         targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
         ax1.scatter(targetx, targety, targetz, c='k')
-        #ax1.autoscale_view()
-        #ax1.autoscale(enable=True, tight=True)
+        # ax1.autoscale_view()
+        # ax1.autoscale(enable=True, tight=True)
 
         plt.show(block=blocking)
         if sec > 0:
@@ -368,7 +384,6 @@ class ResultSet:
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
         return plt
-
 
     # Saving/loading results
     def toFileYup(self, f):
@@ -392,7 +407,7 @@ class ResultSet:
     def toFileSpace(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
-             pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
 
     def toFile(self, f):
         # type: (ResultSet, str) -> None
