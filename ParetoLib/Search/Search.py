@@ -61,6 +61,7 @@ def binary_search(x,
     y = x
     dist = subtract(y.h, y.l)
     # while greater_equal(dist, error):
+    # while any(dist_i > error[0] for dist_i in dist):
     while not less(dist, error):
         yval = div(add(y.l, y.h), 2.0)
         # We need a oracle() for guiding the search
@@ -96,7 +97,7 @@ def multidim_search(xspace,
 
     # Alpha in [0,1]^n
     alphaprime = (range(2),) * n
-    alpha = set(itertools.product(*alphaprime))
+    alpha = itertools.product(*alphaprime)
 
     # Particular cases of alpha
     # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
@@ -105,10 +106,8 @@ def multidim_search(xspace,
     one = (1,) * n
 
     # Set of comparable and incomparable rectangles
-    # comparable = set(filter(lambda x: all(x[i]==x[i+1] for i in range(len(x)-1)), alpha))
-    # incomparable = list(filter(lambda x: x[0]!=x[1], alpha))
     comparable = [zero, one]
-    incomparable = alpha.difference(comparable)  # Use list instead of set. Remove sublist 'comparable'
+    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # l = [xspace]
@@ -181,8 +180,7 @@ def multidim_search(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
         vprint('vol_border: ', vol_border)
-        ########################
-        print('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
+        vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(l)))
 
         if sleep > 0.0:

@@ -285,7 +285,8 @@ def brect(alpha, yrectangle, xspace):
 
 
 def irect(alphaincomp, yrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> list
+    # type: (list, Rectangle, Rectangle) -> list
+    ## type: (set, Rectangle, Rectangle) -> list
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -297,8 +298,18 @@ def irect(alphaincomp, yrectangle, xspace):
     return [brect(alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp]
 
 
+nproc = cpu_count()
+pool = Pool(nproc)
+
+
+def pbrect(args):
+    alpha, yrectangle, xspace = args
+    return brect(alpha, yrectangle, xspace)
+
+
 def pirect(alphaincomp, yrectangle, xspace):
-    # type: (set, Rectangle, Rectangle) -> list
+    # type: (list, Rectangle, Rectangle) -> list
+    ## type: (set, Rectangle, Rectangle) -> list
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
         "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -307,10 +318,7 @@ def pirect(alphaincomp, yrectangle, xspace):
     #    "alphaincomp_list and yrectangle.min_corner do not share the same dimension"
     # assert (dim(alphaincomp_list) == dim(yrectangle.max_corner)), \
     #    "alphaincomp_list and yrectangle.max_corner do not share the same dimension"
-    nproc = cpu_count()
-    pool = Pool(nproc)
-    parallel_results = [pool.apply_async(brect, args=(alphaincomp_i, yrectangle, xspace))
-                        for alphaincomp_i in alphaincomp]
-    pool.close()
-    pool.join()
-    return [pres.get() for pres in parallel_results]
+
+    args_i = ((alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp)
+    parallel_results = pool.map(pbrect, args_i)
+    return parallel_results
