@@ -152,9 +152,34 @@ intermediate results in 2D/3D graphics.
 * sleep: time in seconds that the intermediate 2D/3D graphic must be shown in the screen.
                     
 As a result, the function returns an object of the class *ResultSet*. 
-*SearchOracleFunction* and *SearchOraclePoint* classes are wrappers that simplify 
-and automatize the calling to this function for *OracleFunction* and *OraclePoint* oracles.
+*Search2D*, *Search3D* and *SearchND* functions are wrappers that simplify 
+and automatize the calling to the multidimensional search for *OracleFunction* and *OraclePoint* oracles.
 A set of running examples for 2D, 3D and ND can be found in Test/test_Search.py.
+
+```python
+from ParetoLib.Oracle.OracleFunction import *
+from ParetoLib.Search.Search import *
+
+# File containing the definition of the Oracle
+nfile='Test/Search/OracleFunction/2D/test0.txt'
+human_readable=True
+
+# Definition of the n-dimensional space
+min_x, min_y = (0.0, 0.0)
+max_x, max_y = (1.0, 1.0)
+
+oracle = OracleFunction()
+oracle.fromFile(nfile, human_readable)
+rs = Search2D(ora=oracle,
+              min_cornerx=min_x,
+              min_cornery=min_y,
+              max_cornerx=max_x,
+              max_cornery=max_y,
+              epsilon=EPS,
+              delta=DELTA,
+              blocking=False,
+              sleep=0)
+```                          
 
 ### Saving and plotting the results
 The result of the learning process is saved in an object of the *ResultSet* class.
