@@ -4,23 +4,23 @@ import unittest
 
 from ParetoLib.Oracle.OracleFunction import *
 
+
 ##################
 # OracleFunction #
 ##################
 
 
-class OracleFunctionTestCase (unittest.TestCase):
+class OracleFunctionTestCase(unittest.TestCase):
 
-    def setUp ( self ) :
+    def setUp(self):
         self.files_to_clean = set()
 
-
-    def tearDown ( self ) :
-        for filename in self.files_to_clean :
-            if ( os.path.isfile(filename) ) :
+    def tearDown(self):
+        for filename in self.files_to_clean:
+            if (os.path.isfile(filename)):
                 os.remove(filename)
 
-    def add_file_to_clean ( self, filename ) :
+    def add_file_to_clean(self, filename):
         self.files_to_clean.add(filename)
 
     # Test polynomial conditions
@@ -60,7 +60,7 @@ class OracleFunctionTestCase (unittest.TestCase):
 
         self.assertNotEqual(c1, c2)
 
-    def test_files ( self) :
+    def test_files(self):
 
         self.read_write_files(False)
         self.read_write_files(True)

@@ -1,7 +1,8 @@
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Rectangle import *
 
-#def testSegment():
+
+# def testSegment():
 #    x = (1.0,) * 2
 #    y = (2.0,) * 2
 #    xy = Segment(x, y)
@@ -68,11 +69,11 @@ def testRectangle():
         "Comparison of volume failed. Expected r3.volume == r2.volume = (%s, %s)" % (str(r3.volume()), str(r2.volume()))
 
     assert (r1.volume() > r_intersect.volume()), \
-        "Comparison of volume failed. Expected r1.volume > r_intersect.volume = (%s, %s)"\
+        "Comparison of volume failed. Expected r1.volume > r_intersect.volume = (%s, %s)" \
         % (str(r1.volume()), str(r2.volume()))
 
     assert (r2.volume() > r_intersect.volume()), \
-        "Comparison of volume failed. Expected r2.volume > r_intersect.volume = (%s, %s)"\
+        "Comparison of volume failed. Expected r2.volume > r_intersect.volume = (%s, %s)" \
         % (str(r2.volume()), str(r_intersect.volume()))
 
     p1 = (0.0, 0.0)
@@ -92,6 +93,7 @@ def testRectangle():
         "Comparison of num_vertices failed. Expected to be equal:\nnVertices_1 = %s\nnVertices_2 = %s)" \
         % (str(num_vertices), str(num_vertices_expected))
 
+
 if __name__ == '__main__':
-    #testSegment()
+    # testSegment()
     testRectangle()

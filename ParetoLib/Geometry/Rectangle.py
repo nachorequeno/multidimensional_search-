@@ -1,6 +1,5 @@
 import __builtin__
-from multiprocessing import Pool, cpu_count, Process, Queue
-# from multiprocessing import Process, Queue
+from multiprocessing import Pool, cpu_count
 
 import numpy as np
 import matplotlib.patches as patches
@@ -9,8 +8,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Point import *
 
-
-# import ParetoLib.Geometry.Point
 
 # Rectangle
 # Rectangular Half-Space

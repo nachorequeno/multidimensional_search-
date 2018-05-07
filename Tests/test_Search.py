@@ -1,10 +1,5 @@
 import os
-import random
-import __builtin__
-import itertools
 import unittest
-
-import multiprocessing
 
 from ParetoLib.Search.Search import *
 from ParetoLib.Oracle.OracleFunction import *
@@ -13,11 +8,12 @@ from ParetoLib.Oracle.OraclePoint import *
 EPS = 1e-5
 DELTA = 1e-5
 
+
 class SearchTestCase(unittest.TestCase):
 
     def setUp(self):
         self.this_dir = "Search"
-        self.search = Search()
+        self.oracle = Oracle()
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def _closureMembershipTest(self, fora, rs, xpoint):
@@ -27,7 +23,8 @@ class SearchTestCase(unittest.TestCase):
         vprint_string = 'Warning!\n'
         vprint_string += 'Testing ', str(xpoint)
         vprint_string += '(inYup, inYlow, inBorder): (%s, %s, %s)' \
-                         % (str(rs.memberYup(xpoint)), str(rs.memberYlow(xpoint)), str(rs.memberBorder(xpoint)))
+                         % (str(rs.memberYup(xpoint)), str(rs.memberYlow(xpoint)),
+                            str(rs.memberBorder(xpoint)))
         vprint_string += 'Expecting\n'
         vprint_string += '(inYup, inYlow): (%s, %s)' \
                          % (str(fora(xpoint)), str(not fora(xpoint)))
@@ -163,18 +160,17 @@ class SearchTestCase(unittest.TestCase):
         max_x, max_y = (1.0, 1.0)
         for test in test_2D_txt:
             self.assertTrue(os.path.isfile(test), test)
-            fora = self.search.loadOracle(nfile=test,
-                                          human_readable=human_readable)
-            rs = self.search.Search2D(min_cornerx=min_x,
-                                      min_cornery=min_y,
-                                      max_cornerx=max_x,
-                                      max_cornery=max_y,
-                                      epsilon=EPS,
-                                      delta=DELTA,
-                                      blocking=False,
-                                      sleep=0,
-                                      nfile=test,
-                                      human_readable=human_readable)
+            self.oracle.fromFile(test, human_readable)
+            fora = self.oracle.membership()
+            rs = Search2D(ora=self.oracle,
+                          min_cornerx=min_x,
+                          min_cornery=min_y,
+                          max_cornerx=max_x,
+                          max_cornery=max_y,
+                          epsilon=EPS,
+                          delta=DELTA,
+                          blocking=False,
+                          sleep=0)
             self._verify2D(fora,
                            rs,
                            min_cornerx=min_x,
@@ -191,20 +187,19 @@ class SearchTestCase(unittest.TestCase):
         max_x, max_y, max_z = (1.0, 1.0, 1.0)
         for test in test_3D_txt:
             self.assertTrue(os.path.isfile(test), test)
-            fora = self.search.loadOracle(nfile=test,
-                                          human_readable=human_readable)
-            rs = self.search.Search3D(min_cornerx=min_x,
-                                      min_cornery=min_y,
-                                      min_cornerz=min_z,
-                                      max_cornerx=max_x,
-                                      max_cornery=max_y,
-                                      max_cornerz=max_z,
-                                      epsilon=EPS,
-                                      delta=DELTA,
-                                      blocking=False,
-                                      sleep=0,
-                                      nfile=test,
-                                      human_readable=human_readable)
+            self.oracle.fromFile(test, human_readable)
+            fora = self.oracle.membership()
+            rs = Search3D(ora=self.oracle,
+                          min_cornerx=min_x,
+                          min_cornery=min_y,
+                          min_cornerz=min_z,
+                          max_cornerx=max_x,
+                          max_cornery=max_y,
+                          max_cornerz=max_z,
+                          epsilon=EPS,
+                          delta=DELTA,
+                          blocking=False,
+                          sleep=0)
             self._verify3D(fora,
                            rs,
                            min_cornerx=min_x,
@@ -223,18 +218,17 @@ class SearchTestCase(unittest.TestCase):
         max_corner = 1.0
         for test in test_ND_txt:
             self.assertTrue(os.path.isfile(test), test)
-            fora = self.search.loadOracle(nfile=test,
-                                          human_readable=human_readable)
-            rs = self.search.SearchND(min_corner=min_corner,
-                                      max_corner=max_corner,
-                                      epsilon=EPS,
-                                      delta=DELTA,
-                                      blocking=False,
-                                      sleep=0,
-                                      nfile=test,
-                                      human_readable=human_readable)
+            self.oracle.fromFile(test, human_readable)
+            fora = self.oracle.membership()
+            rs = SearchND(ora=self.oracle,
+                          min_corner=min_corner,
+                          max_corner=max_corner,
+                          epsilon=EPS,
+                          delta=DELTA,
+                          blocking=False,
+                          sleep=0)
 
-            d = fora.dim()
+            d = self.oracle.dim()
             t = np.arange(min_corner, max_corner, 0.1)
             # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
             list_test_points = list(itertools.product(t, repeat=d))
@@ -247,7 +241,7 @@ class SearchOracleFunctionTestCase(SearchTestCase):
     def setUp(self):
         super(SearchOracleFunctionTestCase, self).setUp()
         self.this_dir = "Search/OracleFunction"
-        self.search = SearchOracleFunction()
+        self.oracle = OracleFunction()
 
     def test_2D(self):
         self.search_verify_2D(True)
@@ -264,11 +258,10 @@ class SearchOraclePointTestCase(SearchTestCase):
     def setUp(self):
         super(SearchOraclePointTestCase, self).setUp()
         self.this_dir = "Search/OraclePoint"
-        self.search = SearchOraclePoint()
+        self.oracle = OraclePoint()
 
     def test_2D(self):
         self.search_verify_2D(False)
-
 
     def test_3D(self):
         self.search_verify_3D(False)
@@ -277,19 +270,6 @@ class SearchOraclePointTestCase(SearchTestCase):
         self.search_verify_ND(False)
 
 
-
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)
     unittest.main(testRunner=runner)
-
-    # filename_list = ["./Tests/Search/ND/test-%sd.txt" % i for i in range(2, 11)]
-    # filename_list = ["./Tests/Search/ND/test-%sd.txt" % i for i in range(2, 3)]
-    # [testNDOracleFunction(min_corner=0.0,
-    #                     max_corner=1.0,
-    #                     epsilon=0.01,
-    #                     delta=0.01,
-    #                     verbose=False,
-    #                     blocking=False,
-    #                     test=False,
-    #                     sleep=0,
-    #                     nfile=os.path.abspath(filename)) for filename in filename_list]

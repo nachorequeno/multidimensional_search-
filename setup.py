@@ -168,7 +168,7 @@ class test_paretolib ( Command ):
 
 # Check that we have the right Python version
 if ( sys.version_info[:2] < (2, 7) ) :
-    print('ParetoLib requires Python 2.7 (or Python 3.4 or later). ' \
+    print('ParetoLib requires Python 2.7.9 (or Python 3.4 or later). ' \
           'Python %d.%d detected'.format(sys.version_info[:2]))
     sys.exit(1)
 elif ( (sys.version_info[0] == 3) and (sys.version_info[:2] < (3, 4)) ) :
@@ -199,7 +199,7 @@ setup_args = { 'name': 'ParetoLib',
                'author_email': 'jose-ignacio.requeno-jarabo@univ-grenoble-alpes.fr',
                'url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/',
                'description': 'ParetoLib is a free multidimensional boundary learning library for ' \
-                              'tools for Python 2.7 and Python 3.4 or newer',
+                              'tools for Python 2.7.9 and Python 3.4 or newer',
                'download_url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/repository/master/' \
                                'archive.tar.gz',
                'cmdclass': { 'install': install_paretolib,

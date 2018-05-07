@@ -6,14 +6,15 @@ import numpy as np
 import ParetoLib.Geometry.PPoint as pp
 import ParetoLib.Geometry.Point as p
 
-class PointTestCase (unittest.TestCase):
+
+class PointTestCase(unittest.TestCase):
     DIM = 2
     REP = 100
 
-    def setUp ( self ) :
+    def setUp(self):
         None
 
-    def tearDown ( self ) :
+    def tearDown(self):
         None
 
     def time_for_n_iterations(self, f, l):
@@ -21,7 +22,7 @@ class PointTestCase (unittest.TestCase):
         for i in range(l):
             f(i)
         end = time.time()
-        print(str(end-start))
+        print(str(end - start))
 
     def operation_performance(self,
                               rep=REP,
@@ -81,15 +82,15 @@ class PointTestCase (unittest.TestCase):
         self.assertEqual(p.max(x, xprime), pp.max(x, xprime))
         self.assertEqual(p.min(x, xprime), pp.min(x, xprime))
 
-    def test_point_operations_performance( self) :
+    def test_point_operations_performance(self):
         for dim in range(2, 10):
             self.operation_performance(rep=self.REP, dim=dim)
 
-    def test_point_operations_correctness( self) :
+    def test_point_operations_correctness(self):
         for dim in range(2, 10):
             self.operation_correctness(dim=dim)
+
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)
     unittest.main(testRunner=runner)
-

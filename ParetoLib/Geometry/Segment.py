@@ -1,5 +1,3 @@
-from functools import reduce
-
 from ParetoLib.Geometry.Point import *
 
 

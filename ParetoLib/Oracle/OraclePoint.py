@@ -2,17 +2,19 @@ import pickle
 
 from ParetoLib.Oracle.NDTree import *
 
-import ParetoLib.Oracle.Oracle
+from ParetoLib.Oracle.Oracle import Oracle
 # from ParetoLib.Oracle import vprint
 from . import vprint
 
 
-# class OraclePoint(ParetoLib.Oracle.Oracle):
-class OraclePoint:
+class OraclePoint(Oracle):
+# class OraclePoint:
     # OraclePoint defines membership function based on a cloud of points that belongs to the closure.
     # OraclePoint saves a set of points in a NDTree
     def __init__(self, MAX_P=2, MIN_CH=2):
         # type: (OraclePoint, int, int) -> None
+        #super(OraclePoint, self).__init__()
+        Oracle.__init__(self)
         self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
 
     # Printers

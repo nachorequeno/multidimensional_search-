@@ -4,38 +4,29 @@ import copy
 import unittest
 
 from ParetoLib.Oracle.OraclePoint import *
-from ParetoLib.Oracle._NDTree import *
+from ParetoLib.Oracle.NDTree import *
 
 
 ###############
 # OraclePoint #
 ###############
 
-class OraclePointTestCase (unittest.TestCase):
+class OraclePointTestCase(unittest.TestCase):
     def setUp(self):
         self.files_to_clean = set()
-
 
     def tearDown(self):
         for filename in self.files_to_clean:
             if (os.path.isfile(filename)):
                 os.remove(filename)
 
-
     def add_file_to_clean(self, filename):
-        """
-        Adds a file for deferred removal by the tearDown() routine.
-
-        Arguments :
-            filename  ( string )
-                File name to remove by the tearDown() routine.
-        """
         self.files_to_clean.add(filename)
 
     # Test ND-Tree structure
     def test_NDTree(self,
-                   min_corner=0.0,
-                   max_corner=1.0):
+                    min_corner=0.0,
+                    max_corner=1.0):
         # type: (_, float, float) -> _
 
         def f1(x):
@@ -95,17 +86,15 @@ class OraclePointTestCase (unittest.TestCase):
         self.assertEqual(ND1, oldND1)
         self.assertNotEqual(ND1, ND2)
 
-
     # Test OraclePoint
     def test_OraclePoints(self):
         self.read_write_files(human_readable=False)
         self.read_write_files(human_readable=True)
 
-
     def read_write_files(self,
-                        min_corner=0.0,
-                        max_corner=1.0,
-                        human_readable=False):
+                         min_corner=0.0,
+                         max_corner=1.0,
+                         human_readable=False):
         # type: (_, float, float, bool) -> _
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name

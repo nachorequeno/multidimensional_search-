@@ -2,17 +2,12 @@ import re
 import pickle
 
 from sortedcontainers import SortedSet
-from sympy import Poly, simplify, expand, S, default_sort_key, Intersection, Interval, Expr, Symbol
-from sympy.solvers.inequalities import solve_poly_inequality, solve_poly_inequalities
+from sympy import simplify, expand, default_sort_key, Expr, Symbol
 
-from ParetoLib.Geometry.Point import *
-
-import ParetoLib.Oracle.Oracle
+from ParetoLib.Oracle.Oracle import Oracle
 # from ParetoLib.Oracle import vprint
 from . import vprint, eprint
 
-
-# from data_generator import *
 
 class Condition:
     # Condition = f op g
@@ -262,12 +257,14 @@ class Condition:
         foutput.write(str(self) + '\n')
 
 
-# class OracleFunction(ParetoLib.Oracle.Oracle):
-class OracleFunction:
+class OracleFunction(Oracle):
+# class OracleFunction:
     # An OracleFunction is a set of Conditions
     def __init__(self):
-        # type: (OracleFunction, int) -> None
-        #self.variables = set()
+        # type: (OracleFunction) -> None
+        #super(OracleFunction, self).__init__()
+        Oracle.__init__(self)
+        # self.variables = set()
         self.variables = SortedSet(key=default_sort_key)
         self.oracle = set()
 
@@ -306,7 +303,7 @@ class OracleFunction:
 
     def get_variables(self):
         # type: (OracleFunction) -> list
-        #variable_list = sorted(self.variables, key=default_sort_key)
+        # variable_list = sorted(self.variables, key=default_sort_key)
         variable_list = list(self.variables)
         return variable_list
 
@@ -316,23 +313,23 @@ class OracleFunction:
 
     def eval_tuple(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
-        #_eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
+        # _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
         _eval_list = [cond.eval_tuple(xpoint) == True for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
-        #_eval = any(_eval_list)
+        # _eval = any(_eval_list)
         vprint('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
         # type: (OracleFunction, dict) -> bool
-        #_eval_list = [cond.eval_dict(d) for cond in self.oracle]
+        # _eval_list = [cond.eval_dict(d) for cond in self.oracle]
         _eval_list = [cond.eval_dict(d) == True for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
-        #_eval = any(_eval_list)
+        # _eval = any(_eval_list)
         vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.toStr(), ' to ', str(_eval))
         return _eval
 
@@ -355,7 +352,7 @@ class OracleFunction:
         # type: (OracleFunction, tuple) -> bool
         # return self.eval_tuple(xpoint)
         vprint(xpoint)
-        #keys = self.get_variables()
+        # keys = self.get_variables()
         keys = self.variables
         di = {key: xpoint[i] for i, key in enumerate(keys)}
         # di = dict.fromkeys(keys)
@@ -425,17 +422,3 @@ class OracleFunction:
         # Each line has a Condition
         for cond in self.oracle:
             cond.toFileHumRead(foutput)
-
-
-EPS = 1e-1
-
-
-def staircase_oracle(xs, ys):
-    # type: (tuple, tuple) -> function
-    return lambda p: any(p[0] >= x and p[1] >= y for x, y in zip(xs, ys))
-
-
-# Point (p0,p1) is closer than a 'epsilon' to point (x,y), which is member point
-def membership_oracle(xs, ys, epsilon=EPS):
-    # type: (tuple, tuple, float) -> function
-    return lambda p: any((abs(p[0] - x) <= epsilon) and (abs(p[1] - y) <= epsilon) for x, y in zip(xs, ys))
