@@ -203,26 +203,30 @@ class ResultSet:
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.yup:
-            isMember = isMember or (xpoint in rect)
+            #isMember = isMember or (xpoint in rect)
+            isMember = isMember or rect.inside(xpoint)
         return isMember
 
     def memberYlow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.ylow:
-            isMember = isMember or (xpoint in rect)
+            #isMember = isMember or (xpoint in rect)
+            isMember = isMember or rect.inside(xpoint)
         return isMember
 
     def memberBorder(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.border:
-            isMember = isMember or (xpoint in rect)
+            #isMember = isMember or (xpoint in rect)
+            isMember = isMember or rect.inside(xpoint)
         return isMember
 
     def memberSpace(self, xpoint):
         # type: (ResultSet, tuple) -> bool
-        return xpoint in self.xspace
+        #return xpoint in self.xspace
+        return self.xspace.inside(xpoint)
 
     # Points of closure
     def getPointsYup(self, n):

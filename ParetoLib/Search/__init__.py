@@ -2,7 +2,7 @@ import sys
 
 __version__=1.
 __name__="Search"
-__all__ = ["Search", "ResultSet"]
+__all__ = ["Search", "pSearch", "ResultSet"]
 __verbose__=False
 
 if __verbose__:
