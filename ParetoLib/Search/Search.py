@@ -110,9 +110,9 @@ def multidim_search(xspace,
     incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
-    # l = [xspace]
-    l = SortedListWithKey(key=Rectangle.volume)
-    l.add(xspace)
+    # border = [xspace]
+    border = SortedListWithKey(key=Rectangle.volume)
+    border.add(xspace)
 
     ylow = []
     yup = []
@@ -136,10 +136,11 @@ def multidim_search(xspace,
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (step <= max_step):
-        vprint('l:', l)
+        step = step + 1
+        vprint('border:', border)
         # l.sort(key=Rectangle.volume)
 
-        xrectangle = l.pop()
+        xrectangle = border.pop()
 
         vprint('xrectangle: ', xrectangle)
         vprint('xrectangle.volume: ', xrectangle.volume())
@@ -171,18 +172,18 @@ def multidim_search(xspace,
         # i = pirect(incomparable, yrectangle, xrectangle)
         # l.extend(i)
 
-        l += i
+        border += i
         vprint('irect: ', i)
 
         vol_border = vol_total - vol_yup - vol_ylow
 
         #vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
-        #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(l)))
+        #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        step = step + 1
-
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
+              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
         if sleep > 0.0:
-            rs = ResultSet(list(l), ylow, yup, xspace)
+            rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -192,7 +193,7 @@ def multidim_search(xspace,
     time0 = end - start
     vprint('Time multidim search: ', str(time0))
 
-    return ResultSet(list(l), ylow, yup, xspace)
+    return ResultSet(list(border), ylow, yup, xspace)
 
 
 def loadOracleFunction(nfile,

@@ -20,7 +20,6 @@ rs = Search3D(ora=oracle,
               max_cornerz=max_z,
               epsilon=EPS,
               delta=DELTA,
-#              max_step=STEPS,
-              max_step=30,
+              max_step=STEPS,
               blocking=False,
               sleep=0)

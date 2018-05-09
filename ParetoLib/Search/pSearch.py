@@ -165,6 +165,7 @@ def multidim_search(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
+    remaining_steps = max_step - step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -187,7 +188,12 @@ def multidim_search(xspace,
     vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (step <= max_step):
+    while (vol_border >= delta) and (remaining_steps > 0):
+        # Process the 'border' until the number of maximum steps is reached
+        border = border[:remaining_steps] if (remaining_steps <= len(border)) else border
+        step += len(border)
+        remaining_steps = max_step - step
+
         # 'f = oracle.membership()' is not thread safe!
         # Create a copy of 'oracle' for each concurrent process
         # args_pbin_search = [(xrectangle, copy.deepcopy(oracle), epsilon, n) for xrectangle in border]
@@ -220,8 +226,6 @@ def multidim_search(xspace,
 
         print('%s, %s, %s, %s, %s, %d, %d, %d'
                % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
-
-        step = step + len(border)
 
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
