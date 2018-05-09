@@ -120,9 +120,9 @@ and can be set arbitrarily small depending on the accuracy required by the user.
 Samples of *OracleFunction* and *OraclePoint* definitions can be found in 
 Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 
-[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/cloud_points.png "Cloud of points"
-[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/pareto_front.png "Pareto front"
-[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/multidim_search.png "Upper and lower closures"
+[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/cloud_points.png "Cloud of points"
+[paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/pareto_front.png "Pareto front"
+[multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
 
@@ -161,7 +161,7 @@ from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Search.Search import *
 
 # File containing the definition of the Oracle
-nfile='Test/Search/OracleFunction/2D/test0.txt'
+nfile='Tests/Search/OracleFunction/2D/test0.txt'
 human_readable=True
 
 # Definition of the n-dimensional space
@@ -177,6 +177,7 @@ rs = Search2D(ora=oracle,
               max_cornery=max_y,
               epsilon=EPS,
               delta=DELTA,
+              max_step=STEPS,
               blocking=False,
               sleep=0)
 ```                          

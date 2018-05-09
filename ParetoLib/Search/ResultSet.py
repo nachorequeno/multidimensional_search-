@@ -258,6 +258,11 @@ class ResultSet:
         return self.xspace.getPoints(n)
 
     # MatPlot Graphics
+    def toMatPlotSpace2D(self, xaxe=0, yaxe=1, opacity=1.0):
+        # type: (ResultSet, int, int, float) -> list
+        patches = [self.xspace.toMatplot2D('blue', xaxe, yaxe, opacity)]
+        return patches
+
     def toMatPlotYup2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
         patches = [rect.toMatplot2D('green', xaxe, yaxe, opacity) for rect in self.yup]
@@ -318,6 +323,57 @@ class ResultSet:
 
         plt.close()
         return plt
+
+    def toMatPlot2DLight(self,
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    targetx=list(),
+                    targety=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
+        # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
+
+        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.1)
+
+        pathpatch = pathpatch_border
+        pathpatch += pathpatch_ylow
+        pathpatch += pathpatch_yup
+
+        for pathpatch_i in pathpatch:
+            ax1.add_patch(pathpatch_i)
+        ax1.autoscale_view()
+
+        # Include the vertices of the rectangles of the ResultSet in the plotting
+        # The inclusion of explicit points forces the autoscaling of the image
+        rs_vertices = self.vertices()
+        xs = [vi[0] for vi in rs_vertices]
+        ys = [vi[1] for vi in rs_vertices]
+
+        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+
+        plt.plot(targetx, targety, 'kp')
+        plt.autoscale()
+        plt.show(block=blocking)
+        time.sleep(sec)
+
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+
+        plt.close()
+        return plt
+
+    def toMatPlotSpace3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+        # type: (ResultSet, int, int, int, float) -> list
+        faces = [self.xspace.toMatplot3D('blue', xaxe, yaxe, zaxe, opacity)]
+        return faces
 
     def toMatPlotYup3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
@@ -384,6 +440,58 @@ class ResultSet:
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
         return plt
+
+    def toMatPlot3DLight(self,
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    zaxe=2,
+                    targetx=list(),
+                    targety=list(),
+                    targetz=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
+        # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        ax1.set_title('Approximation of the Pareto front (x,y,z): ('
+                      + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+
+        faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
+        faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
+        faces_border = self.toMatPlotSpace3D(xaxe, yaxe, zaxe, 0.1)
+
+        faces = faces_border
+        faces += faces_ylow
+        faces += faces_yup
+
+        for faces_i in faces:
+            ax1.add_collection3d(faces_i)
+
+        # Include the vertices of the rectangles of the ResultSet in the plotting
+        # The inclusion of explicit points forces the autoscaling of the image
+        rs_vertices = self.vertices()
+        xs = [vi[0] for vi in rs_vertices]
+        ys = [vi[1] for vi in rs_vertices]
+        zs = [vi[2] for vi in rs_vertices]
+
+        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        targetz += [__builtin__.min(zs), __builtin__.max(zs)]
+
+        ax1.scatter(targetx, targety, targetz, c='k')
+        # ax1.autoscale_view()
+        # ax1.autoscale(enable=True, tight=True)
+
+        plt.show(block=blocking)
+        if sec > 0:
+            time.sleep(sec)
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+        plt.close()
+        return plt
+
 
     # Saving/loading results
     def toFileYup(self, f):

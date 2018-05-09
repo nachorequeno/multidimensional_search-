@@ -168,12 +168,8 @@ class test_paretolib ( Command ):
 
 # Check that we have the right Python version
 if ( sys.version_info[:2] < (2, 7) ) :
-    print('ParetoLib requires Python 2.7.9 (or Python 3.4 or later). ' \
+    print('ParetoLib requires Python 2.7.9. ' \
           'Python %d.%d detected'.format(sys.version_info[:2]))
-    sys.exit(1)
-elif ( (sys.version_info[0] == 3) and (sys.version_info[:2] < (3, 4)) ) :
-    print('ParetoLib requires Python 3.4 or later (or Python 2.7). ' \
-          'Python %d.%d detected' % sys.version_info[:2])
     sys.exit(1)
 
 # We now define the ParetoLib version number in ParetoLib/__init__.py
@@ -182,14 +178,8 @@ for line in open('ParetoLib/__init__.py') :
     if ( line.startswith('__version__') ) :
         exec(line.strip())
 
-# Simple trick to use the 2to3 converted source under Python 3, change the
-# current directory before/after running setup. Note as a side effect there will
-# be a build folder underneath the python3_source folder.
 old_path = os.getcwd()
-try:
-    src_path = python3_source
-except NameError :
-    src_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+src_path = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(src_path)
 sys.path.insert(0, src_path)
 
@@ -208,9 +198,7 @@ setup_args = { 'name': 'ParetoLib',
                'packages': [ 'ParetoLib',
                              'ParetoLib.Geometry',
                              'ParetoLib.Oracle',
-                             'ParetoLib.Search',
-                             'ParetoLib._py3k' ],
-               'package_data': {'ParetoLib.Data': ['*.gb']}, }
+                             'ParetoLib.Search'], }
 
 try:
     setup(**setup_args)

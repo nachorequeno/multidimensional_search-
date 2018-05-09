@@ -1,6 +1,7 @@
 import itertools
-
-from sortedcontainers import SortedListWithKey
+from multiprocessing import Manager, Pool, cpu_count
+import multiprocessing as mp
+import copy
 
 from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Oracle.OraclePoint import *
@@ -73,6 +74,49 @@ def binary_search(x,
     return y
 
 
+def pbin_search_ser(args):
+    xrectangle, f, epsilon, n = args
+    error = (epsilon,) * n
+    return binary_search(xrectangle.diagToSegment(), f, error)
+
+
+def pbin_search(args):
+    xrectangle, ora, epsilon, n = args
+    f = ora.membership()
+    error = (epsilon,) * n
+    return binary_search(xrectangle.diagToSegment(), f, error)
+
+def pbin_search_dict(args):
+    xrectangle, dict_man, epsilon, n = args
+    ora = dict_man[mp.current_process().name]
+    f = ora.membership()
+    error = (epsilon,) * n
+    return binary_search(xrectangle.diagToSegment(), f, error)
+
+
+def pb0(args):
+    # b0 = Rectangle(xspace.min_corner, y.l)
+    xrectangle, y = args
+    return Rectangle(xrectangle.min_corner, y.l)
+
+
+def pb1(args):
+    # b1 = Rectangle(y.h, xspace.max_corner)
+    xrectangle, y = args
+    return Rectangle(y.h, xrectangle.max_corner)
+
+
+def pborder(args):
+    # border = irect(incomparable, yrectangle, xrectangle)
+    incomparable, y, xrectangle = args
+    yrectangle = Rectangle(y.l, y.h)
+    return irect(incomparable, yrectangle, xrectangle)
+
+
+def pvol(rect):
+    return rect.volume()
+
+
 # Multidimensional search
 # The search returns a set of Rectangles in Yup, Ylow and Border
 def multidim_search(xspace,
@@ -110,22 +154,30 @@ def multidim_search(xspace,
     incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
-    # l = [xspace]
-    l = SortedListWithKey(key=Rectangle.volume)
-    l.add(xspace)
+    border = [xspace]
 
+    # Upper and lower clausure
     ylow = []
     yup = []
 
-    # oracle function
-    f = oracle.membership()
-
-    error = (epsilon,) * n
     vol_total = xspace.volume()
     vol_yup = 0
     vol_ylow = 0
     vol_border = vol_total
     step = 0
+
+    num_proc = cpu_count()
+    p = Pool(num_proc)
+
+    # oracle function
+    # f = oracle.membership()
+
+    #oracle_dict = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    man = Manager()
+    dict_man = man.dict()
+
+    for proc in mp.active_children():
+        dict_man[proc.name] = copy.deepcopy(oracle)
 
     vprint('xspace: ', xspace)
     vprint('vol_border: ', vol_border)
@@ -136,53 +188,43 @@ def multidim_search(xspace,
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (step <= max_step):
-        vprint('l:', l)
-        # l.sort(key=Rectangle.volume)
+        # 'f = oracle.membership()' is not thread safe!
+        # Create a copy of 'oracle' for each concurrent process
+        # args_pbin_search = [(xrectangle, copy.deepcopy(oracle), epsilon, n) for xrectangle in border]
+        # y_list = p.map(pbin_search, args_pbin_search)
+        args_pbin_search_dict = [(xrectangle, dict_man, epsilon, n) for xrectangle in border]
+        y_list = p.map(pbin_search_dict, args_pbin_search_dict)
+        # args_pbin_search_ser = ((xrectangle, f, epsilon, n) for xrectangle in border)
+        # y_list = map(pbin_search_ser, args_pbin_search)
 
-        xrectangle = l.pop()
+        b0_list = p.map(pb0, zip(border, y_list))
+        b1_list = p.map(pb1, zip(border, y_list))
 
-        vprint('xrectangle: ', xrectangle)
-        vprint('xrectangle.volume: ', xrectangle.volume())
-        vprint('xrectangle.norm : ', xrectangle.norm())
+        ylow.extend(b0_list)
+        yup.extend(b1_list)
 
-        # y, segment
-        # y = search(xrectangle.diagToSegment(), f, epsilon)
-        y = binary_search(xrectangle.diagToSegment(), f, error)
-        vprint('y: ', y)
+        vol_b0_list = p.map(pvol, b0_list)
+        vol_b1_list = p.map(pvol, b1_list)
 
-        # b0 = Rectangle(xspace.min_corner, y.l)
-        b0 = Rectangle(xrectangle.min_corner, y.l)
-        ylow.append(b0)
-        vol_ylow += b0.volume()
+        vol_ylow += sum(vol_b0_list)
+        vol_yup += sum(vol_b1_list)
 
-        vprint('b0: ', b0)
-        vprint('ylow: ', ylow)
-
-        # b1 = Rectangle(y.h, xspace.max_corner)
-        b1 = Rectangle(y.h, xrectangle.max_corner)
-        yup.append(b1)
-        vol_yup += b1.volume()
-
-        vprint('b1: ', b1)
-        vprint('yup: ', yup)
-
-        yrectangle = Rectangle(y.l, y.h)
-        i = irect(incomparable, yrectangle, xrectangle)
-        # i = pirect(incomparable, yrectangle, xrectangle)
-        # l.extend(i)
-
-        l += i
-        vprint('irect: ', i)
+        args_pborder = ((incomparable, y, xrectangle) for xrectangle, y in zip(border, y_list))
+        border2 = p.map(pborder, args_pborder)
+        # Flatten list
+        border = list(chain.from_iterable(border2))
 
         vol_border = vol_total - vol_yup - vol_ylow
+        # vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
+        #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        #vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
-        #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(l)))
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
+               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        step = step + 1
+        step = step + len(border)
 
         if sleep > 0.0:
-            rs = ResultSet(list(l), ylow, yup, xspace)
+            rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -192,7 +234,7 @@ def multidim_search(xspace,
     time0 = end - start
     vprint('Time multidim search: ', str(time0))
 
-    return ResultSet(list(l), ylow, yup, xspace)
+    return ResultSet(border, ylow, yup, xspace)
 
 
 def loadOracleFunction(nfile,
