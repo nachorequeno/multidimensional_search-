@@ -70,23 +70,23 @@ class ResultSet:
     # Vertex functions
     def verticesYup(self):
         # type: (ResultSet) -> set
+        vertices_list = (rect.vertices() for rect in self.yup)
         vertices = set()
-        for rect in self.yup:
-            vertices = vertices.union(set(rect.vertices()))
+        vertices = vertices.union(*vertices_list)
         return vertices
 
     def verticesYlow(self):
         # type: (ResultSet) -> set
+        vertices_list = (rect.vertices() for rect in self.ylow)
         vertices = set()
-        for rect in self.ylow:
-            vertices = vertices.union(set(rect.vertices()))
+        vertices = vertices.union(*vertices_list)
         return vertices
 
     def verticesBorder(self):
         # type: (ResultSet) -> set
+        vertices_list = (rect.vertices() for rect in self.border)
         vertices = set()
-        for rect in self.border:
-            vertices = vertices.union(set(rect.vertices()))
+        vertices = vertices.union(*vertices_list)
         return vertices
 
     def vertices(self):
@@ -96,62 +96,80 @@ class ResultSet:
         vertices = vertices.union(self.verticesBorder())
         return vertices
 
+    def verticesYup2(self):
+        # type: (ResultSet) -> set
+        vertices = set()
+        for rect in self.yup:
+            vertices = vertices.union(set(rect.vertices()))
+        return vertices
+
+    def verticesYlow2(self):
+        # type: (ResultSet) -> set
+        vertices = set()
+        for rect in self.ylow:
+            vertices = vertices.union(set(rect.vertices()))
+        return vertices
+
+    def verticesBorder2(self):
+        # type: (ResultSet) -> set
+        vertices = set()
+        for rect in self.border:
+            vertices = vertices.union(set(rect.vertices()))
+        return vertices
+
     # Volume functions
     def _overlappingVolume(self, pairs_of_rect):
-        # type: (ResultSet, list) -> float
+        # type: (ResultSet, iter) -> float
+        ## type: (ResultSet, list) -> float
         # remove pairs (recti, recti) from previous list
-        pairs_of_rect_filt = [pair for pair in pairs_of_rect if pair[0] != pair[1]]
-        overlapping_rect = [r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt]
+        #pairs_of_rect_filt = [pair for pair in pairs_of_rect if pair[0] != pair[1]]
+        #overlapping_rect = [r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt]
+        pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
+        overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
         # vol_overlapping_rect = p.map(Rectangle.volume, overlapping_rect)
-        vol_overlapping_rect = [rect.volume() for rect in overlapping_rect]
+        # vol_overlapping_rect = [rect.volume() for rect in overlapping_rect]
+        vol_overlapping_rect = (rect.volume() for rect in overlapping_rect)
         return sum(vol_overlapping_rect)
-        # vol_overlapping_rect = p.map_async(volume, overlapping_rect)
-        # vol_overlapping_rect.wait()
-        # return sum(vol_overlapping_rect.get())
 
     def overlappingVolumeYup(self):
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = list(combinations_with_replacement(self.yup, 2))
-        # pairs_of_rect = list(product(self.yup, 2))
+        # pairs_of_rect = list(combinations_with_replacement(self.yup, 2))
+        pairs_of_rect = combinations_with_replacement(self.yup, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def overlappingVolumeYlow(self):
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = list(combinations_with_replacement(self.ylow, 2))
-        # pairs_of_rect = list(product(self.ylow, 2))
+        # pairs_of_rect = list(combinations_with_replacement(self.ylow, 2))
+        pairs_of_rect = combinations_with_replacement(self.ylow, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def overlappingVolumeBorder(self):
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = list(combinations_with_replacement(self.border, 2))
-        # pairs_of_rect = list(product(self.border, 2))
+        # pairs_of_rect = list(combinations_with_replacement(self.border, 2))
+        pairs_of_rect = combinations_with_replacement(self.border, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def volumeYup(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.yup)
-        vol_list = [rect.volume() for rect in self.yup]
+        # vol_list = [rect.volume() for rect in self.yup]
+        vol_list = (rect.volume() for rect in self.yup)
         return sum(vol_list)
         # return sum(vol_list) - self.overlappingVolumeYup()
-        # vol_list = p.map_async(volume, self.yup)
-        # vol_list.wait()
-        # return sum(vol_list.get())
 
     def volumeYlow(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.ylow)
-        vol_list = [rect.volume() for rect in self.ylow]
+        # vol_list = [rect.volume() for rect in self.ylow]
+        vol_list = (rect.volume() for rect in self.ylow)
         return sum(vol_list)
         # return sum(vol_list) - self.overlappingVolumeYlow()
-        # vol_list = p.map_async(volume, self.ylow)
-        # vol_list.wait()
-        # return sum(vol_list.get())
 
     def volumeBorder(self):
         # type: (ResultSet) -> float
@@ -164,12 +182,9 @@ class ResultSet:
     def volumeBorderExact(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.border)
-        vol_list = [rect.volume() for rect in self.border]
+        # vol_list = [rect.volume() for rect in self.border]
+        vol_list = (rect.volume() for rect in self.border)
         return sum(vol_list) - self.overlappingVolumeBorder()
-        # vol_list = p.map_async(volume, self.border)
-        # vol_overlapping = self.overlappingVolumeBorder()
-        # vol_list.wait()
-        # return sum(vol_list.get()) - vol_overlapping
 
     def volumeTotal(self):
         # type: (ResultSet) -> float
@@ -201,13 +216,33 @@ class ResultSet:
 
     def memberYup(self, xpoint):
         # type: (ResultSet, tuple) -> bool
+        isMember = (rect.inside(xpoint) for rect in self.yup)
+        return any(isMember)
+
+    def memberYlow(self, xpoint):
+        # type: (ResultSet, tuple) -> bool
+        isMember = (rect.inside(xpoint) for rect in self.ylow)
+        return any(isMember)
+
+    def memberBorder(self, xpoint):
+        # type: (ResultSet, tuple) -> bool
+        isMember = (rect.inside(xpoint) for rect in self.border)
+        return any(isMember)
+
+    def memberSpace(self, xpoint):
+        # type: (ResultSet, tuple) -> bool
+        #return xpoint in self.xspace
+        return self.xspace.inside(xpoint)
+
+    def memberYup2(self, xpoint):
+        # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.yup:
             #isMember = isMember or (xpoint in rect)
             isMember = isMember or rect.inside(xpoint)
         return isMember
 
-    def memberYlow(self, xpoint):
+    def memberYlow2(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.ylow:
@@ -215,7 +250,7 @@ class ResultSet:
             isMember = isMember or rect.inside(xpoint)
         return isMember
 
-    def memberBorder(self, xpoint):
+    def memberBorder2(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = False
         for rect in self.border:
@@ -223,17 +258,13 @@ class ResultSet:
             isMember = isMember or rect.inside(xpoint)
         return isMember
 
-    def memberSpace(self, xpoint):
-        # type: (ResultSet, tuple) -> bool
-        #return xpoint in self.xspace
-        return self.xspace.inside(xpoint)
-
     # Points of closure
     def getPointsYup(self, n):
         # type: (ResultSet, int) -> list
         m = n / len(self.yup)
         m = 1 if m < 1 else m
-        point_list = [rect.getPoints(m) for rect in self.yup]
+        # point_list = [rect.getPoints(m) for rect in self.yup]
+        point_list = (rect.getPoints(m) for rect in self.yup)
         # Flatten list
         # Before
         # point_list = [ [] , [], ..., [] ]
@@ -246,7 +277,8 @@ class ResultSet:
         # type: (ResultSet, int) -> list
         m = n / len(self.ylow)
         m = 1 if m < 1 else m
-        point_list = [rect.getPoints(m) for rect in self.ylow]
+        #point_list = [rect.getPoints(m) for rect in self.ylow]
+        point_list = (rect.getPoints(m) for rect in self.ylow)
         merged = list(chain.from_iterable(point_list))
         return merged
 
@@ -254,7 +286,8 @@ class ResultSet:
         # type: (ResultSet, int) -> list
         m = n / len(self.border)
         m = 1 if m < 1 else m
-        point_list = [rect.getPoints(m) for rect in self.border]
+        # point_list = [rect.getPoints(m) for rect in self.border]
+        point_list = (rect.getPoints(m) for rect in self.border)
         merged = list(chain.from_iterable(point_list))
         return merged
 
