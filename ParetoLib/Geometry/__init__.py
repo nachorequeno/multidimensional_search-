@@ -2,7 +2,7 @@ import sys
 
 __version__ = 1.
 __name__ = "Geometry"
-__all__ = ["Segment", "Rectangle", "Point", "PPoint"]
+__all__ = ["Segment", "Rectangle", "pRectangle", "Point", "PPoint"]
 __verbose__ = False
 
 if __verbose__:
