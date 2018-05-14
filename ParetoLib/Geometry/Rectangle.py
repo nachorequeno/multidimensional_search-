@@ -30,18 +30,22 @@ class Rectangle:
     def __contains__(self, xpoint):
         # type: (Rectangle, tuple) -> bool
         # xpoint is strictly inside the rectangle (i.e., is not along the border)
-        return (not incomparable(xpoint, self.min_corner) and
-                not incomparable(xpoint, self.max_corner) and
-                greater(xpoint, self.min_corner) and
+        return (greater(xpoint, self.min_corner) and
                 less(xpoint, self.max_corner))
+        #return (not incomparable(xpoint, self.min_corner) and
+        #        not incomparable(xpoint, self.max_corner) and
+        #        greater(xpoint, self.min_corner) and
+        #        less(xpoint, self.max_corner))
 
     def inside(self, xpoint):
         # type: (Rectangle, tuple) -> bool
         # xpoint is inside the rectangle or along the border
-        return (not incomparable(xpoint, self.min_corner) and
-                not incomparable(xpoint, self.max_corner) and
-                greater_equal(xpoint, self.min_corner) and
+        return (greater_equal(xpoint, self.min_corner) and
                 less_equal(xpoint, self.max_corner))
+        #return (not incomparable(xpoint, self.min_corner) and
+        #        not incomparable(xpoint, self.max_corner) and
+        #        greater_equal(xpoint, self.min_corner) and
+        #        less_equal(xpoint, self.max_corner))
 
     # Printers
     def toStr(self):
@@ -154,8 +158,10 @@ class Rectangle:
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
         other_vertices = other.vertices()
-        overlap = any([other_vertex in self for other_vertex in other_vertices])
-        # overlap = any([self.strictIn(other_vertex) for other_vertex in other_vertices])
+        other_vertex_in_self = (other_vertex in self for other_vertex in other_vertices)
+        self_vertices = self.vertices()
+        self_vertex_in_other = (self_vertex in other for self_vertex in self_vertices)
+        overlap = any(other_vertex_in_self) and any(self_vertex_in_other)
         return overlap
 
     def intersection(self, other):
@@ -176,6 +182,7 @@ class Rectangle:
             self_vertices = self.vertices()
             # self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if other.strictIn(self_vertex)]
             self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
+
             minc = self_vertices_inside_other[0]
             maxc = other_vertices_inside_self[0]
 

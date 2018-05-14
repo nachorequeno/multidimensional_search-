@@ -134,7 +134,7 @@ def multidim_search(xspace,
     vprint('incomparable: ', incomparable)
     vprint('comparable: ', comparable)
 
-    vprint('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (step <= max_step):
         step = step + 1
         vprint('border:', border)
@@ -180,7 +180,7 @@ def multidim_search(xspace,
         #vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
         #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        vprint('%s, %s, %s, %s, %s, %d, %d, %d'
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)

@@ -1,3 +1,4 @@
+import os
 import __builtin__
 import time
 import pickle
@@ -96,38 +97,12 @@ class ResultSet:
         vertices = vertices.union(self.verticesBorder())
         return vertices
 
-    def verticesYup2(self):
-        # type: (ResultSet) -> set
-        vertices = set()
-        for rect in self.yup:
-            vertices = vertices.union(set(rect.vertices()))
-        return vertices
-
-    def verticesYlow2(self):
-        # type: (ResultSet) -> set
-        vertices = set()
-        for rect in self.ylow:
-            vertices = vertices.union(set(rect.vertices()))
-        return vertices
-
-    def verticesBorder2(self):
-        # type: (ResultSet) -> set
-        vertices = set()
-        for rect in self.border:
-            vertices = vertices.union(set(rect.vertices()))
-        return vertices
-
     # Volume functions
     def _overlappingVolume(self, pairs_of_rect):
         # type: (ResultSet, iter) -> float
-        ## type: (ResultSet, list) -> float
         # remove pairs (recti, recti) from previous list
-        #pairs_of_rect_filt = [pair for pair in pairs_of_rect if pair[0] != pair[1]]
-        #overlapping_rect = [r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt]
         pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
         overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
-        # vol_overlapping_rect = p.map(Rectangle.volume, overlapping_rect)
-        # vol_overlapping_rect = [rect.volume() for rect in overlapping_rect]
         vol_overlapping_rect = (rect.volume() for rect in overlapping_rect)
         return sum(vol_overlapping_rect)
 
@@ -135,7 +110,6 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = list(combinations_with_replacement(self.yup, 2))
         pairs_of_rect = combinations_with_replacement(self.yup, 2)
         return self._overlappingVolume(pairs_of_rect)
 
@@ -143,7 +117,6 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = list(combinations_with_replacement(self.ylow, 2))
         pairs_of_rect = combinations_with_replacement(self.ylow, 2)
         return self._overlappingVolume(pairs_of_rect)
 
@@ -151,7 +124,6 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = list(combinations_with_replacement(self.border, 2))
         pairs_of_rect = combinations_with_replacement(self.border, 2)
         return self._overlappingVolume(pairs_of_rect)
 
@@ -161,7 +133,6 @@ class ResultSet:
         # vol_list = [rect.volume() for rect in self.yup]
         vol_list = (rect.volume() for rect in self.yup)
         return sum(vol_list)
-        # return sum(vol_list) - self.overlappingVolumeYup()
 
     def volumeYlow(self):
         # type: (ResultSet) -> float
@@ -169,7 +140,6 @@ class ResultSet:
         # vol_list = [rect.volume() for rect in self.ylow]
         vol_list = (rect.volume() for rect in self.ylow)
         return sum(vol_list)
-        # return sum(vol_list) - self.overlappingVolumeYlow()
 
     def volumeBorder(self):
         # type: (ResultSet) -> float
@@ -191,11 +161,10 @@ class ResultSet:
         vol_total = self.xspace.volume()
         return vol_total
 
-    # By construction, overlapping of rectangles only happens in the boundary
     def volumeTotalExact(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.border)
-        vol_total = self.volumeYlow() + self.volumeYup() + self.volumeBorder()
+        vol_total = self.volumeYlow() + self.volumeYup() + self.volumeBorderExact()
         return vol_total
 
     def volumeReport(self):
@@ -233,30 +202,6 @@ class ResultSet:
         # type: (ResultSet, tuple) -> bool
         #return xpoint in self.xspace
         return self.xspace.inside(xpoint)
-
-    def memberYup2(self, xpoint):
-        # type: (ResultSet, tuple) -> bool
-        isMember = False
-        for rect in self.yup:
-            #isMember = isMember or (xpoint in rect)
-            isMember = isMember or rect.inside(xpoint)
-        return isMember
-
-    def memberYlow2(self, xpoint):
-        # type: (ResultSet, tuple) -> bool
-        isMember = False
-        for rect in self.ylow:
-            #isMember = isMember or (xpoint in rect)
-            isMember = isMember or rect.inside(xpoint)
-        return isMember
-
-    def memberBorder2(self, xpoint):
-        # type: (ResultSet, tuple) -> bool
-        isMember = False
-        for rect in self.border:
-            #isMember = isMember or (xpoint in rect)
-            isMember = isMember or rect.inside(xpoint)
-        return isMember
 
     # Points of closure
     def getPointsYup(self, n):
@@ -556,10 +501,14 @@ class ResultSet:
 
     def toFile(self, f):
         # type: (ResultSet, str) -> None
-        self.toFileYup(f + self.suffix_Yup)
-        self.toFileYlow(f + self.suffix_Ylow)
-        self.toFileBorder(f + self.suffix_Border)
-        self.toFileSpace(f + self.suffix_Space)
+        name = os.path.splitext(f)
+        # ('file', '.ext')
+        basename = name[0]
+        extension = name[1]
+        self.toFileYup(basename + self.suffix_Yup + extension)
+        self.toFileYlow(basename + self.suffix_Ylow + extension)
+        self.toFileBorder(basename + self.suffix_Border + extension)
+        self.toFileSpace(basename + self.suffix_Space + extension)
 
     def fromFileYup(self, f):
         # type: (ResultSet, str) -> None
@@ -587,6 +536,11 @@ class ResultSet:
 
     def fromFile(self, f):
         # type: (ResultSet, str) -> None
-        self.fromFileYup(f + self.suffix_Yup)
-        self.fromFileYlow(f + self.suffix_Ylow)
-        self.fromFileBorder(f + self.suffix_Border)
+        name = os.path.splitext(f)
+        # ('file', '.ext')
+        basename = name[0]
+        extension = name[1]
+        self.fromFileYup(basename + self.suffix_Yup + extension)
+        self.fromFileYlow(basename + self.suffix_Ylow + extension)
+        self.fromFileBorder(basename + self.suffix_Border + extension)
+        self.fromFileSpace(basename + self.suffix_Space + extension)
