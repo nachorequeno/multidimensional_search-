@@ -3,7 +3,7 @@ import sys
 __version__=1.
 __name__="Search"
 __all__ = ["Search", "pSearch", "ResultSet", "pResultSet"]
-__verbose__=False
+__verbose__ = False
 
 if __verbose__:
     # Verbose print (stdout)

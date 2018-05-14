@@ -146,6 +146,15 @@ class Condition:
         expr = self.get_expression()
         return sorted(expr.free_symbols, key=default_sort_key)
 
+    def eval_zip_tuple(self, var_xpoint):
+        # type: (Condition, list) -> Expr
+        expr = self.get_expression()
+        # expr.subs([(x, 2), (y, 4), (z, 0)])
+        res = expr.subs(var_xpoint)
+        ex = str(res) + self.op + '0'
+        vprint('Expression ', str(simplify(ex)))
+        return simplify(ex)
+
     def eval_tuple(self, xpoint):
         # type: (Condition, tuple) -> Expr
         keys_fv = self.get_variables()
@@ -311,6 +320,16 @@ class OracleFunction(Oracle):
         # type: (OracleFunction) -> int
         return len(self.get_variables())
 
+    def eval_zip_tuple(self, var_xpoint):
+        # type: (OracleFunction, list) -> bool
+        _eval_list = [cond.eval_zip_tuple(var_xpoint) == True for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        # _eval = any(_eval_list)
+        vprint('OracleFunction evaluates ', str(var_xpoint), ' to ', str(_eval))
+        return _eval
+
     def eval_tuple(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
         # _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
@@ -348,7 +367,16 @@ class OracleFunction(Oracle):
         # type: (OracleFunction, tuple) -> bool
         return self.member(p) is True
 
-    def member(self, xpoint):
+    def member_zip_var(self, xpoint):
+        # type: (OracleFunction, tuple) -> bool
+        # return self.eval_tuple(xpoint)
+        vprint(xpoint)
+        # keys = self.get_variables()
+        keys = self.variables
+        var_xpoint = zip(keys, xpoint)
+        return self.eval_zip_tuple(var_xpoint)
+
+    def member_dict(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
         # return self.eval_tuple(xpoint)
         vprint(xpoint)
@@ -357,6 +385,13 @@ class OracleFunction(Oracle):
         di = {key: xpoint[i] for i, key in enumerate(keys)}
         # di = dict.fromkeys(keys)
         return self.eval_dict(di)
+
+    def member(self, xpoint):
+        # type: (OracleFunction, tuple) -> bool
+        # member_zip_var performs better than member_dict
+        return self.member_zip_var(xpoint)
+        #return self.member_dict(xpoint)
+
 
     def membership(self):
         # type: (OracleFunction) -> function

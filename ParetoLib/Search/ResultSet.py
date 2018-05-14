@@ -476,23 +476,43 @@ class ResultSet:
 
 
     # Saving/loading results
-    def toFileYup(self, f):
+    def toFileYup2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.yup:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileYlow(self, f):
+    def toFileYlow2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.ylow:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileBorder(self, f):
+    def toFileBorder2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.border:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileSpace2(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileYup(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.yup, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileYlow(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.ylow, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileBorder(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.border, output, pickle.HIGHEST_PROTOCOL)
 
     def toFileSpace(self, f):
         # type: (ResultSet, str) -> None

@@ -106,7 +106,7 @@ class ResultSet:
         # remove pairs (recti, recti) from previous list
         pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
         overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
-        vol_overlapping_rect = self.p.imap(pvol, overlapping_rect)
+        vol_overlapping_rect = self.p.imap_unordered(pvol, overlapping_rect)
         return sum(vol_overlapping_rect)
 
     def overlappingVolumeYup(self):
@@ -132,13 +132,13 @@ class ResultSet:
 
     def volumeYup(self):
         # type: (ResultSet) -> float
-        vol_list = self.p.imap(pvol, self.yup)
+        vol_list = self.p.imap_unordered(pvol, self.yup)
         # vol_list = (rect.volume() for rect in self.yup)
         return sum(vol_list)
 
     def volumeYlow(self):
         # type: (ResultSet) -> float
-        vol_list = self.p.imap(pvol, self.ylow)
+        vol_list = self.p.imap_unordered(pvol, self.ylow)
         # vol_list = (rect.volume() for rect in self.ylow)
         return sum(vol_list)
 
@@ -152,7 +152,7 @@ class ResultSet:
     # By construction, overlapping of rectangles only happens in the boundary
     def volumeBorderExact(self):
         # type: (ResultSet) -> float
-        vol_list = self.p.imap(pvol, self.border)
+        vol_list = self.p.imap_unordered(pvol, self.border)
         # vol_list = (rect.volume() for rect in self.border)
         return sum(vol_list) - self.overlappingVolumeBorder()
 
@@ -187,21 +187,21 @@ class ResultSet:
         # type: (ResultSet, tuple) -> bool
         # isMember = (rect.inside(xpoint) for rect in self.yup)
         args_member = ((rect, xpoint) for rect in self.yup)
-        isMember = self.p.imap(pinside, args_member)
+        isMember = self.p.imap_unordered(pinside, args_member)
         return any(isMember)
 
     def memberYlow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         # isMember = (rect.inside(xpoint) for rect in self.ylow)
         args_member = ((rect, xpoint) for rect in self.ylow)
-        isMember = self.p.imap(pinside, args_member)
+        isMember = self.p.imap_unordered(pinside, args_member)
         return any(isMember)
 
     def memberBorder(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         # isMember = (rect.inside(xpoint) for rect in self.border)
         args_member = ((rect, xpoint) for rect in self.border)
-        isMember = self.p.imap(pinside, args_member)
+        isMember = self.p.imap_unordered(pinside, args_member)
         return any(isMember)
 
     def memberSpace(self, xpoint):
@@ -478,23 +478,43 @@ class ResultSet:
         return plt
 
     # Saving/loading results
-    def toFileYup(self, f):
+    def toFileYup2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.yup:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileYlow(self, f):
+    def toFileYlow2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.ylow:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileBorder(self, f):
+    def toFileBorder2(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             for rect in self.border:
                 pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileSpace2(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileYup(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.yup, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileYlow(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.ylow, output, pickle.HIGHEST_PROTOCOL)
+
+    def toFileBorder(self, f):
+        # type: (ResultSet, str) -> None
+        with open(f, 'wb') as output:
+            pickle.dump(self.border, output, pickle.HIGHEST_PROTOCOL)
 
     def toFileSpace(self, f):
         # type: (ResultSet, str) -> None
