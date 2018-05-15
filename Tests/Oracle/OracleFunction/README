@@ -8,7 +8,7 @@ suite of ParetoLib for OracleFunction. Each file defines a OracleFunction:
 2D/3D
 - test1.txt: Oracle that specifies the closure membership using a linear function (diagonal)
 - test2.txt: Oracle that specifies the closure membership using a quadratic function (parabola)
-- test3.txt: Oracle that specifies the closure membership using a inverse function (hyperbola)
+- test3.txt: Oracle that specifies the closure membership using an inverse function (hyperbola)
 - test4.txt: Oracle that specifies the closure membership using a circumference/sphere
 - test5.txt: Oracle that specifies the closure membership using a simplex
 

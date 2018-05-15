@@ -3,16 +3,20 @@
 """""""""""""""""""""""""""""""""""""""""""""""""
 
 The following file contains information about every data file used in the test
-suite of ParetoLib for OraclePoint. Each file defines a OraclePoint:
+suite of ParetoLib for OraclePoint. Each file defines a OraclePoint.
 
 2D/3D
--
+- test-2d-[6|12]points.txt: Oracle that has a set of [6|12] points obtained by evaluating a linear function (diagonal)
+- test-2d-10points.txt: Oracle that has a set of 10 points obtained by evaluating an inverse function (hyperbola)
+- test-Nd-[1000|2000|10000]points.txt: Oracle that has a set of X points of N-dimension. They are LIDAR points
+ extracted from the adaptation of:
+
+ ftp://ftp.geo.euskadi.net/lidar/LIDAR_2012_ETRS89/XYZ/COMPLETO/458_4782_completo.zip
+
 
 ND
--
+- test-Nd-Xpoints.bin: Oracle that has a set of X random points of N-dimension
 
-
-*** All the tests consider n-dimensional spaces where the range of each axe is [0,1]. ****
 
     File format
 """""""""""""""""
