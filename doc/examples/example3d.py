@@ -2,7 +2,7 @@ from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Search.Search import *
 
 # File containing the definition of the Oracle
-nfile='../../Tests/Search/OracleFunction/3D/test5.txt'
+nfile='../../Tests/Oracle/OracleFunction/3D/test1.txt'
 human_readable=True
 
 # Definition of the n-dimensional space

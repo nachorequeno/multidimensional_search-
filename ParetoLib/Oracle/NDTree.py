@@ -124,11 +124,8 @@ class Node:
         if self.isLeaf():
             return self.hasPoint(x)
         else:
-            _hasPoints = [x.hasPointRec(x) for x in self.nodes]
-            _hasPoint = True
-            for i in _hasPoints:
-                _hasPoint = _hasPoint and i
-            return _hasPoint
+            _hasPoint = (n.hasPointRec(x) for n in self.nodes)
+            return any(_hasPoint)
 
     def __contains__(self, x):
         # type: (Node, tuple) -> bool
@@ -151,7 +148,7 @@ class Node:
         if self.isLeaf():
             return self.toStr(nesting_level)
         else:
-            _strings = [x.toStrRec(nesting_level + 1) for x in self.nodes]
+            _strings = (x.toStrRec(nesting_level + 1) for x in self.nodes)
             return "\n".join(_strings)
 
     def __repr__(self):
@@ -252,6 +249,12 @@ class Node:
 
     def getSubnodesRec(self):
         # type: (Node) -> set
+        subnode_list = (n.getSubnodesRec() for n in self.nodes)
+        nodes = set.union(*subnode_list)
+        return nodes.union(self.getSubnodes())
+
+    def getSubnodesRec2(self):
+        # type: (Node) -> set
         nodes = set()
         for n in self.nodes:
             nodes = nodes.union(n.getSubnodesRec())
@@ -324,7 +327,8 @@ class Node:
             return set(self.L)
         # if n == internal, S(n) == U S(m) for all m in descendent(n)
         else:
-            temp_list = [i.S() for i in self.nodes]
+            #temp_list = [i.S() for i in self.nodes]
+            temp_list = (i.S() for i in self.nodes)
             temp = set.union(*temp_list)
             vprint("temp " + str(temp))
             return temp
@@ -385,9 +389,8 @@ class Node:
         y = (0,) * d
         mean_max_distance = 0
         for yp in self.L:
-            max_distance = 0
-            for xp in self.L:
-                max_distance += distance(yp, xp)
+            dist_list = (distance(yp, xp) for xp in self.L)
+            max_distance = sum(dist_list)
             temp_mean_max_distance = max_distance / (self.numPoints() - 1)
             if temp_mean_max_distance > mean_max_distance:
                 mean_max_distance = temp_mean_max_distance
@@ -465,10 +468,9 @@ class Node:
                     npr, update = npr.updateNode(x)
                     if not update:
                         return nout, False
-                    else:
-                        if npr.isEmptySolution():
-                            vprint('Removing node\n', npr.toStrRec())
-                            self.removeNode(npr)
+                    elif npr.isEmptySolution():
+                        vprint('Removing node\n', npr.toStrRec())
+                        self.removeNode(npr)
                 if self.numSubnodes() == 1:
                     vprint('Simplifying\n', self.toStrRec())
                     # Remove node n and use npr in place of n

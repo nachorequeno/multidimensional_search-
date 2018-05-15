@@ -1,0 +1,26 @@
+
+    README file of the Test suite for ParetoLib
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+The following file contains information about every data file used in the test
+suite of ParetoLib for OraclePoint. Each file defines a OraclePoint:
+
+2D/3D
+-
+
+ND
+-
+
+
+*** All the tests consider n-dimensional spaces where the range of each axe is [0,1]. ****
+
+    File format
+"""""""""""""""""
+There are two kind of files (*.txt, *.bin):
+- *.txt are textual human-readable files.
+Each line of the file represents a point in the closure.
+Every point is defined by a tuple with the format '(x, y, z)',
+The dimension of the n-dimensional space is implicitly defined by the number of
+coordinates in the tuple.
+
+- *.bin are binary files created by the serialization of Oracles with the Python's Pickle library.

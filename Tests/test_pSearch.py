@@ -12,7 +12,7 @@ DELTA = 1e-5
 class SearchTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.this_dir = "Search"
+        self.this_dir = "Oracle"
         self.oracle = Oracle()
 
     #  Membership testing function used in verify2D, verify3D and verifyND
@@ -234,7 +234,7 @@ class SearchOracleFunctionTestCase(SearchTestCase):
 
     def setUp(self):
         super(SearchOracleFunctionTestCase, self).setUp()
-        self.this_dir = "Search/OracleFunction"
+        self.this_dir = "Oracle/OracleFunction"
         self.oracle = OracleFunction()
 
     def test_2D(self):
@@ -251,7 +251,7 @@ class SearchOraclePointTestCase(SearchTestCase):
 
     def setUp(self):
         super(SearchOraclePointTestCase, self).setUp()
-        self.this_dir = "Search/OraclePoint"
+        self.this_dir = "Oracle/OraclePoint"
         self.oracle = OraclePoint()
 
     def test_2D(self):

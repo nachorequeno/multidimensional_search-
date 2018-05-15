@@ -3,6 +3,17 @@
 """""""""""""""""""""""""""""""""""""""""""""""""
 
 The following file contains information about every data file used in the test
-suite of ParetoLib:
+suite of ParetoLib. The structure of the Test folder is divided in two parts,
+one for each kind of Oracle. Internally, each folder is organised three subfolders
+depending on the dimension of the Oracle. A detailed description of the examples
+is found inside each specific path.
 
-
+Oracle
+    |_ OracleFunction
+                |_ 2D
+                |_ 3D
+                |_ ND
+    |_ OraclePoint
+                |_ 2D
+                |_ 3D
+                |_ ND

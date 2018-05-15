@@ -2,7 +2,7 @@ from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Search.Search import *
 
 # File containing the definition of the Oracle
-nfile='../../Tests/Search/OracleFunction/ND/test-2d.txt'
+nfile='../../Tests/Oracle/OracleFunction/ND/sphere-4d.txt'
 human_readable=True
 
 # Definition of the n-dimensional space
