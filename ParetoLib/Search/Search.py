@@ -134,7 +134,7 @@ def multidim_search(xspace,
     vprint('incomparable: ', incomparable)
     vprint('comparable: ', comparable)
 
-    vprint('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (step <= max_step):
         step = step + 1
         vprint('border:', border)
@@ -180,7 +180,7 @@ def multidim_search(xspace,
         #vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
         #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        vprint('%s, %s, %s, %s, %s, %d, %d, %d'
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
@@ -245,7 +245,9 @@ def Search2D(ora,
     xs = [point[0] for point in points]
     ys = [point[1] for point in points]
 
-    rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
+    #rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
+    #rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True)
+    rs.toMatPlot2DLight(blocking=True)
     return rs
 
 
@@ -275,7 +277,9 @@ def Search3D(ora,
     ys = [point[1] for point in points]
     zs = [point[2] for point in points]
 
-    rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    #rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    #rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    rs.toMatPlot3DLight(blocking=True)
     return rs
 
 

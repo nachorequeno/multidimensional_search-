@@ -2,8 +2,7 @@ import os
 import __builtin__
 import time
 import pickle
-from itertools import chain, combinations_with_replacement, product
-from multiprocessing import Pool, cpu_count
+from itertools import chain, combinations_with_replacement
 
 import matplotlib.pyplot as plt
 
@@ -284,7 +283,6 @@ class ResultSet:
 
         for pathpatch_i in pathpatch:
             ax1.add_patch(pathpatch_i)
-        ax1.autoscale_view()
 
         # Include the vertices of the rectangles of the ResultSet in the plotting
         # The inclusion of explicit points forces the autoscaling of the image
@@ -296,6 +294,9 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
 
         plt.plot(targetx, targety, 'kp')
+        #ax1.scatter(targetx, targety, c='k')
+        #ax1.autoscale_view()
+
         plt.autoscale()
         plt.show(block=blocking)
         time.sleep(sec)
@@ -322,7 +323,7 @@ class ResultSet:
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.1)
+        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.20)
 
         pathpatch = pathpatch_border
         pathpatch += pathpatch_ylow
@@ -330,7 +331,6 @@ class ResultSet:
 
         for pathpatch_i in pathpatch:
             ax1.add_patch(pathpatch_i)
-        ax1.autoscale_view()
 
         # Include the vertices of the rectangles of the ResultSet in the plotting
         # The inclusion of explicit points forces the autoscaling of the image
@@ -342,6 +342,9 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
 
         plt.plot(targetx, targety, 'kp')
+        #ax1.scatter(targetx, targety,  c='k')
+        #ax1.autoscale_view()
+
         plt.autoscale()
         plt.show(block=blocking)
         time.sleep(sec)
@@ -411,13 +414,14 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
         targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
-        ax1.scatter(targetx, targety, targetz, c='k')
-        # ax1.autoscale_view()
-        # ax1.autoscale(enable=True, tight=True)
+        plt.plot(targetx, targety, targetz, 'kp')
+        #ax1.scatter(targetx, targety, targetz, c='k')
+        #ax1.autoscale_view()
 
+        plt.autoscale() #
         plt.show(block=blocking)
-        if sec > 0:
-            time.sleep(sec)
+        time.sleep(sec)
+
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
@@ -442,7 +446,7 @@ class ResultSet:
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
-        faces_border = self.toMatPlotSpace3D(xaxe, yaxe, zaxe, 0.1)
+        faces_border = self.toMatPlotSpace3D(xaxe, yaxe, zaxe, 0.2)
 
         faces = faces_border
         faces += faces_ylow
@@ -462,13 +466,14 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
         targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
-        ax1.scatter(targetx, targety, targetz, c='k')
-        # ax1.autoscale_view()
-        # ax1.autoscale(enable=True, tight=True)
+        plt.plot(targetx, targety, targetz, 'kp')
+        #ax1.scatter(targetx, targety, targetz, c='k')
+        #ax1.autoscale_view()
 
+        plt.autoscale() #
         plt.show(block=blocking)
-        if sec > 0:
-            time.sleep(sec)
+        time.sleep(sec)
+
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
@@ -476,29 +481,6 @@ class ResultSet:
 
 
     # Saving/loading results
-    def toFileYup2(self, f):
-        # type: (ResultSet, str) -> None
-        with open(f, 'wb') as output:
-            for rect in self.yup:
-                pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
-
-    def toFileYlow2(self, f):
-        # type: (ResultSet, str) -> None
-        with open(f, 'wb') as output:
-            for rect in self.ylow:
-                pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
-
-    def toFileBorder2(self, f):
-        # type: (ResultSet, str) -> None
-        with open(f, 'wb') as output:
-            for rect in self.border:
-                pickle.dump(rect, output, pickle.HIGHEST_PROTOCOL)
-
-    def toFileSpace2(self, f):
-        # type: (ResultSet, str) -> None
-        with open(f, 'wb') as output:
-            pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
-
     def toFileYup(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
