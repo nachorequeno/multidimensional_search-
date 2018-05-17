@@ -72,19 +72,23 @@ class OraclePoint(Oracle):
     def member(self, p):
         # type: (OraclePoint, tuple) -> bool
         # Returns 'True' if p belongs to the set of points stored in the Pareto archive
-        vprint(p)
         return p in self.getPoints()
-
-    def dominates(self, p):
-        # type: (OraclePoint, tuple) -> bool
-        # Returns 'True' if p dominates any point of the set of points stored in the Pareto archive
-        vprint(p)
-        return any(greater_equal(p, point) for point in self.getPoints())
 
     def membership(self):
         # type: (OraclePoint) -> function
+        return lambda p: self.oracle.dominates(p)
+
+    def dominates2(self, p):
+        # type: (OraclePoint, tuple) -> bool
+        # Returns 'True' if p dominates any point of the set of points stored in the Pareto archive
+        #return any(greater_equal(p, point) for point in self.getPoints())
+        # Returns 'True' if p is dominated by any point stored in the Pareto archive
+        return any(less_equal(point, p) for point in self.points)
+
+    def membership2(self):
+        # type: (OraclePoint) -> function
         # return lambda p: self.member(p)
-        return lambda p: self.dominates(p)
+        return lambda p: self.dominates2(p)
 
     # Read/Write file functions
     def fromFile(self, fname='', human_readable=False):
@@ -112,6 +116,25 @@ class OraclePoint(Oracle):
         self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
+        # type: (OraclePoint, BinaryIO) -> None
+        assert (finput is not None), "File object should not be null"
+
+        def _line2tuple(inline):
+            line = inline
+            line = line.replace('(', '')
+            line = line.replace(')', '')
+            line = line.split(',')
+            return tuple(float(pi) for pi in line)
+
+        self.oracle = NDTree()
+
+        point_list = (_line2tuple(line) for line in finput)
+        #point_list = (self._line2tuple(line) for line in finput)
+
+        #map(self.oracle.updatePoint, point_list)
+        [self.oracle.updatePoint(point) for point in point_list]
+
+    def fromFileHumRead2(self, finput=None):
         # type: (OraclePoint, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 

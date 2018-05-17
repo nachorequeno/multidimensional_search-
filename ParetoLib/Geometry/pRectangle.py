@@ -27,7 +27,13 @@ def pirect(alphaincomp, yrectangle, xspace):
     pool = Pool(nproc)
 
     args_i = ((alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp)
-    parallel_results = pool.map(pbrect, args_i)
+    #parallel_results = pool.map(pbrect, args_i)
+    parallel_results = pool.imap_unordered(pbrect, args_i)
+
+    # Stop multiprocessing
+    pool.close()
+    pool.join()
+
     return parallel_results
 
 #############################################################################################

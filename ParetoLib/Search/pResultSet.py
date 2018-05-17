@@ -25,6 +25,11 @@ class ResultSet:
         self.suffix_Border = 'border'
         self.suffix_Space = 'space'
 
+    def __del__(self):
+        # Stop multiprocessing
+        self.p.close()
+        self.p.join()
+
     # Printers
     def toStr(self):
         # type: (ResultSet) -> str

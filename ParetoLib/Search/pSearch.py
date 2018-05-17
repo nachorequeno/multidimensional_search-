@@ -262,7 +262,7 @@ def multidim_search_deep_first(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        vprint('%s, %s, %s, %s, %s, %d, %d, %d'
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
                % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
@@ -271,6 +271,10 @@ def multidim_search_deep_first(xspace,
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+
+    # Stop multiprocessing
+    p.close()
+    p.join()
 
     return ResultSet(list(border), ylow, yup, xspace)
 
@@ -390,6 +394,10 @@ def multidim_search_breadth_first(xspace,
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+
+    # Stop multiprocessing
+    p.close()
+    p.join()
 
     return ResultSet(border, ylow, yup, xspace)
 
