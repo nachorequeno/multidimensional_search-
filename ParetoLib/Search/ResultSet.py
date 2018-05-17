@@ -185,12 +185,14 @@ class ResultSet:
     def memberYup(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.yup)
-        return any(isMember)
+        # return any(isMember)
+        return any(isMember) and not self.memberBorder(xpoint)
 
     def memberYlow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.ylow)
-        return any(isMember)
+        #return any(isMember)
+        return any(isMember) and not self.memberBorder(xpoint)
 
     def memberBorder(self, xpoint):
         # type: (ResultSet, tuple) -> bool

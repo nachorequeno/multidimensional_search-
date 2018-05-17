@@ -32,7 +32,7 @@ class Rectangle:
         # xpoint is strictly inside the rectangle (i.e., is not along the border)
         return (greater(xpoint, self.min_corner) and
                 less(xpoint, self.max_corner))
-        #return (not incomparable(xpoint, self.min_corner) and
+        # return (not incomparable(xpoint, self.min_corner) and
         #        not incomparable(xpoint, self.max_corner) and
         #        greater(xpoint, self.min_corner) and
         #        less(xpoint, self.max_corner))
@@ -42,7 +42,7 @@ class Rectangle:
         # xpoint is inside the rectangle or along the border
         return (greater_equal(xpoint, self.min_corner) and
                 less_equal(xpoint, self.max_corner))
-        #return (not incomparable(xpoint, self.min_corner) and
+        # return (not incomparable(xpoint, self.min_corner) and
         #        not incomparable(xpoint, self.max_corner) and
         #        greater_equal(xpoint, self.min_corner) and
         #        less_equal(xpoint, self.max_corner))

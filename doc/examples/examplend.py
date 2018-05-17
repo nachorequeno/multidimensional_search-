@@ -2,8 +2,8 @@ from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Search.Search import *
 
 # File containing the definition of the Oracle
-nfile='../../Tests/Oracle/OracleFunction/ND/sphere-4d.txt'
-human_readable=True
+nfile = '../../Tests/Oracle/OracleFunction/ND/sphere-4d.txt'
+human_readable = True
 
 # Definition of the n-dimensional space
 min_c, max_c = (0.0, 1.0)

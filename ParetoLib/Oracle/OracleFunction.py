@@ -267,11 +267,11 @@ class Condition:
 
 
 class OracleFunction(Oracle):
-# class OracleFunction:
+    # class OracleFunction:
     # An OracleFunction is a set of Conditions
     def __init__(self):
         # type: (OracleFunction) -> None
-        #super(OracleFunction, self).__init__()
+        # super(OracleFunction, self).__init__()
         Oracle.__init__(self)
         # self.variables = set()
         self.variables = SortedSet(key=default_sort_key)
@@ -390,8 +390,7 @@ class OracleFunction(Oracle):
         # type: (OracleFunction, tuple) -> bool
         # member_zip_var performs better than member_dict
         return self.member_zip_var(xpoint)
-        #return self.member_dict(xpoint)
-
+        # return self.member_dict(xpoint)
 
     def membership(self):
         # type: (OracleFunction) -> function

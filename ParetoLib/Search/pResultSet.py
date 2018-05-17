@@ -5,15 +5,15 @@ import pickle
 from itertools import chain, combinations_with_replacement, product
 from multiprocessing import Pool, cpu_count
 
-
 from ParetoLib.Geometry.Rectangle import *
 from ParetoLib.Geometry.pRectangle import *
 from ParetoLib.Search.ResultSet import *
 
+
 class pResultSet(ResultSet):
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
         # type: (pResultSet, list, list, list, Rectangle) -> None
-        #super(pResultSet, self).__init__(border, ylow, yup, xspace)
+        # super(pResultSet, self).__init__(border, ylow, yup, xspace)
         ResultSet.__init__(self, border, ylow, yup, xspace)
         self.p = Pool(cpu_count())
 
@@ -80,14 +80,16 @@ class pResultSet(ResultSet):
         # isMember = (rect.inside(xpoint) for rect in self.yup)
         args_member = ((rect, xpoint) for rect in self.yup)
         isMember = self.p.imap_unordered(pinside, args_member)
-        return any(isMember)
+        # return any(isMember)
+        return any(isMember) and not self.memberBorder(xpoint)
 
     def memberYlow(self, xpoint):
         # type: (pResultSet, tuple) -> bool
         # isMember = (rect.inside(xpoint) for rect in self.ylow)
         args_member = ((rect, xpoint) for rect in self.ylow)
         isMember = self.p.imap_unordered(pinside, args_member)
-        return any(isMember)
+        # return any(isMember)
+        return any(isMember) and not self.memberBorder(xpoint)
 
     def memberBorder(self, xpoint):
         # type: (pResultSet, tuple) -> bool

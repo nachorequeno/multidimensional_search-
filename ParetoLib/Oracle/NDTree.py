@@ -200,7 +200,7 @@ class Node:
 
     def reportRec(self):
         self.report()
-        #vprint('\n')
+        # vprint('\n')
         [n.reportRec() for n in self.nodes]
 
     # Functions for checking the type of node
@@ -307,7 +307,7 @@ class Node:
         # type: (Node) -> set
         return set(self.L)
 
-    #def getPointsRec(self):
+    # def getPointsRec(self):
     #    # type: (Node) -> set
     #    pointrec_list = [n.getPointsRec() for n in self.nodes]
     #    points = set.union(*pointrec_list)
@@ -335,7 +335,7 @@ class Node:
 
     def hasPoints(self):
         # type: (Node) -> bool
-        #vprint("None") if self is None else None
+        # vprint("None") if self is None else None
         return (self is not None) and (len(self.L) > 0)
 
     # Relationship functions
@@ -444,9 +444,9 @@ class Node:
                     npr = self.getSubnode()
                     nparent = self.getParent()
                     nparent.replaceNode(self, npr) if nparent is not None else None
-                    #nparent.replaceNode(self, npr) if nparent is not None else self = npr
-        #else:
-            # Skip this node
+                    # nparent.replaceNode(self, npr) if nparent is not None else self = npr
+        # else:
+        # Skip this node
         return nout, True
 
     def updateIdealNadir(self, x):
@@ -498,8 +498,8 @@ class Node:
         elif less_equal(rect.min_corner, x) or less_equal(x, rect.max_corner):
             # x is inside the rectangle enclosing the Pareto front
             return any(n.dominates(x) for n in self.nodes)
-        #elif less_equal(x, rect.min_corner):
-            # x dominates the Pareto front
-            # return False
+        # elif less_equal(x, rect.min_corner):
+        # x dominates the Pareto front
+        # return False
         else:
             return False

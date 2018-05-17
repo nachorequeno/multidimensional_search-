@@ -8,12 +8,12 @@ from . import vprint
 
 
 class OraclePoint(Oracle):
-# class OraclePoint:
+    # class OraclePoint:
     # OraclePoint defines membership function based on a cloud of points that belongs to the closure.
     # OraclePoint saves a set of points in a NDTree
     def __init__(self, MAX_P=2, MIN_CH=2):
         # type: (OraclePoint, int, int) -> None
-        #super(OraclePoint, self).__init__()
+        # super(OraclePoint, self).__init__()
         Oracle.__init__(self)
         self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
 
@@ -81,7 +81,7 @@ class OraclePoint(Oracle):
     def dominates2(self, p):
         # type: (OraclePoint, tuple) -> bool
         # Returns 'True' if p dominates any point of the set of points stored in the Pareto archive
-        #return any(greater_equal(p, point) for point in self.getPoints())
+        # return any(greater_equal(p, point) for point in self.getPoints())
         # Returns 'True' if p is dominated by any point stored in the Pareto archive
         return any(less_equal(point, p) for point in self.points)
 
@@ -129,9 +129,9 @@ class OraclePoint(Oracle):
         self.oracle = NDTree()
 
         point_list = (_line2tuple(line) for line in finput)
-        #point_list = (self._line2tuple(line) for line in finput)
+        # point_list = (self._line2tuple(line) for line in finput)
 
-        #map(self.oracle.updatePoint, point_list)
+        # map(self.oracle.updatePoint, point_list)
         [self.oracle.updatePoint(point) for point in point_list]
 
     def fromFileHumRead2(self, finput=None):

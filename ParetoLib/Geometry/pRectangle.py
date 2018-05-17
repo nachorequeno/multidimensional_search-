@@ -2,6 +2,7 @@ from multiprocessing import Pool, cpu_count
 
 from ParetoLib.Geometry.Rectangle import *
 
+
 ############################################################################
 # Parallel version for the computation of incomparable rectangles in a space
 ############################################################################
@@ -27,7 +28,7 @@ def pirect(alphaincomp, yrectangle, xspace):
     pool = Pool(nproc)
 
     args_i = ((alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp)
-    #parallel_results = pool.map(pbrect, args_i)
+    # parallel_results = pool.map(pbrect, args_i)
     parallel_results = pool.imap_unordered(pbrect, args_i)
 
     # Stop multiprocessing
@@ -35,6 +36,7 @@ def pirect(alphaincomp, yrectangle, xspace):
     pool.join()
 
     return parallel_results
+
 
 #############################################################################################
 # Wrappers for methods of the Rectangle class.
@@ -46,9 +48,11 @@ def pvol(rect):
     # type: (Rectangle) -> float
     return rect.volume()
 
+
 def pvertices(rect):
     # type: (Rectangle) -> list
     return rect.vertices()
+
 
 def pinside(args):
     rect, xpoint = args

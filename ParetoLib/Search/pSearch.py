@@ -9,7 +9,8 @@ from sortedcontainers import SortedListWithKey
 from ParetoLib.Geometry.pRectangle import *
 from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Oracle.OraclePoint import *
-from ParetoLib.Search.ResultSet import *
+# from ParetoLib.Search.ResultSet import *
+from ParetoLib.Search.pResultSet import *
 
 # from ParetoLib.Search import vprint
 from . import vprint
@@ -120,32 +121,33 @@ def multidim_search(xspace,
                     max_step=STEPS,
                     blocking=False,
                     sleep=0.0):
-    # type: (Rectangle, Oracle, float, float, float, bool, float) -> ResultSet
+    # type: (Rectangle, Oracle, float, float, float, bool, float) -> pResultSet
     vprint('Starting multidimensional search')
     start = time.time()
-    #rs = multidim_search_breadth_first(xspace,
+    # rs = multidim_search_breadth_first(xspace,
     rs = multidim_search_deep_first(xspace,
-                    oracle,
-                    epsilon=epsilon,
-                    delta=delta,
-                    max_step=max_step,
-                    blocking=blocking,
-                    sleep=sleep)
+                                    oracle,
+                                    epsilon=epsilon,
+                                    delta=delta,
+                                    max_step=max_step,
+                                    blocking=blocking,
+                                    sleep=sleep)
     end = time.time()
     time0 = end - start
     vprint('Time multidim search: ', str(time0))
 
     return rs
 
+
 # Multidimensional search prioritizing the analysis of rectangles with highest volume
 def multidim_search_deep_first(xspace,
-                    oracle,
-                    epsilon=EPS,
-                    delta=DELTA,
-                    max_step=STEPS,
-                    blocking=False,
-                    sleep=0.0):
-    # type: (Rectangle, Oracle, float, float, float, bool, float) -> ResultSet
+                               oracle,
+                               epsilon=EPS,
+                               delta=DELTA,
+                               max_step=STEPS,
+                               blocking=False,
+                               sleep=0.0):
+    # type: (Rectangle, Oracle, float, float, float, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -170,7 +172,7 @@ def multidim_search_deep_first(xspace,
     incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
-    #border = [xspace]
+    # border = [xspace]
 
     border = SortedListWithKey(key=Rectangle.volume)
     border.add(xspace)
@@ -198,7 +200,7 @@ def multidim_search_deep_first(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    #dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
@@ -209,7 +211,7 @@ def multidim_search_deep_first(xspace,
     vprint('incomparable: ', incomparable)
     vprint('comparable: ', comparable)
 
-    vprint('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
@@ -220,7 +222,7 @@ def multidim_search_deep_first(xspace,
         slice_border = border[-chunk:]
 
         # Remove elements of the slice_border from the original border
-        #border = list(set(border).difference(set(slice_border)))
+        # border = list(set(border).difference(set(slice_border)))
         for item in slice_border:
             border.remove(item)
 
@@ -228,12 +230,12 @@ def multidim_search_deep_first(xspace,
         remaining_steps = max_step - step
 
         # Process the 'border' until the number of maximum steps is reached
-        #border = border[:remaining_steps] if (remaining_steps <= len(border)) else border
-        #step += len(border)
-        #remaining_steps = max_step - step
+        # border = border[:remaining_steps] if (remaining_steps <= len(border)) else border
+        # step += len(border)
+        # remaining_steps = max_step - step
 
         # Search the intersection point of the Pareto front and the diagonal
-        #args_pbin_search = [(xrectangle, dict_man, epsilon, n) for xrectangle in slice_border]
+        # args_pbin_search = [(xrectangle, dict_man, epsilon, n) for xrectangle in slice_border]
         args_pbin_search = ((xrectangle, dict_man, epsilon, n) for xrectangle in slice_border)
         y_list = p.map(pbin_search, args_pbin_search)
 
@@ -263,9 +265,10 @@ def multidim_search_deep_first(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         print('%s, %s, %s, %s, %s, %d, %d, %d'
-               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
+            # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
@@ -276,17 +279,18 @@ def multidim_search_deep_first(xspace,
     p.close()
     p.join()
 
-    return ResultSet(list(border), ylow, yup, xspace)
+    return pResultSet(list(border), ylow, yup, xspace)
+
 
 # Multidimensional search with no priority for rectangles with highest volume
 def multidim_search_breadth_first(xspace,
-                    oracle,
-                    epsilon=EPS,
-                    delta=DELTA,
-                    max_step=STEPS,
-                    blocking=False,
-                    sleep=0.0):
-    # type: (Rectangle, Oracle, float, float, float, bool, float) -> ResultSet
+                                  oracle,
+                                  epsilon=EPS,
+                                  delta=DELTA,
+                                  max_step=STEPS,
+                                  blocking=False,
+                                  sleep=0.0):
+    # type: (Rectangle, Oracle, float, float, float, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -313,7 +317,6 @@ def multidim_search_breadth_first(xspace,
     # List of incomparable rectangles
     border = [xspace]
 
-
     # Upper and lower clausure
     ylow = []
     yup = []
@@ -337,7 +340,7 @@ def multidim_search_breadth_first(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    #dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
@@ -348,7 +351,7 @@ def multidim_search_breadth_first(xspace,
     vprint('incomparable: ', incomparable)
     vprint('comparable: ', comparable)
 
-    vprint('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0):
         # Process the 'border' until the number of maximum steps is reached
 
@@ -358,7 +361,7 @@ def multidim_search_breadth_first(xspace,
         remaining_steps = max_step - step
 
         # Search the intersection point of the Pareto front and the diagonal
-        #args_pbin_search = [(xrectangle, dict_man, epsilon, n) for xrectangle in border]
+        # args_pbin_search = [(xrectangle, dict_man, epsilon, n) for xrectangle in border]
         args_pbin_search = ((xrectangle, dict_man, epsilon, n) for xrectangle in border)
         y_list = p.map(pbin_search, args_pbin_search)
         # args_pbin_search_ser = ((xrectangle, f, epsilon, n) for xrectangle in border)
@@ -385,10 +388,11 @@ def multidim_search_breadth_first(xspace,
         # vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
         #      % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
-        vprint('%s, %s, %s, %s, %s, %d, %d, %d'
-               % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('%s, %s, %s, %s, %s, %d, %d, %d'
+              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
+            # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
@@ -399,7 +403,7 @@ def multidim_search_breadth_first(xspace,
     p.close()
     p.join()
 
-    return ResultSet(border, ylow, yup, xspace)
+    return pResultSet(border, ylow, yup, xspace)
 
 
 def loadOracleFunction(nfile,
@@ -439,7 +443,7 @@ def Search2D(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0):
-    # type: (Oracle, float, float, float, float, float, float, float, bool, float) -> ResultSet
+    # type: (Oracle, float, float, float, float, float, float, float, bool, float) -> pResultSet
     xyspace = _create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep)
 
@@ -451,8 +455,8 @@ def Search2D(ora,
     xs = [point[0] for point in points]
     ys = [point[1] for point in points]
 
-    #rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
-    #rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True)
+    # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
+    # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True)
     rs.toMatPlot2DLight(blocking=True)
     return rs
 
@@ -469,7 +473,7 @@ def Search3D(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0):
-    # type: (Oracle, float, float, float, float, float, float, float, bool, float) -> ResultSet
+    # type: (Oracle, float, float, float, float, float, float, float, bool, float) -> pResultSet
     xyspace = _create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep)
@@ -483,8 +487,8 @@ def Search3D(ora,
     ys = [point[1] for point in points]
     zs = [point[2] for point in points]
 
-    #rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
-    #rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True)
     rs.toMatPlot3DLight(blocking=True)
     return rs
 
@@ -497,7 +501,7 @@ def SearchND(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0):
-    # type: (Oracle, float, float, float, float, float, bool, float) -> ResultSet
+    # type: (Oracle, float, float, float, float, float, bool, float) -> pResultSet
     d = ora.dim()
 
     minc = (min_corner,) * d

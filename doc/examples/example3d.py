@@ -2,8 +2,8 @@ from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Search.Search import *
 
 # File containing the definition of the Oracle
-nfile='../../Tests/Oracle/OracleFunction/3D/test1.txt'
-human_readable=True
+nfile = '../../Tests/Oracle/OracleFunction/3D/test1.txt'
+human_readable = True
 
 # Definition of the n-dimensional space
 min_x, min_y, min_z = (0.0, 0.0, 0.0)

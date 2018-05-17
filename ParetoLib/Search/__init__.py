@@ -1,7 +1,7 @@
 import sys
 
-__version__=1.
-__name__="Search"
+__version__ = 1.
+__name__ = "Search"
 __all__ = ["Search", "pSearch", "ResultSet", "pResultSet"]
 __verbose__ = False
 
