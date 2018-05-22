@@ -2,7 +2,7 @@ import os
 import __builtin__
 import time
 import pickle
-from itertools import chain, combinations_with_replacement
+from itertools import chain, combinations #combinations_with_replacement
 
 import matplotlib.pyplot as plt
 
@@ -96,12 +96,97 @@ class ResultSet:
         vertices = vertices.union(self.verticesBorder())
         return vertices
 
+
+    # Simplification functions
+    def simplify(self):
+        # type: (ResultSet) -> None
+        self.fusionRectanglesBorder()
+        self.fusionRectanglesYlow()
+        self.fusionRectanglesYup()
+
+    def fusionRectanglesYup(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.yup for rect2 in self.yup if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                rect1.concatenate(rect2)
+                self.yup.remove(rect2)
+                break
+
+    def fusionRectanglesYlow(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.ylow for rect2 in self.ylow if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                rect1.concatenate(rect2)
+                self.ylow.remove(rect2)
+                break
+
+    def fusionRectanglesBorder(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                rect1.concatenate(rect2)
+                self.border.remove(rect2)
+                break
+
+
+    def fusionRectanglesYup2(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.yup for rect2 in self.yup if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                self.yup += [rect1.concatenate(rect2)]
+                self.yup.remove(rect1)
+                self.yup.remove(rect2)
+                break
+
+    def fusionRectanglesYlow2(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.ylow for rect2 in self.ylow if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                self.ylow += [rect1.concatenate(rect2)]
+                self.ylow.remove(rect1)
+                self.ylow.remove(rect2)
+                break
+
+    def fusionRectanglesBorder2(self):
+        # type: (ResultSet) -> None
+        has_new_concatenations = True
+        while has_new_concatenations:
+            has_new_concatenations = False
+            concatenables = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.isconcatenable(rect2))
+            for rect1, rect2 in concatenables:
+                has_new_concatenations = True
+                self.border += [rect1.concatenate(rect2)]
+                self.border.remove(rect1)
+                self.border.remove(rect2)
+                break
+
     # Volume functions
     def _overlappingVolume(self, pairs_of_rect):
         # type: (ResultSet, iter) -> float
         # remove pairs (recti, recti) from previous list
-        pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
-        overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
+        #pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
+        #overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
+        overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect)
         vol_overlapping_rect = (rect.volume() for rect in overlapping_rect)
         return sum(vol_overlapping_rect)
 
@@ -109,21 +194,24 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = combinations_with_replacement(self.yup, 2)
+        #pairs_of_rect = combinations_with_replacement(self.yup, 2)
+        pairs_of_rect = combinations(self.yup, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def overlappingVolumeYlow(self):
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = combinations_with_replacement(self.ylow, 2)
+        #pairs_of_rect = combinations_with_replacement(self.ylow, 2)
+        pairs_of_rect = combinations(self.ylow, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def overlappingVolumeBorder(self):
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        pairs_of_rect = combinations_with_replacement(self.border, 2)
+        #pairs_of_rect = combinations_with_replacement(self.border, 2)
+        pairs_of_rect = combinations(self.border, 2)
         return self._overlappingVolume(pairs_of_rect)
 
     def volumeYup(self):

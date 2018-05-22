@@ -1,7 +1,32 @@
+import __builtin__
 from multiprocessing import Pool, cpu_count
 
 from ParetoLib.Geometry.Rectangle import *
 
+#def isconcatenable(rect1, rect2):
+#    # type: (Rectangle, Rectangle) -> Rectangle
+#    assert (rect1.dim() == rect2.dim(), "Rectangles should have the same dimension")
+#    d = rect1.dim()
+#    vert_1 = set(rect1.vertices())
+#    vert_2 = set(rect2.vertices())
+#    inter = vert_1.intersection(vert_2)
+#
+#    return len(inter) == pow(2, d-1)
+
+#def concatenate(rect1, rect2):
+#    # type: (Rectangle, Rectangle) -> Rectangle
+#    assert (dim(rect1) == dim(rect2), "Rectangles should have the same dimension")
+#    d = rect1.dim()
+#    vert_1 = set(rect1.vertices())
+#    vert_2 = set(rect2.vertices())
+#    inter = vert_1.intersection(vert_2)
+#    #fusionable = (len(inter) == pow(2, d-1))
+#    new_union_vertices = (vert_1.union(vert_2)) - inter
+#
+#    minc = __builtin__.min(new_union_vertices)
+#    maxc = __builtin__.max(new_union_vertices)
+#
+#    return Rectangle(minc, maxc)
 
 ############################################################################
 # Parallel version for the computation of incomparable rectangles in a space

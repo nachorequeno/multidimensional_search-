@@ -51,8 +51,9 @@ class pResultSet(ResultSet):
     def _overlappingVolume(self, pairs_of_rect):
         # type: (pResultSet, iter) -> float
         # remove pairs (recti, recti) from previous list
-        pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
-        overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
+        #pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
+        #overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
+        overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect)
         vol_overlapping_rect = self.p.imap_unordered(pvol, overlapping_rect)
         return sum(vol_overlapping_rect)
 

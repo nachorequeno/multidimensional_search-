@@ -127,3 +127,12 @@ def int2binlist(x, pad=0):
 def int2bintuple(x, pad=0):
     # type: (int, int) -> tuple
     return tuple(int2binlist(x, pad))
+
+# Domination
+def dominates(x, xprime):
+    # type: (tuple, tuple) -> bool
+    return less_equal(x, xprime)
+
+def isdominated(x, xprime):
+    # type: (tuple, tuple) -> bool
+    return less_equal(xprime, x)

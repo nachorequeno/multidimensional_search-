@@ -134,20 +134,6 @@ class OraclePoint(Oracle):
         # map(self.oracle.updatePoint, point_list)
         [self.oracle.updatePoint(point) for point in point_list]
 
-    def fromFileHumRead2(self, finput=None):
-        # type: (OraclePoint, BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
-
-        self.oracle = NDTree()
-        i = 0
-        for i, line in enumerate(finput):
-            line = line.replace('(', '')
-            line = line.replace(')', '')
-            line = line.split(',')
-            point = tuple(float(pi) for pi in line)
-            vprint("Adding: ", i, point)
-            self.oracle.updatePoint(point)
-        vprint("numPoints: ", i)
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (OraclePoint, str, bool, bool) -> None

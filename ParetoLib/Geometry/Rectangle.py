@@ -141,31 +141,33 @@ class Rectangle:
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
         return point_list
 
-    #    def overlapsStrict(self, other):
-    #        # type: (Rectangle, Rectangle) -> bool
-    #        other_vertices = other.vertices()
-    #        other_vertices_inside_self = [other_vertex for other_vertex in other_vertices if other_vertex in self]
-    #        other_overlaps_self = any([other_vertex in self for other_vertex in other_vertices])
-    #
-    #        self_vertices = self.vertices()
-    #        self_vertices_inside_other = [self_vertex for self_vertex in self_vertices if self_vertex in other]
-    #        self_overlaps_other = any([self_vertex in other for self_vertex in self_vertices])
-    #        return len(other_vertices_inside_self) > 0 and \
-    #               len(self_vertices_inside_other) > 0 and \
-    #               other_overlaps_self and \
-    #               self_overlaps_other
-
+    # Geometric operations between two rectangles
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
         other_vertices = other.vertices()
-        other_vertex_in_self = (other_vertex in self for other_vertex in other_vertices)
         self_vertices = self.vertices()
+
+        # Some vertices of 'self' are strictly inside the rectangle 'other', or viceversa
+        other_vertex_in_self = (other_vertex in self for other_vertex in other_vertices)
         self_vertex_in_other = (self_vertex in other for self_vertex in self_vertices)
         overlap = any(other_vertex_in_self) and any(self_vertex_in_other)
         return overlap
 
+    def inside_rect(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+        self_vertices = self.vertices()
+
+        # Rectangle 'self' is inside rectangle 'other' (including the edges of 'other')
+        self_vertex_inside_other = (other.inside(self_vertex) for self_vertex in self_vertices)
+        isinside = all(self_vertex_inside_other)
+        return isinside
+
+
     def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
         # Create a default rectangle of area/volume = 0
         # minc = (float("-inf"), ) * self.dim()
         # maxc = (float("-inf"), ) * self.dim()
@@ -185,9 +187,58 @@ class Rectangle:
 
             minc = self_vertices_inside_other[0]
             maxc = other_vertices_inside_self[0]
-
+        elif self.inside_rect(other):
+            minc = self.min_corner
+            maxc = self.max_corner
+        elif other.inside_rect(self):
+            minc = other.min_corner
+            maxc = other.max_corner
         r = Rectangle(minc, maxc)
         return r
+
+    def isconcatenable(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+        d = self.dim()
+        vert_1 = set(self.vertices())
+        vert_2 = set(other.vertices())
+        inter = vert_1.intersection(vert_2)
+        return len(inter) == pow(2, d - 1)
+
+    def concatenate(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+        vert_1 = set(self.vertices())
+        vert_2 = set(other.vertices())
+        inter = vert_1.intersection(vert_2)
+        new_union_vertices = (vert_1.union(vert_2)) - inter
+        self.min_corner = __builtin__.min(new_union_vertices)
+        self.max_corner = __builtin__.max(new_union_vertices)
+
+        return self
+
+        #minc = __builtin__.min(new_union_vertices)
+        #maxc = __builtin__.max(new_union_vertices)
+
+        #return Rectangle(minc, maxc)
+
+    # Domination
+    def dominatesPoint(self, xpoint):
+        # type: (Rectangle, tuple) -> bool
+        return less_equal(self.max_corner, xpoint)
+
+    def isDominatedByPoint(self, xpoint):
+        # type: (Rectangle, tuple) -> bool
+        return less_equal(xpoint, self.min_corner)
+
+    def dominatesRect(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        return less_equal(self.max_corner, other.min_corner)
+
+    def isDominatedByRect(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        return other.dominatesRect(self)
+
 
     # Matplot functions
     def toMatplot2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):

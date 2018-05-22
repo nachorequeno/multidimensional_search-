@@ -9,6 +9,8 @@ from . import vprint
 EPS = 1e-5
 DELTA = 1e-5
 # STEPS = 100
+# EPS = sys.float_info.epsilon
+# DELTA = sys.float_info.epsilon
 STEPS = float('inf')
 
 
