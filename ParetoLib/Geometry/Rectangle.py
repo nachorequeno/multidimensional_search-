@@ -20,8 +20,11 @@ class Rectangle:
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
 
-        self.min_corner = tuple(__builtin__.min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        self.max_corner = tuple(__builtin__.max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        #self.min_corner = tuple(__builtin__.min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        #self.max_corner = tuple(__builtin__.max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+
+        self.min_corner = tuple(r(__builtin__.min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        self.max_corner = tuple(r(__builtin__.max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
 
         assert greater_equal(self.max_corner, self.min_corner) or \
                incomparable(self.min_corner, self.max_corner)
@@ -208,12 +211,17 @@ class Rectangle:
     def concatenate(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
         assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+        d = self.dim()
         vert_1 = set(self.vertices())
         vert_2 = set(other.vertices())
         inter = vert_1.intersection(vert_2)
-        new_union_vertices = (vert_1.union(vert_2)) - inter
-        self.min_corner = __builtin__.min(new_union_vertices)
-        self.max_corner = __builtin__.max(new_union_vertices)
+        # if 'self' and 'other' are concatenable
+        if len(inter) == pow(2, d - 1):
+            new_union_vertices = (vert_1.union(vert_2)) - inter
+            if len(new_union_vertices) == 0:
+                print ("error ", self, " ", other)
+            self.min_corner = __builtin__.min(new_union_vertices)
+            self.max_corner = __builtin__.max(new_union_vertices)
 
         return self
 

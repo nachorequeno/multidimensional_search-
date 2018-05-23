@@ -40,12 +40,12 @@ def add(x, xprime):
 
 
 def mult(x, i):
-    # type: (tuple, int) -> tuple
+    # type: (tuple, float) -> tuple
     return tuple(np.array(x) * i)
 
 
 def div(x, i):
-    # type: (tuple, int) -> tuple
+    # type: (tuple, float) -> tuple
     return tuple(np.array(x) / i)
 
 

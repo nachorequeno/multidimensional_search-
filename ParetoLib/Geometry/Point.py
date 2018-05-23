@@ -1,4 +1,11 @@
 import math
+import ParetoLib.Geometry
+
+
+# Rounding
+def r(i):
+    # type: (float) -> float
+    return round(i, ParetoLib.Geometry.__numdigits__)
 
 
 # Point = n-dimensional tuple
@@ -41,12 +48,12 @@ def add(x, xprime):
 
 
 def mult(x, i):
-    # type: (tuple, int) -> tuple
+    # type: (tuple, float) -> tuple
     return tuple(xi * i for xi in x)
 
 
 def div(x, i):
-    # type: (tuple, int) -> tuple
+    # type: (tuple, float) -> tuple
     return tuple(xi / i for xi in x)
 
 
