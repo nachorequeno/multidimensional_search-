@@ -106,79 +106,43 @@ class ResultSet:
 
     def fusionRectanglesYup(self):
         # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.yup for rect2 in self.yup if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                rect1.concatenate(rect2)
-                self.yup.remove(rect2)
-                break
+        len_before = float("inf")
+        len_after = len(self.yup)
+        while len_before > len_after:
+            #len_before = len(self.yup)
+            len_before = len_after
+            for rect1 in self.yup:
+                for rect2 in self.yup:
+                    if rect1.isconcatenable(rect2):
+                        rect1.concatenate(rect2)
+                        self.yup.remove(rect2)
+            len_after = len(self.yup)
 
     def fusionRectanglesYlow(self):
         # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.ylow for rect2 in self.ylow if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                rect1.concatenate(rect2)
-                self.ylow.remove(rect2)
-                break
+        len_before = float("inf")
+        len_after = len(self.ylow)
+        while len_before > len_after:
+            len_before = len_after
+            for rect1 in self.ylow:
+                for rect2 in self.ylow:
+                    if rect1.isconcatenable(rect2):
+                        rect1.concatenate(rect2)
+                        self.ylow.remove(rect2)
+            len_after = len(self.ylow)
 
     def fusionRectanglesBorder(self):
         # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                rect1.concatenate(rect2)
-                self.border.remove(rect2)
-                break
-
-
-    def fusionRectanglesYup2(self):
-        # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.yup for rect2 in self.yup if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                self.yup += [rect1.concatenate(rect2)]
-                self.yup.remove(rect1)
-                self.yup.remove(rect2)
-                break
-
-    def fusionRectanglesYlow2(self):
-        # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.ylow for rect2 in self.ylow if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                self.ylow += [rect1.concatenate(rect2)]
-                self.ylow.remove(rect1)
-                self.ylow.remove(rect2)
-                break
-
-    def fusionRectanglesBorder2(self):
-        # type: (ResultSet) -> None
-        has_new_concatenations = True
-        while has_new_concatenations:
-            has_new_concatenations = False
-            concatenables = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.isconcatenable(rect2))
-            for rect1, rect2 in concatenables:
-                has_new_concatenations = True
-                self.border += [rect1.concatenate(rect2)]
-                self.border.remove(rect1)
-                self.border.remove(rect2)
-                break
+        len_before = float("inf")
+        len_after = len(self.border)
+        while len_before > len_after:
+            len_before = len_after
+            for rect1 in self.border:
+                for rect2 in self.border:
+                    if rect1.isconcatenable(rect2):
+                        rect1.concatenate(rect2)
+                        self.border.remove(rect2)
+            len_after = len(self.border)
 
     # Volume functions
     def _overlappingVolume(self, pairs_of_rect):

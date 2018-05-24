@@ -188,11 +188,55 @@ def multidim_search_deep_first(xspace,
         vol_ylow += sum(vol_b0_list)
         vol_yup += sum(vol_b1_list)
 
+        ################################
+        # Every Border rectangle that dominates B0 is included in Ylow
+        ylow_candidates = [rect for rect in border if any(rect.dominatesRect(b0) for b0 in b0_list)]
+        # Every Border rectangle that is dominated by B1 is included in Yup
+        yup_candidates = [rect for rect in border if any(rect.isDominatedByRect(b1) for b1 in b1_list)]
+
+        ylow.extend(ylow_candidates)
+        yup.extend(yup_candidates)
+
+        vol_ylow_opt_list = p.map(pvol, ylow_candidates)
+        vol_yup_opt_list = p.map(pvol, yup_candidates)
+
+        vol_ylow += sum(vol_ylow_opt_list)
+        vol_yup += sum(vol_yup_opt_list)
+
+        for rect in ylow_candidates:
+            border.remove(rect)
+
+        for rect in yup_candidates:
+            border.remove(rect)
+        ################################
+
         # Compute incomparable rectangles
         args_pborder = ((incomparable, y, xrectangle) for xrectangle, y in zip(slice_border, y_list))
         new_incomp_rects_iter = p.map(pborder, args_pborder)
         # Flatten list
         new_incomp_rects = list(chain.from_iterable(new_incomp_rects_iter))
+
+        ################################
+        # Every Incomparable rectangle that dominates B0 is included in Ylow
+        ylow_candidates = [inc for inc in new_incomp_rects if any(inc.dominatesRect(b0) for b0 in ylow)]
+        # Every Incomparable rectangle that is dominated by B1 is included in Yup
+        yup_candidates = [inc for inc in new_incomp_rects if any(inc.isDominatedByRect(b1) for b1 in yup)]
+
+        vol_ylow_opt_list = p.map(pvol, ylow_candidates)
+        vol_yup_opt_list = p.map(pvol, yup_candidates)
+
+        ylow.extend(ylow_candidates)
+        yup.extend(yup_candidates)
+
+        vol_ylow += sum(vol_ylow_opt_list)
+        vol_yup += sum(vol_yup_opt_list)
+
+        for rect in ylow_candidates:
+            new_incomp_rects.remove(rect)
+
+        for rect in yup_candidates:
+            new_incomp_rects.remove(rect)
+        ################################
 
         # Add new incomparable rectangles to the border
         border += new_incomp_rects
@@ -216,7 +260,6 @@ def multidim_search_deep_first(xspace,
     p.join()
 
     return pResultSet(list(border), ylow, yup, xspace)
-
 
 # Multidimensional search with no priority for rectangles with highest volume
 def multidim_search_breadth_first(xspace,
@@ -316,9 +359,9 @@ def multidim_search_breadth_first(xspace,
         vol_yup += sum(vol_b1_list)
 
         args_pborder = ((incomparable, y, xrectangle) for xrectangle, y in zip(border, y_list))
-        border2 = p.map(pborder, args_pborder)
+        new_incomp_rects = p.map(pborder, args_pborder)
         # Flatten list
-        border = list(chain.from_iterable(border2))
+        border = list(chain.from_iterable(new_incomp_rects))
 
         vol_border = vol_total - vol_yup - vol_ylow
         # vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'
