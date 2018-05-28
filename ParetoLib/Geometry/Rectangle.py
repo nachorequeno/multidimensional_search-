@@ -3,10 +3,10 @@ import __builtin__
 import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from itertools import product, tee
 
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Point import *
-
 
 # Rectangle
 # Rectangular Half-Space
@@ -145,37 +145,18 @@ class Rectangle:
         return point_list
 
     # Geometric operations between two rectangles
-    def overlaps(self, other):
-        # type: (Rectangle, Rectangle) -> bool
-        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
-
-        minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-
-        inter_rect = Rectangle(minc, maxc)
-        inter_rect_vert = inter_rect.vertices()
-
-        overlap = all(self.inside(vi) for vi in inter_rect_vert) and\
-                  all(other.inside(vi) for vi in inter_rect_vert)
-        return overlap
-
-    def intersection(self, other):
-        # type: (Rectangle, Rectangle) -> Rectangle
-        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
-
-        minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        return Rectangle(minc, maxc)
-
     def isconcatenable(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
         assert self.dim() == other.dim(), "Rectangles should have the same dimension"
-        #assert self != other, "Rectangles should be different"
+        # assert self != other, "Rectangles should be different"
         d = self.dim()
         vert_1 = set(self.vertices())
         vert_2 = set(other.vertices())
         inter = vert_1.intersection(vert_2)
-        return (self != other) and len(inter) == pow(2, d - 1)
+        return (self != other) and \
+               len(vert_1) == len(vert_2) and \
+               len(vert_1) == pow(2, d) and \
+               len(inter) == pow(2, d - 1)
 
     def concatenate(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
@@ -186,41 +167,82 @@ class Rectangle:
         vert_2 = set(other.vertices())
         inter = vert_1.intersection(vert_2)
         # if 'self' and 'other' are concatenable
-        if len(inter) == pow(2, d - 1):
+        if len(vert_1) == len(vert_2) and \
+                len(vert_1) == pow(2, d) and \
+                len(inter) == pow(2, d - 1):
             new_union_vertices = (vert_1.union(vert_2)) - inter
-            assert len(new_union_vertices) > 0,\
+            assert len(new_union_vertices) > 0, \
                 "Error in computing vertices for the concatenation of '" + str(self) + "' and '" + str(other) + "'"
             self.min_corner = __builtin__.min(new_union_vertices)
             self.max_corner = __builtin__.max(new_union_vertices)
 
         return self
 
-        #minc = __builtin__.min(new_union_vertices)
-        #maxc = __builtin__.max(new_union_vertices)
+        # minc = __builtin__.min(new_union_vertices)
+        # maxc = __builtin__.max(new_union_vertices)
 
-        #return Rectangle(minc, maxc)
+        # return Rectangle(minc, maxc)
 
-    def minus(self, other):
+    def overlaps(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+
+        minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+
+        inter_rect = Rectangle(minc, maxc)
+        inter_rect_vert = inter_rect.vertices()
+
+        overlap = all(self.inside(vi) for vi in inter_rect_vert) and all(other.inside(vi) for vi in inter_rect_vert)
+        return overlap
+
+    def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
-        if not self.overlaps(other):
-            return self
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+
+        minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        return Rectangle(minc, maxc)
+
+    __and__ = intersection
+
+    def difference(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        assert self.dim() == other.dim(), "Rectangles should have the same dimension"
+
+        def pairwise(iterable):
+            "s -> (s0, s1), (s1, s2), (s2, s3), ..."
+            a, b = tee(iterable)
+            next(b, None)
+            return zip(a, b)
+
+        intersection = self & other
+        if intersection == self:
+            yield self
         else:
-            rect_inter = self.intersection(other)
-            inter_vertices = set(rect_inter.vertices())
-            print inter_vertices
-            self_vertices = set(self.vertices())
-            print self_vertices
-            border_vertices = inter_vertices.intersection(self_vertices)
-            print border_vertices
-            result_vertices = self_vertices - inter_vertices
-            print result_vertices
-            result_vertices = result_vertices.union(border_vertices)
-            print result_vertices
+            dimension = self.dim()
+            d = [None] * dimension
+            for i in range(dimension):
+                d[i] = {self.min_corner[i], self.max_corner[i]}
 
-            self.min_corner = __builtin__.min(result_vertices)
-            self.max_corner = __builtin__.max(result_vertices)
+            for i in range(dimension):
+                if self.min_corner[i] < other.min_corner[i] < self.max_corner[i]:
+                    d[i].add(other.min_corner[i])
+                if self.min_corner[i] < other.max_corner[i] < self.max_corner[i]:
+                    d[i].add(other.max_corner[i])
 
-        return self
+            elem = (pairwise(sorted(item)) for item in d)
+            for vertex in product(*elem):
+                #vertex = ((x1, x2), (y1, y2), ...)
+                #x1 = min value for coord x
+                #x2 = max value for coord x
+                minc = tuple(item[0] for item in vertex)
+                maxc = tuple(item[1] for item in vertex)
+                instance = Rectangle(minc, maxc)
+                if instance != intersection:
+                    yield instance
+
+    __sub__ = difference
 
     # Domination
     def dominatesPoint(self, xpoint):

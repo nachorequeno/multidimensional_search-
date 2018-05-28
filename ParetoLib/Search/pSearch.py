@@ -197,8 +197,11 @@ def multidim_search_deep_first(xspace,
         ylow.extend(ylow_candidates)
         yup.extend(yup_candidates)
 
-        vol_ylow_opt_list = p.map(pvol, ylow_candidates)
-        vol_yup_opt_list = p.map(pvol, yup_candidates)
+        #vol_ylow_opt_list = p.map(pvol, ylow_candidates)
+        #vol_yup_opt_list = p.map(pvol, yup_candidates)
+
+        vol_ylow_opt_list = p.imap_unordered(pvol, ylow_candidates)
+        vol_yup_opt_list = p.imap_unordered(pvol, yup_candidates)
 
         vol_ylow += sum(vol_ylow_opt_list)
         vol_yup += sum(vol_yup_opt_list)
@@ -222,11 +225,14 @@ def multidim_search_deep_first(xspace,
         # Every Incomparable rectangle that is dominated by B1 is included in Yup
         yup_candidates = [inc for inc in new_incomp_rects if any(inc.isDominatedByRect(b1) for b1 in yup)]
 
-        vol_ylow_opt_list = p.map(pvol, ylow_candidates)
-        vol_yup_opt_list = p.map(pvol, yup_candidates)
-
         ylow.extend(ylow_candidates)
         yup.extend(yup_candidates)
+
+        #vol_ylow_opt_list = p.map(pvol, ylow_candidates)
+        #vol_yup_opt_list = p.map(pvol, yup_candidates)
+
+        vol_ylow_opt_list = p.imap_unordered(pvol, ylow_candidates)
+        vol_yup_opt_list = p.imap_unordered(pvol, yup_candidates)
 
         vol_ylow += sum(vol_ylow_opt_list)
         vol_yup += sum(vol_yup_opt_list)
@@ -352,8 +358,11 @@ def multidim_search_breadth_first(xspace,
         ylow.extend(b0_list)
         yup.extend(b1_list)
 
-        vol_b0_list = p.map(pvol, b0_list)
-        vol_b1_list = p.map(pvol, b1_list)
+        #vol_b0_list = p.map(pvol, b0_list)
+        #vol_b1_list = p.map(pvol, b1_list)
+
+        vol_b0_list = p.imap_unordered(pvol, b0_list)
+        vol_b1_list = p.imap_unordered(pvol, b1_list)
 
         vol_ylow += sum(vol_b0_list)
         vol_yup += sum(vol_b1_list)
@@ -362,6 +371,31 @@ def multidim_search_breadth_first(xspace,
         new_incomp_rects = p.map(pborder, args_pborder)
         # Flatten list
         border = list(chain.from_iterable(new_incomp_rects))
+
+        ################################
+        # Every Border rectangle that dominates B0 is included in Ylow
+        ylow_candidates = [rect for rect in border if any(rect.dominatesRect(b0) for b0 in b0_list)]
+        # Every Border rectangle that is dominated by B1 is included in Yup
+        yup_candidates = [rect for rect in border if any(rect.isDominatedByRect(b1) for b1 in b1_list)]
+
+        ylow.extend(ylow_candidates)
+        yup.extend(yup_candidates)
+
+        #vol_ylow_opt_list = p.map(pvol, ylow_candidates)
+        #vol_yup_opt_list = p.map(pvol, yup_candidates)
+
+        vol_ylow_opt_list = p.imap_unordered(pvol, ylow_candidates)
+        vol_yup_opt_list = p.imap_unordered(pvol, yup_candidates)
+
+        vol_ylow += sum(vol_ylow_opt_list)
+        vol_yup += sum(vol_yup_opt_list)
+
+        for rect in ylow_candidates:
+            border.remove(rect)
+
+        for rect in yup_candidates:
+            border.remove(rect)
+        ################################
 
         vol_border = vol_total - vol_yup - vol_ylow
         # vprint('Volume report (Step, Ylow, Yup, Border, Total, nYlow, nYup, nBorder): (%s, %s, %s, %s, %s, %d, %d, %d)'

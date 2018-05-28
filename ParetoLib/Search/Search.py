@@ -8,6 +8,8 @@ from ParetoLib.Search.ResultSet import *
 # from ParetoLib.Search import vprint
 from . import vprint
 
+#TODO: Incomparable rectangles that are in 2D when we use 3D.
+
 # Multidimensional search
 # The search returns a set of Rectangles in Yup, Ylow and Border
 def multidim_search(xspace,
