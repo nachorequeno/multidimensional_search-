@@ -20,4 +20,5 @@ rs = Search2D(ora=oracle,
               delta=DELTA,
               max_step=STEPS,
               blocking=False,
-              sleep=0)
+              sleep=0,
+              opt_level=0)

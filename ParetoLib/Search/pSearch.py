@@ -230,7 +230,8 @@ def multidim_search_deep_first_opt_2(xspace,
         vol_yup += sum(vol_b1_list)
 
         ################################
-        for (yl, yh) in y_list:
+        for y_segment in y_list:
+            yl, yh = y_segment.l, y_segment.h
             # Every Border rectangle that dominates B0 is included in Ylow
             # Every Border rectangle that is dominated by B1 is included in Yup
             b0_extended = Rectangle(xspace.min_corner, yl)
@@ -460,8 +461,8 @@ def multidim_search_deep_first_opt_1(xspace,
         vol_ylow += sum(vol_ylow_opt_list)
         vol_yup += sum(vol_yup_opt_list)
 
-        new_incomp_rects -= ylow_candidates
-        new_incomp_rects -= yup_candidates
+        new_incomp_rects = new_incomp_rects.difference(ylow_candidates)
+        new_incomp_rects = new_incomp_rects.difference(yup_candidates)
         ################################
 
         # Add new incomparable rectangles to the border
@@ -727,7 +728,8 @@ def multidim_search_breadth_first_opt_2(xspace,
         vol_yup += sum(vol_b1_list)
 
         ################################
-        for (yl, yh) in y_list:
+        for y_segment in y_list:
+            yl, yh = y_segment.l, y_segment.h
             # Every Border rectangle that dominates B0 is included in Ylow
             # Every Border rectangle that is dominated by B1 is included in Yup
 
