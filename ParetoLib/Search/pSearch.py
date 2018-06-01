@@ -238,16 +238,14 @@ def multidim_search_deep_first_opt_2(xspace,
             b1_extended = Rectangle(yh, xspace.max_corner)
 
             border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
-            border -= border_overlapping_b0
-
             for rect in border_overlapping_b0:
                 border |= list(rect - b0_extended)
+            border -= border_overlapping_b0
 
             border_overlapping_b1 = [rect for rect in border if b1_extended.overlaps(rect)]
-            border -= border_overlapping_b1
-
             for rect in border_overlapping_b1:
                 border |= list(rect - b1_extended)
+            border -= border_overlapping_b1
 
             #border_dominatedby_b0 = [rect.intersection(b0_extended) for rect in border_overlapping_b0]
             #border_dominatedby_b1 = [rect.intersection(b1_extended) for rect in border_overlapping_b1]
@@ -736,19 +734,24 @@ def multidim_search_breadth_first_opt_2(xspace,
             b0_extended = Rectangle(xspace.min_corner, yl)
             b1_extended = Rectangle(yh, xspace.max_corner)
 
-            border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
-            #border -= border_overlapping_b0
-            border = [rect for rect in border if not b0_extended.overlaps(rect)]
+            #border_non_dominatedby_b0 = []
+            #for rect in border_overlapping_b0:
+            #    border_non_dominatedby_b0 += list(rect - b0_extended)
+            #border += border_non_dominatedby_b0
 
+            border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
             for rect in border_overlapping_b0:
                 border += list(rect - b0_extended)
 
-            border_overlapping_b1 = [rect for rect in border if b1_extended.overlaps(rect)]
-            #border -= border_overlapping_b1
-            border = [rect for rect in border if not b1_extended.overlaps(rect)]
+            #border -= border_overlapping_b0
+            border = [rect for rect in border if not b0_extended.overlaps(rect)]
 
+            border_overlapping_b1 = [rect for rect in border if b1_extended.overlaps(rect)]
             for rect in border_overlapping_b1:
                 border += list(rect - b1_extended)
+
+            #border -= border_overlapping_b1
+            border = [rect for rect in border if not b1_extended.overlaps(rect)]
 
             #border_dominatedby_b0 = [rect.intersection(b0_extended) for rect in border_overlapping_b0]
             #border_dominatedby_b1 = [rect.intersection(b1_extended) for rect in border_overlapping_b1]

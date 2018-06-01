@@ -114,7 +114,7 @@ class ResultSet:
             for rect1 in self.yup:
                 for rect2 in self.yup:
                     if rect1.isconcatenable(rect2):
-                        rect1.concatenate(rect2)
+                        rect1.concatenate_update(rect2)
                         self.yup.remove(rect2)
             len_after = len(self.yup)
 
@@ -127,7 +127,7 @@ class ResultSet:
             for rect1 in self.ylow:
                 for rect2 in self.ylow:
                     if rect1.isconcatenable(rect2):
-                        rect1.concatenate(rect2)
+                        rect1.concatenate_update(rect2)
                         self.ylow.remove(rect2)
             len_after = len(self.ylow)
 
@@ -140,7 +140,7 @@ class ResultSet:
             for rect1 in self.border:
                 for rect2 in self.border:
                     if rect1.isconcatenable(rect2):
-                        rect1.concatenate(rect2)
+                        rect1.concatenate_update(rect2)
                         self.border.remove(rect2)
             len_after = len(self.border)
 

@@ -195,11 +195,37 @@ class RectangleTestCase(unittest.TestCase):
         p4 = (1.5, 1.0)
         r2 = Rectangle(p3, p4)
 
-        p9 = (0.5, 1.0)
-        r5 = Rectangle(p9, p2)
+        p5 = (0.5, 1.0)
+        r3 = Rectangle(p1, p5)
+        r4 = Rectangle(p5, p2)
+
+        p6 = (0.0, 1.0)
+        p7 = (0.5, 1.75)
+        r5 = Rectangle(p6, p7)
+
+        diff_result = set(r1 - r2)
 
         # Difference
-        self.assertTrue(r5 in set(r1 - r2))
+        self.assertTrue(r3 in diff_result)
+        self.assertTrue(r4 in diff_result)
+        self.assertTrue(r5 in diff_result)
+        self.assertTrue(len(diff_result) == 3)
+
+        diff_result21 = set(r3 - r4)
+        diff_result22 = set(r4 - r3)
+        diff_result31 = set(r4 - r5)
+        diff_result32 = set(r5 - r4)
+
+        # r1 - r2 returns r1 in the case that r1 and r2 do not intersect
+        self.assertTrue(len(diff_result21) == 1)
+        self.assertTrue(len(diff_result22) == 1)
+        self.assertTrue(len(diff_result31) == 1)
+        self.assertTrue(len(diff_result32) == 1)
+
+        self.assertTrue(r3 in diff_result21)
+        self.assertTrue(r4 in diff_result22)
+        self.assertTrue(r4 in diff_result31)
+        self.assertTrue(r5 in diff_result32)
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)

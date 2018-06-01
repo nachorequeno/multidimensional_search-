@@ -120,21 +120,20 @@ def multidim_search_opt_2(xspace,
         y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
         #vprint('y: ', y)
 
-        # b0 = Rectangle(xspace.min_corner, y.l)
         b0 = Rectangle(xrectangle.min_corner, y.l)
-        ylow.append(b0)
-        vol_ylow += b0.volume()
-
-        #vprint('b0: ', b0)
-        #vprint('ylow: ', ylow)
-
-        # b1 = Rectangle(y.h, xspace.max_corner)
         b1 = Rectangle(y.h, xrectangle.max_corner)
+
+        ylow.append(b0)
         yup.append(b1)
+
+        vol_ylow += b0.volume()
         vol_yup += b1.volume()
 
-        #vprint('b1: ', b1)
-        #vprint('yup: ', yup)
+        # vprint('b0: ', b0)
+        # vprint('b1: ', b1)
+
+        # vprint('ylow: ', ylow)
+        # vprint('yup: ', yup)
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -142,29 +141,55 @@ def multidim_search_opt_2(xspace,
         b0_extended = Rectangle(xspace.min_corner, y.l)
         b1_extended = Rectangle(y.h, xspace.max_corner)
 
-        border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
-
-        #border_dominatedby_b0 = [b0_extended.intersection(rect) for rect in border_overlapping_b0]
+        # border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
+        # border_dominatedby_b0 = [b0_extended.intersection(rect) for rect in border_overlapping_b0]
+        border_overlapping_b0 = [rect for rect in border if rect.overlaps(b0_extended)]
         border_dominatedby_b0 = [rect.intersection(b0_extended) for rect in border_overlapping_b0]
+
         #border_nondominatedby_b0 = [rect - b0_extended for rect in border_overlapping_b0]
+
         border_nondominatedby_b0 = []
         for rect in border_overlapping_b0:
             border_nondominatedby_b0 += list(rect - b0_extended)
 
-        border -= border_overlapping_b0
+        #border_nondominatedby_b0 = set()
+        #for rect in border_overlapping_b0:
+        #    border_nondominatedby_b0 |= set(rect - b0_extended)
+        #border_nondominatedby_b0 -= set(border_overlapping_b0)
+
+        # if 'rect' is completely dominated by b0_extended (i.e., rect is strictly inside b0_extended), then
+        # set(rect - b0_extended) == {rect}
+        # Therefore, 'rect' must be removed from 'non dominated' borders
+
+
+        #border -= border_overlapping_b0
         border |= border_nondominatedby_b0
+        border -= border_overlapping_b0
 
-        border_overlapping_b1 = [rect for rect in border if b1_extended.overlaps(rect)]
+        # border_overlapping_b1 = [rect for rect in border if b1_extended.overlaps(rect)]
+        # border_dominatedby_b1 = [b1_extended.intersection(rect) for rect in border_overlapping_b1]
 
-        #border_dominatedby_b1 = [b1_extended.intersection(rect) for rect in border_overlapping_b1]
+        border_overlapping_b1 = [rect for rect in border if rect.overlaps(b1_extended)]
         border_dominatedby_b1 = [rect.intersection(b1_extended) for rect in border_overlapping_b1]
+
         #border_nondominatedby_b1 = [rect - b1_extended for rect in border_overlapping_b1]
+
         border_nondominatedby_b1 = []
         for rect in border_overlapping_b1:
             border_nondominatedby_b1 += list(rect - b1_extended)
 
-        border -= border_overlapping_b1
+        #border_nondominatedby_b1 = set()
+        #for rect in border_overlapping_b1:
+        #    border_nondominatedby_b1 |= set(rect - b1_extended)
+        #border_nondominatedby_b1 -= set(border_overlapping_b1)
+
+        # if 'rect' is completely dominated by b1_extended (i.e., rect is strictly inside b1_extended), then
+        # set(rect - b1_extended) == {rect}
+        # Therefore, 'rect' must be removed from 'non dominated' borders
+
+        #border -= border_overlapping_b1
         border |= border_nondominatedby_b1
+        border -= border_overlapping_b1
 
         ylow.extend(border_dominatedby_b0)
         yup.extend(border_dominatedby_b1)
