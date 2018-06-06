@@ -68,7 +68,7 @@ def check_dependencies ( ) :
         bool
             True if it can continue, False otherwise.
     """
-    # Check if NumPy, Sympy or matplotlib are missing, as they are required for
+    # Check if NumPy, Sympy, SortedContainers or matplotlib are missing, as they are required for
     # ParetoLib to work properly
     if ( not can_import('numpy') ) :
         print('Numerical Python (NumPy) is not installed.\nThis package is required for' \
