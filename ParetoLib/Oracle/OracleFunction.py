@@ -310,15 +310,15 @@ class OracleFunction(Oracle):
         self.variables = self.variables.union(cond.get_variables())
         self.oracle.add(cond)
 
+    def dim(self):
+        # type: (OracleFunction) -> int
+        return len(self.get_variables())
+
     def get_variables(self):
         # type: (OracleFunction) -> list
         # variable_list = sorted(self.variables, key=default_sort_key)
         variable_list = list(self.variables)
         return variable_list
-
-    def dim(self):
-        # type: (OracleFunction) -> int
-        return len(self.get_variables())
 
     def eval_zip_tuple(self, var_xpoint):
         # type: (OracleFunction, list) -> bool

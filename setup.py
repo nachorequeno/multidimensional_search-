@@ -197,6 +197,7 @@ setup_args = { 'name': 'ParetoLib',
                              'test': test_paretolib, },
                'packages': [ 'ParetoLib',
                              'ParetoLib.Geometry',
+                             'ParetoLib.JAMT',
                              'ParetoLib.Oracle',
                              'ParetoLib.Search'], }
 
