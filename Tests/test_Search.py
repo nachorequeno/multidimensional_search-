@@ -4,6 +4,7 @@ import unittest
 from ParetoLib.Search.Search import *
 from ParetoLib.Oracle.OracleFunction import *
 from ParetoLib.Oracle.OraclePoint import *
+from ParetoLib.Oracle.OracleSTL import *
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -152,9 +153,11 @@ class SearchTestCase(unittest.TestCase):
         print ('Time tests: ', str(time0))
 
     def search_verify_2D(self, human_readable):
-        test_2D_dir = self.this_dir + "/2D/"
+        #test_2D_dir = self.this_dir + "/2D/"
+        test_2D_dir = os.path.join(self.this_dir, "2D")
         files_path = os.listdir(test_2D_dir)
-        test_2D_txt = [test_2D_dir + x for x in files_path if x.endswith(".txt")]
+        #test_2D_txt = [test_2D_dir + x for x in files_path if x.endswith(".txt")]
+        test_2D_txt = [os.path.join(test_2D_dir, x) for x in files_path if x.endswith(".txt")]
 
         min_x, min_y = (0.0, 0.0)
         max_x, max_y = (1.0, 1.0)
@@ -179,9 +182,11 @@ class SearchTestCase(unittest.TestCase):
                            max_cornery=max_y)
 
     def search_verify_3D(self, human_readable):
-        test_3D_dir = self.this_dir + "/3D/"
+        #test_3D_dir = self.this_dir + "/3D/"
+        test_3D_dir = os.path.join(self.this_dir, "3D")
         files_path = os.listdir(test_3D_dir)
-        test_3D_txt = [test_3D_dir + x for x in files_path if x.endswith(".txt")]
+        #test_3D_txt = [test_3D_dir + x for x in files_path if x.endswith(".txt")]
+        test_3D_txt = [os.path.join(test_3D_dir, x) for x in files_path if x.endswith(".txt")]
 
         min_x, min_y, min_z = (0.0, 0.0, 0.0)
         max_x, max_y, max_z = (1.0, 1.0, 1.0)
@@ -210,9 +215,11 @@ class SearchTestCase(unittest.TestCase):
                            max_cornerz=max_z)
 
     def search_verify_ND(self, human_readable):
-        test_ND_dir = self.this_dir + "/ND/"
+        #test_ND_dir = self.this_dir + "/ND/"
+        test_ND_dir = os.path.join(self.this_dir, "ND")
         files_path = os.listdir(test_ND_dir)
-        test_ND_txt = [test_ND_dir + x for x in files_path if x.endswith(".txt")]
+        #test_ND_txt = [test_ND_dir + x for x in files_path if x.endswith(".txt")]
+        test_ND_txt = [os.path.join(test_ND_dir, x) for x in files_path if x.endswith(".txt")]
 
         min_corner = 0.0
         max_corner = 1.0
@@ -269,6 +276,21 @@ class SearchOraclePointTestCase(SearchTestCase):
     def test_ND(self):
         self.search_verify_ND(False)
 
+class SearchOracleSTLTestCase(SearchTestCase):
+
+    def setUp(self):
+        super(SearchOracleSTLTestCase, self).setUp()
+        self.this_dir = "Oracle/OracleSTL"
+        self.oracle = OracleSTL()
+
+    def test_2D(self):
+        self.search_verify_2D(False)
+
+    def test_3D(self):
+        self.search_verify_3D(False)
+
+    def test_ND(self):
+        self.search_verify_ND(False)
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)
