@@ -2,17 +2,23 @@
     README file of the Test suite for ParetoLib
 """""""""""""""""""""""""""""""""""""""""""""""""
 
-The following file contains information about every data file used in the test
-suite of ParetoLib for OracleSTL. Each file defines a OracleSTL.
+This README contains information about every data file used in the test
+suite of ParetoLib for OracleSTL. Each test-Nd.[txt|bin] file defines an OracleSTL.
+OracleSTL is an oracle that evaluates parametrised Signal Temporal Logic (STL)
+formulas for guiding the discovery of closures.
+OracleSTL uses the external tool JAMT for evaluating STL formulas.
+So, part of the information contained in the test-Nd.[txt|bin] file correspond to
+the configuration and running environment of JAMT.
 
-2D/3D
-- test-2d.txt: Oracle that ...
-- test-3d.txt: Oracle that ...
-- test-Nd.txt: Oracle that ...
+The files required by the JAMT tool are:
+- A signal in VCD format (*.vcd, stabilization.vcd).
+- A parametrised STL specification (*.stl, stabilization.stl).
+- A mapping between variables in the signal and variables in STL (*.alias, stabilization.alias).
 
-ND
-- test-Nd.bin: Oracle that ... of N-dimension
-
+OracleSTL needs an extra configuration file (*.param, stabilization.param) for
+pointing out the parameters of the STL formula that it will consider.
+All the examples (2D/3D/ND) analyse the same signal by varying the number of
+parameters in the STL formula (i.e., 2 parameters for 2D, 3 parameters for 3D and so on).
 
     File format
 """""""""""""""""
@@ -25,7 +31,7 @@ The first line points to the file containing a parametrised STL formula.
 The JAMT will check a particular instance of this STL formula over a signal.
 The second line points to the file containing a representation of the signal in VCD format.
 The third line points to a file that maps variables in the VCD file into variables of the STL formula.
-The last line is an explicit list of parameters of the STL formula (in Python list format).
+The last line is an specific***explicit list of parameters of the STL formula (in Python list format).
 These parameters implicitly define the n-dimensional space of the Pareto search, i.e.,
 the first parameter matches the coordinate 'x', the second parameter matches the coordinate 'y' and so on.
 The dimension of the n-dimensional space is equal to the number of parameters in the STL formula.

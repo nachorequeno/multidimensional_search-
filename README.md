@@ -90,13 +90,15 @@ The *Oracle* determines the membership of a point *x=(x1,x2,...,xN)* to any of
 the two closures (*X1* or *X2*). 
 The complete space is denoted by *X = X1 + X2*.
 
-Our library supports two kind of *Oracles* for inferring the Pareto's front
-and learning the membership of a point *x* to any of the two closures. 
-The first *Oracle*, named *OracleFunction*, defines the membership of point *x*
-to the closure *X1* based on polynomial constraints.
+For the moment, our library only supports three kinds of *Oracles* for inferring 
+the Pareto's front and learning the membership of a point *x* to any of the two closures.
+Nevertheless, the number of *Oracles* can be enlarged easily by implementing
+an abstract interface (ParetoLib/Oracle/Oracle.py). 
+
+The first *Oracle*, named *OracleFunction*, is a 'proof of concept'.
+It defines the membership of point *x* to the closure *X1* based on polynomial constraints.
 For instance, *x1 = x2* may define the boundary. Every point *x* having the coordinates
 *x1 > x2* will belong to *X1*, while every point *x* having *x1 < x2* will belong to *X2*
-
 
 The second *Oracle*, named *OraclePoint*, defines the membership of point *x*
 to the closure *X1* based on a cloud of points. For instance, next image shows a dense
@@ -109,7 +111,14 @@ frontier. The Pareto front is obtained by a NDTree [3].
 
 ![alt text][paretofront]
 
-Finally, the last image shows the partitioning that is learnt by our algorithm thanks to
+Finally, the last *Oracle*, named *OracleSTL*, defines the membership of point *x* depending
+on the success in evaluating a Signal Temporal Logic (STL) [4] formula over a signal.
+The STL formula is parametrized with a set of variables which correspond to the coordinates
+of the point *x* (i.e., the number of parameters in the STL formula is equal to the dimension of *x*). 
+Every point *x* satisfying the STL formula will belong to *X1*, while every point *x* 
+falsifying it will belong to *X2*.
+
+The last image shows the partitioning that is learnt by our algorithm thanks to
 the *Oracle* guidance. The green side corresponds to *X1* and the red side corresponds 
 to *X2*. A gap in blue may appear between the two closures, which corresponds to the border 
 and can be set arbitrarily small depending on the accuracy required by the user.
@@ -117,7 +126,7 @@ and can be set arbitrarily small depending on the accuracy required by the user.
 ![alt text][multidim_search]
 
 
-Samples of *OracleFunction* and *OraclePoint* definitions can be found in 
+Samples of *OracleFunction*, *OraclePoint* and *OracleSTL* definitions can be found in 
 Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 
 [cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/cloud_points.png "Cloud of points"
@@ -125,6 +134,7 @@ Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 [multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
+[4] [STL⁎: Extending signal temporal logic with signal-value freezing operator] (https://doi.org/10.1016/j.ic.2014.01.012)
 
 ### Running the multidimensional search
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.

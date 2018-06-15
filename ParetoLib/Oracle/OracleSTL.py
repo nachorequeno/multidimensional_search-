@@ -139,7 +139,7 @@ class OracleSTL(Oracle):
         # assrtn, resn
         #
         # where 'res_i' in {"violated", "satisfied"}
-        tp_result = {"violated": False, "satisfied": True}
+        tp_result = {"violated": False, "satisfied": True, "unknown": None}
 
         # Remove empty spaces for each file line
         f = open(res_file, 'rb')
