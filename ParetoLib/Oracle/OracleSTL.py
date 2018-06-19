@@ -85,6 +85,20 @@ class OracleSTL(Oracle):
         # The number of parameters in the STL formula should be less or equal than the number of coordinates in the tuple
         assert self.dim() <= len(xpoint)
 
+        def eval_expr(match):
+            # Evaluate the arithmetic expression detected by 'match'
+            return str(eval(match.group(0)))
+            #return str(eval(match.group('expr')))
+
+        ####
+        # Regex for detecting an arithmetic expression inside a STL formula
+        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
+        op = '(\*|\/|\+|\-)+'
+        math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
+        # math_regex = r'(?P<expr>\b%s\b(%s\b%s\b)*)' % (number, op, number)
+        pattern = re.compile(math_regex)
+        ####
+
         f = open(self.stl_prop_file, 'r')
         stl_prop_file_subst = tempfile.NamedTemporaryFile(mode='w', delete=False)
         stl_prop_file_subst_name = stl_prop_file_subst.name
@@ -92,12 +106,15 @@ class OracleSTL(Oracle):
         for line in f:
             for i, par in enumerate(self.stl_parameters):
                 line = re.sub(r"\b%s\b" % par, str(xpoint[i]), line)
+
+            line = pattern.sub(eval_expr, line)
             stl_prop_file_subst.write(line)
 
         f.close()
         stl_prop_file_subst.close()
 
         return stl_prop_file_subst_name
+
 
     def eval_STL_formula(self, stl_prop_file):
         # type: (OracleSTL, str) -> str
