@@ -324,7 +324,8 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        ax1 = fig1.add_subplot(111, aspect='equal')
+        #ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1 = fig1.add_subplot(111)
         ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
@@ -351,7 +352,15 @@ class ResultSet:
         #ax1.scatter(targetx, targety, c='k')
         #ax1.autoscale_view()
 
-        plt.autoscale()
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+
         plt.show(block=blocking)
         time.sleep(sec)
 
@@ -372,7 +381,8 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        ax1 = fig1.add_subplot(111, aspect='equal')
+        #ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1 = fig1.add_subplot(111)
         ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
@@ -399,7 +409,15 @@ class ResultSet:
         #ax1.scatter(targetx, targety,  c='k')
         #ax1.autoscale_view()
 
-        plt.autoscale()
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+
         plt.show(block=blocking)
         time.sleep(sec)
 
@@ -442,7 +460,8 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        ax1 = fig1.add_subplot(111, projection='3d')
         ax1.set_title('Approximation of the Pareto front (x,y,z): ('
                       + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
 
@@ -472,7 +491,16 @@ class ResultSet:
         #ax1.scatter(targetx, targety, targetz, c='k')
         #ax1.autoscale_view()
 
-        plt.autoscale() #
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        #plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+        #plt.zscale('linear')
+
         plt.show(block=blocking)
         time.sleep(sec)
 
@@ -494,7 +522,8 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        ax1 = fig1.add_subplot(111, projection='3d')
         ax1.set_title('Approximation of the Pareto front (x,y,z): ('
                       + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
 
@@ -524,7 +553,16 @@ class ResultSet:
         #ax1.scatter(targetx, targety, targetz, c='k')
         #ax1.autoscale_view()
 
-        plt.autoscale() #
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+        #plt.zscale('linear')
+
         plt.show(block=blocking)
         time.sleep(sec)
 

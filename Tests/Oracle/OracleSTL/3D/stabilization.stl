@@ -2,4 +2,4 @@ bool trigger;
 real varx;
 
 assertion ime: 
-	always ((varx <= 5) and (trigger -> (eventually[p3:p1] always[0:p2] varx <= 0.2)));
+	always ((varx <= 5) and (trigger -> (eventually[100-p3:p1] always[150:300-p2] varx <= 0.2)));

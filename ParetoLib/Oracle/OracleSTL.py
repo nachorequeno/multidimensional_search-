@@ -87,12 +87,20 @@ class OracleSTL(Oracle):
 
         def eval_expr(match):
             # Evaluate the arithmetic expression detected by 'match'
-            return str(eval(match.group(0)))
+            try:
+                res = str(eval(match.group(0)))
+            except:
+                print "Unexpected error:", match
+                raise
+            else:
+                return res
+            #return str(eval(match.group(0)))
             #return str(eval(match.group('expr')))
 
         ####
         # Regex for detecting an arithmetic expression inside a STL formula
-        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
+        #number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
+        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
         op = '(\*|\/|\+|\-)+'
         math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
         # math_regex = r'(?P<expr>\b%s\b(%s\b%s\b)*)' % (number, op, number)
@@ -146,7 +154,7 @@ class OracleSTL(Oracle):
 
 
     def parse_AMT_result(self, res_file):
-        # type: (OracleSTL, str) -> bool
+        # type: (OracleSTL, str) -> (bool, bool)
         #
         # CSV format of the AMT result file:
         # Assertion, Verdict
@@ -171,15 +179,22 @@ class OracleSTL(Oracle):
         key_veredict = reader.fieldnames[-1]
 
         # Process the result of the assertions
-        _eval_list = (tp_result[line[key_veredict]] for line in reader)
+        #_eval_list = (tp_result[line[key_veredict]] for line in reader)
+        _eval_list = [tp_result[line[key_veredict]] for line in reader]
+
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
+
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
 
+        # Check if there is any "unknown" value
+        _unknown_list = [unk for unk in _eval_list if unk is None]
+        delet = len(_unknown_list) == 0
+
         f.close()
 
-        return _eval
+        return _eval, delet
 
     # Membership functions
     def __contains__(self, p):
@@ -208,11 +223,16 @@ class OracleSTL(Oracle):
         result_file_name = self.eval_STL_formula(stl_prop_file_subst_name)
 
         # Parse the AMT result
-        res = self.parse_AMT_result(result_file_name)
+        res, delet = self.parse_AMT_result(result_file_name)
 
+        #
+        # print res
         # Remove temporal files
-        os.remove(stl_prop_file_subst_name)
-        os.remove(result_file_name)
+        if delet:
+            os.remove(stl_prop_file_subst_name)
+            os.remove(result_file_name)
+        else:
+            print "Warning! Evaluation of file %s returns 'unkown' (see %s)." % (stl_prop_file_subst_name, result_file_name)
 
         return res
 

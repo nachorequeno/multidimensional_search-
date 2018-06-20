@@ -1,0 +1,4 @@
+Tests/Oracle/OracleSTL/2D/stabilization_2.stl
+Tests/Oracle/OracleSTL/2D/stabilization.vcd
+Tests/Oracle/OracleSTL/2D/stabilization_2.alias
+['p1', 'p2']
