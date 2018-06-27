@@ -199,7 +199,9 @@ setup_args = { 'name': 'ParetoLib',
                              'ParetoLib.Geometry',
                              'ParetoLib.JAMT',
                              'ParetoLib.Oracle',
-                             'ParetoLib.Search'], }
+                             'ParetoLib.Search'],
+             'package_data': {'ParetoLib.JAMT': ['*.jar']},
+}
 
 try:
     setup(**setup_args)

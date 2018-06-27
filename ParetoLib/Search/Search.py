@@ -104,7 +104,7 @@ def multidim_search_opt_2(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
-    while (vol_border >= delta) and (step <= max_step):
+    while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
         #vprint('border:', border)
         # l.sort(key=Rectangle.volume)
@@ -283,7 +283,7 @@ def multidim_search_opt_1(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
-    while (vol_border >= delta) and (step <= max_step):
+    while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
         #vprint('border:', border)
         # l.sort(key=Rectangle.volume)
@@ -431,7 +431,7 @@ def multidim_search_opt_0(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch')
-    while (vol_border >= delta) and (step <= max_step):
+    while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
         #vprint('border:', border)
         # l.sort(key=Rectangle.volume)

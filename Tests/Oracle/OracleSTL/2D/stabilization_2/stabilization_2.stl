@@ -1,0 +1,5 @@
+bool trigger;
+real varx;
+
+assertion ime: 
+	eventually[105:p1] varx < abs(p2);

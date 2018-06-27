@@ -1,4 +1,0 @@
-Tests/Oracle/OracleSTL/2D/stabilization.stl
-Tests/Oracle/OracleSTL/2D/stabilization.vcd
-Tests/Oracle/OracleSTL/2D/stabilization.alias
-['p1', 'p2']

@@ -1,0 +1,5 @@
+bool trigger;
+real varx;
+
+assertion ime: 
+	always ((varx <= 5) and (trigger -> (eventually[100:p1] always[150:300-p2] varx <= 0.2)));

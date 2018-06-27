@@ -213,7 +213,7 @@ class OracleSTL(Oracle):
         # AMT evaluates a STL formula (.stl) over a signal (.vcd) following a variable aliasing (.alias)
         # and exports the result to an output file (out).
         #
-        # java -jar ./jamt.jar -x ./stab/stabilization.stl -s ./stab/stabilization.vcd -a ./stab/stabilization.alias - v out
+        # java -jar ./jamt.jar -x ./stab/stabilization.stl -s ./stab/stabilization.vcd -a ./stab/stabilization.alias -v out
         #
 
         # Replace parameters of the STL formula with current values in xpoint tuple

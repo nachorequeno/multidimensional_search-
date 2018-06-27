@@ -1,10 +1,11 @@
+import time
 import __builtin__
 import itertools
 from multiprocessing import Manager, Pool, cpu_count
 import multiprocessing as mp
 import copy
 
-from sortedcontainers import SortedListWithKey
+from sortedcontainers import SortedListWithKey, SortedSet
 
 from ParetoLib.Geometry.pRectangle import *
 from ParetoLib.Search.CommonSearch import *
@@ -165,7 +166,7 @@ def multidim_search_deep_first_opt_2(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
-    remaining_steps = max_step - step
+    remaining_steps = max_step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -191,7 +192,7 @@ def multidim_search_deep_first_opt_2(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
@@ -377,7 +378,7 @@ def multidim_search_deep_first_opt_1(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
@@ -533,7 +534,7 @@ def multidim_search_deep_first_opt_0(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
-    remaining_steps = max_step - step
+    remaining_steps = max_step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -559,7 +560,7 @@ def multidim_search_deep_first_opt_0(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
@@ -674,7 +675,7 @@ def multidim_search_breadth_first_opt_2(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
-    remaining_steps = max_step - step
+    remaining_steps = max_step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -700,7 +701,7 @@ def multidim_search_breadth_first_opt_2(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
         chunk = __builtin__.min(remaining_steps, len(border))
@@ -851,7 +852,7 @@ def multidim_search_breadth_first_opt_1(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
-    remaining_steps = max_step - step
+    remaining_steps = max_step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -877,7 +878,7 @@ def multidim_search_breadth_first_opt_1(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
         chunk = __builtin__.min(remaining_steps, len(border))
@@ -998,7 +999,7 @@ def multidim_search_breadth_first_opt_0(xspace,
     vol_ylow = 0
     vol_border = vol_total
     step = 0
-    remaining_steps = max_step - step
+    remaining_steps = max_step
 
     num_proc = cpu_count()
     p = Pool(num_proc)
@@ -1024,7 +1025,7 @@ def multidim_search_breadth_first_opt_0(xspace,
     #vprint('comparable: ', comparable)
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
-    while (vol_border >= delta) and (remaining_steps > 0):
+    while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
         chunk = __builtin__.min(remaining_steps, len(border))
