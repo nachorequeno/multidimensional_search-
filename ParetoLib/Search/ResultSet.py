@@ -1,8 +1,12 @@
 import os
+import sys
 import __builtin__
 import time
 import pickle
 from itertools import chain, combinations #combinations_with_replacement
+import zipfile
+import tempfile
+import shutil
 
 import matplotlib.pyplot as plt
 
@@ -19,10 +23,10 @@ class ResultSet:
         self.yup = yup
         self.xspace = xspace
 
-        self.suffix_Yup = 'up'
-        self.suffix_Ylow = 'low'
-        self.suffix_Border = 'border'
-        self.suffix_Space = 'space'
+        self.filename_yup = 'up'
+        self.filename_ylow = 'low'
+        self.filename_border = 'border'
+        self.filename_space = 'space'
 
     # Printers
     def toStr(self):
@@ -595,14 +599,39 @@ class ResultSet:
 
     def toFile(self, f):
         # type: (ResultSet, str) -> None
-        name = os.path.splitext(f)
-        # ('file', '.ext')
-        basename = name[0]
-        extension = name[1]
-        self.toFileYup(basename + self.suffix_Yup + extension)
-        self.toFileYlow(basename + self.suffix_Ylow + extension)
-        self.toFileBorder(basename + self.suffix_Border + extension)
-        self.toFileSpace(basename + self.suffix_Space + extension)
+        #fname = os.path.basename(f)
+        #name = os.path.splitext(fname)
+        ## ('file', '.ext')
+        #basename = name[0]
+        #extension = name[1]
+
+        tempdir = tempfile.mkdtemp()
+
+        yup_name = os.path.join(tempdir, self.filename_yup)
+        ylow_name = os.path.join(tempdir, self.filename_ylow)
+        border_name = os.path.join(tempdir, self.filename_border)
+        space_name = os.path.join(tempdir, self.filename_space)
+
+        self.toFileYup(yup_name)
+        self.toFileYlow(ylow_name)
+        self.toFileBorder(border_name)
+        self.toFileSpace(space_name)
+
+        filename_list = (yup_name, ylow_name, border_name, space_name)
+        zf = zipfile.ZipFile(f, mode='w', compression=zipfile.ZIP_DEFLATED)
+        for file in filename_list:
+            try:
+                fname = os.path.basename(file)
+                # Adding new file to the .zip
+                zf.write(file, arcname=fname)
+            except:
+                print "Unexpected error when saving %s: %s" % (file, sys.exc_info()[0])
+            os.remove(file)
+        zf.close()
+
+        # Remove temporary folder
+        os.rmdir(tempdir)
+        #shutil.rmtree(tempdir, ignore_errors=True)
 
     def fromFileYup(self, f):
         # type: (ResultSet, str) -> None
@@ -630,11 +659,38 @@ class ResultSet:
 
     def fromFile(self, f):
         # type: (ResultSet, str) -> None
-        name = os.path.splitext(f)
-        # ('file', '.ext')
-        basename = name[0]
-        extension = name[1]
-        self.fromFileYup(basename + self.suffix_Yup + extension)
-        self.fromFileYlow(basename + self.suffix_Ylow + extension)
-        self.fromFileBorder(basename + self.suffix_Border + extension)
-        self.fromFileSpace(basename + self.suffix_Space + extension)
+        # fname = os.path.basename(f)
+        # name = os.path.splitext(fname)
+        ## ('file', '.ext')
+        # basename = name[0]
+        # extension = name[1]
+
+        tempdir = tempfile.mkdtemp()
+
+        zf = zipfile.ZipFile(f, mode='r')
+        try:
+            zf.extractall(tempdir)
+        except KeyError:
+            print 'ERROR: Did not find %s file' % f
+        else:
+            zf.close()
+
+        yup_name = os.path.join(tempdir, self.filename_yup)
+        ylow_name = os.path.join(tempdir, self.filename_ylow)
+        border_name = os.path.join(tempdir, self.filename_border)
+        space_name = os.path.join(tempdir, self.filename_space)
+
+        self.fromFileYup(yup_name)
+        self.fromFileYlow(ylow_name)
+        self.fromFileBorder(border_name)
+        self.fromFileSpace(space_name)
+
+        filename_list = (yup_name, ylow_name, border_name, space_name)
+        for file in filename_list:
+            try:
+                os.remove(file)
+            except:
+                print "Unexpected error when removing %s: %s" % (file, sys.exc_info()[0])
+
+        # Remove temporary folder
+        os.rmdir(tempdir)
