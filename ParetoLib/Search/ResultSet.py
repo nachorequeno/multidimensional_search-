@@ -294,7 +294,45 @@ class ResultSet:
         return merged
 
     def getPointsSpace(self, n):
+        # type: (ResultSet, int) -> list
         return self.xspace.getPoints(n)
+
+    # Maximum/minimum values for each parameter
+    def getMinValDimensionYup(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMinValDimensionRectList(i, self.yup)
+
+    def getMinValDimensionYlow(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMinValDimensionRectList(i, self.ylow)
+
+    def getMinValDimensionBorder(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMinValDimensionRectList(i, self.border)
+
+    def getMaxValDimensionYup(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMaxValDimensionRectList(i, self.yup)
+
+    def getMaxValDimensionYlow(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMaxValDimensionRectList(i, self.ylow)
+
+    def getMaxValDimensionBorder(self, i):
+        # type: (ResultSet, int) -> float
+        return self._getMaxValDimensionRectList(i, self.border)
+
+    def _getMinValDimensionRectList(self, i, rect_list):
+        # type: (ResultSet, int, list) -> float
+        min_cs = (rect.min_corner for rect in rect_list)
+        mc_i = (mc[i] for mc in min_cs)
+        return __builtin__.min(mc_i)
+
+    def _getMaxValDimensionRectList(self, i, rect_list):
+        # type: (ResultSet, int, list) -> float
+        max_cs = (rect.max_corner for rect in rect_list)
+        mc_i = (mc[i] for mc in max_cs)
+        return __builtin__.max(mc_i)
 
     # MatPlot Graphics
     def toMatPlotSpace2D(self, xaxe=0, yaxe=1, opacity=1.0):
