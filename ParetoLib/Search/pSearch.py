@@ -62,7 +62,8 @@ def multidim_search(xspace,
                     max_step=STEPS,
                     blocking=False,
                     sleep=0.0,
-                    opt_level=2):
+                    opt_level=2,
+                    logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
     md_search = [multidim_search_deep_first_opt_0,
                  multidim_search_deep_first_opt_1,
@@ -80,7 +81,8 @@ def multidim_search(xspace,
                               delta=delta,
                               max_step=max_step,
                               blocking=blocking,
-                              sleep=sleep)
+                              sleep=sleep,
+                              logging=True)
     end = time.time()
     time0 = end - start
     #vprint('Time multidim search: ', str(time0))
@@ -125,7 +127,8 @@ def multidim_search_deep_first_opt_2(xspace,
                                delta=DELTA,
                                max_step=STEPS,
                                blocking=False,
-                               sleep=0.0):
+                               sleep=0.0,
+                               logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -190,6 +193,9 @@ def multidim_search_deep_first_opt_2(xspace,
     #vprint('step: ', step)
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
+
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
@@ -299,6 +305,11 @@ def multidim_search_deep_first_opt_2(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -311,7 +322,8 @@ def multidim_search_deep_first_opt_1(xspace,
                                delta=DELTA,
                                max_step=STEPS,
                                blocking=False,
-                               sleep=0.0):
+                               sleep=0.0,
+                               logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -376,6 +388,9 @@ def multidim_search_deep_first_opt_1(xspace,
     #vprint('step: ', step)
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
+
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
@@ -480,6 +495,11 @@ def multidim_search_deep_first_opt_1(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -493,7 +513,8 @@ def multidim_search_deep_first_opt_0(xspace,
                                delta=DELTA,
                                max_step=STEPS,
                                blocking=False,
-                               sleep=0.0):
+                               sleep=0.0,
+                               logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -558,6 +579,9 @@ def multidim_search_deep_first_opt_0(xspace,
     #vprint('step: ', step)
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
+
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
@@ -624,6 +648,11 @@ def multidim_search_deep_first_opt_0(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -638,7 +667,8 @@ def multidim_search_breadth_first_opt_2(xspace,
                                     delta=DELTA,
                                     max_step=STEPS,
                                     blocking=False,
-                                    sleep=0.0):
+                                    sleep=0.0,
+                                    logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -699,6 +729,9 @@ def multidim_search_breadth_first_opt_2(xspace,
     #vprint('step: ', step)
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
+
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
@@ -802,6 +835,11 @@ def multidim_search_breadth_first_opt_2(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -815,7 +853,8 @@ def multidim_search_breadth_first_opt_1(xspace,
                                   delta=DELTA,
                                   max_step=STEPS,
                                   blocking=False,
-                                  sleep=0.0):
+                                  sleep=0.0,
+                                  logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -876,6 +915,9 @@ def multidim_search_breadth_first_opt_1(xspace,
     #vprint('step: ', step)
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
+
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
 
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
@@ -949,6 +991,11 @@ def multidim_search_breadth_first_opt_1(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -962,7 +1009,8 @@ def multidim_search_breadth_first_opt_0(xspace,
                                   delta=DELTA,
                                   max_step=STEPS,
                                   blocking=False,
-                                  sleep=0.0):
+                                  sleep=0.0,
+                                  logging=True):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
 
     # Xspace is a particular case of maximal rectangle
@@ -1024,6 +1072,9 @@ def multidim_search_breadth_first_opt_0(xspace,
     #vprint('incomparable: ', incomparable)
     #vprint('comparable: ', comparable)
 
+    # Create temporary directory for storing the result of each step
+    tempdir = tempfile.mkdtemp()
+
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
@@ -1072,6 +1123,11 @@ def multidim_search_breadth_first_opt_0(xspace,
             elif n == 3:
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
+        if logging:
+            rs = pResultSet(list(border), ylow, yup, xspace)
+            name = os.path.join(tempdir, str(step))
+            rs.toFile(name)
+
     # Stop multiprocessing
     p.close()
     p.join()
@@ -1091,10 +1147,11 @@ def Search2D(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0,
-             opt_level=2):
+             opt_level=2,
+             logging=True):
     # type: (Oracle, float, float, float, float, float, float, int, bool, float, int) -> pResultSet
     xyspace = create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level)
+    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     n = int((max_cornerx - min_cornerx) / 0.1)
@@ -1123,11 +1180,12 @@ def Search3D(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0,
-             opt_level=2):
+             opt_level=2,
+             logging=True):
     # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int) -> pResultSet
     xyspace = create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level)
+    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     n = int((max_cornerx - min_cornerx) / 0.1)
@@ -1153,7 +1211,8 @@ def SearchND(ora,
              max_step=STEPS,
              blocking=False,
              sleep=0.0,
-             opt_level=2):
+             opt_level=2,
+             logging=True):
     # type: (Oracle, float, float, float, float, int, bool, float, int) -> pResultSet
     d = ora.dim()
 
@@ -1161,6 +1220,6 @@ def SearchND(ora,
     maxc = (max_corner,) * d
     xyspace = Rectangle(minc, maxc)
 
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level)
+    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
     rs.simplify()
     return rs

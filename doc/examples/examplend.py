@@ -18,4 +18,5 @@ rs = SearchND(ora=oracle,
               max_step=STEPS,
               blocking=False,
               sleep=0,
-              opt_level=0)
+              opt_level=0,
+              logging=True)
