@@ -368,7 +368,7 @@ class ResultSet:
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
-        ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front, Parameters: (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
@@ -425,11 +425,11 @@ class ResultSet:
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
-        ax1.set_title('Approximation of the Pareto front (x,y): (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.20)
+        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.2)
 
         pathpatch = pathpatch_border
         pathpatch += pathpatch_ylow
@@ -504,8 +504,7 @@ class ResultSet:
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        ax1.set_title('Approximation of the Pareto front (x,y,z): ('
-                      + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
@@ -566,8 +565,7 @@ class ResultSet:
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        ax1.set_title('Approximation of the Pareto front (x,y,z): ('
-                      + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)

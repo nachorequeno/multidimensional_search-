@@ -66,7 +66,7 @@ def multidim_search(xspace,
                     sleep=0.0,
                     opt_level=2,
                     logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, int, bool) -> pResultSet
     md_search = [multidim_search_deep_first_opt_0,
                  multidim_search_deep_first_opt_1,
                  multidim_search_deep_first_opt_2]
