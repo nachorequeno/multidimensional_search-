@@ -29,7 +29,7 @@ def distance(x, xprime):
 
 
 # Hamming distance between two points
-def distanceHamming(x, xprime):
+def hamming_distance(x, xprime):
     # type: (tuple, tuple) -> float
     temp = subtract(x, xprime)
     _sum = reduce(lambda si, sj: abs(si) + abs(sj), temp)
@@ -78,12 +78,12 @@ def less_equal(x, xprime):
     return all(xi[0] <= xi[1] for xi in zip(x, xprime))
 
 
-def incomparable(x, xprime):
+def incomparables(x, xprime):
     # type: (tuple, tuple) -> bool
     return (not greater_equal(x, xprime)) and (not greater_equal(xprime, x))
 
 
-def max(x, xprime):
+def maximum(x, xprime):
     # type: (tuple, tuple) -> tuple
     if greater_equal(x, xprime):
         return x
@@ -91,7 +91,7 @@ def max(x, xprime):
         return xprime
 
 
-def min(x, xprime):
+def minimum(x, xprime):
     # type: (tuple, tuple) -> tuple
     if less_equal(x, xprime):
         return x
@@ -123,7 +123,7 @@ def select(x, xprime):
 
 
 # Integer to binary notation
-def int2binlist(x, pad=0):
+def int_to_bin_list(x, pad=0):
     # type: (int, int) -> list
     temp1 = [int(i) for i in bin(x)[2:]]
     pad_temp = pad if pad > 0 else len(temp1)
@@ -131,15 +131,17 @@ def int2binlist(x, pad=0):
     return temp2
 
 
-def int2bintuple(x, pad=0):
+def int_to_bin_tuple(x, pad=0):
     # type: (int, int) -> tuple
-    return tuple(int2binlist(x, pad))
+    return tuple(int_to_bin_list(x, pad))
+
 
 # Domination
 def dominates(x, xprime):
     # type: (tuple, tuple) -> bool
     return less_equal(x, xprime)
 
-def isdominated(x, xprime):
+
+def is_dominated(x, xprime):
     # type: (tuple, tuple) -> bool
     return less_equal(xprime, x)

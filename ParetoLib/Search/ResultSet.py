@@ -3,17 +3,15 @@ import sys
 import __builtin__
 import time
 import pickle
-from itertools import chain, combinations #combinations_with_replacement
+from itertools import chain, combinations  # combinations_with_replacement
 import zipfile
 import tempfile
-import shutil
+#import shutil
 
 import matplotlib.pyplot as plt
 
 from ParetoLib.Geometry.Rectangle import *
 
-
-# p = Pool(cpu_count())
 
 class ResultSet:
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
@@ -29,12 +27,12 @@ class ResultSet:
         self.filename_space = 'space'
 
     # Printers
-    def toStr(self):
+    def to_str(self):
         # type: (ResultSet) -> str
         # _string = "("
-        # for i, data in enumerate(self.l):
+        # for i, data in enumerate(self.low):
         #    _string += str(data)
-        #    if i != dim(self.l) - 1:
+        #    if i != dim(self.low) - 1:
         #        _string += ", "
         # _string += ")"
         _string = "<"
@@ -48,11 +46,11 @@ class ResultSet:
 
     def __repr__(self):
         # type: (ResultSet) -> str
-        return self.toStr()
+        return self.to_str()
 
     def __str__(self):
         # type: (ResultSet) -> str
-        return self.toStr()
+        return self.to_str()
 
     # Equality functions
     def __eq__(self, other):
@@ -72,21 +70,21 @@ class ResultSet:
         return hash((self.border, self.ylow, self.yup, self.xspace))
 
     # Vertex functions
-    def verticesYup(self):
+    def vertices_yup(self):
         # type: (ResultSet) -> set
         vertices_list = (rect.vertices() for rect in self.yup)
         vertices = set()
         vertices = vertices.union(*vertices_list)
         return vertices
 
-    def verticesYlow(self):
+    def vertices_ylow(self):
         # type: (ResultSet) -> set
         vertices_list = (rect.vertices() for rect in self.ylow)
         vertices = set()
         vertices = vertices.union(*vertices_list)
         return vertices
 
-    def verticesBorder(self):
+    def vertices_border(self):
         # type: (ResultSet) -> set
         vertices_list = (rect.vertices() for rect in self.border)
         vertices = set()
@@ -95,34 +93,33 @@ class ResultSet:
 
     def vertices(self):
         # type: (ResultSet) -> set
-        vertices = self.verticesYup()
-        vertices = vertices.union(self.verticesYlow())
-        vertices = vertices.union(self.verticesBorder())
+        vertices = self.vertices_yup()
+        vertices = vertices.union(self.vertices_ylow())
+        vertices = vertices.union(self.vertices_border())
         return vertices
-
 
     # Simplification functions
     def simplify(self):
         # type: (ResultSet) -> None
-        self.fusionRectanglesBorder()
-        self.fusionRectanglesYlow()
-        self.fusionRectanglesYup()
+        self.fusion_rectangles_border()
+        self.fusion_rectangles_ylow()
+        self.fusion_rectangles_yup()
 
-    def fusionRectanglesYup(self):
+    def fusion_rectangles_yup(self):
         # type: (ResultSet) -> None
         len_before = float("inf")
         len_after = len(self.yup)
         while len_before > len_after:
-            #len_before = len(self.yup)
+            # len_before = len(self.yup)
             len_before = len_after
             for rect1 in self.yup:
                 for rect2 in self.yup:
-                    if rect1.isconcatenable(rect2):
+                    if rect1.is_concatenable(rect2):
                         rect1.concatenate_update(rect2)
                         self.yup.remove(rect2)
             len_after = len(self.yup)
 
-    def fusionRectanglesYlow(self):
+    def fusion_rectangles_ylow(self):
         # type: (ResultSet) -> None
         len_before = float("inf")
         len_after = len(self.ylow)
@@ -130,12 +127,12 @@ class ResultSet:
             len_before = len_after
             for rect1 in self.ylow:
                 for rect2 in self.ylow:
-                    if rect1.isconcatenable(rect2):
+                    if rect1.is_concatenable(rect2):
                         rect1.concatenate_update(rect2)
                         self.ylow.remove(rect2)
             len_after = len(self.ylow)
 
-    def fusionRectanglesBorder(self):
+    def fusion_rectangles_border(self):
         # type: (ResultSet) -> None
         len_before = float("inf")
         len_after = len(self.border)
@@ -143,130 +140,134 @@ class ResultSet:
             len_before = len_after
             for rect1 in self.border:
                 for rect2 in self.border:
-                    if rect1.isconcatenable(rect2):
+                    if rect1.is_concatenable(rect2):
                         rect1.concatenate_update(rect2)
                         self.border.remove(rect2)
             len_after = len(self.border)
 
     # Volume functions
-    def _overlappingVolume(self, pairs_of_rect):
-        # type: (ResultSet, iter) -> float
+    @staticmethod
+    def _overlapping_volume(pairs_of_rect):
+        # type: (iter) -> float
         # remove pairs (recti, recti) from previous list
-        #pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
-        #overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
+        # pairs_of_rect_filt = (pair for pair in pairs_of_rect if pair[0] != pair[1])
+        # overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect_filt)
         overlapping_rect = (r1.intersection(r2) for (r1, r2) in pairs_of_rect if r1.overlaps(r2))
         vol_overlapping_rect = (rect.volume() for rect in overlapping_rect)
         return sum(vol_overlapping_rect)
 
-    def overlappingVolumeYup(self):
+    def overlapping_volume_yup(self):
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        #pairs_of_rect = combinations_with_replacement(self.yup, 2)
+        # pairs_of_rect = combinations_with_replacement(self.yup, 2)
         pairs_of_rect = combinations(self.yup, 2)
-        return self._overlappingVolume(pairs_of_rect)
+        # return self._overlapping_volume(pairs_of_rect)
+        return ResultSet._overlapping_volume(pairs_of_rect)
 
-    def overlappingVolumeYlow(self):
+    def overlapping_volume_ylow(self):
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        #pairs_of_rect = combinations_with_replacement(self.ylow, 2)
+        # pairs_of_rect = combinations_with_replacement(self.ylow, 2)
         pairs_of_rect = combinations(self.ylow, 2)
-        return self._overlappingVolume(pairs_of_rect)
+        # return self._overlapping_volume(pairs_of_rect)
+        return ResultSet._overlapping_volume(pairs_of_rect)
 
-    def overlappingVolumeBorder(self):
+    def overlapping_volume_border(self):
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        #pairs_of_rect = combinations_with_replacement(self.border, 2)
+        # pairs_of_rect = combinations_with_replacement(self.border, 2)
         pairs_of_rect = combinations(self.border, 2)
-        return self._overlappingVolume(pairs_of_rect)
+        # return self._overlapping_volume(pairs_of_rect)
+        return ResultSet._overlapping_volume(pairs_of_rect)
 
-    def volumeYup(self):
+    def volume_yup(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.yup)
         # vol_list = [rect.volume() for rect in self.yup]
         vol_list = (rect.volume() for rect in self.yup)
         return sum(vol_list)
 
-    def volumeYlow(self):
+    def volume_ylow(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.ylow)
         # vol_list = [rect.volume() for rect in self.ylow]
         vol_list = (rect.volume() for rect in self.ylow)
         return sum(vol_list)
 
-    def volumeBorder(self):
+    def volume_border(self):
         # type: (ResultSet) -> float
         vol_total = self.xspace.volume()
-        vol_ylow = self.volumeYlow()
-        vol_yup = self.volumeYup()
+        vol_ylow = self.volume_ylow()
+        vol_yup = self.volume_yup()
         return vol_total - vol_ylow - vol_yup
 
     # By construction, overlapping of rectangles only happens in the boundary
-    def volumeBorderExact(self):
+    def volume_border_exact(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.border)
         # vol_list = [rect.volume() for rect in self.border]
         vol_list = (rect.volume() for rect in self.border)
-        return sum(vol_list) - self.overlappingVolumeBorder()
+        return sum(vol_list) - self.overlapping_volume_border()
 
-    def volumeTotal(self):
+    def volume_total(self):
         # type: (ResultSet) -> float
         vol_total = self.xspace.volume()
         return vol_total
 
-    def volumeTotalExact(self):
+    def volume_total_exact(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.border)
-        vol_total = self.volumeYlow() + self.volumeYup() + self.volumeBorderExact()
+        vol_total = self.volume_ylow() + self.volume_yup() + self.volume_border_exact()
         return vol_total
 
-    def volumeReport(self):
+    def volume_report(self):
         # type: (ResultSet) -> str
         vol_report = ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
                       % (
-                          str(self.volumeYlow()), str(self.volumeYup()), str(self.volumeBorder()),
-                          str(self.volumeTotal())))
+                          str(self.volume_ylow()), str(self.volume_yup()), str(self.volume_border()),
+                          str(self.volume_total())))
         return vol_report
 
     # Membership functions
     def __contains__(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         # xpoint is inside the upper/lower closure or in the border
-        return self.memberBorder(xpoint) or \
-               self.memberYlow(xpoint) or \
-               self.memberYup(xpoint)
+        return self.member_border(xpoint) or \
+               self.member_ylow(xpoint) or \
+               self.member_yup(xpoint)
 
-    def memberYup(self, xpoint):
+    def member_yup(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.yup)
         # return any(isMember)
-        return any(isMember) and not self.memberBorder(xpoint)
+        return any(isMember) and not self.member_border(xpoint)
 
-    def memberYlow(self, xpoint):
+    def member_ylow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.ylow)
-        #return any(isMember)
-        return any(isMember) and not self.memberBorder(xpoint)
+        # return any(isMember)
+        return any(isMember) and not self.member_border(xpoint)
 
-    def memberBorder(self, xpoint):
+    def member_border(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.border)
         return any(isMember)
 
-    def memberSpace(self, xpoint):
+    def member_space(self, xpoint):
         # type: (ResultSet, tuple) -> bool
-        #return xpoint in self.xspace
+        # return xpoint in self.xspace
         return self.xspace.inside(xpoint)
 
     # Points of closure
-    def getPointsYup(self, n):
+    def get_points_yup(self, n):
         # type: (ResultSet, int) -> list
         m = n / len(self.yup)
         m = 1 if m < 1 else m
-        # point_list = [rect.getPoints(m) for rect in self.yup]
-        point_list = (rect.getPoints(m) for rect in self.yup)
+        # point_list = [rect.get_points(m) for rect in self.yup]
+        point_list = (rect.get_points(m) for rect in self.yup)
         # Flatten list
         # Before
         # point_list = [ [] , [], ..., [] ]
@@ -275,203 +276,87 @@ class ResultSet:
         merged = list(chain.from_iterable(point_list))
         return merged
 
-    def getPointsYlow(self, n):
+    def get_points_ylow(self, n):
         # type: (ResultSet, int) -> list
         m = n / len(self.ylow)
         m = 1 if m < 1 else m
-        #point_list = [rect.getPoints(m) for rect in self.ylow]
-        point_list = (rect.getPoints(m) for rect in self.ylow)
+        # point_list = [rect.get_points(m) for rect in self.ylow]
+        point_list = (rect.get_points(m) for rect in self.ylow)
         merged = list(chain.from_iterable(point_list))
         return merged
 
-    def getPointsBorder(self, n):
+    def get_points_border(self, n):
         # type: (ResultSet, int) -> list
         m = n / len(self.border)
         m = 1 if m < 1 else m
-        # point_list = [rect.getPoints(m) for rect in self.border]
-        point_list = (rect.getPoints(m) for rect in self.border)
+        # point_list = [rect.get_points(m) for rect in self.border]
+        point_list = (rect.get_points(m) for rect in self.border)
         merged = list(chain.from_iterable(point_list))
         return merged
 
-    def getPointsSpace(self, n):
+    def get_points_space(self, n):
         # type: (ResultSet, int) -> list
-        return self.xspace.getPoints(n)
+        return self.xspace.get_points(n)
 
     # Maximum/minimum values for each parameter
-    def getMinValDimensionYup(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMinValDimensionRectList(i, self.yup)
-
-    def getMinValDimensionYlow(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMinValDimensionRectList(i, self.ylow)
-
-    def getMinValDimensionBorder(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMinValDimensionRectList(i, self.border)
-
-    def getMaxValDimensionYup(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMaxValDimensionRectList(i, self.yup)
-
-    def getMaxValDimensionYlow(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMaxValDimensionRectList(i, self.ylow)
-
-    def getMaxValDimensionBorder(self, i):
-        # type: (ResultSet, int) -> float
-        return self._getMaxValDimensionRectList(i, self.border)
-
-    def _getMinValDimensionRectList(self, i, rect_list):
-        # type: (ResultSet, int, list) -> float
+    @staticmethod
+    def _get_min_val_dimension_rect_list(i, rect_list):
+        # type: (int, list) -> float
         min_cs = (rect.min_corner for rect in rect_list)
         mc_i = (mc[i] for mc in min_cs)
         return __builtin__.min(mc_i)
 
-    def _getMaxValDimensionRectList(self, i, rect_list):
-        # type: (ResultSet, int, list) -> float
+    def get_min_val_dimension_yup(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_min_val_dimension_rect_list(i, self.yup)
+
+    def get_min_val_dimension_ylow(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_min_val_dimension_rect_list(i, self.ylow)
+
+    def get_min_val_dimension_border(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_min_val_dimension_rect_list(i, self.border)
+
+    @staticmethod
+    def _get_max_val_dimension_rect_list(i, rect_list):
+        # type: (int, list) -> float
         max_cs = (rect.max_corner for rect in rect_list)
         mc_i = (mc[i] for mc in max_cs)
         return __builtin__.max(mc_i)
 
+    def get_max_val_dimension_yup(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_max_val_dimension_rect_list(i, self.yup)
+
+    def get_max_val_dimension_ylow(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_max_val_dimension_rect_list(i, self.ylow)
+
+    def get_max_val_dimension_border(self, i):
+        # type: (ResultSet, int) -> float
+        return ResultSet._get_max_val_dimension_rect_list(i, self.border)
+
     # MatPlot Graphics
     def toMatPlotSpace2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = [self.xspace.toMatplot2D('blue', xaxe, yaxe, opacity)]
-        return patches
+        patch = [self.xspace.toMatplot2D('blue', xaxe, yaxe, opacity)]
+        return patch
 
     def toMatPlotYup2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = [rect.toMatplot2D('green', xaxe, yaxe, opacity) for rect in self.yup]
-        return patches
+        patch = [rect.toMatplot2D('green', xaxe, yaxe, opacity) for rect in self.yup]
+        return patch
 
     def toMatPlotYlow2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = [rect.toMatplot2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
-        return patches
+        patch = [rect.toMatplot2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
+        return patch
 
     def toMatPlotBorder2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patches = [rect.toMatplot2D('blue', xaxe, yaxe, opacity) for rect in self.border]
-        return patches
-
-    def toMatPlot2D2(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    targetx=list(),
-                    targety=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
-        fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal')
-        ax1 = fig1.add_subplot(111)
-        ax1.set_title('Approximation of the Pareto front, Parameters: (' + str(xaxe) + ', ' + str(yaxe) + ')')
-
-        #ax1.set_xlabel(xlabel)
-        #ax1.set_ylabel(ylabel)
-
-
-        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotBorder2D(xaxe, yaxe, opacity)
-
-        pathpatch = pathpatch_yup
-        pathpatch += pathpatch_ylow
-        pathpatch += pathpatch_border
-
-        for pathpatch_i in pathpatch:
-            ax1.add_patch(pathpatch_i)
-
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
-
-        plt.plot(targetx, targety, 'kp')
-        #ax1.scatter(targetx, targety, c='k')
-        #ax1.autoscale_view()
-
-        #
-        fig1.tight_layout()
-        plt.tight_layout()
-        #
-
-        # plt.autoscale()
-        plt.xscale('linear')
-        plt.yscale('linear')
-
-        plt.show(block=blocking)
-        time.sleep(sec)
-
-        if filename != '':
-            fig1.savefig(filename, dpi=90, bbox_inches='tight')
-
-        plt.close()
-        return plt
-
-    def toMatPlot2DLight2(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    targetx=list(),
-                    targety=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
-        fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal')
-        ax1 = fig1.add_subplot(111)
-        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
-
-        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.2)
-
-        pathpatch = pathpatch_border
-        pathpatch += pathpatch_ylow
-        pathpatch += pathpatch_yup
-
-        for pathpatch_i in pathpatch:
-            ax1.add_patch(pathpatch_i)
-
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
-
-        plt.plot(targetx, targety, 'kp')
-        #ax1.scatter(targetx, targety,  c='k')
-        #ax1.autoscale_view()
-
-        #
-        fig1.tight_layout()
-        plt.tight_layout()
-        #
-
-        # plt.autoscale()
-        plt.xscale('linear')
-        plt.yscale('linear')
-
-        plt.show(block=blocking)
-        time.sleep(sec)
-
-        if filename != '':
-            fig1.savefig(filename, dpi=90, bbox_inches='tight')
-
-        plt.close()
-        return plt
+        patch = [rect.toMatplot2D('blue', xaxe, yaxe, opacity) for rect in self.border]
+        return patch
 
     def toMatPlot2D(self,
                     filename='',
@@ -485,20 +370,18 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal')
+        # ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
-        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        # ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
         ax1.set_title('Approximation of the Pareto front')
 
         # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 2 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
-
-
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
@@ -521,8 +404,8 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
 
         plt.plot(targetx, targety, 'kp')
-        #ax1.scatter(targetx, targety, c='k')
-        #ax1.autoscale_view()
+        # ax1.scatter(targetx, targety, c='k')
+        # ax1.autoscale_view()
 
         #
         fig1.tight_layout()
@@ -543,28 +426,28 @@ class ResultSet:
         return plt
 
     def toMatPlot2DLight(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    var_names = list(),
-                    targetx=list(),
-                    targety=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
+                         filename='',
+                         xaxe=0,
+                         yaxe=1,
+                         var_names=list(),
+                         targetx=list(),
+                         targety=list(),
+                         blocking=False,
+                         sec=0.0,
+                         opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
 
         fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal')
+        # ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
-        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        # ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
         ax1.set_title('Approximation of the Pareto front')
 
         # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 2 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
@@ -589,8 +472,8 @@ class ResultSet:
         targety += [__builtin__.min(ys), __builtin__.max(ys)]
 
         plt.plot(targetx, targety, 'kp')
-        #ax1.scatter(targetx, targety,  c='k')
-        #ax1.autoscale_view()
+        # ax1.scatter(targetx, targety,  c='k')
+        # ax1.autoscale_view()
 
         #
         fig1.tight_layout()
@@ -644,20 +527,18 @@ class ResultSet:
                     opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
         ax1.set_title('Approximation of the Pareto front')
 
         # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 3 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
-
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
@@ -682,18 +563,18 @@ class ResultSet:
         targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
         plt.plot(targetx, targety, targetz, 'kp')
-        #ax1.scatter(targetx, targety, targetz, c='k')
-        #ax1.autoscale_view()
+        # ax1.scatter(targetx, targety, targetz, c='k')
+        # ax1.autoscale_view()
 
         #
         fig1.tight_layout()
         plt.tight_layout()
         #
 
-        #plt.autoscale()
+        # plt.autoscale()
         plt.xscale('linear')
         plt.yscale('linear')
-        #plt.zscale('linear')
+        # plt.zscale('linear')
 
         plt.show(block=blocking)
         time.sleep(sec)
@@ -704,29 +585,28 @@ class ResultSet:
         return plt
 
     def toMatPlot3DLight(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    zaxe=2,
-                    var_names=list(),
-                    targetx=list(),
-                    targety=list(),
-                    targetz=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
+                         filename='',
+                         xaxe=0,
+                         yaxe=1,
+                         zaxe=2,
+                         var_names=list(),
+                         targetx=list(),
+                         targety=list(),
+                         targetz=list(),
+                         blocking=False,
+                         sec=0.0,
+                         opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
-        #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
         ax1.set_title('Approximation of the Pareto front')
 
         # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 3 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
@@ -754,8 +634,8 @@ class ResultSet:
         targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
         plt.plot(targetx, targety, targetz, 'kp')
-        #ax1.scatter(targetx, targety, targetz, c='k')
-        #ax1.autoscale_view()
+        # ax1.scatter(targetx, targety, targetz, c='k')
+        # ax1.autoscale_view()
 
         #
         fig1.tight_layout()
@@ -765,7 +645,7 @@ class ResultSet:
         # plt.autoscale()
         plt.xscale('linear')
         plt.yscale('linear')
-        #plt.zscale('linear')
+        # plt.zscale('linear')
 
         plt.show(block=blocking)
         time.sleep(sec)
@@ -774,7 +654,6 @@ class ResultSet:
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
         plt.close()
         return plt
-
 
     # Saving/loading results
     def toFileYup(self, f):
@@ -799,12 +678,13 @@ class ResultSet:
 
     def toFile(self, f):
         # type: (ResultSet, str) -> None
-        #fname = os.path.basename(f)
-        #name = os.path.splitext(fname)
+        # fname = os.path.basename(f)
+        # name = os.path.splitext(fname)
         ## ('file', '.ext')
-        #basename = name[0]
-        #extension = name[1]
+        # basename = name[0]
+        # extension = name[1]
 
+        # Save each closure into a separated file, and, then, compress them in a single .zip
         tempdir = tempfile.mkdtemp()
 
         yup_name = os.path.join(tempdir, self.filename_yup)
@@ -819,19 +699,19 @@ class ResultSet:
 
         filename_list = (yup_name, ylow_name, border_name, space_name)
         zf = zipfile.ZipFile(f, mode='w', compression=zipfile.ZIP_DEFLATED)
-        for file in filename_list:
+        for outfile in filename_list:
             try:
-                fname = os.path.basename(file)
+                fname = os.path.basename(outfile)
                 # Adding new file to the .zip
-                zf.write(file, arcname=fname)
-            except:
-                print "Unexpected error when saving %s: %s" % (file, sys.exc_info()[0])
-            os.remove(file)
+                zf.write(outfile, arcname=fname)
+            except OSError:
+                print "Unexpected error when saving %s: %s" % (outfile, sys.exc_info()[0])
+            os.remove(outfile)
         zf.close()
 
         # Remove temporary folder
         os.rmdir(tempdir)
-        #shutil.rmtree(tempdir, ignore_errors=True)
+        # shutil.rmtree(tempdir, ignore_errors=True)
 
     def fromFileYup(self, f):
         # type: (ResultSet, str) -> None
@@ -865,6 +745,8 @@ class ResultSet:
         # basename = name[0]
         # extension = name[1]
 
+        # Extracts all the files into a temporal folder.
+        # Each file contains a closure.
         tempdir = tempfile.mkdtemp()
 
         zf = zipfile.ZipFile(f, mode='r')
@@ -885,12 +767,17 @@ class ResultSet:
         self.fromFileBorder(border_name)
         self.fromFileSpace(space_name)
 
+        # Remove temporal files before removing the temporary folder
         filename_list = (yup_name, ylow_name, border_name, space_name)
-        for file in filename_list:
-            try:
-                os.remove(file)
-            except:
-                print "Unexpected error when removing %s: %s" % (file, sys.exc_info()[0])
+        for infile in filename_list:
+            if os.path.exists(infile):
+                try:
+                    os.remove(infile)
+                except OSError:
+                    print "Unexpected error when removing %s: %s" % (infile, sys.exc_info()[0])
 
         # Remove temporary folder
-        os.rmdir(tempdir)
+        try:
+            os.rmdir(tempdir)
+        except OSError:
+            print "Unexpected error when removing folder %s: %s" % (tempdir, sys.exc_info()[0])

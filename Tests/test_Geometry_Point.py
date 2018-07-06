@@ -12,10 +12,10 @@ class PointTestCase(unittest.TestCase):
     REP = 100
 
     def setUp(self):
-        None
+        pass
 
     def tearDown(self):
-        None
+        pass
 
     def time_for_n_iterations(self, f, l):
         start = time.time()
@@ -35,7 +35,7 @@ class PointTestCase(unittest.TestCase):
         print("Point (tuple)")
         self.time_for_n_iterations(lambda z: p.norm(x), rep)
         self.time_for_n_iterations(lambda z: p.distance(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: p.distanceHamming(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.hamming_distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.subtract(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.add(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.mult(x, 2), rep)
@@ -44,13 +44,13 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.greater_equal(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.less(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.less_equal(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: p.max(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: p.min(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.maximum(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.minimum(x, xprime), rep)
 
         print("Point (numpy)")
         self.time_for_n_iterations(lambda z: pp.norm(x), rep)
         self.time_for_n_iterations(lambda z: pp.distance(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: pp.distanceHamming(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.hamming_distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.subtract(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.add(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.mult(x, 2), rep)
@@ -59,8 +59,8 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: pp.greater_equal(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.less(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.less_equal(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: pp.max(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: pp.min(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.maximum(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.minimum(x, xprime), rep)
 
     def operation_correctness(self, dim=DIM):
         xxprime = np.random.rand(2, dim)
@@ -70,7 +70,7 @@ class PointTestCase(unittest.TestCase):
 
         self.assertEqual(p.norm(x), pp.norm(x))
         self.assertEqual(p.distance(x, xprime), pp.distance(x, xprime))
-        self.assertEqual(p.distanceHamming(x, xprime), pp.distanceHamming(x, xprime))
+        self.assertEqual(p.hamming_distance(x, xprime), pp.hamming_distance(x, xprime))
         self.assertEqual(p.subtract(x, xprime), pp.subtract(x, xprime))
         self.assertEqual(p.add(x, xprime), pp.add(x, xprime))
         self.assertEqual(p.mult(x, 2), pp.mult(x, 2))
@@ -79,8 +79,8 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(p.greater_equal(x, xprime), pp.greater_equal(x, xprime))
         self.assertEqual(p.less(x, xprime), pp.less(x, xprime))
         self.assertEqual(p.less_equal(x, xprime), pp.less_equal(x, xprime))
-        self.assertEqual(p.max(x, xprime), pp.max(x, xprime))
-        self.assertEqual(p.min(x, xprime), pp.min(x, xprime))
+        self.assertEqual(p.maximum(x, xprime), pp.maximum(x, xprime))
+        self.assertEqual(p.minimum(x, xprime), pp.minimum(x, xprime))
 
     def test_point_operations_performance(self):
         for dim in range(2, 10):

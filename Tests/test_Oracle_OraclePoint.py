@@ -50,29 +50,29 @@ class OraclePointTestCase(unittest.TestCase):
 
         for x, y in zip(xs, y3s):
             point = (x, y)
-            ND1.updatePoint(point)
-            ND2.updatePoint(point)
+            ND1.update_point(point)
+            ND2.update_point(point)
 
         self.assertEqual(ND1, ND2)
 
         # ND1 should remain constant when we insert the same point twice
         for x, y in zip(xs, y3s):
             point = (x, y)
-            ND1.updatePoint(point)
+            ND1.update_point(point)
 
         self.assertEqual(ND1, ND2)
 
         # ND1 should change when we insert new dominanting points
         for x, y in zip(xs, y2s):
             point = (x, y)
-            ND1.updatePoint(point)
+            ND1.update_point(point)
 
         self.assertNotEqual(ND1, ND2)
 
         # ND1 should change when we insert new dominanting points
         for x, y in zip(xs, y1s):
             point = (x, y)
-            ND1.updatePoint(point)
+            ND1.update_point(point)
 
         self.assertNotEqual(ND1, ND2)
 
@@ -81,7 +81,7 @@ class OraclePointTestCase(unittest.TestCase):
         # ND1 should remain constant when we insert dominated points
         for x, y in zip(xs, y3s):
             point = (x, y)
-            ND1.updatePoint(point)
+            ND1.update_point(point)
 
         self.assertEqual(ND1, oldND1)
         self.assertNotEqual(ND1, ND2)
@@ -122,10 +122,10 @@ class OraclePointTestCase(unittest.TestCase):
         ora1 = OraclePoint()
         for x, y in zip(xs, y1s):
             point = (x, y)
-            ora1.addPoint(point)
+            ora1.add_point(point)
 
         ora2 = OraclePoint()
-        ora2.addPoints(set(p1))
+        ora2.add_points(set(p1))
 
         self.assertEqual(ora1, ora2)
 

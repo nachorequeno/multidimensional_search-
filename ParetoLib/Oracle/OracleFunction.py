@@ -1,5 +1,6 @@
 import re
 import pickle
+import io
 
 from sortedcontainers import SortedSet
 from sympy import simplify, expand, default_sort_key, Expr, Symbol
@@ -19,7 +20,7 @@ class Condition:
     # inequality = (sympy.Poly(f - g), op)
 
     def __init__(self, f='x', op='==', g='0'):
-        # type: (_, str, str, str) -> None
+        # type: (Condition, str, str, str) -> None
         self.comparison = ['==', '>', '<', '>=', '<=', '<>']
         assert (op in self.comparison), "Operator " + op + " must be any of: {'>', '>=', '<', '<=', '==', '!='}"
         assert (not f.isdigit() or not g.isdigit()), \
@@ -32,7 +33,7 @@ class Condition:
             eprint("WARNING! Expression '%s' contains negative coefficients: %s"
                    % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
-    def initFromString(self, poly_function):
+    def init_from_string(self, poly_function):
         # op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         # f_regex = r'(\s*\w\s*)+'
         # g_regex = r'(\s*\w\s*)+'
@@ -60,13 +61,13 @@ class Condition:
     # Printers
     def __repr__(self):
         # type: (Condition) -> str
-        return self.toStr()
+        return self.to_str()
 
     def __str__(self):
         # type: (Condition) -> str
-        return self.toStr()
+        return self.to_str()
 
-    def toStr(self):
+    def to_str(self):
         # type: (Condition) -> str
         return str(self.f) + self.op + str(self.g)
 
@@ -128,14 +129,14 @@ class Condition:
     def get_expression_with_negative_coeff(self):
         # type: (Condition) -> Expr
         negative_coeff = self.get_negative_coeff_of_expression()
-        l = ['%s * %s' % (negative_coeff[i], i) for i in negative_coeff]
-        return simplify(''.join(l))
+        neg_expr = ['%s * %s' % (negative_coeff[i], i) for i in negative_coeff]
+        return simplify(''.join(neg_expr))
 
     def get_expression_with_positive_coeff(self):
         # type: (Condition) -> Expr
         positive_coeff = self.get_positive_coeff_of_expression()
-        l = ['%s * %s' % (positive_coeff[i], i) for i in positive_coeff]
-        return simplify('+'.join(l))
+        pos_expr = ['%s * %s' % (positive_coeff[i], i) for i in positive_coeff]
+        return simplify('+'.join(pos_expr))
 
     def get_expression(self):
         # type: (Condition) -> Expr
@@ -220,7 +221,7 @@ class Condition:
         finput.close()
 
     def fromFileNonHumRead(self, finput=None):
-        # type: (Condition, BinaryIO) -> None
+        # type: (Condition, io.BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         self.f = pickle.load(finput)
@@ -228,11 +229,11 @@ class Condition:
         self.g = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (Condition, BinaryIO) -> None
+        # type: (Condition, io.BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         poly_function = finput.readline()
-        self.initFromString(poly_function)
+        self.init_from_string(poly_function)
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (Condition, str, bool, bool) -> None
@@ -251,7 +252,7 @@ class Condition:
         foutput.close()
 
     def toFileNonHumRead(self, foutput=None):
-        # type: (Condition, BinaryIO) -> None
+        # type: (Condition, io.BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         pickle.dump(self.f, foutput, pickle.HIGHEST_PROTOCOL)
@@ -259,7 +260,7 @@ class Condition:
         pickle.dump(self.g, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
-        # type: (Condition, BinaryIO) -> None
+        # type: (Condition, io.BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         # str(self.f) + self.op + str(self.g)
@@ -280,13 +281,13 @@ class OracleFunction(Oracle):
     # Printers
     def __repr__(self):
         # type: (OracleFunction) -> str
-        return self.toStr()
+        return self.to_str()
 
     def __str__(self):
         # type: (OracleFunction) -> str
-        return self.toStr()
+        return self.to_str()
 
-    def toStr(self):
+    def to_str(self):
         # type: (OracleFunction) -> str
         return str(self.oracle)
 
@@ -353,7 +354,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.toStr(), ' to ', str(_eval))
+        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
@@ -363,7 +364,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.toStr(), ' to ', str(_eval))
+        vprint('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     # Membership functions
@@ -414,20 +415,20 @@ class OracleFunction(Oracle):
         finput.close()
 
     def fromFileNonHumRead(self, finput=None):
-        # type: (OracleFunction, BinaryIO) -> None
+        # type: (OracleFunction, io.BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         self.oracle = pickle.load(finput)
         self.variables = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (OracleFunction, BinaryIO) -> None
+        # type: (OracleFunction, io.BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
 
         # Each line has a Condition
         for line in finput:
             cond = Condition()
-            cond.initFromString(line)
+            cond.init_from_string(line)
             self.add(cond)
 
     def toFile(self, fname='', append=False, human_readable=False):
@@ -447,14 +448,14 @@ class OracleFunction(Oracle):
         foutput.close()
 
     def toFileNonHumRead(self, foutput=None):
-        # type: (OracleFunction, BinaryIO) -> None
+        # type: (OracleFunction, io.BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.variables, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
-        # type: (OracleFunction, BinaryIO) -> None
+        # type: (OracleFunction, io.BinaryIO) -> None
         assert (foutput is not None), "File object should not be null"
 
         # Each line has a Condition

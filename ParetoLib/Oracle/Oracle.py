@@ -1,10 +1,13 @@
+import io
+
+
 # Oracle template
 
 class Oracle:
 
     # Dimension = [0,..,n-1]
     def __init__(self):
-        None
+        pass
 
     # Printers
     def __repr__(self):
@@ -66,12 +69,12 @@ class Oracle:
         finput.close()
 
     def fromFileNonHumRead(self, finput=None):
-        # type: (Oracle, BinaryIO) -> None
-        return None
+        # type: (Oracle, io.BinaryIO) -> None
+        pass
 
     def fromFileHumRead(self, finput=None):
-        # type: (Oracle, BinaryIO) -> None
-        return None
+        # type: (Oracle, io.BinaryIO) -> None
+        pass
 
     def toFile(self, fname='', append=False, human_readable=False):
         # type: (Oracle, str, bool, bool) -> None
@@ -90,9 +93,9 @@ class Oracle:
         foutput.close()
 
     def toFileNonHumRead(self, foutput=None):
-        # type: (Oracle, BinaryIO) -> None
-        return None
+        # type: (Oracle, io.BinaryIO) -> None
+        pass
 
     def toFileHumRead(self, foutput=None):
-        # type: (Oracle, BinaryIO) -> None
-        return None
+        # type: (Oracle, io.BinaryIO) -> None
+        pass

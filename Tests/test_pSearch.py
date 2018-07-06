@@ -18,14 +18,14 @@ class SearchTestCase(unittest.TestCase):
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def _closureMembershipTest(self, fora, rs, xpoint):
-        test1 = fora(xpoint) and (rs.memberYup(xpoint) or rs.memberBorder(xpoint))
-        test2 = (not fora(xpoint)) and (rs.memberYlow(xpoint) or rs.memberBorder(xpoint))
+        test1 = fora(xpoint) and (rs.member_yup(xpoint) or rs.member_border(xpoint))
+        test2 = (not fora(xpoint)) and (rs.member_ylow(xpoint) or rs.member_border(xpoint))
 
         vprint_string = 'Warning!\n'
         vprint_string += 'Testing ', str(xpoint)
         vprint_string += '(inYup, inYlow, inBorder): (%s, %s, %s)' \
-                         % (str(rs.memberYup(xpoint)), str(rs.memberYlow(xpoint)),
-                            str(rs.memberBorder(xpoint)))
+                         % (str(rs.member_yup(xpoint)), str(rs.member_ylow(xpoint)),
+                            str(rs.member_border(xpoint)))
         vprint_string += 'Expecting\n'
         vprint_string += '(inYup, inYlow): (%s, %s)' \
                          % (str(fora(xpoint)), str(not fora(xpoint)))
@@ -56,19 +56,19 @@ class SearchTestCase(unittest.TestCase):
         for t1p in t1:
             for t2p in t2:
                 xpoint = (t1p, t2p)
-                testYup = testYup or rs.memberYup(xpoint)
-                testYlow = testYlow or rs.memberYlow(xpoint)
-                testBorder = testBorder or rs.memberBorder(xpoint)
+                testYup = testYup or rs.member_yup(xpoint)
+                testYlow = testYlow or rs.member_ylow(xpoint)
+                testBorder = testBorder or rs.member_border(xpoint)
 
-                nYup = nYup + 1 if rs.memberYup(xpoint) else nYup
-                nYlow = nYlow + 1 if rs.memberYlow(xpoint) else nYlow
-                nBorder = nBorder + 1 if rs.memberBorder(xpoint) else nBorder
+                nYup = nYup + 1 if rs.member_yup(xpoint) else nYup
+                nYlow = nYlow + 1 if rs.member_ylow(xpoint) else nYlow
+                nBorder = nBorder + 1 if rs.member_border(xpoint) else nBorder
 
                 self._closureMembershipTest(fora, rs, xpoint)
         end = time.time()
         time0 = end - start
 
-        print (rs.volumeReport())
+        print (rs.volume_report())
         print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
         print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
         print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
@@ -102,19 +102,19 @@ class SearchTestCase(unittest.TestCase):
             for t2p in t2:
                 for t3p in t3:
                     xpoint = (t1p, t2p, t3p)
-                    testYup = testYup or rs.memberYup(xpoint)
-                    testYlow = testYlow or rs.memberYlow(xpoint)
-                    testBorder = testBorder or rs.memberBorder(xpoint)
+                    testYup = testYup or rs.member_yup(xpoint)
+                    testYlow = testYlow or rs.member_ylow(xpoint)
+                    testBorder = testBorder or rs.member_border(xpoint)
 
-                    nYup = nYup + 1 if rs.memberYup(xpoint) else nYup
-                    nYlow = nYlow + 1 if rs.memberYlow(xpoint) else nYlow
-                    nBorder = nBorder + 1 if rs.memberBorder(xpoint) else nBorder
+                    nYup = nYup + 1 if rs.member_yup(xpoint) else nYup
+                    nYlow = nYlow + 1 if rs.member_ylow(xpoint) else nYlow
+                    nBorder = nBorder + 1 if rs.member_border(xpoint) else nBorder
 
                     self._closureMembershipTest(fora, rs, xpoint)
         end = time.time()
         time0 = end - start
 
-        print (rs.volumeReport())
+        print (rs.volume_report())
         print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
         print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
         print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
@@ -129,9 +129,9 @@ class SearchTestCase(unittest.TestCase):
 
         print ('Starting tests\n')
         start = time.time()
-        f1 = lambda p: 1 if rs.memberYup(p) else 0
-        f2 = lambda p: 1 if rs.memberYlow(p) else 0
-        f3 = lambda p: 1 if rs.memberBorder(p) else 0
+        f1 = lambda p: 1 if rs.member_yup(p) else 0
+        f2 = lambda p: 1 if rs.member_ylow(p) else 0
+        f3 = lambda p: 1 if rs.member_border(p) else 0
 
         list_nYup = map(f1, list_test_points)
         list_nYlow = map(f2, list_test_points)
@@ -146,7 +146,7 @@ class SearchTestCase(unittest.TestCase):
         end = time.time()
         time0 = end - start
 
-        print (rs.volumeReport())
+        print (rs.volume_report())
         print ('Report Ylow: %s' % (str(nYlow)))
         print ('Report Yup: %s' % (str(nYup)))
         print ('Report Border: %s' % (str(nBorder)))

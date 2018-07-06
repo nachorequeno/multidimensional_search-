@@ -22,6 +22,11 @@ if __verbose__:
         print >> sys.stderr
 
 else:
-    vprint = lambda *a: None  # do-nothing function
-    eprint = lambda *a: None  # do-nothing function
+    # do-nothing function
+    def vprint(*args):
+        pass
 
+
+    # do-nothing function
+    def eprint(*args):
+        pass

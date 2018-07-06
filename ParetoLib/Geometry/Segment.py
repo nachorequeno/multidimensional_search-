@@ -4,20 +4,20 @@ from ParetoLib.Geometry.Point import *
 class Segment:
     # l, h are points
     def __init__(self, low, high):
-        # type: (Segment, tuple, tuple) -> _
-        self.l = min(low, high)
-        self.h = max(low, high)
-        assert dim(self.l) == dim(self.h)
-        assert greater_equal(self.h, self.l)
+        # type: (Segment, tuple, tuple) -> None
+        self.low = minimum(low, high)
+        self.high = maximum(low, high)
+        assert dim(self.low) == dim(self.high)
+        assert greater_equal(self.high, self.low)
 
     # Membership function
     def __contains__(self, xpoint):
         # type: (Segment, tuple) -> bool
-        return (greater_equal(xpoint, self.l) and
-                less_equal(xpoint, self.h))
+        return (greater_equal(xpoint, self.low) and
+                less_equal(xpoint, self.high))
 
     # Printers
-    def toStr(self):
+    def to_str(self):
         # type: (Segment) -> str
         # _string = "("
         # for i, data in enumerate(self.l):
@@ -26,24 +26,24 @@ class Segment:
         #        _string += ", "
         # _string += ")"
         _string = "<"
-        _string += str(self.l)
+        _string += str(self.low)
         _string += ', '
-        _string += str(self.h)
+        _string += str(self.high)
         _string += ">"
         return _string
 
     def __repr__(self):
         # type: (Segment) -> str
-        return self.toStr()
+        return self.to_str()
 
     def __str__(self):
         # type: (Segment) -> str
-        return self.toStr()
+        return self.to_str()
 
     # Equality functions
     def __eq__(self, other):
         # type: (Segment) -> bool
-        return (other.l == self.l) and (other.h == self.h)
+        return (other.low == self.low) and (other.high == self.high)
 
     def __ne__(self, other):
         # type: (Segment) -> bool
@@ -52,17 +52,17 @@ class Segment:
     # Identity function (via hashing)
     def __hash__(self):
         # type: (Segment) -> float
-        return hash((self.l, self.h))
+        return hash((self.low, self.high))
 
     # Segment properties
     def dim(self):
         # type: (Segment) -> int
-        return dim(self.l)
+        return dim(self.low)
 
     # def __len__(self):
     def diag(self):
         # type: (Segment) -> tuple
-        return subtract(self.h, self.l)
+        return subtract(self.high, self.low)
 
     def norm(self):
         # type: (Segment) -> float
@@ -74,6 +74,4 @@ class Segment:
         diagonal = self.diag()
         square_diagonal = tuple(di * di for di in diagonal)
         _sum = sum(square_diagonal)
-        # square_diagonal = map(lambda si: si * si, diagonal)
-        # _sum = reduce(lambda si, sj: si + sj, square_diagonal)
         return math.sqrt(_sum)

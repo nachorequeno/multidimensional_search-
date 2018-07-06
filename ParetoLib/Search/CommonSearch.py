@@ -6,11 +6,12 @@ from ParetoLib.Oracle.OraclePoint import *
 # from ParetoLib.Search import vprint
 from . import vprint
 
-EPS = 1e-5
-DELTA = 1e-5
 # STEPS = 100
 # EPS = sys.float_info.epsilon
 # DELTA = sys.float_info.epsilon
+
+EPS = 1e-5
+DELTA = 1e-5
 STEPS = float('inf')
 
 
@@ -52,6 +53,7 @@ def createNDSpace(*args):
     vprint('Time creating Space: ', str(time0))
     return xyspace
 
+
 def loadOracleFunction(nfile,
                        human_readable=True):
     # type: (str, bool) -> OracleFunction
@@ -81,19 +83,19 @@ def loadOraclePoint(nfile,
 def binary_search(x,
                   member,
                   error):
-    # type: (Segment, _, tuple) -> (Segment, int)
+    # type: (Segment, callable, tuple) -> (Segment, int)
     y = x
-    dist = subtract(y.h, y.l)
+    dist = subtract(y.high, y.low)
     i = 0
     # while greater_equal(dist, error):
     # while any(dist_i > error[0] for dist_i in dist):
     while not less(dist, error):
         i += 1
-        yval = div(add(y.l, y.h), 2.0)
+        yval = div(add(y.low, y.high), 2.0)
         # We need a oracle() for guiding the search
         if member(yval):
-            y.h = yval
+            y.high = yval
         else:
-            y.l = yval
-        dist = subtract(y.h, y.l)
+            y.low = yval
+        dist = subtract(y.high, y.low)
     return y, i

@@ -2,14 +2,15 @@ import unittest
 
 from ParetoLib.Geometry.Rectangle import *
 
+
 #############
 # Rectangle #
 #############
 
 class RectangleTestCase(unittest.TestCase):
 
-    #def setUp(self):
-    #def tearDown(self):
+    # def setUp(self):
+    # def tearDown(self):
 
     def test_equality(self):
         p1 = (0.0, 0.75)
@@ -34,13 +35,12 @@ class RectangleTestCase(unittest.TestCase):
         self.assertEqual(r4, r5)
 
     def test_distance_to_center(self):
-
         p5 = (1.0, 1.0)
         p6 = (2.0, 2.0)
         r3 = Rectangle(p5, p6)
 
-        dist_p5 = r3.distanceToCenter(p5)
-        dist_p6 = r3.distanceToCenter(p6)
+        dist_p5 = r3.distance_to_center(p5)
+        dist_p6 = r3.distance_to_center(p6)
 
         # Distance to center
         self.assertEqual(dist_p5, dist_p6)
@@ -71,19 +71,18 @@ class RectangleTestCase(unittest.TestCase):
     def test_vertices(self):
         p1 = (0.0, 0.0)
         p2 = (1.0, 1.0)
-        r = Rectangle(p1, p2)
-        vertices = r.vertices()
+        rect = Rectangle(p1, p2)
+        vertices = rect.vertices()
         expected_vertices = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 
         # Vertices
         self.assertEqual(vertices, expected_vertices),
 
-        num_vertices = r.numVertices()
+        num_vertices = rect.num_vertices()
         num_vertices_expected = len(expected_vertices)
         self.assertEqual(num_vertices, num_vertices_expected)
 
     def test_intersection(self):
-
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -136,7 +135,6 @@ class RectangleTestCase(unittest.TestCase):
         ####
 
     def test_concatenation(self):
-
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -162,26 +160,26 @@ class RectangleTestCase(unittest.TestCase):
         r_intersect = r1.intersection(r2)
 
         # Concatenation of Rectangles
-        self.assertTrue(not r1.isconcatenable(r2))
-        self.assertTrue(not r1.isconcatenable(r3))
-        self.assertTrue(not r1.isconcatenable(r4))
-        self.assertTrue(not r1.isconcatenable(r5))
-        self.assertTrue(not r1.isconcatenable(r6))
-        self.assertTrue(not r2.isconcatenable(r1))
-        self.assertTrue(not r2.isconcatenable(r3))
-        self.assertTrue(r2.isconcatenable(r4))
-        self.assertTrue(not r2.isconcatenable(r5))
-        self.assertTrue(not r2.isconcatenable(r6))
-        self.assertTrue(not r3.isconcatenable(r1))
-        self.assertTrue(not r3.isconcatenable(r2))
-        self.assertTrue(not r4.isconcatenable(r1))
-        self.assertTrue(r4.isconcatenable(r2))
-        self.assertTrue(not r5.isconcatenable(r1))
-        self.assertTrue(not r5.isconcatenable(r2))
-        self.assertTrue(not r5.isconcatenable(r6))
-        self.assertTrue(not r6.isconcatenable(r1))
-        self.assertTrue(not r6.isconcatenable(r2))
-        self.assertTrue(not r6.isconcatenable(r5))
+        self.assertTrue(not r1.is_concatenable(r2))
+        self.assertTrue(not r1.is_concatenable(r3))
+        self.assertTrue(not r1.is_concatenable(r4))
+        self.assertTrue(not r1.is_concatenable(r5))
+        self.assertTrue(not r1.is_concatenable(r6))
+        self.assertTrue(not r2.is_concatenable(r1))
+        self.assertTrue(not r2.is_concatenable(r3))
+        self.assertTrue(r2.is_concatenable(r4))
+        self.assertTrue(not r2.is_concatenable(r5))
+        self.assertTrue(not r2.is_concatenable(r6))
+        self.assertTrue(not r3.is_concatenable(r1))
+        self.assertTrue(not r3.is_concatenable(r2))
+        self.assertTrue(not r4.is_concatenable(r1))
+        self.assertTrue(r4.is_concatenable(r2))
+        self.assertTrue(not r5.is_concatenable(r1))
+        self.assertTrue(not r5.is_concatenable(r2))
+        self.assertTrue(not r5.is_concatenable(r6))
+        self.assertTrue(not r6.is_concatenable(r1))
+        self.assertTrue(not r6.is_concatenable(r2))
+        self.assertTrue(not r6.is_concatenable(r5))
 
         self.assertEqual(r1, r_intersect.concatenate(r5).concatenate(r6))
         self.assertEqual(r4, r2.concatenate(r4).intersection(r4))
@@ -227,7 +225,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertTrue(r4 in diff_result31)
         self.assertTrue(r5 in diff_result32)
 
+
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)
     unittest.main(testRunner=runner)
-

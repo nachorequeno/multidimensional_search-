@@ -110,8 +110,8 @@ def multidim_search_opt_2(xspace,
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    print(
-        'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, '
+          'nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
         # vprint('border:', border)
@@ -124,12 +124,12 @@ def multidim_search_opt_2(xspace,
         # vprint('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
-        # y = search(xrectangle.diagToSegment(), f, epsilon)
-        y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
+        # y = search(xrectangle.diag_to_segment(), f, epsilon)
+        y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
         # vprint('y: ', y)
 
-        b0 = Rectangle(xrectangle.min_corner, y.l)
-        b1 = Rectangle(y.h, xrectangle.max_corner)
+        b0 = Rectangle(xrectangle.min_corner, y.low)
+        b1 = Rectangle(y.high, xrectangle.max_corner)
 
         ylow.append(b0)
         yup.append(b1)
@@ -146,8 +146,8 @@ def multidim_search_opt_2(xspace,
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
         # Every Border rectangle that is dominated by B1 is included in Yup
-        b0_extended = Rectangle(xspace.min_corner, y.l)
-        b1_extended = Rectangle(y.h, xspace.max_corner)
+        b0_extended = Rectangle(xspace.min_corner, y.low)
+        b1_extended = Rectangle(y.high, xspace.max_corner)
 
         # border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
         # border_dominatedby_b0 = [b0_extended.intersection(rect) for rect in border_overlapping_b0]
@@ -209,7 +209,7 @@ def multidim_search_opt_2(xspace,
         # Every rectangle in 'i' is incomparable for current B1 and for all B1 included in Yup
         ################################
 
-        yrectangle = Rectangle(y.l, y.h)
+        yrectangle = Rectangle(y.low, y.high)
         i = irect(incomparable, yrectangle, xrectangle)
         # i = pirect(incomparable, yrectangle, xrectangle)
         # l.extend(i)
@@ -298,8 +298,8 @@ def multidim_search_opt_1(xspace,
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    print(
-        'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
+    print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, '
+          'BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
         # vprint('border:', border)
@@ -312,20 +312,20 @@ def multidim_search_opt_1(xspace,
         # vprint('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
-        # y = search(xrectangle.diagToSegment(), f, epsilon)
-        y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
+        # y = search(xrectangle.diag_to_segment(), f, epsilon)
+        y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
         # vprint('y: ', y)
 
-        # b0 = Rectangle(xspace.min_corner, y.l)
-        b0 = Rectangle(xrectangle.min_corner, y.l)
+        # b0 = Rectangle(xspace.min_corner, y.low)
+        b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
         # vprint('b0: ', b0)
         # vprint('ylow: ', ylow)
 
-        # b1 = Rectangle(y.h, xspace.max_corner)
-        b1 = Rectangle(y.h, xrectangle.max_corner)
+        # b1 = Rectangle(y.high, xspace.max_corner)
+        b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
@@ -334,40 +334,40 @@ def multidim_search_opt_1(xspace,
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
-        ylow_candidates = [rect for rect in border if rect.dominatesRect(b0)]
+        ylow_candidates = [rect for rect in border if rect.dominates_rect(b0)]
         ylow.extend(ylow_candidates)
-        vol_ylow_opt_1 = sum(b0.volume() for b0 in ylow_candidates)  ##
+        vol_ylow_opt_1 = sum(b0.volume() for b0 in ylow_candidates)
         vol_ylow += vol_ylow_opt_1
         for rect in ylow_candidates:
             border.remove(rect)
 
         # Every Border rectangle that is dominated by B1 is included in Yup
-        yup_candidates = [rect for rect in border if rect.isDominatedByRect(b1)]
+        yup_candidates = [rect for rect in border if rect.is_dominated_by_rect(b1)]
         yup.extend(yup_candidates)
-        vol_yup_opt_1 = sum(b1.volume() for b1 in yup_candidates)  ##
+        vol_yup_opt_1 = sum(b1.volume() for b1 in yup_candidates)
         vol_yup += vol_yup_opt_1
         for rect in yup_candidates:
             border.remove(rect)
         ################################
 
-        yrectangle = Rectangle(y.l, y.h)
+        yrectangle = Rectangle(y.low, y.high)
         i = irect(incomparable, yrectangle, xrectangle)
         # i = pirect(incomparable, yrectangle, xrectangle)
         # l.extend(i)
 
         ################################
         # Every Incomparable rectangle that dominates B0 is included in Ylow
-        ylow_candidates = [inc for inc in i if any(inc.dominatesRect(b0) for b0 in ylow)]
+        ylow_candidates = [inc for inc in i if any(inc.dominates_rect(b0) for b0 in ylow)]
         ylow.extend(ylow_candidates)
-        vol_ylow_opt_2 = sum(b0.volume() for b0 in ylow_candidates)  ##
+        vol_ylow_opt_2 = sum(b0.volume() for b0 in ylow_candidates)
         vol_ylow += vol_ylow_opt_2
         for rect in ylow_candidates:
             i.remove(rect)
 
         # Every Incomparable rectangle that is dominated by B1 is included in Yup
-        yup_candidates = [inc for inc in i if any(inc.isDominatedByRect(b1) for b1 in yup)]
+        yup_candidates = [inc for inc in i if any(inc.is_dominated_by_rect(b1) for b1 in yup)]
         yup.extend(yup_candidates)
-        vol_yup_opt_2 = sum(b1.volume() for b1 in yup_candidates)  ##
+        vol_yup_opt_2 = sum(b1.volume() for b1 in yup_candidates)
         vol_yup += vol_yup_opt_2
         for rect in yup_candidates:
             i.remove(rect)
@@ -470,27 +470,27 @@ def multidim_search_opt_0(xspace,
         # vprint('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
-        # y = search(xrectangle.diagToSegment(), f, epsilon)
-        y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
+        # y = search(xrectangle.diag_to_segment(), f, epsilon)
+        y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
         # vprint('y: ', y)
 
-        # b0 = Rectangle(xspace.min_corner, y.l)
-        b0 = Rectangle(xrectangle.min_corner, y.l)
+        # b0 = Rectangle(xspace.min_corner, y.low)
+        b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
         # vprint('b0: ', b0)
         # vprint('ylow: ', ylow)
 
-        # b1 = Rectangle(y.h, xspace.max_corner)
-        b1 = Rectangle(y.h, xrectangle.max_corner)
+        # b1 = Rectangle(y.high, xspace.max_corner)
+        b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
         # vprint('b1: ', b1)
         # vprint('yup: ', yup)
 
-        yrectangle = Rectangle(y.l, y.h)
+        yrectangle = Rectangle(y.low, y.high)
         i = irect(incomparable, yrectangle, xrectangle)
         # i = pirect(incomparable, yrectangle, xrectangle)
         # l.extend(i)
@@ -535,12 +535,12 @@ def Search2D(ora,
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    n = int((max_cornerx - min_cornerx) / 0.1)
-    points = rs.getPointsBorder(n)
+    # n = int((max_cornerx - min_cornerx) / 0.1)
+    # points = rs.getPointsBorder(n)
 
     # vprint("Points ", points)
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
+    # xs = [point[0] for point in points]
+    # ys = [point[1] for point in points]
 
     # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
     # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
@@ -569,13 +569,13 @@ def Search3D(ora,
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    n = int((max_cornerx - min_cornerx) / 0.1)
-    points = rs.getPointsBorder(n)
+    # n = int((max_cornerx - min_cornerx) / 0.1)
+    # points = rs.getPointsBorder(n)
 
     # vprint("Points ", points)
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
-    zs = [point[2] for point in points]
+    # xs = [point[0] for point in points]
+    # ys = [point[1] for point in points]
+    # zs = [point[2] for point in points]
 
     # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
     # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())

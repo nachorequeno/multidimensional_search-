@@ -21,7 +21,7 @@ def distance(x, xprime):
 
 
 # Hamming distance between two points
-def distanceHamming(x, xprime):
+def hamming_distance(x, xprime):
     # type: (tuple, tuple) -> float
     temp = subtract(x, xprime)
     _sum = reduce(lambda si, sj: abs(si) + abs(sj), temp)
@@ -70,12 +70,12 @@ def less_equal(x, xprime):
     return all(np.array(x) <= np.array(xprime))
 
 
-def incomparable(x, xprime):
+def incomparables(x, xprime):
     # type: (tuple, tuple) -> bool
     return (not greater_equal(x, xprime)) and (not greater_equal(xprime, x))
 
 
-def max(x, xprime):
+def maximum(x, xprime):
     # type: (tuple, tuple) -> tuple
     if greater_equal(x, xprime):
         return x
@@ -83,7 +83,7 @@ def max(x, xprime):
         return xprime
 
 
-def min(x, xprime):
+def minimum(x, xprime):
     # type: (tuple, tuple) -> tuple
     if less_equal(x, xprime):
         return x

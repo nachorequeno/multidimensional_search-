@@ -1,40 +1,48 @@
 import os
 
+
 # JAMT requires java to be installed
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 def get_java_exec_name():
     return "java"
 
+
 def get_java_path():
     java_path = ""
-    java_exec_name = get_java_exec_name()
-    #if os.system(java_exec_name) != 0:
+    # java_exec_name = get_java_exec_name()
+    # if os.system(java_exec_name) != 0:
     if os.system("java -version") != 0:
         java_path = input("Java not included in PATH. Write the absolute path to Java binary: ")
         if not (java_path and os.path.lexists(java_path)):
-           raise RuntimeError("Java not available. Please, install it before running JAMT\n\nYou can find Java at https://www.java.com/")
+            raise RuntimeError("Java not available. Please, install it before running JAMT\n\n"
+                               "You can find Java at https://www.java.com/")
     return java_path
 
-def get_java_bin ( ) :
+
+def get_java_bin():
     java_path = get_java_path()
     java_exec_name = get_java_exec_name()
     return os.path.join(java_path, java_exec_name)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 def get_jamt_exec_name():
     return [fname for fname in os.listdir(os.path.dirname(__file__)) if fname.endswith('.jar')][0]
 
+
 def get_jamt_path():
     return os.path.dirname(os.path.realpath(__file__))
+
 
 def get_jamt_bin():
     jamt_path = get_jamt_path()
     jamt_exec_name = get_jamt_exec_name()
     return os.path.join(jamt_path, jamt_exec_name)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 # JAMT OPTIONS
 JAVA_BIN = get_java_bin()

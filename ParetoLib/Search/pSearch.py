@@ -18,7 +18,7 @@ from . import vprint
 def pbin_search_ser(args):
     xrectangle, f, epsilon, n = args
     error = (epsilon,) * n
-    y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
+    y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
     return y
 
 
@@ -27,7 +27,7 @@ def pbin_search(args):
     ora = dict_man[mp.current_process().name]
     f = ora.membership()
     error = (epsilon,) * n
-    y, steps_binsearch = binary_search(xrectangle.diagToSegment(), f, error)
+    y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
     return y
 
 
@@ -38,15 +38,15 @@ def pb0(args):
 
 
 def pb1(args):
-    # b1 = Rectangle(y.h, xspace.max_corner)
+    # b1 = Rectangle(y.high, xspace.max_corner)
     xrectangle, y = args
-    return Rectangle(y.h, xrectangle.max_corner)
+    return Rectangle(y.high, xrectangle.max_corner)
 
 
 def pborder(args):
     # border = irect(incomparable, yrectangle, xrectangle)
     incomparable, y, xrectangle = args
-    yrectangle = Rectangle(y.l, y.h)
+    yrectangle = Rectangle(y.low, y.high)
     return irect(incomparable, yrectangle, xrectangle)
 
 
@@ -75,7 +75,7 @@ def multidim_search(xspace,
     # multidim_search_breadth_first_opt_1
     # multidim_search_breadth_first_opt_2
 
-    # vprint('Starting multidimensional search')
+    vprint('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
                               oracle,
@@ -87,7 +87,7 @@ def multidim_search(xspace,
                               logging=logging)
     end = time.time()
     time0 = end - start
-    # vprint('Time multidim search: ', str(time0))
+    vprint('Time multidim search: ', str(time0))
 
     return rs
 
@@ -100,7 +100,7 @@ def multidim_search_old(xspace,
                         blocking=False,
                         sleep=0.0):
     # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
-    # vprint('Starting multidimensional search')
+    vprint('Starting multidimensional search')
     start = time.time()
     # rs = multidim_search_breadth_first_opt_1(xspace,
     rs = multidim_search_deep_first_opt_1(xspace,
@@ -112,8 +112,7 @@ def multidim_search_old(xspace,
                                           sleep=sleep)
     end = time.time()
     time0 = end - start
-    # vprint('Time multidim search: ', str(time0))
-
+    vprint('Time multidim search: ', str(time0))
     return rs
 
 
@@ -242,7 +241,7 @@ def multidim_search_deep_first_opt_2(xspace,
 
         ################################
         for y_segment in y_list:
-            yl, yh = y_segment.l, y_segment.h
+            yl, yh = y_segment.low, y_segment.high
             # Every Border rectangle that dominates B0 is included in Ylow
             # Every Border rectangle that is dominated by B1 is included in Yup
             b0_extended = Rectangle(xspace.min_corner, yl)
@@ -440,8 +439,8 @@ def multidim_search_deep_first_opt_1(xspace,
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
         # Every Border rectangle that is dominated by B1 is included in Yup
-        ylow_candidates = [rect for rect in border if any(rect.dominatesRect(b0) for b0 in b0_list)]
-        yup_candidates = [rect for rect in border if any(rect.isDominatedByRect(b1) for b1 in b1_list)]
+        ylow_candidates = [rect for rect in border if any(rect.dominates_rect(b0) for b0 in b0_list)]
+        yup_candidates = [rect for rect in border if any(rect.is_dominated_by_rect(b1) for b1 in b1_list)]
 
         ylow.extend(ylow_candidates)
         yup.extend(yup_candidates)
@@ -468,8 +467,8 @@ def multidim_search_deep_first_opt_1(xspace,
         ################################
         # Every Incomparable rectangle that dominates B0 is included in Ylow
         # Every Incomparable rectangle that is dominated by B1 is included in Yup
-        ylow_candidates = [inc for inc in new_incomp_rects if any(inc.dominatesRect(b0) for b0 in ylow)]
-        yup_candidates = [inc for inc in new_incomp_rects if any(inc.isDominatedByRect(b1) for b1 in yup)]
+        ylow_candidates = [inc for inc in new_incomp_rects if any(inc.dominates_rect(b0) for b0 in ylow)]
+        yup_candidates = [inc for inc in new_incomp_rects if any(inc.is_dominated_by_rect(b1) for b1 in yup)]
 
         ylow.extend(ylow_candidates)
         yup.extend(yup_candidates)
@@ -767,7 +766,7 @@ def multidim_search_breadth_first_opt_2(xspace,
 
         ################################
         for y_segment in y_list:
-            yl, yh = y_segment.l, y_segment.h
+            yl, yh = y_segment.low, y_segment.high
             # Every Border rectangle that dominates B0 is included in Ylow
             # Every Border rectangle that is dominated by B1 is included in Yup
 
@@ -965,9 +964,9 @@ def multidim_search_breadth_first_opt_1(xspace,
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
         # Every Border rectangle that is dominated by B1 is included in Yup
-        ylow_candidates = [rect for rect in border if any(rect.dominatesRect(b0) for b0 in b0_list)]  # b0_list?, ylow?
+        ylow_candidates = [rect for rect in border if any(rect.dominates_rect(b0) for b0 in b0_list)]  # b0_list?, ylow?
         yup_candidates = [rect for rect in border if
-                          any(rect.isDominatedByRect(b1) for b1 in b1_list)]  # b1_list?, yup?
+                          any(rect.is_dominated_by_rect(b1) for b1 in b1_list)]  # b1_list?, yup?
 
         ylow.extend(ylow_candidates)
         yup.extend(yup_candidates)
@@ -1162,12 +1161,12 @@ def Search2D(ora,
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    n = int((max_cornerx - min_cornerx) / 0.1)
-    points = rs.getPointsBorder(n)
+    # n = int((max_cornerx - min_cornerx) / 0.1)
+    # points = rs.get_points_border(n)
 
     # vprint("Points ", points)
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
+    # xs = [point[0] for point in points]
+    # ys = [point[1] for point in points]
 
     # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
     # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
@@ -1196,13 +1195,13 @@ def Search3D(ora,
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    n = int((max_cornerx - min_cornerx) / 0.1)
-    points = rs.getPointsBorder(n)
+    # n = int((max_cornerx - min_cornerx) / 0.1)
+    # points = rs.get_points_border(n)
 
     # vprint("Points ", points)
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
-    zs = [point[2] for point in points]
+    # xs = [point[0] for point in points]
+    # ys = [point[1] for point in points]
+    # zs = [point[2] for point in points]
 
     # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
     # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())

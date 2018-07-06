@@ -1,4 +1,5 @@
 import pickle
+import io
 
 from ParetoLib.Oracle.NDTree import *
 
@@ -11,22 +12,22 @@ class OraclePoint(Oracle):
     # class OraclePoint:
     # OraclePoint defines membership function based on a cloud of points that belongs to the closure.
     # OraclePoint saves a set of points in a NDTree
-    def __init__(self, MAX_P=2, MIN_CH=2):
+    def __init__(self, max_points=2, min_children=2):
         # type: (OraclePoint, int, int) -> None
         # super(OraclePoint, self).__init__()
         Oracle.__init__(self)
-        self.oracle = NDTree(MAX_P=MAX_P, MIN_CH=MIN_CH)
+        self.oracle = NDTree(max_points=max_points, min_children=min_children)
 
     # Printers
     def __repr__(self):
         # type: (OraclePoint) -> str
-        return self.toStr()
+        return self.to_str()
 
     def __str__(self):
         # type: (OraclePoint) -> str
-        return self.toStr()
+        return self.to_str()
 
-    def toStr(self):
+    def to_str(self):
         # type: (OraclePoint) -> str
         return str(self.oracle)
 
@@ -45,18 +46,18 @@ class OraclePoint(Oracle):
         return hash(self.oracle)
 
     # Oracle operations
-    def addPoint(self, p):
+    def add_point(self, p):
         # type: (OraclePoint, tuple) -> None
-        self.oracle.updatePoint(p)
+        self.oracle.update_point(p)
 
-    def addPoints(self, setpoints):
+    def add_points(self, setpoints):
         # type: (OraclePoint, set) -> None
         for point in setpoints:
-            self.addPoint(point)
+            self.add_point(point)
 
-    def getPoints(self):
+    def get_points(self):
         # type: (OraclePoint) -> set
-        return self.oracle.getPoints()
+        return self.oracle.get_points()
 
     def dim(self):
         # type: (OraclePoint) -> int
@@ -70,35 +71,24 @@ class OraclePoint(Oracle):
     # Membership functions
     def __contains__(self, p):
         # type: (OraclePoint, tuple) -> bool
-        # set_points = self.getPoints()
+        # set_points = self.get_points()
         # return p in set_points
         return self.member(p)
 
     def member(self, p):
         # type: (OraclePoint, tuple) -> bool
         # Returns 'True' if p belongs to the set of points stored in the Pareto archive
-        return p in self.getPoints()
+        return p in self.get_points()
 
     def membership(self):
         # type: (OraclePoint) -> function
-        return lambda p: self.oracle.dominates(p)
-
-    def dominates2(self, p):
-        # type: (OraclePoint, tuple) -> bool
-        # Returns 'True' if p dominates any point of the set of points stored in the Pareto archive
-        # return any(greater_equal(p, point) for point in self.getPoints())
         # Returns 'True' if p is dominated by any point stored in the Pareto archive
-        return any(less_equal(point, p) for point in self.points)
-
-    def membership2(self):
-        # type: (OraclePoint) -> function
-        # return lambda p: self.member(p)
-        return lambda p: self.dominates2(p)
+        return lambda p: self.oracle.dominates(p)
 
     # Read/Write file functions
     def fromFileNonHumRead(self, finput=None):
-        # type: (OraclePoint, BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        # type: (OraclePoint, io.BinaryIO) -> None
+        assert (finput is not None), 'File object should not be null'
 
         # Setting maximum recursion. It is required for the NDTree build
         # sys.getrecursionlimit()
@@ -109,8 +99,8 @@ class OraclePoint(Oracle):
         self.oracle = pickle.load(finput)
 
     def fromFileHumRead(self, finput=None):
-        # type: (OraclePoint, BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        # type: (OraclePoint, io.BinaryIO) -> None
+        assert (finput is not None), 'File object should not be null'
 
         def _line2tuple(inline):
             line = inline
@@ -125,11 +115,11 @@ class OraclePoint(Oracle):
         # point_list = (self._line2tuple(line) for line in finput)
 
         # map(self.oracle.updatePoint, point_list)
-        [self.oracle.updatePoint(point) for point in point_list]
+        [self.oracle.update_point(point) for point in point_list]
 
     def toFileNonHumRead(self, foutput=None):
-        # type: (OraclePoint, BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        # type: (OraclePoint, io.BinaryIO) -> None
+        assert (foutput is not None), 'File object should not be null'
 
         # Setting maximum recursion. It is required for the NDTree build
         # sys.getrecursionlimit()
@@ -140,11 +130,11 @@ class OraclePoint(Oracle):
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
 
     def toFileHumRead(self, foutput=None):
-        # type: (OraclePoint, BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        # type: (OraclePoint, io.BinaryIO) -> None
+        assert (foutput is not None), 'File object should not be null'
 
-        setPoints = self.getPoints()
-        vprint("Set of points ")
+        setPoints = self.get_points()
+        vprint('Set of points ')
         vprint(setPoints)
         for point in setPoints:
             foutput.write(str(point))
