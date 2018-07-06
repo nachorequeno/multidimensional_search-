@@ -1,0 +1,4 @@
+Tests/Oracle/OracleSTL/2D/airplane/airplane.stl
+Tests/Oracle/OracleSTL/2D/airplane/airplane.vcd
+Tests/Oracle/OracleSTL/2D/airplane/airplane.alias
+['p1', 'p2']

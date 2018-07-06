@@ -1,0 +1,5 @@
+real d0;
+real d1;
+
+assertion prop:
+	always eventually[0:45] always[0:30] ((d0 <= p1) and (d1 <= p2));

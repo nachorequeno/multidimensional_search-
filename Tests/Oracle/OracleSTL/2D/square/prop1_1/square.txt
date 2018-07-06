@@ -1,0 +1,4 @@
+Tests/Oracle/OracleSTL/2D/square/prop1_1/square.stl
+Tests/Oracle/OracleSTL/2D/square/square.vcd
+Tests/Oracle/OracleSTL/2D/square/prop1_1/square.alias
+['p1', 'mp2']

@@ -1,0 +1,4 @@
+Tests/Oracle/OracleSTL/2D/sincos/prop1_1/sincos.stl
+Tests/Oracle/OracleSTL/2D/sincos/sincos500.vcd
+Tests/Oracle/OracleSTL/2D/sincos/prop1_1/sincos.alias
+['p1', 'mp2']

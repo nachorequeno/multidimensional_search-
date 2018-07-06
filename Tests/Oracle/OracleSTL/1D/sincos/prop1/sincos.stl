@@ -1,0 +1,5 @@
+real d0;
+real d1;
+
+assertion prop:
+	always ((d0 >= -mp1) and (d1 >= -mp1));

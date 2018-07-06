@@ -1,0 +1,4 @@
+real d0;
+
+assertion prop:
+	eventually ((d0 <= p1) and (d0 >= -mp2));

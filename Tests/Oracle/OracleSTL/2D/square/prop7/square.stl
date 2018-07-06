@@ -1,0 +1,4 @@
+real d0;
+
+assertion prop:
+	always[0:50000] eventually[0:250]((always[0:200] (d0 <= p1)) or (always[0:200] (d0 >= -mp2)));
