@@ -33,6 +33,12 @@ class Oracle:
         # type: (Oracle) -> int
         return 0
 
+    # Name of the parameters/variables whose validity domain the Pareto search wants to infer
+    def get_var_names(self):
+        # type: (Oracle) -> list
+        # If parameter names are not provided, then we use lexicographic characters by default.
+        return [chr(i) for i in range(ord('a'), ord('z') + 1)]
+
     # Membership functions
     def __contains__(self, point):
         # type: (Oracle, tuple) -> bool

@@ -314,6 +314,10 @@ class OracleFunction(Oracle):
         # type: (OracleFunction) -> int
         return len(self.get_variables())
 
+    def get_var_names(self):
+        # type: (OracleFunction) -> list
+        return [str(i) for i in self.variables]
+
     def get_variables(self):
         # type: (OracleFunction) -> list
         # variable_list = sorted(self.variables, key=default_sort_key)

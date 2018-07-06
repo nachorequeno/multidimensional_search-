@@ -66,6 +66,10 @@ class OracleSTL(Oracle):
         # type: (OracleSTL) -> int
         return len(self.stl_parameters)
 
+    def get_var_names(self):
+        # type: (OracleSTL) -> list
+        return [str(i) for i in self.stl_parameters]
+
     def get_parameters_stl(self, stl_param_file):
         # type: (OracleSTL, str) -> list
 

@@ -33,7 +33,7 @@ class OraclePoint(Oracle):
     # Equality functions
     def __eq__(self, other):
         # type: (OraclePoint, OraclePoint) -> bool
-        return (self.oracle == other.oracle)
+        return self.oracle == other.oracle
 
     def __ne__(self, other):
         # type: (OraclePoint, OraclePoint) -> bool
@@ -42,7 +42,7 @@ class OraclePoint(Oracle):
     # Identity function (via hashing)
     def __hash__(self):
         # type: (OraclePoint) -> int
-        return hash((self.oracle))
+        return hash(self.oracle)
 
     # Oracle operations
     def addPoint(self, p):
@@ -61,6 +61,11 @@ class OraclePoint(Oracle):
     def dim(self):
         # type: (OraclePoint) -> int
         return self.oracle.dim()
+
+    def get_var_names(self):
+        # type: (OraclePoint) -> list
+        # super(OraclePoint, self).get_var_names()
+        return Oracle.get_var_names(self)
 
     # Membership functions
     def __contains__(self, p):
@@ -91,18 +96,6 @@ class OraclePoint(Oracle):
         return lambda p: self.dominates2(p)
 
     # Read/Write file functions
-    def fromFile(self, fname='', human_readable=False):
-        # type: (OraclePoint, str, bool) -> None
-        assert (fname != ''), "Filename should not be null"
-
-        mode = 'rb'
-        finput = open(fname, mode)
-        if human_readable:
-            self.fromFileHumRead(finput)
-        else:
-            self.fromFileNonHumRead(finput)
-        finput.close()
-
     def fromFileNonHumRead(self, finput=None):
         # type: (OraclePoint, BinaryIO) -> None
         assert (finput is not None), "File object should not be null"
@@ -133,23 +126,6 @@ class OraclePoint(Oracle):
 
         # map(self.oracle.updatePoint, point_list)
         [self.oracle.updatePoint(point) for point in point_list]
-
-
-    def toFile(self, fname='', append=False, human_readable=False):
-        # type: (OraclePoint, str, bool, bool) -> None
-        assert (fname != ''), "Filename should not be null"
-
-        if append:
-            mode = 'ab'
-        else:
-            mode = 'wb'
-
-        foutput = open(fname, mode)
-        if human_readable:
-            self.toFileHumRead(foutput)
-        else:
-            self.toFileNonHumRead(foutput)
-        foutput.close()
 
     def toFileNonHumRead(self, foutput=None):
         # type: (OraclePoint, BinaryIO) -> None

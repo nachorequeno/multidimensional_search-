@@ -1169,10 +1169,10 @@ def Search2D(ora,
     xs = [point[0] for point in points]
     ys = [point[1] for point in points]
 
-    # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True)
-    # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True)
+    # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
+    # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
     rs.simplify()
-    rs.toMatPlot2DLight(blocking=True)
+    rs.toMatPlot2DLight(blocking=True, var_names=ora.get_var_names())
     return rs
 
 
@@ -1204,10 +1204,10 @@ def Search3D(ora,
     ys = [point[1] for point in points]
     zs = [point[2] for point in points]
 
-    # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True)
-    # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True)
+    # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
+    # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
     rs.simplify()
-    rs.toMatPlot3DLight(blocking=True)
+    rs.toMatPlot3DLight(blocking=True, var_names=ora.get_var_names())
     return rs
 
 

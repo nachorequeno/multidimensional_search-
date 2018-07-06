@@ -355,7 +355,7 @@ class ResultSet:
         patches = [rect.toMatplot2D('blue', xaxe, yaxe, opacity) for rect in self.border]
         return patches
 
-    def toMatPlot2D(self,
+    def toMatPlot2D2(self,
                     filename='',
                     xaxe=0,
                     yaxe=1,
@@ -369,6 +369,136 @@ class ResultSet:
         #ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
         ax1.set_title('Approximation of the Pareto front, Parameters: (' + str(xaxe) + ', ' + str(yaxe) + ')')
+
+        #ax1.set_xlabel(xlabel)
+        #ax1.set_ylabel(ylabel)
+
+
+        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.toMatPlotBorder2D(xaxe, yaxe, opacity)
+
+        pathpatch = pathpatch_yup
+        pathpatch += pathpatch_ylow
+        pathpatch += pathpatch_border
+
+        for pathpatch_i in pathpatch:
+            ax1.add_patch(pathpatch_i)
+
+        # Include the vertices of the rectangles of the ResultSet in the plotting
+        # The inclusion of explicit points forces the autoscaling of the image
+        rs_vertices = self.vertices()
+        xs = [vi[0] for vi in rs_vertices]
+        ys = [vi[1] for vi in rs_vertices]
+
+        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+
+        plt.plot(targetx, targety, 'kp')
+        #ax1.scatter(targetx, targety, c='k')
+        #ax1.autoscale_view()
+
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+
+        plt.show(block=blocking)
+        time.sleep(sec)
+
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+
+        plt.close()
+        return plt
+
+    def toMatPlot2DLight2(self,
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    targetx=list(),
+                    targety=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
+        # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
+        fig1 = plt.figure()
+        #ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1 = fig1.add_subplot(111)
+        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+
+        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.2)
+
+        pathpatch = pathpatch_border
+        pathpatch += pathpatch_ylow
+        pathpatch += pathpatch_yup
+
+        for pathpatch_i in pathpatch:
+            ax1.add_patch(pathpatch_i)
+
+        # Include the vertices of the rectangles of the ResultSet in the plotting
+        # The inclusion of explicit points forces the autoscaling of the image
+        rs_vertices = self.vertices()
+        xs = [vi[0] for vi in rs_vertices]
+        ys = [vi[1] for vi in rs_vertices]
+
+        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+
+        plt.plot(targetx, targety, 'kp')
+        #ax1.scatter(targetx, targety,  c='k')
+        #ax1.autoscale_view()
+
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+
+        plt.show(block=blocking)
+        time.sleep(sec)
+
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+
+        plt.close()
+        return plt
+
+    def toMatPlot2D(self,
+                    filename='',
+                    xaxe=0,
+                    yaxe=1,
+                    var_names=list(),
+                    targetx=list(),
+                    targety=list(),
+                    blocking=False,
+                    sec=0.0,
+                    opacity=1.0):
+        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+        fig1 = plt.figure()
+        #ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1 = fig1.add_subplot(111)
+        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 2 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
+
+
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
@@ -416,16 +546,27 @@ class ResultSet:
                     filename='',
                     xaxe=0,
                     yaxe=1,
+                    var_names = list(),
                     targetx=list(),
                     targety=list(),
                     blocking=False,
                     sec=0.0,
                     opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
-        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 2 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
         pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
         pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
@@ -494,17 +635,29 @@ class ResultSet:
                     xaxe=0,
                     yaxe=1,
                     zaxe=2,
+                    var_names=list(),
                     targetx=list(),
                     targety=list(),
                     targetz=list(),
                     blocking=False,
                     sec=0.0,
                     opacity=1.0):
-        # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 3 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
+        ax1.set_zlabel(var_names[zaxe % len(var_names)])
+
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
@@ -555,17 +708,28 @@ class ResultSet:
                     xaxe=0,
                     yaxe=1,
                     zaxe=2,
+                    var_names=list(),
                     targetx=list(),
                     targety=list(),
                     targetz=list(),
                     blocking=False,
                     sec=0.0,
                     opacity=1.0):
-        # type: (ResultSet, str, int, int, int, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         #ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
-        ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        #ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ', ' + str(zaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z')+1)] if len(var_names) <= 3 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
+        ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
         faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
         faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
