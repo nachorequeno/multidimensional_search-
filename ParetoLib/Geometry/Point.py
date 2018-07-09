@@ -104,7 +104,7 @@ def subt(i, x, xprime):
     # type: (int, tuple, tuple) -> tuple
     n = len(x)
     m = len(xprime)
-    assert ((0 <= i) and (i < n) and (i < m)), "index out of range"
+    assert ((0 <= i) and (i < n) and (i < m)), 'index out of range'
     tup1 = x[0:i]
     tup2 = (xprime[i],)
     tup3 = x[(i + 1):]
@@ -118,7 +118,7 @@ def select(x, xprime):
     # select(x, xprime) == (0, 0, 7)
     n = len(x)
     m = len(xprime)
-    assert (n == m), "index out of range"
+    assert (n == m), 'index out of range'
     return tuple(xi if yi > 0 else 0 for xi, yi in zip(x, xprime))
 
 

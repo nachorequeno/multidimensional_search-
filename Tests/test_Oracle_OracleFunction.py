@@ -17,7 +17,7 @@ class OracleFunctionTestCase(unittest.TestCase):
 
     def tearDown(self):
         for filename in self.files_to_clean:
-            if (os.path.isfile(filename)):
+            if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
@@ -67,7 +67,6 @@ class OracleFunctionTestCase(unittest.TestCase):
 
     def read_write_files(self,
                          human_readable=False):
-        # type: (_, bool) -> _
 
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
@@ -76,9 +75,9 @@ class OracleFunctionTestCase(unittest.TestCase):
         c1 = Condition('x', '>', '0.5')
 
         # Read/Write Condition from file
-        c1.toFile(nfile, append=False, human_readable=human_readable)
+        c1.to_file(nfile, append=False, human_readable=human_readable)
         c2 = Condition()
-        c2.fromFile(nfile, human_readable=human_readable)
+        c2.from_file(nfile, human_readable=human_readable)
 
         self.assertEqual(c1, c2)
 
@@ -100,9 +99,9 @@ class OracleFunctionTestCase(unittest.TestCase):
         self.assertNotEqual(ora1, ora2)
 
         # Read/Write Oracle from file
-        ora1.toFile(nfile, append=False, human_readable=human_readable)
+        ora1.to_file(nfile, append=False, human_readable=human_readable)
         ora2 = OracleFunction()
-        ora2.fromFile(nfile, human_readable=human_readable)
+        ora2.from_file(nfile, human_readable=human_readable)
 
         self.assertEqual(ora1, ora2)
 

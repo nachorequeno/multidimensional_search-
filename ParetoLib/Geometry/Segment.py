@@ -19,17 +19,17 @@ class Segment:
     # Printers
     def to_str(self):
         # type: (Segment) -> str
-        # _string = "("
+        # _string = '('
         # for i, data in enumerate(self.l):
         #    _string += str(data)
         #    if i != dim(self.l) - 1:
-        #        _string += ", "
-        # _string += ")"
-        _string = "<"
+        #        _string += ', '
+        # _string += ')'
+        _string = '<'
         _string += str(self.low)
         _string += ', '
         _string += str(self.high)
-        _string += ">"
+        _string += '>'
         return _string
 
     def __repr__(self):

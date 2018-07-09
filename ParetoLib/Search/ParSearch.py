@@ -1,15 +1,12 @@
 import time
 import __builtin__
 import itertools
-from multiprocessing import Manager, Pool, cpu_count
+from multiprocessing import Manager
 import multiprocessing as mp
 import copy
 
-from sortedcontainers import SortedListWithKey, SortedSet
-
-from ParetoLib.Geometry.pRectangle import *
 from ParetoLib.Search.CommonSearch import *
-from ParetoLib.Search.pResultSet import *
+from ParetoLib.Search.ParResultSet import *
 
 # from ParetoLib.Search import vprint
 from . import vprint
@@ -66,7 +63,7 @@ def multidim_search(xspace,
                     sleep=0.0,
                     opt_level=2,
                     logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, int, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, int, bool) -> ParResultSet
     md_search = [multidim_search_deep_first_opt_0,
                  multidim_search_deep_first_opt_1,
                  multidim_search_deep_first_opt_2]
@@ -99,7 +96,7 @@ def multidim_search_old(xspace,
                         max_step=STEPS,
                         blocking=False,
                         sleep=0.0):
-    # type: (Rectangle, Oracle, float, float, int, bool, float) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float) -> ParResultSet
     vprint('Starting multidimensional search')
     start = time.time()
     # rs = multidim_search_breadth_first_opt_1(xspace,
@@ -132,7 +129,7 @@ def multidim_search_deep_first_opt_2(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -309,15 +306,15 @@ def multidim_search_deep_first_opt_2(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(list(border), ylow, yup, xspace)
 
 
 def multidim_search_deep_first_opt_1(xspace,
@@ -328,7 +325,7 @@ def multidim_search_deep_first_opt_1(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -500,15 +497,15 @@ def multidim_search_deep_first_opt_1(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(list(border), ylow, yup, xspace)
 
 
 def multidim_search_deep_first_opt_0(xspace,
@@ -519,7 +516,7 @@ def multidim_search_deep_first_opt_0(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -653,15 +650,15 @@ def multidim_search_deep_first_opt_0(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(list(border), ylow, yup, xspace)
 
 
 ########################################################################################################################
@@ -674,7 +671,7 @@ def multidim_search_breadth_first_opt_2(xspace,
                                         blocking=False,
                                         sleep=0.0,
                                         logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -841,15 +838,15 @@ def multidim_search_breadth_first_opt_2(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(border, ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_breadth_first_opt_1(xspace,
@@ -860,7 +857,7 @@ def multidim_search_breadth_first_opt_1(xspace,
                                         blocking=False,
                                         sleep=0.0,
                                         logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -998,15 +995,15 @@ def multidim_search_breadth_first_opt_1(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(border, ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_breadth_first_opt_0(xspace,
@@ -1017,7 +1014,7 @@ def multidim_search_breadth_first_opt_0(xspace,
                                         blocking=False,
                                         sleep=0.0,
                                         logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> pResultSet
+    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -1130,15 +1127,15 @@ def multidim_search_breadth_first_opt_0(xspace,
                 rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = pResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     # Stop multiprocessing
     p.close()
     p.join()
 
-    return pResultSet(border, ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 ########################################################################################################################
@@ -1156,15 +1153,15 @@ def Search2D(ora,
              sleep=0.0,
              opt_level=2,
              logging=True):
-    # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool) -> pResultSet
-    xyspace = create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
+    # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
+    xyspace = create_2D_space(min_cornerx, min_cornery, max_cornerx, max_cornery)
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.get_points_border(n)
 
-    # vprint("Points ", points)
+    # vprint('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
 
@@ -1189,8 +1186,8 @@ def Search3D(ora,
              sleep=0.0,
              opt_level=2,
              logging=True):
-    # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool) -> pResultSet
-    xyspace = create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
+    # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
+    xyspace = create_3D_space(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
@@ -1198,7 +1195,7 @@ def Search3D(ora,
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.get_points_border(n)
 
-    # vprint("Points ", points)
+    # vprint('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
     # zs = [point[2] for point in points]
@@ -1220,7 +1217,7 @@ def SearchND(ora,
              sleep=0.0,
              opt_level=2,
              logging=True):
-    # type: (Oracle, float, float, float, float, int, bool, float, int, bool) -> pResultSet
+    # type: (Oracle, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
     d = ora.dim()
 
     minc = (min_corner,) * d

@@ -5,18 +5,18 @@ import os
 # -------------------------------------------------------------------------------
 
 def get_java_exec_name():
-    return "java"
+    return 'java'
 
 
 def get_java_path():
-    java_path = ""
+    java_path = ''
     # java_exec_name = get_java_exec_name()
     # if os.system(java_exec_name) != 0:
-    if os.system("java -version") != 0:
-        java_path = input("Java not included in PATH. Write the absolute path to Java binary: ")
+    if os.system('java -version') != 0:
+        java_path = input('Java not included in PATH. Write the absolute path to Java binary: ')
         if not (java_path and os.path.lexists(java_path)):
-            raise RuntimeError("Java not available. Please, install it before running JAMT\n\n"
-                               "You can find Java at https://www.java.com/")
+            raise RuntimeError('Java not available. Please, install it before running JAMT\n\n'
+                               'You can find Java at https://www.java.com/')
     return java_path
 
 
@@ -46,11 +46,11 @@ def get_jamt_bin():
 
 # JAMT OPTIONS
 JAVA_BIN = get_java_bin()
-JAVA_OPT_JAR = "-jar"
+JAVA_OPT_JAR = '-jar'
 
 # JAMT OPTIONS
 JAMT_BIN = get_jamt_bin()
-JAMT_OPT_STL = "-x"
-JAMT_OPT_SIGNAL = "-s"
-JAMT_OPT_ALIAS = "-a"
-JAMT_OPT_RES = "-v"
+JAMT_OPT_STL = '-x'
+JAMT_OPT_SIGNAL = '-s'
+JAMT_OPT_ALIAS = '-a'
+JAMT_OPT_RES = '-v'

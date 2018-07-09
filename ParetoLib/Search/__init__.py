@@ -1,8 +1,8 @@
 import sys
 
 __version__ = 1.
-__name__ = "Search"
-__all__ = ["Search", "pSearch", "ResultSet", "pResultSet"]
+__name__ = 'Search'
+__all__ = ['Search', 'ParSearch.py', 'ResultSet', 'ParResultSet.py']
 __verbose__ = False
 
 if __verbose__:

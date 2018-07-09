@@ -1,8 +1,8 @@
 import sys
 
 __version__ = 1.
-__name__ = "Oracle"
-__all__ = ["NDTree", "Oracle", "OracleFunction", "OraclePoint", "OracleSTL"]
+__name__ = 'Oracle'
+__all__ = ['NDTree', 'Oracle', 'OracleFunction', 'OraclePoint', 'OracleSTL']
 __verbose__ = False
 
 if __verbose__:

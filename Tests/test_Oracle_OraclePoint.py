@@ -17,7 +17,7 @@ class OraclePointTestCase(unittest.TestCase):
 
     def tearDown(self):
         for filename in self.files_to_clean:
-            if (os.path.isfile(filename)):
+            if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
@@ -27,7 +27,7 @@ class OraclePointTestCase(unittest.TestCase):
     def test_NDTree(self,
                     min_corner=0.0,
                     max_corner=1.0):
-        # type: (_, float, float) -> _
+        # type: (OraclePointTestCase, float, float) -> None
 
         def f1(x):
             return 1 / x if x > 0.0 else 1000
@@ -95,7 +95,7 @@ class OraclePointTestCase(unittest.TestCase):
                          min_corner=0.0,
                          max_corner=1.0,
                          human_readable=False):
-        # type: (_, float, float, bool) -> _
+        # type: (OraclePointTestCase, float, float, bool) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 
@@ -142,9 +142,9 @@ class OraclePointTestCase(unittest.TestCase):
             self.assertFalse(fora1(p))
 
         # Read/Write Oracle from file
-        ora1.toFile(nfile, append=False, human_readable=human_readable)
+        ora1.to_file(nfile, append=False, human_readable=human_readable)
         ora2 = OraclePoint()
-        ora2.fromFile(nfile, human_readable=human_readable)
+        ora2.from_file(nfile, human_readable=human_readable)
 
         self.assertEqual(ora1, ora2)
 

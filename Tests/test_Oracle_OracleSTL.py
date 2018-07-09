@@ -1,6 +1,4 @@
-import os
 import tempfile as tf
-import copy
 import unittest
 
 from ParetoLib.Oracle.OracleSTL import *
@@ -18,14 +16,14 @@ class OracleSTLTestCase(unittest.TestCase):
 
     def tearDown(self):
         for filename in self.files_to_clean:
-            if (os.path.isfile(filename)):
+            if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
         self.files_to_clean.add(filename)
 
     def add_file_to_load(self):
-        #local_dirs = [x[0] for x in os.walk("Oracle/OracleSTL")]
+        # local_dirs = [x[0] for x in os.walk("Oracle/OracleSTL")]
         local_dirs = [x[0] for x in os.walk(self.this_dir)]
         oraclestl_filenames = []
         for local_dir in local_dirs:
@@ -33,7 +31,7 @@ class OracleSTLTestCase(unittest.TestCase):
         return oraclestl_filenames
 
     def add_file_to_load_from_folder(self, folder):
-        #test_dir = self.this_dir + folder
+        # test_dir = self.this_dir + folder
         test_dir = folder
         files_path = os.listdir(test_dir)
         test_txt = [test_dir + x for x in files_path if x.endswith(".txt")]
@@ -59,11 +57,11 @@ class OracleSTLTestCase(unittest.TestCase):
         for infile in self.files_to_load:
             # Read/Write Oracle from file
             ora1 = OracleSTL()
-            ora1.fromFile(infile, human_readable=True)
-            ora1.toFile(outfile, append=False, human_readable=human_readable)
+            ora1.from_file(infile, human_readable=True)
+            ora1.to_file(outfile, append=False, human_readable=human_readable)
 
             ora2 = OracleSTL()
-            ora2.fromFile(infile, human_readable=human_readable)
+            ora2.from_file(infile, human_readable=human_readable)
 
             self.assertEqual(ora1, ora2)
 

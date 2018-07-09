@@ -22,15 +22,15 @@ class Condition:
     def __init__(self, f='x', op='==', g='0'):
         # type: (Condition, str, str, str) -> None
         self.comparison = ['==', '>', '<', '>=', '<=', '<>']
-        assert (op in self.comparison), "Operator " + op + " must be any of: {'>', '>=', '<', '<=', '==', '!='}"
+        assert (op in self.comparison), 'Operator ' + op + ' must be any of: {">", ">=", "<", "<=", "==", "!="}'
         assert (not f.isdigit() or not g.isdigit()), \
-            "At least '" + f + "' or '" + g + "' must be a polynomial expression (i.e., not a single number)"
+            'At least '' + f + '' or '' + g + '' must be a polynomial expression (i.e., not a single number)'
         self.op = op
         self.f = simplify(f)
         self.g = simplify(g)
 
         if not self.all_coeff_are_positive():
-            eprint("WARNING! Expression '%s' contains negative coefficients: %s"
+            eprint('WARNING! Expression "%s" contains negative coefficients: %s'
                    % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
     def init_from_string(self, poly_function):
@@ -39,7 +39,7 @@ class Condition:
         # g_regex = r'(\s*\w\s*)+'
         vprint('Polynomial string ', poly_function)
 
-        op_comp = "|".join(self.comparison)
+        op_comp = '|'.join(self.comparison)
         op_regex = r'(%s)' % op_comp
         f_regex = r'[^%s]+' % op_comp
         g_regex = r'[^%s]+' % op_comp
@@ -55,7 +55,7 @@ class Condition:
             vprint('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
             if not self.all_coeff_are_positive():
-                eprint("WARNING! Expression '%s' contains negative coefficients: %s"
+                eprint('WARNING! Expression "%s" contains negative coefficients: %s'
                        % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
     # Printers
@@ -174,9 +174,9 @@ class Condition:
         else:
             di = d
             keys = set(d.keys())
-            assert keys.issuperset(keys_fv), "Keys in dictionary " \
+            assert keys.issuperset(keys_fv), 'Keys in dictionary ' \
                                              + str(d) \
-                                             + " do not match with the variables in the condition"
+                                             + ' do not match with the variables in the condition'
         expr = self.get_expression()
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
@@ -208,36 +208,36 @@ class Condition:
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
-    def fromFile(self, fname='', human_readable=False):
+    def from_file(self, fname='', human_readable=False):
         # type: (Condition, str, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         mode = 'rb'
         finput = open(fname, mode)
         if human_readable:
-            self.fromFileHumRead(finput)
+            self.from_file_text(finput)
         else:
-            self.fromFileNonHumRead(finput)
+            self.from_file_binary(finput)
         finput.close()
 
-    def fromFileNonHumRead(self, finput=None):
+    def from_file_binary(self, finput=None):
         # type: (Condition, io.BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        assert (finput is not None), 'File object should not be null'
 
         self.f = pickle.load(finput)
         self.op = pickle.load(finput)
         self.g = pickle.load(finput)
 
-    def fromFileHumRead(self, finput=None):
+    def from_file_text(self, finput=None):
         # type: (Condition, io.BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        assert (finput is not None), 'File object should not be null'
 
         poly_function = finput.readline()
         self.init_from_string(poly_function)
 
-    def toFile(self, fname='', append=False, human_readable=False):
+    def to_file(self, fname='', append=False, human_readable=False):
         # type: (Condition, str, bool, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         if append:
             mode = 'ab'
@@ -246,22 +246,22 @@ class Condition:
 
         foutput = open(fname, mode)
         if human_readable:
-            self.toFileHumRead(foutput)
+            self.to_file_text(foutput)
         else:
-            self.toFileNonHumRead(foutput)
+            self.to_file_binary(foutput)
         foutput.close()
 
-    def toFileNonHumRead(self, foutput=None):
+    def to_file_binary(self, foutput=None):
         # type: (Condition, io.BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        assert (foutput is not None), 'File object should not be null'
 
         pickle.dump(self.f, foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.op, foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.g, foutput, pickle.HIGHEST_PROTOCOL)
 
-    def toFileHumRead(self, foutput=None):
+    def to_file_text(self, foutput=None):
         # type: (Condition, io.BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        assert (foutput is not None), 'File object should not be null'
 
         # str(self.f) + self.op + str(self.g)
         foutput.write(str(self) + '\n')
@@ -327,7 +327,8 @@ class OracleFunction(Oracle):
 
     def eval_zip_tuple(self, var_xpoint):
         # type: (OracleFunction, list) -> bool
-        _eval_list = [cond.eval_zip_tuple(var_xpoint) == True for cond in self.oracle]
+        # _eval_list = [cond.eval_zip_tuple(var_xpoint) == True for cond in self.oracle]
+        _eval_list = [cond.eval_zip_tuple(var_xpoint) for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
@@ -338,7 +339,8 @@ class OracleFunction(Oracle):
     def eval_tuple(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
         # _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
-        _eval_list = [cond.eval_tuple(xpoint) == True for cond in self.oracle]
+        # _eval_list = [cond.eval_tuple(xpoint) == True for cond in self.oracle]
+        _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
@@ -349,7 +351,8 @@ class OracleFunction(Oracle):
     def eval_dict(self, d=None):
         # type: (OracleFunction, dict) -> bool
         # _eval_list = [cond.eval_dict(d) for cond in self.oracle]
-        _eval_list = [cond.eval_dict(d) == True for cond in self.oracle]
+        # _eval_list = [cond.eval_dict(d) == True for cond in self.oracle]
+        _eval_list = [cond.eval_dict(d) for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
@@ -359,7 +362,8 @@ class OracleFunction(Oracle):
 
     def eval_var_val(self, var=None, val='0'):
         # type: (OracleFunction, Symbol, int) -> bool
-        _eval_list = [cond.eval_var_val(var, val) == True for cond in self.oracle]
+        # _eval_list = [cond.eval_var_val(var, val) == True for cond in self.oracle]
+        _eval_list = [cond.eval_var_val(var, val) for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
@@ -402,28 +406,28 @@ class OracleFunction(Oracle):
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
-    def fromFile(self, fname='', human_readable=False):
+    def from_file(self, fname='', human_readable=False):
         # type: (OracleFunction, str, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         mode = 'rb'
         finput = open(fname, mode)
         if human_readable:
-            self.fromFileHumRead(finput)
+            self.from_file_text(finput)
         else:
-            self.fromFileNonHumRead(finput)
+            self.from_file_binary(finput)
         finput.close()
 
-    def fromFileNonHumRead(self, finput=None):
+    def from_file_binary(self, finput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        assert (finput is not None), 'File object should not be null'
 
         self.oracle = pickle.load(finput)
         self.variables = pickle.load(finput)
 
-    def fromFileHumRead(self, finput=None):
+    def from_file_text(self, finput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
-        assert (finput is not None), "File object should not be null"
+        assert (finput is not None), 'File object should not be null'
 
         # Each line has a Condition
         for line in finput:
@@ -431,9 +435,9 @@ class OracleFunction(Oracle):
             cond.init_from_string(line)
             self.add(cond)
 
-    def toFile(self, fname='', append=False, human_readable=False):
+    def to_file(self, fname='', append=False, human_readable=False):
         # type: (OracleFunction, str, bool, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         if append:
             mode = 'ab'
@@ -442,22 +446,22 @@ class OracleFunction(Oracle):
 
         foutput = open(fname, mode)
         if human_readable:
-            self.toFileHumRead(foutput)
+            self.to_file_text(foutput)
         else:
-            self.toFileNonHumRead(foutput)
+            self.to_file_binary(foutput)
         foutput.close()
 
-    def toFileNonHumRead(self, foutput=None):
+    def to_file_binary(self, foutput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        assert (foutput is not None), 'File object should not be null'
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.variables, foutput, pickle.HIGHEST_PROTOCOL)
 
-    def toFileHumRead(self, foutput=None):
+    def to_file_text(self, foutput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
-        assert (foutput is not None), "File object should not be null"
+        assert (foutput is not None), 'File object should not be null'
 
         # Each line has a Condition
         for cond in self.oracle:
-            cond.toFileHumRead(foutput)
+            cond.to_file_text(foutput)

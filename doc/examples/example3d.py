@@ -10,7 +10,7 @@ min_x, min_y, min_z = (0.0, 0.0, 0.0)
 max_x, max_y, max_z = (1.0, 1.0, 1.0)
 
 oracle = OracleFunction()
-oracle.fromFile(nfile, human_readable)
+oracle.from_file(nfile, human_readable)
 rs = Search3D(ora=oracle,
               min_cornerx=min_x,
               min_cornery=min_y,

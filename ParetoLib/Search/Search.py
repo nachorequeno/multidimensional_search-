@@ -232,7 +232,7 @@ def multidim_search_opt_2(xspace,
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     return ResultSet(list(border), ylow, yup, xspace)
 
@@ -391,7 +391,7 @@ def multidim_search_opt_1(xspace,
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     return ResultSet(list(border), ylow, yup, xspace)
 
@@ -512,7 +512,7 @@ def multidim_search_opt_0(xspace,
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
-            rs.toFile(name)
+            rs.to_file(name)
 
     return ResultSet(list(border), ylow, yup, xspace)
 
@@ -531,14 +531,14 @@ def Search2D(ora,
              opt_level=2,
              logging=True):
     # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool) -> ResultSet
-    xyspace = create2DSpace(min_cornerx, min_cornery, max_cornerx, max_cornery)
+    xyspace = create_2D_space(min_cornerx, min_cornery, max_cornerx, max_cornery)
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.getPointsBorder(n)
 
-    # vprint("Points ", points)
+    # vprint('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
 
@@ -564,7 +564,7 @@ def Search3D(ora,
              opt_level=2,
              logging=True):
     # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool) -> ResultSet
-    xyspace = create3DSpace(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
+    xyspace = create_3D_space(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
     rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
 
@@ -572,7 +572,7 @@ def Search3D(ora,
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.getPointsBorder(n)
 
-    # vprint("Points ", points)
+    # vprint('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
     # zs = [point[2] for point in points]

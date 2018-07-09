@@ -96,7 +96,7 @@ def subt(i, x, xprime):
     # type: (int, tuple, tuple) -> tuple
     n = len(x)
     m = len(xprime)
-    assert ((0 <= i) and (i < n) and (i < m)), "index out of range"
+    assert ((0 <= i) and (i < n) and (i < m)), 'index out of range'
     out = np.array(x)
     out[i] = xprime[i]
     return tuple(out)
@@ -109,7 +109,7 @@ def select(x, xprime):
     # select(x, xprime) == (0, 0, 7)
     n = len(x)
     m = len(xprime)
-    assert (n == m), "index out of range"
+    assert (n == m), 'index out of range'
     return tuple(np.array(x) * np.array(xprime))
 
 

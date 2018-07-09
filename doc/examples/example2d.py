@@ -10,7 +10,7 @@ min_x, min_y = (0.0, 0.0)
 max_x, max_y = (1.0, 1.0)
 
 oracle = OracleFunction()
-oracle.fromFile(nfile, human_readable)
+oracle.from_file(nfile, human_readable)
 rs = Search2D(ora=oracle,
               min_cornerx=min_x,
               min_cornery=min_y,

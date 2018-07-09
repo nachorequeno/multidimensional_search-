@@ -12,11 +12,11 @@ class Oracle:
     # Printers
     def __repr__(self):
         # type: (Oracle) -> str
-        return ""
+        return ''
 
     def __str__(self):
         # type: (Oracle) -> str
-        return ""
+        return ''
 
     # Equality functions
     def __eq__(self, other):
@@ -56,29 +56,29 @@ class Oracle:
         return lambda point: self.member(point)
 
     # Read/Write file functions
-    def fromFile(self, fname='', human_readable=False):
+    def from_file(self, fname='', human_readable=False):
         # type: (Oracle, str, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         mode = 'rb'
         finput = open(fname, mode)
         if human_readable:
-            self.fromFileHumRead(finput)
+            self.from_file_text(finput)
         else:
-            self.fromFileNonHumRead(finput)
+            self.from_file_binary(finput)
         finput.close()
 
-    def fromFileNonHumRead(self, finput=None):
+    def from_file_binary(self, finput=None):
         # type: (Oracle, io.BinaryIO) -> None
         pass
 
-    def fromFileHumRead(self, finput=None):
+    def from_file_text(self, finput=None):
         # type: (Oracle, io.BinaryIO) -> None
         pass
 
-    def toFile(self, fname='', append=False, human_readable=False):
+    def to_file(self, fname='', append=False, human_readable=False):
         # type: (Oracle, str, bool, bool) -> None
-        assert (fname != ''), "Filename should not be null"
+        assert (fname != ''), 'Filename should not be null'
 
         if append:
             mode = 'ab'
@@ -87,15 +87,15 @@ class Oracle:
 
         foutput = open(fname, mode)
         if human_readable:
-            self.toFileHumRead(foutput)
+            self.to_file_text(foutput)
         else:
-            self.toFileNonHumRead(foutput)
+            self.to_file_binary(foutput)
         foutput.close()
 
-    def toFileNonHumRead(self, foutput=None):
+    def to_file_binary(self, foutput=None):
         # type: (Oracle, io.BinaryIO) -> None
         pass
 
-    def toFileHumRead(self, foutput=None):
+    def to_file_text(self, foutput=None):
         # type: (Oracle, io.BinaryIO) -> None
         pass

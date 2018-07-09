@@ -362,8 +362,7 @@ class Node:
     # NDTree operations
     def find_closest_node(self, x):
         # type: (Node, tuple) -> Node
-        key_function = lambda node: node.rect.distance_to_center(x)
-        lsorted = sorted(self.nodes, key=key_function)
+        lsorted = sorted(self.nodes, key=lambda node: node.rect.distance_to_center(x))
         return lsorted[0]
 
     def insert(self, x):

@@ -1,8 +1,8 @@
 import sys
 
 __version__ = 1.
-__name__ = "JAMT"
-__all__ = ["JAMT"]
+__name__ = 'JAMT'
+__all__ = ['JAMT']
 __verbose__ = False
 
 if __verbose__:

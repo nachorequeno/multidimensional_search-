@@ -132,9 +132,10 @@ class OracleSTL(Oracle):
         # type: (OracleSTL, str) -> str
 
         # File having the result of the STL property evaluation over the signal
-        temp_dir = tempfile._get_default_tempdir()
-        temp_name = next(tempfile._get_candidate_names())
-        result_file_name = os.path.join(temp_dir, temp_name)
+        # temp_dir = tempfile.gettempdir()
+        # temp_name = next(tempfile._get_candidate_names())
+        # result_file_name = os.path.join(temp_dir, temp_name)
+        result_file_name = tempfile.mktemp()
 
         try:
             # java -jar ./jamt.jar -x ./stl_prop_file.stl -s ./vcd_signal_file.vcd -a ./variables.alias -v out
@@ -247,7 +248,7 @@ class OracleSTL(Oracle):
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
-    def fromFileNonHumRead(self, finput=None):
+    def from_file_binary(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
@@ -256,7 +257,7 @@ class OracleSTL(Oracle):
         self.var_alias_file = pickle.load(finput)
         self.stl_parameters = pickle.load(finput)
 
-    def fromFileHumRead(self, finput=None):
+    def from_file_text(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
@@ -265,7 +266,7 @@ class OracleSTL(Oracle):
         self.var_alias_file = finput.readline().strip(' \n\t')
         self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
 
-    def toFileNonHumRead(self, foutput=None):
+    def to_file_binary(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 
@@ -274,7 +275,7 @@ class OracleSTL(Oracle):
         pickle.dump(self.var_alias_file, foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.stl_parameters, foutput, pickle.HIGHEST_PROTOCOL)
 
-    def toFileHumRead(self, foutput=None):
+    def to_file_text(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 

@@ -32,7 +32,7 @@ class PointTestCase(unittest.TestCase):
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
 
-        print("Point (tuple)")
+        print('Point (tuple)')
         self.time_for_n_iterations(lambda z: p.norm(x), rep)
         self.time_for_n_iterations(lambda z: p.distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.hamming_distance(x, xprime), rep)
@@ -47,7 +47,7 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.minimum(x, xprime), rep)
 
-        print("Point (numpy)")
+        print('Point (numpy)')
         self.time_for_n_iterations(lambda z: pp.norm(x), rep)
         self.time_for_n_iterations(lambda z: pp.distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.hamming_distance(x, xprime), rep)

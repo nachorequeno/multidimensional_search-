@@ -86,7 +86,7 @@ class OraclePoint(Oracle):
         return lambda p: self.oracle.dominates(p)
 
     # Read/Write file functions
-    def fromFileNonHumRead(self, finput=None):
+    def from_file_binary(self, finput=None):
         # type: (OraclePoint, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
@@ -98,7 +98,7 @@ class OraclePoint(Oracle):
 
         self.oracle = pickle.load(finput)
 
-    def fromFileHumRead(self, finput=None):
+    def from_file_text(self, finput=None):
         # type: (OraclePoint, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
@@ -117,7 +117,7 @@ class OraclePoint(Oracle):
         # map(self.oracle.updatePoint, point_list)
         [self.oracle.update_point(point) for point in point_list]
 
-    def toFileNonHumRead(self, foutput=None):
+    def to_file_binary(self, foutput=None):
         # type: (OraclePoint, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 
@@ -129,7 +129,7 @@ class OraclePoint(Oracle):
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
 
-    def toFileHumRead(self, foutput=None):
+    def to_file_text(self, foutput=None):
         # type: (OraclePoint, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 

@@ -1,8 +1,8 @@
 import sys
 
 __version__ = 1.
-__name__ = "ParetoLib"
-__all__ = ["Geometry", "Oracle", "Search"]
+__name__ = 'ParetoLib'
+__all__ = ['Geometry', 'Oracle', 'Search']
 __verbose__ = False
 
 if __verbose__:

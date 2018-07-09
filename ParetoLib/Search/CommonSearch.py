@@ -17,7 +17,7 @@ STEPS = float('inf')
 
 # Auxiliar functions used in 2D, 3D and ND
 # Creation of Spaces
-def create2DSpace(minx, miny, maxx, maxy):
+def create_2D_space(minx, miny, maxx, maxy):
     vprint('Creating Space')
     start = time.time()
     minc = (minx, miny)
@@ -29,7 +29,7 @@ def create2DSpace(minx, miny, maxx, maxy):
     return xyspace
 
 
-def create3DSpace(minx, miny, minz, maxx, maxy, maxz):
+def create_3D_space(minx, miny, minz, maxx, maxy, maxz):
     vprint('Creating Space')
     start = time.time()
     minc = (minx, miny, minz)
@@ -41,7 +41,7 @@ def create3DSpace(minx, miny, minz, maxx, maxy, maxz):
     return xyspace
 
 
-def createNDSpace(*args):
+def create_ND_space(*args):
     # args = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
     vprint('Creating Space')
     start = time.time()
@@ -54,26 +54,26 @@ def createNDSpace(*args):
     return xyspace
 
 
-def loadOracleFunction(nfile,
-                       human_readable=True):
+def load_OracleFunction(nfile,
+                        human_readable=True):
     # type: (str, bool) -> OracleFunction
     vprint('Creating OracleFunction')
     start = time.time()
     ora = OracleFunction()
-    ora.fromFile(nfile, human_readable=human_readable)
+    ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
     vprint('Time reading OracleFunction: ', str(time0))
     return ora
 
 
-def loadOraclePoint(nfile,
-                    human_readable=True):
+def load_OraclePoint(nfile,
+                     human_readable=True):
     # type: (str, bool) -> OraclePoint
     vprint('Creating OraclePoint')
     start = time.time()
     ora = OraclePoint()
-    ora.fromFile(nfile, human_readable=human_readable)
+    ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
     vprint('Time reading OraclePoint: ', str(time0))

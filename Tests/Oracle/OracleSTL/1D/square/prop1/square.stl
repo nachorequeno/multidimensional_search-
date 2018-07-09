@@ -1,0 +1,4 @@
+real d0;
+
+assertion prop:
+	always ( (d0 <= 6) -> eventually[0:50] ((d0 >= 6) or (d0 <= p1)) );

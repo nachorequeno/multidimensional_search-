@@ -9,7 +9,7 @@ human_readable = True
 min_c, max_c = (0.0, 1.0)
 
 oracle = OracleFunction()
-oracle.fromFile(nfile, human_readable)
+oracle.from_file(nfile, human_readable)
 rs = SearchND(ora=oracle,
               min_corner=min_c,
               max_corner=max_c,

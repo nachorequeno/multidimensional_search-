@@ -15,13 +15,13 @@ def pbrect(args):
 def pirect(alphaincomp, yrectangle, xspace):
     # type: (list, Rectangle, Rectangle) -> list
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
-        "xrectangle.min_corner and xrectangle.max_corner do not share the same dimension"
+        'xrectangle.min_corner and xrectangle.max_corner do not share the same dimension'
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
-        "xspace.min_corner and xspace.max_corner do not share the same dimension"
+        'xspace.min_corner and xspace.max_corner do not share the same dimension'
     # assert (dim(alphaincomp_list) == dim(yrectangle.min_corner)), \
-    #    "alphaincomp_list and yrectangle.min_corner do not share the same dimension"
+    #    'alphaincomp_list and yrectangle.min_corner do not share the same dimension'
     # assert (dim(alphaincomp_list) == dim(yrectangle.max_corner)), \
-    #    "alphaincomp_list and yrectangle.max_corner do not share the same dimension"
+    #    'alphaincomp_list and yrectangle.max_corner do not share the same dimension'
 
     nproc = cpu_count()
     pool = Pool(nproc)
@@ -39,7 +39,7 @@ def pirect(alphaincomp, yrectangle, xspace):
 
 #############################################################################################
 # Wrappers for methods of the Rectangle class.
-# The "multiprocessing" library requires "pickable" methods for the parallelization of tasks;
+# The 'multiprocessing' library requires 'pickable' methods for the parallelization of tasks;
 # i.e., these wrappers.
 #############################################################################################
 

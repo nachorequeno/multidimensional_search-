@@ -29,19 +29,19 @@ class ResultSet:
     # Printers
     def to_str(self):
         # type: (ResultSet) -> str
-        # _string = "("
+        # _string = '('
         # for i, data in enumerate(self.low):
         #    _string += str(data)
         #    if i != dim(self.low) - 1:
-        #        _string += ", "
-        # _string += ")"
-        _string = "<"
+        #        _string += ', '
+        # _string += ')'
+        _string = '<'
         _string += str(self.yup)
         _string += ', '
         _string += str(self.ylow)
         _string += ', '
         _string += str(self.border)
-        _string += ">"
+        _string += '>'
         return _string
 
     def __repr__(self):
@@ -107,7 +107,7 @@ class ResultSet:
 
     def fusion_rectangles_yup(self):
         # type: (ResultSet) -> None
-        len_before = float("inf")
+        len_before = float('inf')
         len_after = len(self.yup)
         while len_before > len_after:
             # len_before = len(self.yup)
@@ -121,7 +121,7 @@ class ResultSet:
 
     def fusion_rectangles_ylow(self):
         # type: (ResultSet) -> None
-        len_before = float("inf")
+        len_before = float('inf')
         len_after = len(self.ylow)
         while len_before > len_after:
             len_before = len_after
@@ -134,7 +134,7 @@ class ResultSet:
 
     def fusion_rectangles_border(self):
         # type: (ResultSet) -> None
-        len_before = float("inf")
+        len_before = float('inf')
         len_after = len(self.border)
         while len_before > len_after:
             len_before = len_after
@@ -656,31 +656,31 @@ class ResultSet:
         return plt
 
     # Saving/loading results
-    def toFileYup(self, f):
+    def to_file_yup(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             pickle.dump(self.yup, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileYlow(self, f):
+    def to_file_ylow(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             pickle.dump(self.ylow, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileBorder(self, f):
+    def to_file_border(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             pickle.dump(self.border, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFileSpace(self, f):
+    def to_file_space(self, f):
         # type: (ResultSet, str) -> None
         with open(f, 'wb') as output:
             pickle.dump(self.xspace, output, pickle.HIGHEST_PROTOCOL)
 
-    def toFile(self, f):
+    def to_file(self, f):
         # type: (ResultSet, str) -> None
         # fname = os.path.basename(f)
         # name = os.path.splitext(fname)
-        ## ('file', '.ext')
+        # ('file', '.ext')
         # basename = name[0]
         # extension = name[1]
 
@@ -692,10 +692,10 @@ class ResultSet:
         border_name = os.path.join(tempdir, self.filename_border)
         space_name = os.path.join(tempdir, self.filename_space)
 
-        self.toFileYup(yup_name)
-        self.toFileYlow(ylow_name)
-        self.toFileBorder(border_name)
-        self.toFileSpace(space_name)
+        self.to_file_yup(yup_name)
+        self.to_file_ylow(ylow_name)
+        self.to_file_border(border_name)
+        self.to_file_space(space_name)
 
         filename_list = (yup_name, ylow_name, border_name, space_name)
         zf = zipfile.ZipFile(f, mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -705,7 +705,7 @@ class ResultSet:
                 # Adding new file to the .zip
                 zf.write(outfile, arcname=fname)
             except OSError:
-                print "Unexpected error when saving %s: %s" % (outfile, sys.exc_info()[0])
+                print 'Unexpected error when saving %s: %s' % (outfile, sys.exc_info()[0])
             os.remove(outfile)
         zf.close()
 
@@ -713,35 +713,35 @@ class ResultSet:
         os.rmdir(tempdir)
         # shutil.rmtree(tempdir, ignore_errors=True)
 
-    def fromFileYup(self, f):
+    def from_file_yup(self, f):
         # type: (ResultSet, str) -> None
         self.yup = set()
         with open(f, 'rb') as inputfile:
             self.yup = pickle.load(inputfile)
 
-    def fromFileYlow(self, f):
+    def from_file_ylow(self, f):
         # type: (ResultSet, str) -> None
         self.ylow = set()
         with open(f, 'rb') as inputfile:
             self.ylow = pickle.load(inputfile)
 
-    def fromFileBorder(self, f):
+    def from_file_border(self, f):
         # type: (ResultSet, str) -> None
         self.border = set()
         with open(f, 'rb') as inputfile:
             self.border = pickle.load(inputfile)
 
-    def fromFileSpace(self, f):
+    def from_file_space(self, f):
         # type: (ResultSet, str) -> None
         self.xspace = Rectangle()
         with open(f, 'rb') as inputfile:
             self.xspace = pickle.load(inputfile)
 
-    def fromFile(self, f):
+    def from_file(self, f):
         # type: (ResultSet, str) -> None
         # fname = os.path.basename(f)
         # name = os.path.splitext(fname)
-        ## ('file', '.ext')
+        # ('file', '.ext')
         # basename = name[0]
         # extension = name[1]
 
@@ -762,10 +762,10 @@ class ResultSet:
         border_name = os.path.join(tempdir, self.filename_border)
         space_name = os.path.join(tempdir, self.filename_space)
 
-        self.fromFileYup(yup_name)
-        self.fromFileYlow(ylow_name)
-        self.fromFileBorder(border_name)
-        self.fromFileSpace(space_name)
+        self.from_file_yup(yup_name)
+        self.from_file_ylow(ylow_name)
+        self.from_file_border(border_name)
+        self.from_file_space(space_name)
 
         # Remove temporal files before removing the temporary folder
         filename_list = (yup_name, ylow_name, border_name, space_name)
@@ -774,10 +774,10 @@ class ResultSet:
                 try:
                     os.remove(infile)
                 except OSError:
-                    print "Unexpected error when removing %s: %s" % (infile, sys.exc_info()[0])
+                    print 'Unexpected error when removing %s: %s' % (infile, sys.exc_info()[0])
 
         # Remove temporary folder
         try:
             os.rmdir(tempdir)
         except OSError:
-            print "Unexpected error when removing folder %s: %s" % (tempdir, sys.exc_info()[0])
+            print 'Unexpected error when removing folder %s: %s' % (tempdir, sys.exc_info()[0])
