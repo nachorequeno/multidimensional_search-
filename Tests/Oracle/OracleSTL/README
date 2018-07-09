@@ -3,11 +3,11 @@
 """""""""""""""""""""""""""""""""""""""""""""""""
 
 This README contains information about every data file used in the test
-suite of ParetoLib for OracleSTL. Each test-Nd.[txt|bin] file defines an OracleSTL.
+suite of ParetoLib for OracleSTL. Each *.[txt|bin] file defines an OracleSTL.
 OracleSTL is an oracle that evaluates parametrised Signal Temporal Logic (STL)
 formulas for guiding the discovery of closures.
 OracleSTL uses the external tool JAMT for evaluating STL formulas.
-So, part of the information contained in the test-Nd.[txt|bin] file correspond to
+So, part of the information contained in the *.[txt|bin] file correspond to
 the configuration and running environment of JAMT.
 
 The files required by the JAMT tool are:
@@ -16,9 +16,27 @@ The files required by the JAMT tool are:
 - A mapping between variables in the signal and variables in STL (*.alias).
 
 OracleSTL needs an extra configuration file (*.param) for pointing out the
-parameters of the STL formula that it will consider. All the examples (1D/2D/3D/ND)
-analyse the same signal by varying the number of parameters in the STL formula
-(i.e., 2 parameters for 2D, 3 parameters for 3D and so on).
+parameters of the STL formula that it will consider.
+
+All the examples are classified in folders (1D/2D/3D/ND) depending on the
+number of parameters in the STL formula (i.e., 2 parameters for 2D, 3 parameters
+for 3D and so on). Examples named 'sincos', 'square' and 'airplane' are extracted
+from [1], section 5, table 1; or inspired in them. Examples named 'stabilization'
+are extracted from [2], section 4.
+
+
+[1] Bakhirkin, A., Ferrere, T., and Maler, O. (2018, April).
+"Efficient Parametric Identification for STL".
+In Proceedings of the 21st International Conference on Hybrid Systems: Computation and Control
+(pp. 177-186). ACM.
+
+[2] Nickovic, D., Lebeltel, O., Maler, O., Ferrere, T., and Ulus, D. (2018, April).
+"AMT 2.0: Qualitative and Quantitative Trace Analysis with Extended Signal Temporal Logic".
+In Proceedings of the 24st International Conference on Tools and Algorithms for the Construction and Analysis of Systems
+(pp. 303-319). Springer, Cham.
+
+
+
 
     File format
 """""""""""""""""

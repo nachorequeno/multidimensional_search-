@@ -13,6 +13,9 @@ STEPS = 20
 class SearchTestCase(unittest.TestCase):
 
     def setUp(self):
+        # This test only considers Oracles (in *.txt format) that are located in the root
+        # of folders Oracle/OracleXXX/[1|2|3|N]D
+
         self.this_dir = "Oracle"
         self.oracle = Oracle()
 
@@ -340,7 +343,6 @@ class SearchOraclePointTestCase(SearchTestCase):
         self.search_verify_ND(False)
 
 
-# TODO: Create specific tests for STL. Compare test results with precalculated results
 class SearchOracleSTLTestCase(SearchTestCase):
 
     def setUp(self):
@@ -348,8 +350,8 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.this_dir = "Oracle/OracleSTL"
         self.oracle = OracleSTL()
 
-        # Run tests of the sincos example. The validity of the parametric domain
-        # is [-2.0, 2.0] (sin and cos signals has module 1.0)
+        # Run tests of the 'sincos' example.
+        # The validity of the parametric domain is [-2.0, 2.0] (sin and cos signals has module 1.0)
         self.min_c = -2.0
         self.max_c = 2.0
 
