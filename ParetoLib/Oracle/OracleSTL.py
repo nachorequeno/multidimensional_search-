@@ -5,6 +5,8 @@ import tempfile
 import csv
 import ast
 import io
+import sys
+import filecmp
 
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.JAMT.JAMT import *
@@ -23,8 +25,9 @@ class OracleSTL(Oracle):
         self.stl_prop_file = stl_prop_file.strip(' \n\t')
         self.vcd_signal_file = vcd_signal_file.strip(' \n\t')
         self.var_alias_file = var_alias_file.strip(' \n\t')
-        # self.stl_parameters = self.get_parameters_stl(stl_param_file) if stl_param_file != '' else []
-        self.stl_parameters = OracleSTL.get_parameters_stl(stl_param_file.strip(' \n\t'))
+
+        stl_param_file_trim = stl_param_file.strip(' \n\t')
+        self.stl_parameters = OracleSTL.get_parameters_stl(stl_param_file_trim)
 
     # Printers
     def __repr__(self):
@@ -44,13 +47,29 @@ class OracleSTL(Oracle):
         return s
 
     # Equality functions
-    def __eq__(self, other):
+    def __eq__old(self, other):
         # type: (OracleSTL, OracleSTL) -> bool
         # return hash(self) == hash(other)
         return (self.stl_prop_file == other.stl_prop_file) and \
                (self.vcd_signal_file == other.vcd_signal_file) and \
                (self.var_alias_file == other.var_alias_file) and \
                (self.stl_parameters == other.stl_parameters)
+
+    def __eq__(self, other):
+        # type: (OracleSTL, OracleSTL) -> bool
+        # return hash(self) == hash(other)
+        res = False
+        try:
+            res = (self.stl_prop_file == other.stl_prop_file) \
+                  or filecmp.cmp(self.stl_prop_file, other.stl_prop_file)
+            res = res or ((self.vcd_signal_file == other.vcd_signal_file)
+                          or filecmp.cmp(self.vcd_signal_file, other.vcd_signal_file))
+            res = res or ((self.var_alias_file == other.var_alias_file)
+                          or filecmp.cmp(self.var_alias_file, other.var_alias_file))
+            res = res or (self.stl_parameters == other.stl_parameters)
+        except OSError:
+            print 'Unexpected error when comparing: %s\n%s\n%s' % (sys.exc_info()[0], str(self), str(other))
+        return res
 
     def __ne__(self, other):
         # type: (OracleSTL, OracleSTL) -> bool
@@ -92,12 +111,12 @@ class OracleSTL(Oracle):
 
         def eval_expr(match):
             # Evaluate the arithmetic expression detected by 'match'
+            res = 0
             try:
                 res = str(eval(match.group(0)))
             except SyntaxError:
-                print 'Syntax error:', match
-                raise
-            else:
+                print 'Syntax error: %s' % str(match)
+            finally:
                 return res
             # return str(eval(match.group(0)))
             # return str(eval(match.group('expr')))
@@ -153,8 +172,9 @@ class OracleSTL(Oracle):
             subprocess.check_output(command, stderr=DEVNULL, universal_newlines=True)
         except subprocess.CalledProcessError as e:
             message = 'Running "{}" raised an exception'.format(' '.join(e.cmd))
-            raise RuntimeError(message)
-        else:
+            print message
+            # raise RuntimeError(message)
+        finally:
             # Return the result of evaluating the STL formula
             return result_file_name
 
@@ -244,7 +264,7 @@ class OracleSTL(Oracle):
         return res
 
     def membership(self):
-        # type: (OracleSTL) -> function
+        # type: (OracleSTL) -> callable
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
@@ -252,34 +272,84 @@ class OracleSTL(Oracle):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
-        self.stl_prop_file = pickle.load(finput)
-        self.vcd_signal_file = pickle.load(finput)
-        self.var_alias_file = pickle.load(finput)
-        self.stl_parameters = pickle.load(finput)
+        try:
+            # self.stl_prop_file = pickle.load(finput)
+            # self.vcd_signal_file = pickle.load(finput)
+            # self.var_alias_file = pickle.load(finput)
+            # self.stl_parameters = pickle.load(finput)
+
+            # self.stl_prop_file = os.path.abspath(pickle.load(finput))
+            # self.vcd_signal_file = os.path.abspath(pickle.load(finput))
+            # self.var_alias_file = os.path.abspath(pickle.load(finput))
+            # self.stl_parameters = pickle.load(finput)
+
+            current_path = os.path.dirname(os.path.abspath(finput.name))
+            path = pickle.load(finput)
+            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            path = pickle.load(finput)
+            self.vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            path = pickle.load(finput)
+            self.var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            self.stl_parameters = pickle.load(finput)
+
+            fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
+            for fname in fname_list:
+                if not os.path.isfile(fname):
+                    print 'File %s does not exists or it is not a file' % fname
+
+        except EOFError:
+            print 'Unexpected error when loading %s: %s' % (finput, sys.exc_info()[0])
 
     def from_file_text(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
 
-        self.stl_prop_file = finput.readline().strip(' \n\t')
-        self.vcd_signal_file = finput.readline().strip(' \n\t')
-        self.var_alias_file = finput.readline().strip(' \n\t')
-        self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+        try:
+            # self.stl_prop_file = finput.readline().strip(' \n\t')
+            # self.vcd_signal_file = finput.readline().strip(' \n\t')
+            # self.var_alias_file = finput.readline().strip(' \n\t')
+            # self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+
+            # self.stl_prop_file = os.path.abspath(finput.readline().strip(' \n\t'))
+            # self.vcd_signal_file = os.path.abspath(finput.readline().strip(' \n\t'))
+            # self.var_alias_file = os.path.abspath(finput.readline().strip(' \n\t'))
+            # self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+
+            # Each file line contains the path to a configuration file required by JAMT.
+            # If it is a relative path, we calculate the absolute path.
+            # If it is a absolute path, we do nothing.
+
+            current_path = os.path.dirname(os.path.abspath(finput.name))
+            path = finput.readline().strip(' \n\t')
+            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            path = finput.readline().strip(' \n\t')
+            self.vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            path = finput.readline().strip(' \n\t')
+            self.var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+
+            fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
+            for fname in fname_list:
+                if not os.path.isfile(fname):
+                    print 'File %s does not exists or it is not a file' % fname
+
+        except EOFError:
+            print 'Unexpected error when loading %s: %s' % (finput, sys.exc_info()[0])
 
     def to_file_binary(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 
-        pickle.dump(self.stl_prop_file, foutput, pickle.HIGHEST_PROTOCOL)
-        pickle.dump(self.vcd_signal_file, foutput, pickle.HIGHEST_PROTOCOL)
-        pickle.dump(self.var_alias_file, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.stl_prop_file), foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.vcd_signal_file), foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.var_alias_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(self.stl_parameters, foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
         assert (foutput is not None), 'File object should not be null'
 
-        foutput.write(self.stl_prop_file + '\n')
-        foutput.write(self.vcd_signal_file + '\n')
-        foutput.write(self.var_alias_file + '\n')
+        foutput.write(os.path.abspath(self.stl_prop_file) + '\n')
+        foutput.write(os.path.abspath(self.vcd_signal_file) + '\n')
+        foutput.write(os.path.abspath(self.var_alias_file) + '\n')
         foutput.write(str(self.stl_parameters) + '\n')

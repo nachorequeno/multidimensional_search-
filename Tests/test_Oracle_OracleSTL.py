@@ -34,7 +34,10 @@ class OracleSTLTestCase(unittest.TestCase):
         # test_dir = self.this_dir + folder
         test_dir = folder
         files_path = os.listdir(test_dir)
-        test_txt = [test_dir + x for x in files_path if x.endswith(".txt")]
+        test_txt = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+
+        assert all(os.path.isfile(test) for test in test_txt)
+
         return test_txt
 
     # Test OracleSTL
@@ -44,7 +47,7 @@ class OracleSTLTestCase(unittest.TestCase):
 
     def read_write_files(self,
                          human_readable=False):
-        # type: (_, bool) -> _
+        # type: (OracleSTLTestCase, bool) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         outfile = tmpfile.name
 
@@ -55,19 +58,22 @@ class OracleSTLTestCase(unittest.TestCase):
         self.assertEqual(ora1, ora2)
 
         for infile in self.files_to_load:
+            print 'Reading from %s' % infile
+            print 'Writing to %s' % outfile
+
             # Read/Write Oracle from file
             ora1 = OracleSTL()
             ora1.from_file(infile, human_readable=True)
             ora1.to_file(outfile, append=False, human_readable=human_readable)
 
             ora2 = OracleSTL()
-            ora2.from_file(infile, human_readable=human_readable)
+            ora2.from_file(outfile, human_readable=human_readable)
 
             self.assertEqual(ora1, ora2)
 
-            # Remove tempfile
-            # os.unlink(nfile)
-            self.add_file_to_clean(outfile)
+        # Remove tempfile
+        # os.unlink(nfile)
+        self.add_file_to_clean(outfile)
 
 
 if __name__ == '__main__':

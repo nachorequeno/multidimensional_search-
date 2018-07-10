@@ -1,3 +1,4 @@
+import os
 import io
 
 
@@ -52,13 +53,14 @@ class Oracle:
         return False
 
     def membership(self):
-        # type: (Oracle) -> function
+        # type: (Oracle) -> callable
         return lambda point: self.member(point)
 
     # Read/Write file functions
     def from_file(self, fname='', human_readable=False):
         # type: (Oracle, str, bool) -> None
         assert (fname != ''), 'Filename should not be null'
+        assert os.path.isfile(fname), 'File %s does not exists or it is not a file' % fname
 
         mode = 'rb'
         finput = open(fname, mode)

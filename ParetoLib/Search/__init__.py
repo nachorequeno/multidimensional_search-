@@ -2,7 +2,7 @@ import sys
 
 __version__ = 1.
 __name__ = 'Search'
-__all__ = ['Search', 'ParSearch.py', 'ResultSet', 'ParResultSet.py']
+__all__ = ['CommonSearch', 'SeqSearch', 'ParSearch', 'Search', 'ResultSet', 'ParResultSet']
 __verbose__ = False
 
 if __verbose__:

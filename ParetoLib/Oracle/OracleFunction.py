@@ -204,7 +204,7 @@ class Condition:
         return self.eval_dict(di)
 
     def membership(self):
-        # type: (Condition, tuple) -> function
+        # type: (Condition, tuple) -> callable
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions

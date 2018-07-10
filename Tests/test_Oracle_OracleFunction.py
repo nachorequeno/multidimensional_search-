@@ -75,6 +75,9 @@ class OracleFunctionTestCase(unittest.TestCase):
         c1 = Condition('x', '>', '0.5')
 
         # Read/Write Condition from file
+        print 'Reading from %s' % nfile
+        print 'Writing to %s' % nfile
+
         c1.to_file(nfile, append=False, human_readable=human_readable)
         c2 = Condition()
         c2.from_file(nfile, human_readable=human_readable)
@@ -99,6 +102,9 @@ class OracleFunctionTestCase(unittest.TestCase):
         self.assertNotEqual(ora1, ora2)
 
         # Read/Write Oracle from file
+        print 'Reading from %s' % nfile
+        print 'Writing to %s' % nfile
+
         ora1.to_file(nfile, append=False, human_readable=human_readable)
         ora2 = OracleFunction()
         ora2.from_file(nfile, human_readable=human_readable)

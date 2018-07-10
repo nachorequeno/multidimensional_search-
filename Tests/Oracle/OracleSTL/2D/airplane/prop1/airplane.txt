@@ -1,4 +1,4 @@
-Tests/Oracle/OracleSTL/2D/airplane/prop1/airplane.stl
-Tests/Oracle/OracleSTL/2D/airplane/prop1/airplane.vcd
-Tests/Oracle/OracleSTL/2D/airplane/prop1/airplane.alias
+./airplane.stl
+../airplane.vcd
+./airplane.alias
 ['p1', 'p2']

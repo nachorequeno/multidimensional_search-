@@ -8,6 +8,7 @@ from ParetoLib.Oracle.OracleSTL import *
 EPS = 1e-5
 DELTA = 1e-5
 STEPS = 20
+SLEEP_TIME = 0.5
 
 
 class SearchTestCase(unittest.TestCase):
@@ -22,6 +23,7 @@ class SearchTestCase(unittest.TestCase):
         # By default, use min_corner in 0.0 and max_corner in 1.0
         self.min_c = 0.0
         self.max_c = 1.0
+        self.numpoints_verify = 30
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def _closureMembershipTest(self, fora, rs, xpoint):
@@ -39,94 +41,6 @@ class SearchTestCase(unittest.TestCase):
 
         self.assertTrue(test1 or test2, vprint_string)
 
-    # Auxiliar function for reporting 2D results
-    def _verify2D(self,
-                  fora,
-                  rs,
-                  min_cornerx=0.0,
-                  min_cornery=0.0,
-                  max_cornerx=1.0,
-                  max_cornery=1.0):
-        t1 = np.arange(min_cornerx, max_cornerx, 0.1)
-        t2 = np.arange(min_cornery, max_cornery, 0.1)
-
-        testYup = False
-        testYlow = False
-        testBorder = False
-
-        nYup = 0
-        nYlow = 0
-        nBorder = 0
-
-        vprint('Starting tests')
-        start = time.time()
-        for t1p in t1:
-            for t2p in t2:
-                xpoint = (t1p, t2p)
-                testYup = testYup or rs.member_yup(xpoint)
-                testYlow = testYlow or rs.member_ylow(xpoint)
-                testBorder = testBorder or rs.member_border(xpoint)
-
-                nYup = nYup + 1 if rs.member_yup(xpoint) else nYup
-                nYlow = nYlow + 1 if rs.member_ylow(xpoint) else nYlow
-                nBorder = nBorder + 1 if rs.member_border(xpoint) else nBorder
-
-                self._closureMembershipTest(fora, rs, xpoint)
-        end = time.time()
-        time0 = end - start
-
-        print (rs.volume_report())
-        print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
-        print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
-        print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
-        print ('Time tests: ', str(time0))
-
-    # Auxiliar function for reporting 3D results
-    def _verify3D(self,
-                  fora,
-                  rs,
-                  min_cornerx=0.0,
-                  min_cornery=0.0,
-                  min_cornerz=0.0,
-                  max_cornerx=1.0,
-                  max_cornery=1.0,
-                  max_cornerz=1.0):
-        t1 = np.arange(min_cornerx, max_cornerx, 0.1)
-        t2 = np.arange(min_cornery, max_cornery, 0.1)
-        t3 = np.arange(min_cornerz, max_cornerz, 0.1)
-
-        testYup = False
-        testYlow = False
-        testBorder = False
-
-        nYup = 0
-        nYlow = 0
-        nBorder = 0
-
-        print ('Starting tests')
-        start = time.time()
-        for t1p in t1:
-            for t2p in t2:
-                for t3p in t3:
-                    xpoint = (t1p, t2p, t3p)
-                    testYup = testYup or rs.member_yup(xpoint)
-                    testYlow = testYlow or rs.member_ylow(xpoint)
-                    testBorder = testBorder or rs.member_border(xpoint)
-
-                    nYup = nYup + 1 if rs.member_yup(xpoint) else nYup
-                    nYlow = nYlow + 1 if rs.member_ylow(xpoint) else nYlow
-                    nBorder = nBorder + 1 if rs.member_border(xpoint) else nBorder
-
-                    self._closureMembershipTest(fora, rs, xpoint)
-        end = time.time()
-        time0 = end - start
-
-        print (rs.volume_report())
-        print ('Report Ylow: %s, %s' % (str(testYlow), str(nYlow)))
-        print ('Report Yup: %s, %s' % (str(testYup), str(nYup)))
-        print ('Report Border: %s, %s' % (str(testBorder), str(nBorder)))
-        print ('Time tests: ', str(time0))
-
     # Auxiliar function for reporting ND results
     def _verifyND(self,
                   fora,
@@ -134,7 +48,7 @@ class SearchTestCase(unittest.TestCase):
                   list_test_points):
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
 
-        print ('Starting tests\n')
+        print 'Starting tests\n'
         start = time.time()
         f1 = lambda p: 1 if rs.member_yup(p) else 0
         f2 = lambda p: 1 if rs.member_ylow(p) else 0
@@ -148,165 +62,50 @@ class SearchTestCase(unittest.TestCase):
         nYlow = sum(list_nYlow)
         nBorder = sum(list_nBorder)
 
-        [self._closureMembershipTest(fora, rs, p) for p in list_test_points]
-
+        #[self._closureMembershipTest(fora, rs, p) for p in list_test_points]
+        print 'Ok!\n' if all(self._closureMembershipTest(fora, rs, p) for p in list_test_points) else 'Not ok!\n'
         end = time.time()
         time0 = end - start
 
-        print (rs.volume_report())
-        print ('Report Ylow: %s' % (str(nYlow)))
-        print ('Report Yup: %s' % (str(nYup)))
-        print ('Report Border: %s' % (str(nBorder)))
-        print ('Time tests: ', str(time0))
+        print rs.volume_report()
+        print 'Report Ylow: %s\n' % (str(nYlow))
+        print 'Report Yup: %s\n' % (str(nYup))
+        print 'Report Border: %s\n' % (str(nBorder))
+        print 'Time tests: %s\n' % str(time0)
 
-    def search_verify_1D(self, human_readable):
-        # test_1D_dir = self.this_dir + "/1D/"
-        test_1D_dir = os.path.join(self.this_dir, "1D")
-        files_path = os.listdir(test_1D_dir)
-        # test_1D_txt = [test_1D_dir + x for x in files_path if x.endswith(".txt")]
-        test_1D_txt = [os.path.join(test_1D_dir, x) for x in files_path if x.endswith(".txt")]
-
+    def search_verify_ND(self, human_readable, list_test_files):
         # min_corner = 0.0
         # max_corner = 1.0
         min_corner = self.min_c
         max_corner = self.max_c
 
-        for test in test_1D_txt:
-            self.assertTrue(os.path.isfile(test), test)
-            self.oracle.from_file(test, human_readable)
-            fora = self.oracle.membership()
-            for opt_level in range(3):
-                rs = SearchND(ora=self.oracle,
-                              min_corner=min_corner,
-                              max_corner=max_corner,
-                              epsilon=EPS,
-                              delta=DELTA,
-                              max_step=STEPS,
-                              blocking=False,
-                              sleep=0,
-                              opt_level=opt_level,
-                              logging=False)
+        for bool_val in (True, False):
+            for test in list_test_files:
+                print '\nTesting %s' % test
+                self.assertTrue(os.path.isfile(test), test)
+                self.oracle.from_file(test, human_readable)
+                fora = self.oracle.membership()
+                for opt_level in range(3):
+                    rs = SearchND(ora=self.oracle,
+                                  min_corner=min_corner,
+                                  max_corner=max_corner,
+                                  epsilon=EPS,
+                                  delta=DELTA,
+                                  max_step=STEPS,
+                                  blocking=False,
+                                  sleep=SLEEP_TIME,
+                                  opt_level=opt_level,
+                                  parallel=bool_val,
+                                  logging=bool_val)
 
-                d = self.oracle.dim()
-                t = np.arange(min_corner, max_corner, 0.1)
-                # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
-                list_test_points = list(itertools.product(t, repeat=d))
-
-                self._verifyND(fora, rs, list_test_points)
-
-    def search_verify_2D(self, human_readable):
-        # test_2D_dir = self.this_dir + "/2D/"
-        test_2D_dir = os.path.join(self.this_dir, "2D")
-        files_path = os.listdir(test_2D_dir)
-        # test_2D_txt = [test_2D_dir + x for x in files_path if x.endswith(".txt")]
-        test_2D_txt = [os.path.join(test_2D_dir, x) for x in files_path if x.endswith(".txt")]
-
-        # min_x, min_y = (0.0, 0.0)
-        # max_x, max_y = (1.0, 1.0)
-
-        min_x, min_y = (self.min_c, self.min_c)
-        max_x, max_y = (self.max_c, self.max_c)
-
-        for test in test_2D_txt:
-            self.assertTrue(os.path.isfile(test), test)
-            self.oracle.from_file(test, human_readable)
-            fora = self.oracle.membership()
-            for opt_level in range(3):
-                rs = Search2D(ora=self.oracle,
-                              min_cornerx=min_x,
-                              min_cornery=min_y,
-                              max_cornerx=max_x,
-                              max_cornery=max_y,
-                              epsilon=EPS,
-                              delta=DELTA,
-                              max_step=STEPS,
-                              blocking=False,
-                              sleep=0,
-                              opt_level=opt_level,
-                              logging=False)
-                self._verify2D(fora,
-                               rs,
-                               min_cornerx=min_x,
-                               min_cornery=min_y,
-                               max_cornerx=max_x,
-                               max_cornery=max_y)
-
-    def search_verify_3D(self, human_readable):
-        # test_3D_dir = self.this_dir + "/3D/"
-        test_3D_dir = os.path.join(self.this_dir, "3D")
-        files_path = os.listdir(test_3D_dir)
-        # test_3D_txt = [test_3D_dir + x for x in files_path if x.endswith(".txt")]
-        test_3D_txt = [os.path.join(test_3D_dir, x) for x in files_path if x.endswith(".txt")]
-
-        # min_x, min_y, min_z = (0.0, 0.0, 0.0)
-        # max_x, max_y, max_z = (1.0, 1.0, 1.0)
-
-        min_x, min_y, min_z = (self.min_c, self.min_c, self.min_c)
-        max_x, max_y, max_z = (self.max_c, self.max_c, self.max_c)
-
-        for test in test_3D_txt:
-            self.assertTrue(os.path.isfile(test), test)
-            self.oracle.from_file(test, human_readable)
-            fora = self.oracle.membership()
-            for opt_level in range(3):
-                rs = Search3D(ora=self.oracle,
-                              min_cornerx=min_x,
-                              min_cornery=min_y,
-                              min_cornerz=min_z,
-                              max_cornerx=max_x,
-                              max_cornery=max_y,
-                              max_cornerz=max_z,
-                              epsilon=EPS,
-                              delta=DELTA,
-                              max_step=STEPS,
-                              blocking=False,
-                              sleep=0,
-                              opt_level=opt_level,
-                              logging=False)
-                self._verify3D(fora,
-                               rs,
-                               min_cornerx=min_x,
-                               min_cornery=min_y,
-                               min_cornerz=min_z,
-                               max_cornerx=max_x,
-                               max_cornery=max_y,
-                               max_cornerz=max_z)
-
-    def search_verify_ND(self, human_readable):
-        # test_ND_dir = self.this_dir + "/ND/"
-        test_ND_dir = os.path.join(self.this_dir, "ND")
-        files_path = os.listdir(test_ND_dir)
-        # test_ND_txt = [test_ND_dir + x for x in files_path if x.endswith(".txt")]
-        test_ND_txt = [os.path.join(test_ND_dir, x) for x in files_path if x.endswith(".txt")]
-
-        # min_corner = 0.0
-        # max_corner = 1.0
-
-        min_corner = self.min_c
-        max_corner = self.max_c
-
-        for test in test_ND_txt:
-            self.assertTrue(os.path.isfile(test), test)
-            self.oracle.from_file(test, human_readable)
-            fora = self.oracle.membership()
-            for opt_level in range(3):
-                rs = SearchND(ora=self.oracle,
-                              min_corner=min_corner,
-                              max_corner=max_corner,
-                              epsilon=EPS,
-                              delta=DELTA,
-                              max_step=STEPS,
-                              blocking=False,
-                              sleep=0,
-                              opt_level=opt_level,
-                              logging=False)
-
-                d = self.oracle.dim()
-                t = np.arange(min_corner, max_corner, 0.1)
-                # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
-                list_test_points = list(itertools.product(t, repeat=d))
-
-                self._verifyND(fora, rs, list_test_points)
+                    # Create numpoints_verify vectors of dimension d
+                    # Continuous uniform distribution over the stated interval.
+                    # To sample Unif[a, b), b > a
+                    # (b - a) * random_sample() + a
+                    d = self.oracle.dim()
+                    list_test_points = (max_corner - min_corner) * np.random.random_sample((self.numpoints_verify, d)) \
+                                       + min_corner
+                    self._verifyND(fora, rs, list_test_points)
 
 
 class SearchOracleFunctionTestCase(SearchTestCase):
@@ -317,13 +116,22 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.oracle = OracleFunction()
 
     def test_2D(self):
-        self.search_verify_2D(True)
+        test_dir = os.path.join(self.this_dir, "2D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_3D(self):
-        self.search_verify_3D(True)
+        test_dir = os.path.join(self.this_dir, "3D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_ND(self):
-        self.search_verify_ND(True)
+        test_dir = os.path.join(self.this_dir, "ND")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
 
 class SearchOraclePointTestCase(SearchTestCase):
@@ -334,13 +142,22 @@ class SearchOraclePointTestCase(SearchTestCase):
         self.oracle = OraclePoint()
 
     def test_2D(self):
-        self.search_verify_2D(False)
+        test_dir = os.path.join(self.this_dir, "2D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_3D(self):
-        self.search_verify_3D(False)
+        test_dir = os.path.join(self.this_dir, "3D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_ND(self):
-        self.search_verify_ND(False)
+        test_dir = os.path.join(self.this_dir, "ND")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
 
 class SearchOracleSTLTestCase(SearchTestCase):
@@ -356,10 +173,16 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.max_c = 2.0
 
     def test_1D(self):
-        self.search_verify_1D(False)
+        test_dir = os.path.join(self.this_dir, "1D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_2D(self):
-        self.search_verify_2D(False)
+        test_dir = os.path.join(self.this_dir, "2D")
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     # Currently, we only run OracleSTL tests for 1D and 2D because of the
     # complexity in verifying the results and the computational cost of

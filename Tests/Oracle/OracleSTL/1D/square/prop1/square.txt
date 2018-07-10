@@ -1,4 +1,4 @@
-Tests/Oracle/OracleSTL/1D/square/prop1/square.stl
-Tests/Oracle/OracleSTL/2D/square/square.vcd
-Tests/Oracle/OracleSTL/1D/square/prop1/square.alias
+./square.stl
+../../../2D/square/square.vcd
+./square.alias
 ['p1']

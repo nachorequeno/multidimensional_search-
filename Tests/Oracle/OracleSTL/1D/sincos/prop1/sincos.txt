@@ -1,4 +1,4 @@
-Tests/Oracle/OracleSTL/1D/sincos/prop1/sincos.stl
-Tests/Oracle/OracleSTL/2D/sincos/sincos500.vcd
-Tests/Oracle/OracleSTL/1D/sincos/prop1/sincos.alias
+./sincos.stl
+../../../2D/sincos/sincos500.vcd
+./sincos.alias
 ['mp1']

@@ -81,7 +81,7 @@ class OraclePoint(Oracle):
         return p in self.get_points()
 
     def membership(self):
-        # type: (OraclePoint) -> function
+        # type: (OraclePoint) -> callable
         # Returns 'True' if p is dominated by any point stored in the Pareto archive
         return lambda p: self.oracle.dominates(p)
 

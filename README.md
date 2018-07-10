@@ -140,13 +140,15 @@ Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
 It is implemented by the function:
  
-ParetoLib.Search.Search.multidim_search(xspace,
+ParetoLib.Search.SeqSearch.multidim_search(xspace,
                               oracle,
                               epsilon=EPSILON,
                               delta=DELTA,
                               verbose=False,
                               blocking=False,
-                              sleep=0)
+                              sleep=0.0,
+                              opt_level=2,
+                              logging=True)
 
 which takes as input the following parameters:
 * xspace: the N-dimensional space that contains the upper and lower closures.
@@ -163,7 +165,8 @@ intermediate results in 2D/3D graphics.
                     
 As a result, the function returns an object of the class *ResultSet*. 
 *Search2D*, *Search3D* and *SearchND* functions are wrappers that simplify 
-and automatize the calling to the multidimensional search for *OracleFunction* and *OraclePoint* oracles.
+and automatize the calling to the multidimensional search for *OracleFunction*, 
+*OraclePoint* and *OracleSTL* oracles.
 A set of running examples for 2D, 3D and ND can be found in Test/test_Search.py.
 
 ```python
@@ -189,7 +192,10 @@ rs = Search2D(ora=oracle,
               delta=DELTA,
               max_step=STEPS,
               blocking=False,
-              sleep=0)
+              sleep=0,
+              opt_level=0,
+              parallel=False,
+              logging=True)
 ```                          
 
 ### Saving and plotting the results

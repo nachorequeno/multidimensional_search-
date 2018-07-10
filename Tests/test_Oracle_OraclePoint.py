@@ -142,6 +142,9 @@ class OraclePointTestCase(unittest.TestCase):
             self.assertFalse(fora1(p))
 
         # Read/Write Oracle from file
+        print 'Reading from %s' % nfile
+        print 'Writing to %s' % nfile
+
         ora1.to_file(nfile, append=False, human_readable=human_readable)
         ora2 = OraclePoint()
         ora2.from_file(nfile, human_readable=human_readable)

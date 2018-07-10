@@ -1,4 +1,4 @@
-Tests/Oracle/OracleSTL/2D/stabilization/prop1/stabilization.stl
-Tests/Oracle/OracleSTL/2D/stabilization/stabilization.vcd
-Tests/Oracle/OracleSTL/2D/stabilization/prop1/stabilization.alias
+./stabilization.stl
+../stabilization.vcd
+./stabilization.alias
 ['p1', 'p2']
