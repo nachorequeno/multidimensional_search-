@@ -1,12 +1,14 @@
-import time
 import __builtin__
 import itertools
 from multiprocessing import Manager
 import multiprocessing as mp
 import copy
 
+from sortedcontainers import SortedSet
+
 from ParetoLib.Search.CommonSearch import *
 from ParetoLib.Search.ParResultSet import *
+from ParetoLib.Oracle.Oracle import *
 
 # from ParetoLib.Search import vprint
 from . import vprint
@@ -29,9 +31,9 @@ def pbin_search(args):
 
 
 def pb0(args):
-    # b0 = Rectangle(xspace.min_corner, y.l)
+    # b0 = Rectangle(xspace.min_corner, y.low)
     xrectangle, y = args
-    return Rectangle(xrectangle.min_corner, y.l)
+    return Rectangle(xrectangle.min_corner, y.low)
 
 
 def pb1(args):
@@ -86,30 +88,6 @@ def multidim_search(xspace,
     time0 = end - start
     vprint('Time multidim search: ', str(time0))
 
-    return rs
-
-
-def multidim_search_old(xspace,
-                        oracle,
-                        epsilon=EPS,
-                        delta=DELTA,
-                        max_step=STEPS,
-                        blocking=False,
-                        sleep=0.0):
-    # type: (Rectangle, Oracle, float, float, int, bool, float) -> ParResultSet
-    vprint('Starting multidimensional search')
-    start = time.time()
-    # rs = multidim_search_breadth_first_opt_1(xspace,
-    rs = multidim_search_deep_first_opt_1(xspace,
-                                          oracle,
-                                          epsilon=epsilon,
-                                          delta=delta,
-                                          max_step=max_step,
-                                          blocking=blocking,
-                                          sleep=sleep)
-    end = time.time()
-    time0 = end - start
-    vprint('Time multidim search: ', str(time0))
     return rs
 
 
@@ -301,9 +279,9 @@ def multidim_search_deep_first_opt_2(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -492,9 +470,9 @@ def multidim_search_deep_first_opt_1(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -645,9 +623,9 @@ def multidim_search_deep_first_opt_0(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -833,9 +811,9 @@ def multidim_search_breadth_first_opt_2(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -990,9 +968,9 @@ def multidim_search_breadth_first_opt_1(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -1122,9 +1100,9 @@ def multidim_search_breadth_first_opt_0(xspace,
             # rs = pResultSet(list(border), ylow, yup, xspace)
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3D(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ParResultSet(list(border), ylow, yup, xspace)
@@ -1137,93 +1115,4 @@ def multidim_search_breadth_first_opt_0(xspace,
 
     return ParResultSet(border, ylow, yup, xspace)
 
-
 ########################################################################################################################
-
-# Dimensional tests
-def Search2D(ora,
-             min_cornerx=0.0,
-             min_cornery=0.0,
-             max_cornerx=1.0,
-             max_cornery=1.0,
-             epsilon=EPS,
-             delta=DELTA,
-             max_step=STEPS,
-             blocking=False,
-             sleep=0.0,
-             opt_level=2,
-             logging=True):
-    # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
-    xyspace = create_2D_space(min_cornerx, min_cornery, max_cornerx, max_cornery)
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
-
-    # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    # n = int((max_cornerx - min_cornerx) / 0.1)
-    # points = rs.get_points_border(n)
-
-    # vprint('Points ', points)
-    # xs = [point[0] for point in points]
-    # ys = [point[1] for point in points]
-
-    # rs.toMatPlot2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
-    # rs.toMatPlot2DLight(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
-    rs.simplify()
-    rs.toMatPlot2DLight(blocking=True, var_names=ora.get_var_names())
-    return rs
-
-
-def Search3D(ora,
-             min_cornerx=0.0,
-             min_cornery=0.0,
-             min_cornerz=0.0,
-             max_cornerx=1.0,
-             max_cornery=1.0,
-             max_cornerz=1.0,
-             epsilon=EPS,
-             delta=DELTA,
-             max_step=STEPS,
-             blocking=False,
-             sleep=0.0,
-             opt_level=2,
-             logging=True):
-    # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
-    xyspace = create_3D_space(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
-
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
-
-    # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
-    # n = int((max_cornerx - min_cornerx) / 0.1)
-    # points = rs.get_points_border(n)
-
-    # vprint('Points ', points)
-    # xs = [point[0] for point in points]
-    # ys = [point[1] for point in points]
-    # zs = [point[2] for point in points]
-
-    # rs.toMatPlot3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
-    # rs.toMatPlot3DLight(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
-    rs.simplify()
-    rs.toMatPlot3DLight(blocking=True, var_names=ora.get_var_names())
-    return rs
-
-
-def SearchND(ora,
-             min_corner=0.0,
-             max_corner=1.0,
-             epsilon=EPS,
-             delta=DELTA,
-             max_step=STEPS,
-             blocking=False,
-             sleep=0.0,
-             opt_level=2,
-             logging=True):
-    # type: (Oracle, float, float, float, float, int, bool, float, int, bool) -> ParResultSet
-    d = ora.dim()
-
-    minc = (min_corner,) * d
-    maxc = (max_corner,) * d
-    xyspace = Rectangle(minc, maxc)
-
-    rs = multidim_search(xyspace, ora, epsilon, delta, max_step, blocking, sleep, opt_level, logging)
-    rs.simplify()
-    return rs

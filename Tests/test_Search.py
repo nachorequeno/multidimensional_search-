@@ -62,7 +62,7 @@ class SearchTestCase(unittest.TestCase):
         nYlow = sum(list_nYlow)
         nBorder = sum(list_nBorder)
 
-        #[self._closureMembershipTest(fora, rs, p) for p in list_test_points]
+        # [self._closureMembershipTest(fora, rs, p) for p in list_test_points]
         print 'Ok!\n' if all(self._closureMembershipTest(fora, rs, p) for p in list_test_points) else 'Not ok!\n'
         end = time.time()
         time0 = end - start
