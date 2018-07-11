@@ -1,6 +1,6 @@
 import sys
 import resource
-import __builtin__
+# import __builtin__
 
 from ParetoLib.Geometry.Rectangle import *
 from ParetoLib.Geometry.Point import *
@@ -476,8 +476,12 @@ class Node:
             # than current components of the rectangle.
             # ideal = tuple(xi if xi < ideali else ideali for xi, ideali in zip(x, ideal))
             # nadir = tuple(xi if xi > nadiri else nadiri for xi, nadiri in zip(x, nadir))
-            ideal = tuple(__builtin__.min(xi, ideali) for xi, ideali in zip(x, ideal))
-            nadir = tuple(__builtin__.max(xi, nadiri) for xi, nadiri in zip(x, nadir))
+
+            # ideal = tuple(__builtin__.min(xi, ideali) for xi, ideali in zip(x, ideal))
+            # nadir = tuple(__builtin__.max(xi, nadiri) for xi, nadiri in zip(x, nadir))
+
+            ideal = tuple(min(xi, ideali) for xi, ideali in zip(x, ideal))
+            nadir = tuple(max(xi, nadiri) for xi, nadiri in zip(x, nadir))
 
             self.rect.min_corner = ideal
             self.rect.max_corner = nadir

@@ -60,7 +60,7 @@ class Oracle:
     def from_file(self, fname='', human_readable=False):
         # type: (Oracle, str, bool) -> None
         assert (fname != ''), 'Filename should not be null'
-        assert os.path.isfile(fname), 'File %s does not exists or it is not a file' % fname
+        assert os.path.isfile(fname), 'File {0} does not exists or it is not a file'.format(fname)
 
         mode = 'rb'
         finput = open(fname, mode)

@@ -1,4 +1,4 @@
-import __builtin__
+# import __builtin__
 import itertools
 from multiprocessing import Manager
 import multiprocessing as mp
@@ -177,8 +177,11 @@ def multidim_search_deep_first_opt_2(xspace,
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        chunk = __builtin__.min(num_proc, remaining_steps)
-        chunk = __builtin__.min(chunk, len(border))
+        # chunk = __builtin__.min(num_proc, remaining_steps)
+        # chunk = __builtin__.min(chunk, len(border))
+        chunk = min(num_proc, remaining_steps)
+        chunk = min(chunk, len(border))
+
         # Take the rectangles with highest volume
         slice_border = border[-chunk:]
 
@@ -269,8 +272,8 @@ def multidim_search_deep_first_opt_2(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)
@@ -373,8 +376,11 @@ def multidim_search_deep_first_opt_1(xspace,
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        chunk = __builtin__.min(num_proc, remaining_steps)
-        chunk = __builtin__.min(chunk, len(border))
+        # chunk = __builtin__.min(num_proc, remaining_steps)
+        # chunk = __builtin__.min(chunk, len(border))
+        chunk = min(num_proc, remaining_steps)
+        chunk = min(chunk, len(border))
+
         # Take the rectangles with highest volume
         slice_border = border[-chunk:]
 
@@ -460,8 +466,8 @@ def multidim_search_deep_first_opt_1(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)
@@ -564,8 +570,11 @@ def multidim_search_deep_first_opt_0(xspace,
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        chunk = __builtin__.min(num_proc, remaining_steps)
-        chunk = __builtin__.min(chunk, len(border))
+        # chunk = __builtin__.min(num_proc, remaining_steps)
+        # chunk = __builtin__.min(chunk, len(border))
+        chunk = min(num_proc, remaining_steps)
+        chunk = min(chunk, len(border))
+
         # Take the rectangles with highest volume
         slice_border = border[-chunk:]
 
@@ -613,8 +622,8 @@ def multidim_search_deep_first_opt_0(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)
@@ -714,7 +723,8 @@ def multidim_search_breadth_first_opt_2(xspace,
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        chunk = __builtin__.min(remaining_steps, len(border))
+        # chunk = __builtin__.min(remaining_steps, len(border))
+        chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
         remaining_steps = max_step - step
@@ -801,8 +811,8 @@ def multidim_search_breadth_first_opt_2(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)
@@ -900,7 +910,8 @@ def multidim_search_breadth_first_opt_1(xspace,
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        chunk = __builtin__.min(remaining_steps, len(border))
+        # chunk = __builtin__.min(remaining_steps, len(border))
+        chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
         remaining_steps = max_step - step
@@ -958,8 +969,8 @@ def multidim_search_breadth_first_opt_1(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)
@@ -1057,7 +1068,8 @@ def multidim_search_breadth_first_opt_0(xspace,
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        chunk = __builtin__.min(remaining_steps, len(border))
+        # chunk = __builtin__.min(remaining_steps, len(border))
+        chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
         remaining_steps = max_step - step
@@ -1090,8 +1102,8 @@ def multidim_search_breadth_first_opt_0(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
             # rs = pResultSet(list(border), ylow, yup, xspace)

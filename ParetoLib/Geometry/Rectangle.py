@@ -1,4 +1,4 @@
-import __builtin__
+# import __builtin__
 
 import numpy as np
 import matplotlib.patches as patches
@@ -7,7 +7,7 @@ from itertools import product, tee
 
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Point import *
-
+from ParetoLib._py3k import reduce
 
 # Rectangle
 # Rectangular Half-Space
@@ -24,8 +24,11 @@ class Rectangle:
         # self.min_corner = tuple(__builtin__.min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
         # self.max_corner = tuple(__builtin__.max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
 
-        self.min_corner = tuple(r(__builtin__.min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
-        self.max_corner = tuple(r(__builtin__.max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        # self.min_corner = tuple(r(__builtin__.min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        # self.max_corner = tuple(r(__builtin__.max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+
+        self.min_corner = tuple(r(min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        self.max_corner = tuple(r(max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
 
         assert greater_equal(self.max_corner, self.min_corner) or incomparables(self.min_corner, self.max_corner)
 
@@ -169,8 +172,11 @@ class Rectangle:
             new_union_vertices = (vert_self.union(vert_other)) - inter
             assert len(new_union_vertices) > 0, \
                 'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
-            rect.min_corner = __builtin__.min(new_union_vertices)
-            rect.max_corner = __builtin__.max(new_union_vertices)
+            # rect.min_corner = __builtin__.min(new_union_vertices)
+            # rect.max_corner = __builtin__.max(new_union_vertices)
+
+            rect.min_corner = min(new_union_vertices)
+            rect.max_corner = max(new_union_vertices)
         return rect
 
     def concatenate_update(self, other):
@@ -187,16 +193,23 @@ class Rectangle:
             new_union_vertices = (vert_self.union(vert_other)) - inter
             assert len(new_union_vertices) > 0, \
                 'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
-            self.min_corner = __builtin__.min(new_union_vertices)
-            self.max_corner = __builtin__.max(new_union_vertices)
+
+            # self.min_corner = __builtin__.min(new_union_vertices)
+            # self.max_corner = __builtin__.max(new_union_vertices)
+
+            self.min_corner = min(new_union_vertices)
+            self.max_corner = max(new_union_vertices)
         return self
 
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        # maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+
+        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
         return less(minc, maxc)
 
     def intersection(self, other):
@@ -204,8 +217,11 @@ class Rectangle:
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         if self.overlaps(other):
-            minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            # minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            # maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+
+            minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
             return Rectangle(minc, maxc)
         else:
             return Rectangle(self.min_corner, self.max_corner)
@@ -215,11 +231,11 @@ class Rectangle:
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         if self.overlaps(other):
-            self.min_corner = tuple(
-                __builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            self.max_corner = tuple(
-                __builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            # self.min_corner = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            # self.max_corner = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
 
+            self.min_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            self.max_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
         return self
 
     __and__ = intersection

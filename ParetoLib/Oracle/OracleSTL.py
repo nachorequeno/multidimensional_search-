@@ -98,7 +98,7 @@ class OracleSTL(Oracle):
             res = [line.replace(' ', '') for line in f]
             f.close()
         except IOError:
-            print('Warning: Parameter STL file does not appear to exist.')
+            print('Warning! Parameter STL file does not appear to exist.')
             res = []
 
         return res

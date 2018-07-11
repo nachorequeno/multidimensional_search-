@@ -58,8 +58,8 @@ class OracleSTLTestCase(unittest.TestCase):
         self.assertEqual(ora1, ora2)
 
         for infile in self.files_to_load:
-            print 'Reading from %s' % infile
-            print 'Writing to %s' % outfile
+            print('Reading from {0}'.format(infile))
+            print('Writing to {0}'.format(outfile))
 
             # Read/Write Oracle from file
             ora1 = OracleSTL()

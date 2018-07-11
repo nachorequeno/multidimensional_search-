@@ -217,7 +217,7 @@ def multidim_search_opt_2(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('{0}, {1}, {2}, {3}, %{4}, {5}, {6}, {7}, {8}, {9}, {10}'
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}'
               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch,
                       len(border_overlapping_b0), len(border_overlapping_b1)))
         if sleep > 0.0:

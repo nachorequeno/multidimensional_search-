@@ -20,7 +20,7 @@ def create_2D_space(minx, miny, maxx, maxy):
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: ', str(time0))
+    print('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
@@ -32,7 +32,7 @@ def create_3D_space(minx, miny, minz, maxx, maxy, maxz):
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: ', str(time0))
+    print('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
@@ -45,7 +45,7 @@ def create_ND_space(*args):
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: ', str(time0))
+    print('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
@@ -58,7 +58,7 @@ def load_OracleFunction(nfile,
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OracleFunction: ', str(time0))
+    print('Time reading OracleFunction: {0}'.format(str(time0)))
     return ora
 
 
@@ -71,7 +71,7 @@ def load_OraclePoint(nfile,
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OraclePoint: ', str(time0))
+    print('Time reading OraclePoint: {0}'.format(str(time0)))
     return ora
 
 
@@ -84,7 +84,7 @@ def load_OracleSTL(nfile,
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OracleSTL: ', str(time0))
+    print('Time reading OracleSTL: {0}'.format(str(time0)))
     return ora
 
 

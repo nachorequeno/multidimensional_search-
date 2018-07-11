@@ -1,6 +1,6 @@
 __version__ = 1.
 __name__ = 'ParetoLib'
-__all__ = ['Geometry', 'Oracle', 'Search']
+__all__ = ['Geometry', 'Oracle', 'Search', '_py3k']
 
 
 # -------------------------------------------------------------------------------

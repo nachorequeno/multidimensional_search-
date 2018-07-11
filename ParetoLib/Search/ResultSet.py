@@ -1,6 +1,6 @@
 import os
 import sys
-import __builtin__
+#import __builtin__
 import time
 import pickle
 from itertools import chain, combinations  # combinations_with_replacement
@@ -303,7 +303,8 @@ class ResultSet:
         # type: (int, list) -> float
         min_cs = (rect.min_corner for rect in rect_list)
         mc_i = (mc[i] for mc in min_cs)
-        return __builtin__.min(mc_i)
+        # return __builtin__.min(mc_i)
+        return min(mc_i)
 
     def get_min_val_dimension_yup(self, i):
         # type: (ResultSet, int) -> float
@@ -322,7 +323,8 @@ class ResultSet:
         # type: (int, list) -> float
         max_cs = (rect.max_corner for rect in rect_list)
         mc_i = (mc[i] for mc in max_cs)
-        return __builtin__.max(mc_i)
+        # return __builtin__.max(mc_i)
+        return max(mc_i)
 
     def get_max_val_dimension_yup(self, i):
         # type: (ResultSet, int) -> float
@@ -399,8 +401,10 @@ class ResultSet:
         xs = [vi[0] for vi in rs_vertices]
         ys = [vi[1] for vi in rs_vertices]
 
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        targetx += [min(xs), max(xs)]
+        targety += [min(ys), max(ys)]
 
         plt.plot(targetx, targety, 'kp')
         # ax1.scatter(targetx, targety, c='k')
@@ -467,8 +471,10 @@ class ResultSet:
         xs = [vi[0] for vi in rs_vertices]
         ys = [vi[1] for vi in rs_vertices]
 
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        targetx += [min(xs), max(xs)]
+        targety += [min(ys), max(ys)]
 
         plt.plot(targetx, targety, 'kp')
         # ax1.scatter(targetx, targety,  c='k')
@@ -557,9 +563,12 @@ class ResultSet:
         ys = [vi[1] for vi in rs_vertices]
         zs = [vi[2] for vi in rs_vertices]
 
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
-        targetz += [__builtin__.min(zs), __builtin__.max(zs)]
+        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        # targetz += [__builtin__.min(zs), __builtin__.max(zs)]
+        targetx += [min(xs), max(xs)]
+        targety += [min(ys), max(ys)]
+        targetz += [min(zs), max(zs)]
 
         plt.plot(targetx, targety, targetz, 'kp')
         # ax1.scatter(targetx, targety, targetz, c='k')
@@ -628,9 +637,13 @@ class ResultSet:
         ys = [vi[1] for vi in rs_vertices]
         zs = [vi[2] for vi in rs_vertices]
 
-        targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        targety += [__builtin__.min(ys), __builtin__.max(ys)]
-        targetz += [__builtin__.min(zs), __builtin__.max(zs)]
+        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
+        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
+        # targetz += [__builtin__.min(zs), __builtin__.max(zs)]
+
+        targetx += [min(xs), max(xs)]
+        targety += [min(ys), max(ys)]
+        targetz += [min(zs), max(zs)]
 
         plt.plot(targetx, targety, targetz, 'kp')
         # ax1.scatter(targetx, targety, targetz, c='k')
@@ -752,7 +765,7 @@ class ResultSet:
         try:
             zf.extractall(tempdir)
         except KeyError:
-            print('ERROR: Did not find {0} file'.format(f))
+            print('Error! Did not find {0} file'.format(f))
         else:
             zf.close()
 

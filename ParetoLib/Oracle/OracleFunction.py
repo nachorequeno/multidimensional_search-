@@ -6,7 +6,7 @@ from sortedcontainers import SortedSet
 from sympy import simplify, expand, default_sort_key, Expr, Symbol
 
 from ParetoLib.Oracle.Oracle import Oracle
-
+from ParetoLib._py3k import getoutput, viewvalues, viewitems
 
 class Condition:
     # Condition = f op g
@@ -28,33 +28,31 @@ class Condition:
         self.g = simplify(g)
 
         if not self.all_coeff_are_positive():
-            print('WARNING! Expression "%s" contains negative coefficients: %s'
-                   % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+            print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
     def init_from_string(self, poly_function):
         # op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         # f_regex = r'(\s*\w\s*)+'
         # g_regex = r'(\s*\w\s*)+'
-        print('Polynomial string ', poly_function)
+        # print('Polynomial string ', poly_function)
 
         op_comp = '|'.join(self.comparison)
-        op_regex = r'(%s)' % op_comp
-        f_regex = r'[^%s]+' % op_comp
-        g_regex = r'[^%s]+' % op_comp
-        regex = r'(?P<f>(%s))(?P<op>(%s))(?P<g>(%s))' % (f_regex, op_regex, g_regex)
+        op_regex = r'({0})'.format(op_comp)
+        f_regex = r'[^{0}]+'.format(op_comp)
+        g_regex = r'[^{0}]+'.format(op_comp)
+        regex = r'(?P<f>({0}))(?P<op>({1}))(?P<g>({2}))'.format(f_regex, op_regex, g_regex)
         regex_comp = re.compile(regex)
         result = regex_comp.match(poly_function)
-        print('Parsing result ', str(result))
+        # print('Parsing result ', str(result))
         # if regex_comp is not None:
         if result is not None:
             self.op = result.group('op')
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
-            print('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
+            # print('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
             if not self.all_coeff_are_positive():
-                print('WARNING! Expression "%s" contains negative coefficients: %s'
-                       % (str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+                print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
 
     # Printers
     def __repr__(self):
@@ -127,13 +125,13 @@ class Condition:
     def get_expression_with_negative_coeff(self):
         # type: (Condition) -> Expr
         negative_coeff = self.get_negative_coeff_of_expression()
-        neg_expr = ['%s * %s' % (negative_coeff[i], i) for i in negative_coeff]
+        neg_expr = ['{0} * {1}'.format(negative_coeff[i], i) for i in negative_coeff]
         return simplify(''.join(neg_expr))
 
     def get_expression_with_positive_coeff(self):
         # type: (Condition) -> Expr
         positive_coeff = self.get_positive_coeff_of_expression()
-        pos_expr = ['%s * %s' % (positive_coeff[i], i) for i in positive_coeff]
+        pos_expr = ['{0} * {1}'.format(positive_coeff[i], i) for i in positive_coeff]
         return simplify('+'.join(pos_expr))
 
     def get_expression(self):
@@ -151,7 +149,7 @@ class Condition:
         # expr.subs([(x, 2), (y, 4), (z, 0)])
         res = expr.subs(var_xpoint)
         ex = str(res) + self.op + '0'
-        print('Expression ', str(simplify(ex)))
+        # print('Expression ', str(simplify(ex)))
         return simplify(ex)
 
     def eval_tuple(self, xpoint):
@@ -159,8 +157,8 @@ class Condition:
         keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        print('Condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
-        print('di ', str(di))
+        # print('Condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
+        # print('di ', str(di))
         return self.eval_dict(di)
 
     def eval_dict(self, d=None):
@@ -171,6 +169,7 @@ class Condition:
             di = {key: 0 for key in keys_fv}
         else:
             di = d
+            # keys = set(d.keys()) # For Python 2.7
             keys = set(d.keys())
             assert keys.issuperset(keys_fv), 'Keys in dictionary ' \
                                              + str(d) \
@@ -178,7 +177,7 @@ class Condition:
         expr = self.get_expression()
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        print('Expression ', str(simplify(ex)))
+        # print('Expression ', str(simplify(ex)))
         return simplify(ex)
 
     def eval_var_val(self, variable=None, val='0'):
@@ -191,7 +190,7 @@ class Condition:
         expr = self.get_expression()
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
-        print('Expression ', str(simplify(ex)))
+        # print('Expression ', str(simplify(ex)))
         return simplify(ex)
 
     # Membership functions
@@ -331,7 +330,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        print('OracleFunction evaluates ', str(var_xpoint), ' to ', str(_eval))
+        # print('OracleFunction evaluates ', str(var_xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_tuple(self, xpoint):
@@ -343,7 +342,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        print('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
+        # print('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
@@ -355,7 +354,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        print('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
+        # print('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
@@ -366,7 +365,7 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        print('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
+        # print('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     # Membership functions
@@ -377,7 +376,7 @@ class OracleFunction(Oracle):
     def member_zip_var(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
         # return self.eval_tuple(xpoint)
-        print(xpoint)
+        # print(xpoint)
         # keys = self.get_variables()
         keys = self.variables
         var_xpoint = zip(keys, xpoint)
@@ -386,7 +385,7 @@ class OracleFunction(Oracle):
     def member_dict(self, xpoint):
         # type: (OracleFunction, tuple) -> bool
         # return self.eval_tuple(xpoint)
-        print(xpoint)
+        # print(xpoint)
         # keys = self.get_variables()
         keys = self.variables
         di = {key: xpoint[i] for i, key in enumerate(keys)}

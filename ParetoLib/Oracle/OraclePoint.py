@@ -132,8 +132,8 @@ class OraclePoint(Oracle):
         assert (foutput is not None), 'File object should not be null'
 
         setPoints = self.get_points()
-        print('Set of points ')
-        print(setPoints)
+        # print('Set of points ')
+        # print(setPoints)
         for point in setPoints:
             foutput.write(str(point))
             foutput.write('\n')

@@ -168,10 +168,10 @@ class test_paretolib ( Command ):
 
 # Check that we have the right Python version
 if ( sys.version_info[:2] < (2, 7) ) :
-    print('ParetoLib requires Python 2.7.9. ' \
-          'Python %d.%d detected'.format(sys.version_info[:2]))
-    sys.exit(1)
-
+    if (sys.version_info[:2] < (2, 7)):
+        print('ParetoLib requires Python 2.7.9 (or Python 3.4 or later). Python {0}.{1} detected'.format(sys.version_info[:2]))
+        #          'Python %d.%d detected'.format(sys.version_info[:2]))
+        sys.exit(1)
 # We now define the ParetoLib version number in ParetoLib/__init__.py
 __version__ = 'unknown'
 for line in open('ParetoLib/__init__.py') :
@@ -199,7 +199,8 @@ setup_args = { 'name': 'ParetoLib',
                              'ParetoLib.Geometry',
                              'ParetoLib.JAMT',
                              'ParetoLib.Oracle',
-                             'ParetoLib.Search'],
+                             'ParetoLib.Search',
+                             'ParetoLib._py3k'],
              'package_data': {'ParetoLib.JAMT': ['*.jar']},
 }
 
