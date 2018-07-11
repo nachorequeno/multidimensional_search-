@@ -4,8 +4,6 @@ import io
 from ParetoLib.Oracle.NDTree import *
 
 from ParetoLib.Oracle.Oracle import Oracle
-# from ParetoLib.Oracle import vprint
-from . import vprint
 
 
 class OraclePoint(Oracle):
@@ -134,8 +132,8 @@ class OraclePoint(Oracle):
         assert (foutput is not None), 'File object should not be null'
 
         setPoints = self.get_points()
-        vprint('Set of points ')
-        vprint(setPoints)
+        print('Set of points ')
+        print(setPoints)
         for point in setPoints:
             foutput.write(str(point))
             foutput.write('\n')

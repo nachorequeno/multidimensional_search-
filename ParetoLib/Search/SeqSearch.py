@@ -6,9 +6,6 @@ from ParetoLib.Search.CommonSearch import *
 from ParetoLib.Search.ResultSet import *
 from ParetoLib.Oracle.Oracle import *
 
-# from ParetoLib.Search import vprint
-from . import vprint
-
 
 # Multidimensional search
 # The search returns a set of Rectangles in Yup, Ylow and Border
@@ -26,7 +23,7 @@ def multidim_search(xspace,
                  multidim_search_opt_1,
                  multidim_search_opt_2]
 
-    vprint('Starting multidimensional search')
+    print('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
                               oracle,
@@ -38,7 +35,7 @@ def multidim_search(xspace,
                               logging=logging)
     end = time.time()
     time0 = end - start
-    vprint('Time multidim search: ', str(time0))
+    print('Time multidim search: ', str(time0))
 
     return rs
 
@@ -101,12 +98,12 @@ def multidim_search_opt_2(xspace,
     vol_border = vol_total
     step = 0
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -115,19 +112,19 @@ def multidim_search_opt_2(xspace,
           'nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # vprint('border:', border)
+        # print('border:', border)
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        # vprint('xrectangle: ', xrectangle)
-        # vprint('xrectangle.volume: ', xrectangle.volume())
-        # vprint('xrectangle.norm : ', xrectangle.norm())
+        # print('xrectangle: ', xrectangle)
+        # print('xrectangle.volume: ', xrectangle.volume())
+        # print('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
         # y = search(xrectangle.diag_to_segment(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
-        # vprint('y: ', y)
+        # print('y: ', y)
 
         b0 = Rectangle(xrectangle.min_corner, y.low)
         b1 = Rectangle(y.high, xrectangle.max_corner)
@@ -138,11 +135,11 @@ def multidim_search_opt_2(xspace,
         vol_ylow += b0.volume()
         vol_yup += b1.volume()
 
-        # vprint('b0: ', b0)
-        # vprint('b1: ', b1)
+        # print('b0: ', b0)
+        # print('b1: ', b1)
 
-        # vprint('ylow: ', ylow)
-        # vprint('yup: ', yup)
+        # print('ylow: ', ylow)
+        # print('yup: ', yup)
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -216,13 +213,13 @@ def multidim_search_opt_2(xspace,
         # l.extend(i)
 
         border |= i
-        # vprint('irect: ', i)
+        # print('irect: ', i)
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch,
-                 len(border_overlapping_b0), len(border_overlapping_b1)))
+        print('{0}, {1}, {2}, {3}, %{4}, {5}, {6}, {7}, {8}, {9}, {10}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch,
+                      len(border_overlapping_b0), len(border_overlapping_b1)))
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
@@ -289,12 +286,12 @@ def multidim_search_opt_1(xspace,
     vol_border = vol_total
     step = 0
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -303,35 +300,35 @@ def multidim_search_opt_1(xspace,
           'BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # vprint('border:', border)
+        # print('border:', border)
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        # vprint('xrectangle: ', xrectangle)
-        # vprint('xrectangle.volume: ', xrectangle.volume())
-        # vprint('xrectangle.norm : ', xrectangle.norm())
+        # print('xrectangle: ', xrectangle)
+        # print('xrectangle.volume: ', xrectangle.volume())
+        # print('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
         # y = search(xrectangle.diag_to_segment(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
-        # vprint('y: ', y)
+        # print('y: ', y)
 
         # b0 = Rectangle(xspace.min_corner, y.low)
         b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
-        # vprint('b0: ', b0)
-        # vprint('ylow: ', ylow)
+        # print('b0: ', b0)
+        # print('ylow: ', ylow)
 
         # b1 = Rectangle(y.high, xspace.max_corner)
         b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
-        # vprint('b1: ', b1)
-        # vprint('yup: ', yup)
+        # print('b1: ', b1)
+        # print('yup: ', yup)
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -375,13 +372,13 @@ def multidim_search_opt_1(xspace,
         ################################
 
         border += i
-        # vprint('irect: ', i)
+        # print('irect: ', i)
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d, %d, %s, %s, %s, %s'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch,
-                 vol_ylow_opt_1, vol_ylow_opt_2, vol_yup_opt_1, vol_yup_opt_2))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch,
+                      vol_ylow_opt_1, vol_ylow_opt_2, vol_yup_opt_1, vol_yup_opt_2))
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
@@ -448,12 +445,12 @@ def multidim_search_opt_0(xspace,
     vol_border = vol_total
     step = 0
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -461,35 +458,35 @@ def multidim_search_opt_0(xspace,
     print('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # vprint('border:', border)
+        # print('border:', border)
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        # vprint('xrectangle: ', xrectangle)
-        # vprint('xrectangle.volume: ', xrectangle.volume())
-        # vprint('xrectangle.norm : ', xrectangle.norm())
+        # print('xrectangle: ', xrectangle)
+        # print('xrectangle.volume: ', xrectangle.volume())
+        # print('xrectangle.norm : ', xrectangle.norm())
 
         # y, segment
         # y = search(xrectangle.diag_to_segment(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
-        # vprint('y: ', y)
+        # print('y: ', y)
 
         # b0 = Rectangle(xspace.min_corner, y.low)
         b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
-        # vprint('b0: ', b0)
-        # vprint('ylow: ', ylow)
+        # print('b0: ', b0)
+        # print('ylow: ', ylow)
 
         # b1 = Rectangle(y.high, xspace.max_corner)
         b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
-        # vprint('b1: ', b1)
-        # vprint('yup: ', yup)
+        # print('b1: ', b1)
+        # print('yup: ', yup)
 
         yrectangle = Rectangle(y.low, y.high)
         i = irect(incomparable, yrectangle, xrectangle)
@@ -497,12 +494,13 @@ def multidim_search_opt_0(xspace,
         # l.extend(i)
 
         border += i
-        # vprint('irect: ', i)
+        # print('irect: ', i)
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        print('%s, %s, %s, %s, %s, %d, %d, %d, %d'
-              % (step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border), steps_binsearch))
+        print('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}'
+              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border),
+                      steps_binsearch))
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:

@@ -225,8 +225,7 @@ class ResultSet:
 
     def volume_report(self):
         # type: (ResultSet) -> str
-        vol_report = ('Volume report (Ylow, Yup, Border, Total): (%s, %s, %s, %s)\n'
-                      % (
+        vol_report = ('Volume report (Ylow, Yup, Border, Total): ({0}, {1}, {2}, {3})\n'.format(
                           str(self.volume_ylow()), str(self.volume_yup()), str(self.volume_border()),
                           str(self.volume_total())))
         return vol_report
@@ -705,7 +704,7 @@ class ResultSet:
                 # Adding new file to the .zip
                 zf.write(outfile, arcname=fname)
             except OSError:
-                print 'Unexpected error when saving %s: %s' % (outfile, sys.exc_info()[0])
+                print('Unexpected error when saving {0}: {1}'.format(outfile, sys.exc_info()[0]))
             os.remove(outfile)
         zf.close()
 
@@ -753,7 +752,7 @@ class ResultSet:
         try:
             zf.extractall(tempdir)
         except KeyError:
-            print 'ERROR: Did not find %s file' % f
+            print('ERROR: Did not find {0} file'.format(f))
         else:
             zf.close()
 
@@ -774,10 +773,10 @@ class ResultSet:
                 try:
                     os.remove(infile)
                 except OSError:
-                    print 'Unexpected error when removing %s: %s' % (infile, sys.exc_info()[0])
+                    print('Unexpected error when removing {0}: {1}'.format(infile, sys.exc_info()[0]))
 
         # Remove temporary folder
         try:
             os.rmdir(tempdir)
         except OSError:
-            print 'Unexpected error when removing folder %s: %s' % (tempdir, sys.exc_info()[0])
+            print('Unexpected error when removing folder {0}: {1}'.format(tempdir, sys.exc_info()[0]))

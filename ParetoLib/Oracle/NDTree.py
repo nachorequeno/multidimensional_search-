@@ -5,9 +5,6 @@ import __builtin__
 from ParetoLib.Geometry.Rectangle import *
 from ParetoLib.Geometry.Point import *
 
-# from ParetoLib.Oracle import #vprint
-from . import vprint
-
 
 class NDTree:
     # The data structure definition, notation and algorithms are extracted from the paper
@@ -193,17 +190,17 @@ class Node:
 
     # Report functions
     def report(self):
-        vprint('\tCurrent ', id(self))  # self type(self).__name__
-        vprint('\tParent ', id(self.parent))  # self.parent type(self.parent).__name__
-        vprint('\tNum Successors ', len(self.nodes))
-        vprint('\tSuccessors ', [id(n) for n in self.nodes])
-        vprint('\tNum Points ', len(self.L))
-        vprint('\tPoints ', self.L)
-        vprint('\tRect ', str(self.rect))
+        print('\tCurrent ', id(self))  # self type(self).__name__
+        print('\tParent ', id(self.parent))  # self.parent type(self.parent).__name__
+        print('\tNum Successors ', len(self.nodes))
+        print('\tSuccessors ', [id(n) for n in self.nodes])
+        print('\tNum Points ', len(self.L))
+        print('\tPoints ', self.L)
+        print('\tRect ', str(self.rect))
 
     def report_rec(self):
         self.report()
-        # vprint('\n')
+        # print('\n')
         [n.report_rec() for n in self.nodes]
 
     # Functions for checking the type of node
@@ -338,7 +335,7 @@ class Node:
 
     def has_points(self):
         # type: (Node) -> bool
-        # vprint('None') if self is None else None
+        # print('None') if self is None else None
         return (self is not None) and (len(self.L) > 0)
 
     # Relationship functions

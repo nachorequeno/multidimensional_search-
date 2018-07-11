@@ -13,78 +13,78 @@ from ParetoLib.Oracle.OracleSTL import *
 # Auxiliar functions used in 2D, 3D and ND
 # Creation of Spaces
 def create_2D_space(minx, miny, maxx, maxy):
-    vprint('Creating Space')
+    print('Creating Space')
     start = time.time()
     minc = (minx, miny)
     maxc = (maxx, maxy)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    vprint('Time creating Space: ', str(time0))
+    print('Time creating Space: ', str(time0))
     return xyspace
 
 
 def create_3D_space(minx, miny, minz, maxx, maxy, maxz):
-    vprint('Creating Space')
+    print('Creating Space')
     start = time.time()
     minc = (minx, miny, minz)
     maxc = (maxx, maxy, maxz)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    vprint('Time creating Space: ', str(time0))
+    print('Time creating Space: ', str(time0))
     return xyspace
 
 
 def create_ND_space(*args):
     # args = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
-    vprint('Creating Space')
+    print('Creating Space')
     start = time.time()
     minc = tuple(minx for minx, _ in args)
     maxc = tuple(maxx for _, maxx in args)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    vprint('Time creating Space: ', str(time0))
+    print('Time creating Space: ', str(time0))
     return xyspace
 
 
 def load_OracleFunction(nfile,
                         human_readable=True):
     # type: (str, bool) -> OracleFunction
-    vprint('Creating OracleFunction')
+    print('Creating OracleFunction')
     start = time.time()
     ora = OracleFunction()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    vprint('Time reading OracleFunction: ', str(time0))
+    print('Time reading OracleFunction: ', str(time0))
     return ora
 
 
 def load_OraclePoint(nfile,
                      human_readable=True):
     # type: (str, bool) -> OraclePoint
-    vprint('Creating OraclePoint')
+    print('Creating OraclePoint')
     start = time.time()
     ora = OraclePoint()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    vprint('Time reading OraclePoint: ', str(time0))
+    print('Time reading OraclePoint: ', str(time0))
     return ora
 
 
 def load_OracleSTL(nfile,
                    human_readable=True):
     # type: (str, bool) -> OracleSTL
-    vprint('Creating OracleSTL')
+    print('Creating OracleSTL')
     start = time.time()
     ora = OracleSTL()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    vprint('Time reading OracleSTL: ', str(time0))
+    print('Time reading OracleSTL: ', str(time0))
     return ora
 
 
@@ -114,7 +114,7 @@ def Search2D(ora,
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.get_points_border(n)
 
-    # vprint('Points ', points)
+    # print('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
 
@@ -153,7 +153,7 @@ def Search3D(ora,
     # n = int((max_cornerx - min_cornerx) / 0.1)
     # points = rs.get_points_border(n)
 
-    # vprint('Points ', points)
+    # print('Points ', points)
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
     # zs = [point[2] for point in points]

@@ -1,4 +1,4 @@
 sympy>=1.1.1
 numpy>=1.8.2
-matplotlib>=1.4.2
 sortedcontainers>=1.5.10
+matplotlib>=1.4.2

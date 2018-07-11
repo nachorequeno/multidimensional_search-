@@ -40,10 +40,10 @@ class OracleSTL(Oracle):
 
     def to_str(self):
         # type: (OracleSTL) -> str
-        s = 'STL property file: %s\n' % self.stl_prop_file
-        s += 'STL alias file: %s\n' % self.var_alias_file
-        s += 'STL parameters file: %s\n' % self.stl_parameters
-        s += 'VCD signal file: %s\n' % self.vcd_signal_file
+        s = 'STL property file: {0}\n'.format(self.stl_prop_file)
+        s += 'STL alias file: {0}\n'.format(self.var_alias_file)
+        s += 'STL parameters file: {0}\n'.format(self.stl_parameters)
+        s += 'VCD signal file: {0}\n'.format(self.vcd_signal_file)
         return s
 
     # Equality functions
@@ -68,7 +68,7 @@ class OracleSTL(Oracle):
                           or filecmp.cmp(self.var_alias_file, other.var_alias_file))
             res = res or (self.stl_parameters == other.stl_parameters)
         except OSError:
-            print 'Unexpected error when comparing: %s\n%s\n%s' % (sys.exc_info()[0], str(self), str(other))
+            print('Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
         return res
 
     def __ne__(self, other):
@@ -98,7 +98,7 @@ class OracleSTL(Oracle):
             res = [line.replace(' ', '') for line in f]
             f.close()
         except IOError:
-            print 'Warning: Parameter STL file does not appear to exist.'
+            print('Warning: Parameter STL file does not appear to exist.')
             res = []
 
         return res
@@ -115,7 +115,7 @@ class OracleSTL(Oracle):
             try:
                 res = str(eval(match.group(0)))
             except SyntaxError:
-                print 'Syntax error: %s' % str(match)
+                print('Syntax error: {0}'.format(str(match)))
             finally:
                 return res
             # return str(eval(match.group(0)))
@@ -126,7 +126,8 @@ class OracleSTL(Oracle):
         # number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
         number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
         op = '(\*|\/|\+|\-)+'
-        math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
+        math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
+        # math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
         # math_regex = r'(?P<expr>\b%s\b(%s\b%s\b)*)' % (number, op, number)
         pattern = re.compile(math_regex)
         ####
@@ -137,7 +138,7 @@ class OracleSTL(Oracle):
 
         for line in f:
             for i, par in enumerate(self.stl_parameters):
-                line = re.sub(r'\b%s\b' % par, str(xpoint[i]), line)
+                line = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), line)
 
             line = pattern.sub(eval_expr, line)
             stl_prop_file_subst.write(line)
@@ -171,8 +172,8 @@ class OracleSTL(Oracle):
             # subprocess.call(command)
             subprocess.check_output(command, stderr=DEVNULL, universal_newlines=True)
         except subprocess.CalledProcessError as e:
-            message = 'Running "{}" raised an exception'.format(' '.join(e.cmd))
-            print message
+            message = 'Running "{0}" raised an exception'.format(' '.join(e.cmd))
+            print(message)
             # raise RuntimeError(message)
         finally:
             # Return the result of evaluating the STL formula
@@ -251,15 +252,13 @@ class OracleSTL(Oracle):
         # Parse the AMT result
         res, delet = OracleSTL.parse_amt_result(result_file_name)
 
-        #
-        # print res
         # Remove temporal files
         if delet:
             os.remove(stl_prop_file_subst_name)
             os.remove(result_file_name)
         else:
-            print 'Warning! Evaluation of file %s returns "unkown" (see %s).' % (stl_prop_file_subst_name,
-                                                                                 result_file_name)
+            print('Warning! Evaluation of file {0} returns "unkown" (see {1}).'.format(stl_prop_file_subst_name,
+                                                                                       result_file_name))
 
         return res
 
@@ -295,10 +294,10 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    print 'File %s does not exists or it is not a file' % fname
+                    print('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            print 'Unexpected error when loading %s: %s' % (finput, sys.exc_info()[0])
+            print('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def from_file_text(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
@@ -331,10 +330,10 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    print 'File %s does not exists or it is not a file' % fname
+                    print('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            print 'Unexpected error when loading %s: %s' % (finput, sys.exc_info()[0])
+            print('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def to_file_binary(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None

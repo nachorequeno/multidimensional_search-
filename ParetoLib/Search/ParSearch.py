@@ -10,9 +10,6 @@ from ParetoLib.Search.CommonSearch import *
 from ParetoLib.Search.ParResultSet import *
 from ParetoLib.Oracle.Oracle import *
 
-# from ParetoLib.Search import vprint
-from . import vprint
-
 
 def pbin_search_ser(args):
     xrectangle, f, epsilon, n = args
@@ -74,7 +71,7 @@ def multidim_search(xspace,
     # multidim_search_breadth_first_opt_1
     # multidim_search_breadth_first_opt_2
 
-    vprint('Starting multidimensional search')
+    print('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
                               oracle,
@@ -86,7 +83,7 @@ def multidim_search(xspace,
                               logging=logging)
     end = time.time()
     time0 = end - start
-    vprint('Time multidim search: ', str(time0))
+    print('Time multidim search: ', str(time0))
 
     return rs
 
@@ -165,12 +162,12 @@ def multidim_search_deep_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -361,12 +358,12 @@ def multidim_search_deep_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -552,12 +549,12 @@ def multidim_search_deep_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -703,12 +700,12 @@ def multidim_search_breadth_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -889,12 +886,12 @@ def multidim_search_breadth_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -1046,12 +1043,12 @@ def multidim_search_breadth_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    # vprint('xspace: ', xspace)
-    # vprint('vol_border: ', vol_border)
-    # vprint('delta: ', delta)
-    # vprint('step: ', step)
-    # vprint('incomparable: ', incomparable)
-    # vprint('comparable: ', comparable)
+    # print('xspace: ', xspace)
+    # print('vol_border: ', vol_border)
+    # print('delta: ', delta)
+    # print('step: ', step)
+    # print('incomparable: ', incomparable)
+    # print('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
