@@ -12,10 +12,6 @@ The contents are the same of _py3k.__init__ file from MEvoLib
 [J. Alvarez-Jarreta et al. 2017].
 """
 
-#__version__ = 1.
-#__name__ = '_py3k'
-#__all__ = ['TemporaryDirectory']
-
 import os
 import sys
 

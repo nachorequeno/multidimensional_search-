@@ -1,12 +1,12 @@
 import os
 import sys
-#import __builtin__
+# import __builtin__
 import time
 import pickle
 from itertools import chain, combinations  # combinations_with_replacement
 import zipfile
 import tempfile
-#import shutil
+# import shutil
 
 import matplotlib.pyplot as plt
 
@@ -226,8 +226,8 @@ class ResultSet:
     def volume_report(self):
         # type: (ResultSet) -> str
         vol_report = ('Volume report (Ylow, Yup, Border, Total): ({0}, {1}, {2}, {3})\n'.format(
-                          str(self.volume_ylow()), str(self.volume_yup()), str(self.volume_border()),
-                          str(self.volume_total())))
+            str(self.volume_ylow()), str(self.volume_yup()), str(self.volume_border()),
+            str(self.volume_total())))
         return vol_report
 
     # Membership functions
@@ -339,36 +339,36 @@ class ResultSet:
         return ResultSet._get_max_val_dimension_rect_list(i, self.border)
 
     # MatPlot Graphics
-    def toMatPlotSpace2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def plot_space_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patch = [self.xspace.toMatplot2D('blue', xaxe, yaxe, opacity)]
+        patch = [self.xspace.plot_2D('blue', xaxe, yaxe, opacity)]
         return patch
 
-    def toMatPlotYup2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def plot_yup_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patch = [rect.toMatplot2D('green', xaxe, yaxe, opacity) for rect in self.yup]
+        patch = [rect.plot_2D('green', xaxe, yaxe, opacity) for rect in self.yup]
         return patch
 
-    def toMatPlotYlow2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def plot_ylow_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patch = [rect.toMatplot2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
+        patch = [rect.plot_2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
         return patch
 
-    def toMatPlotBorder2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def plot_border_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
-        patch = [rect.toMatplot2D('blue', xaxe, yaxe, opacity) for rect in self.border]
+        patch = [rect.plot_2D('blue', xaxe, yaxe, opacity) for rect in self.border]
         return patch
 
-    def toMatPlot2D(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    var_names=list(),
-                    targetx=list(),
-                    targety=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
+    def plot_2D(self,
+                filename='',
+                xaxe=0,
+                yaxe=1,
+                var_names=list(),
+                targetx=list(),
+                targety=list(),
+                blocking=False,
+                sec=0.0,
+                opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal')
@@ -384,9 +384,9 @@ class ResultSet:
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
-        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotBorder2D(xaxe, yaxe, opacity)
+        pathpatch_yup = self.plot_yup_2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.plot_ylow_2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.plot_border_2D(xaxe, yaxe, opacity)
 
         pathpatch = pathpatch_yup
         pathpatch += pathpatch_ylow
@@ -428,16 +428,16 @@ class ResultSet:
         plt.close()
         return plt
 
-    def toMatPlot2DLight(self,
-                         filename='',
-                         xaxe=0,
-                         yaxe=1,
-                         var_names=list(),
-                         targetx=list(),
-                         targety=list(),
-                         blocking=False,
-                         sec=0.0,
-                         opacity=1.0):
+    def plot_2D_light(self,
+                      filename='',
+                      xaxe=0,
+                      yaxe=1,
+                      var_names=list(),
+                      targetx=list(),
+                      targety=list(),
+                      blocking=False,
+                      sec=0.0,
+                      opacity=1.0):
         # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
 
         fig1 = plt.figure()
@@ -454,9 +454,9 @@ class ResultSet:
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
-        pathpatch_yup = self.toMatPlotYup2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.toMatPlotYlow2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.toMatPlotSpace2D(xaxe, yaxe, 0.2)
+        pathpatch_yup = self.plot_yup_2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self.plot_ylow_2D(xaxe, yaxe, opacity)
+        pathpatch_border = self.plot_space_2D(xaxe, yaxe, 0.2)
 
         pathpatch = pathpatch_border
         pathpatch += pathpatch_ylow
@@ -498,38 +498,38 @@ class ResultSet:
         plt.close()
         return plt
 
-    def toMatPlotSpace3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def plot_space_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = [self.xspace.toMatplot3D('blue', xaxe, yaxe, zaxe, opacity)]
+        faces = [self.xspace.plot_3D('blue', xaxe, yaxe, zaxe, opacity)]
         return faces
 
-    def toMatPlotYup3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def plot_yup_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = [rect.toMatplot3D('green', xaxe, yaxe, zaxe, opacity) for rect in self.yup]
+        faces = [rect.plot_3D('green', xaxe, yaxe, zaxe, opacity) for rect in self.yup]
         return faces
 
-    def toMatPlotYlow3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def plot_ylow_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = [rect.toMatplot3D('red', xaxe, yaxe, zaxe, opacity) for rect in self.ylow]
+        faces = [rect.plot_3D('red', xaxe, yaxe, zaxe, opacity) for rect in self.ylow]
         return faces
 
-    def toMatPlotBorder3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def plot_border_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
-        faces = [rect.toMatplot3D('blue', xaxe, yaxe, zaxe, opacity) for rect in self.border]
+        faces = [rect.plot_3D('blue', xaxe, yaxe, zaxe, opacity) for rect in self.border]
         return faces
 
-    def toMatPlot3D(self,
-                    filename='',
-                    xaxe=0,
-                    yaxe=1,
-                    zaxe=2,
-                    var_names=list(),
-                    targetx=list(),
-                    targety=list(),
-                    targetz=list(),
-                    blocking=False,
-                    sec=0.0,
-                    opacity=1.0):
+    def plot_3D(self,
+                filename='',
+                xaxe=0,
+                yaxe=1,
+                zaxe=2,
+                var_names=list(),
+                targetx=list(),
+                targety=list(),
+                targetz=list(),
+                blocking=False,
+                sec=0.0,
+                opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
@@ -545,9 +545,9 @@ class ResultSet:
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
-        faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
-        faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
-        faces_border = self.toMatPlotBorder3D(xaxe, yaxe, zaxe, opacity)
+        faces_yup = self.plot_yup_3D(xaxe, yaxe, zaxe, opacity)
+        faces_ylow = self.plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
+        faces_border = self.plot_border_3D(xaxe, yaxe, zaxe, opacity)
 
         faces = faces_yup
         faces += faces_ylow
@@ -592,18 +592,18 @@ class ResultSet:
         plt.close()
         return plt
 
-    def toMatPlot3DLight(self,
-                         filename='',
-                         xaxe=0,
-                         yaxe=1,
-                         zaxe=2,
-                         var_names=list(),
-                         targetx=list(),
-                         targety=list(),
-                         targetz=list(),
-                         blocking=False,
-                         sec=0.0,
-                         opacity=1.0):
+    def plot_3D_light(self,
+                      filename='',
+                      xaxe=0,
+                      yaxe=1,
+                      zaxe=2,
+                      var_names=list(),
+                      targetx=list(),
+                      targety=list(),
+                      targetz=list(),
+                      blocking=False,
+                      sec=0.0,
+                      opacity=1.0):
         # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
@@ -619,9 +619,9 @@ class ResultSet:
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
-        faces_yup = self.toMatPlotYup3D(xaxe, yaxe, zaxe, opacity)
-        faces_ylow = self.toMatPlotYlow3D(xaxe, yaxe, zaxe, opacity)
-        faces_border = self.toMatPlotSpace3D(xaxe, yaxe, zaxe, 0.2)
+        faces_yup = self.plot_yup_3D(xaxe, yaxe, zaxe, opacity)
+        faces_ylow = self.plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
+        faces_border = self.plot_space_3D(xaxe, yaxe, zaxe, 0.2)
 
         faces = faces_border
         faces += faces_ylow

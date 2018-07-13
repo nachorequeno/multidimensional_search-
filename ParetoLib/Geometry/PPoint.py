@@ -2,6 +2,7 @@ import numpy as np
 from numpy import linalg as la
 from ParetoLib._py3k import reduce
 
+
 # Point = n-dimensional tuple
 def dim(x):
     # type: (tuple) -> int

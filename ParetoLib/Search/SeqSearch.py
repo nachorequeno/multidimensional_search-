@@ -223,9 +223,9 @@ def multidim_search_opt_2(xspace,
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)
@@ -382,9 +382,9 @@ def multidim_search_opt_1(xspace,
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)
@@ -504,9 +504,9 @@ def multidim_search_opt_0(xspace,
         if sleep > 0.0:
             rs = ResultSet(list(border), ylow, yup, xspace)
             if n == 2:
-                rs.toMatPlot2DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
-                rs.toMatPlot3DLight(blocking=blocking, sec=sleep, opacity=0.7)
+                rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
             rs = ResultSet(list(border), ylow, yup, xspace)

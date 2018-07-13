@@ -47,7 +47,6 @@ class SearchTestCase(unittest.TestCase):
                   list_test_points):
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
 
-        print('Starting tests\n')
         start = time.time()
         f1 = lambda p: 1 if rs.member_yup(p) else 0
         f2 = lambda p: 1 if rs.member_ylow(p) else 0
@@ -70,10 +69,10 @@ class SearchTestCase(unittest.TestCase):
         time0 = end - start
 
         print(rs.volume_report())
-        print('Report Ylow: %s\n'.format(str(nYlow)))
-        print('Report Yup: %s\n'.format(str(nYup)))
-        print('Report Border: %s\n'.format(str(nBorder)))
-        print('Time tests: %s\n'.format(str(time0)))
+        print('Report Ylow: {0}\n'.format(str(nYlow)))
+        print('Report Yup: {0}\n'.format(str(nYup)))
+        print('Report Border: {0}\n'.format(str(nBorder)))
+        print('Time tests: {0}\n'.format(str(time0)))
 
     def search_verify_ND(self, human_readable, list_test_files):
         # min_corner = 0.0
@@ -107,6 +106,7 @@ class SearchTestCase(unittest.TestCase):
                     d = self.oracle.dim()
                     list_test_points = (max_corner - min_corner) * np.random.random_sample((self.numpoints_verify, d)) \
                                        + min_corner
+                    print('\nVerifying {0}'.format(test))
                     self._verifyND(fora, rs, list_test_points)
 
 

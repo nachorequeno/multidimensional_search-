@@ -1,5 +1,3 @@
-# import __builtin__
-
 import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -8,6 +6,7 @@ from itertools import product, tee
 from ParetoLib.Geometry.Segment import *
 from ParetoLib.Geometry.Point import *
 from ParetoLib._py3k import reduce
+
 
 # Rectangle
 # Rectangular Half-Space
@@ -297,7 +296,7 @@ class Rectangle:
         return other.dominates_rect(self)
 
     # Matplot functions
-    def toMatplot2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
+    def plot_2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), 'Dimension required >= 2'
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
@@ -313,7 +312,7 @@ class Rectangle:
             alpha=opacity
         )
 
-    def toMatplot3D(self, c='red', xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def plot_3D(self, c='red', xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (Rectangle, str, int, int, int, float) -> Poly3DCollection
         assert (self.dim() >= 3), 'Dimension required >= 3'
 

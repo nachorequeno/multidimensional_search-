@@ -1,18 +1,18 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # File :  LocalTempDir.py
 # Last version :  v0.1 ( 10/Oct/2013 )
 # Description :  Definition and implementation of the class 'TemporaryDirectory'
 #       needed when using Python 2.7 (included in Python 3.3 or newer).
 #       Extracted from:
 #  http://stackoverflow.com/questions/19296146/with-tempfile-temporarydirectory
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Historical report :
 #
 #   DATE :  10/Oct/2013
 #   VERSION :  v0.1
 #   AUTHOR(s) :  Leonardo.Z
 #
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 from __future__ import print_function
 
@@ -21,9 +21,10 @@ import os as _os
 
 from tempfile import mkdtemp
 
-#-------------------------------------------------------------------------------
 
-class TemporaryDirectory (object) :
+# -------------------------------------------------------------------------------
+
+class TemporaryDirectory(object):
     """Create and return a temporary directory.  This has the same
     behavior as mkdtemp but can be used as a context manager.  For
     example:
@@ -37,7 +38,7 @@ class TemporaryDirectory (object) :
 
     def __init__(self, suffix="", prefix="tmp", dir=None):
         self._closed = False
-        self.name = None # Handle mkdtemp raising an exception
+        self.name = None  # Handle mkdtemp raising an exception
         self.name = mkdtemp(suffix, prefix, dir)
 
     def __repr__(self):
@@ -47,7 +48,7 @@ class TemporaryDirectory (object) :
         return (self.name)
 
     def cleanup(self, _warn=False):
-        if (self.name and not self._closed) :
+        if (self.name and not self._closed):
             try:
                 self._rmtree(self.name)
             except (TypeError, AttributeError) as ex:
@@ -56,11 +57,11 @@ class TemporaryDirectory (object) :
                 # up due to missing globals
                 if "None" not in str(ex):
                     raise
-                print("ERROR: {!r} while cleaning up {!r}".format(ex, self,),
+                print("ERROR: {!r} while cleaning up {!r}".format(ex, self, ),
                       file=_sys.stderr)
                 return
             self._closed = True
-            if (_warn) :
+            if (_warn):
                 self._warn("Implicitly cleaning up {!r}".format(self))
 
     def __exit__(self, exc, value, tb):
@@ -91,7 +92,7 @@ class TemporaryDirectory (object) :
                 isdir = self._isdir(fullname) and not self._islink(fullname)
             except OSError:
                 isdir = False
-            if (isdir) :
+            if (isdir):
                 self._rmtree(fullname)
             else:
                 try:
@@ -103,5 +104,4 @@ class TemporaryDirectory (object) :
         except OSError:
             pass
 
-
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------

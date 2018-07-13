@@ -392,7 +392,7 @@ class OracleFunction(Oracle):
         # keys = self.get_variables()
         keys = self.variables
         # var_xpoint = zip(keys, xpoint) # Works in Python 2.7
-        var_xpoint = list(zip(keys, xpoint)) # Works in Python 2.7 and Python 3.x
+        var_xpoint = list(zip(keys, xpoint))  # Works in Python 2.7 and Python 3.x
         return self.eval_zip_tuple(var_xpoint)
 
     def member_dict(self, xpoint):
