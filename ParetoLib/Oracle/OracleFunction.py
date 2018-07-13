@@ -6,7 +6,10 @@ from sortedcontainers import SortedSet
 from sympy import simplify, expand, default_sort_key, Expr, Symbol
 
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib._py3k import getoutput, viewvalues, viewitems
+
+
+# from ParetoLib._py3k import getoutput, viewvalues, viewitems
+
 
 class Condition:
     # Condition = f op g
@@ -28,7 +31,9 @@ class Condition:
         self.g = simplify(g)
 
         if not self.all_coeff_are_positive():
-            print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+            print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()),
+                                                                                         str(
+                                                                                             self.get_expression_with_negative_coeff())))
 
     def init_from_string(self, poly_function):
         # op_exp = (=|>|<|>=|<|<=|<>)\s\d+
@@ -52,7 +57,9 @@ class Condition:
             # print('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
             if not self.all_coeff_are_positive():
-                print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()), str(self.get_expression_with_negative_coeff())))
+                print('WARNING! Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()),
+                                                                                             str(
+                                                                                                 self.get_expression_with_negative_coeff())))
 
     # Printers
     def __repr__(self):
@@ -272,7 +279,8 @@ class OracleFunction(Oracle):
         # super(OracleFunction, self).__init__()
         Oracle.__init__(self)
         # self.variables = set()
-        self.variables = SortedSet(key=default_sort_key)
+        # self.variables = SortedSet(key=default_sort_key)
+        self.variables = SortedSet([], key=default_sort_key)
         self.oracle = set()
 
     # Printers

@@ -19,29 +19,33 @@ __all__ = ['TemporaryDirectory']
 import os
 import sys
 
-
 if (sys.version_info[0] >= 3):
     # Code for Python 3
     from builtins import open, zip, map, filter, range, input, round, max, min
     import codecs, io
     from functools import reduce
 
+
     def _is_int_or_long(value):
         """Return True if 'value' is an integer, False otherwise."""
         # There are no longs on Python 3
         return isinstance(value, int)
 
+
     def viewkeys(dictionary):
         """Return a view of the keys of 'dictionary'."""
         return dictionary.keys()
+
 
     def viewvalues(dictionary):
         """Return a view of the values of 'dictionary'."""
         return dictionary.values()
 
+
     def viewitems(dictionary):
         """Return a view of the items of 'dictionary'."""
         return dictionary.items()
+
 
     # On Python 3 urllib, urllib2, and urlparse were merged
     from urllib.request import urlopen, Request, urlretrieve, urlparse
@@ -49,10 +53,10 @@ if (sys.version_info[0] >= 3):
     from urllib.error import HTTPError, URLError
     # On Python 3 subprocess.DEVNULL exists
     from subprocess import DEVNULL
-    #On Python 3, this will be a unicode StringIO
+    # On Python 3, this will be a unicode StringIO
     from io import StringIO
     from tempfile import TemporaryDirectory
-else: # sys.version_info[0] < 3
+else:  # sys.version_info[0] < 3
     # Code for Python 2
     from __builtin__ import open, basestring, unicode, round, max, min, reduce
     # Import Python 3 like iterator functions:
@@ -60,23 +64,28 @@ else: # sys.version_info[0] < 3
     from __builtin__ import xrange as range
     from __builtin__ import raw_input as input
 
+
     def _is_int_or_long(value):
         """Return True if 'value' is an integer or long, False
         otherwise.
         """
         return isinstance(value, (int, long))
 
+
     def viewkeys(dictionary):
         """Return a view of the keys of 'dictionary'."""
-        return ( dictionary.viewkeys() )
+        return (dictionary.viewkeys())
+
 
     def viewvalues(dictionary):
         """Return a view of the values of 'dictionary'."""
         return dictionary.viewvalues()
 
+
     def viewitems(dictionary):
         """Return a view of the items of 'dictionary'."""
         return dictionary.viewitems()
+
 
     # Under urllib.request on Python 3:
     from urllib2 import urlopen, Request
@@ -86,6 +95,7 @@ else: # sys.version_info[0] < 3
     from urllib import urlencode, quote
     # Under urllib.error on Python 3:
     from urllib2 import HTTPError, URLError
+
     # On Python 2 subprocess.DEVNULL doesn't exist
     DEVNULL = open(os.path.devnull, 'w')
     # On Python 2 this will be a (bytes) string based handle.
@@ -100,8 +110,7 @@ else: # sys.version_info[0] < 3
     except NameError:
         pass
     # There is no TemporaryDirectory class in the temp library
-    from .TemporaryDirectory import TemporaryDirectory
-
+    # from .TemporaryDirectory import TemporaryDirectory
 
 if (sys.platform == "win32"):
     # Can't use commands.getoutput on Python 2, Unix only/broken:
@@ -120,6 +129,6 @@ if (sys.platform == "win32"):
 elif (sys.version_info[0] >= 3):
     # Use subprocess.getoutput on Python 3
     from subprocess import getoutput
-else: # sys.version_info[0] <= 2
+else:  # sys.version_info[0] <= 2
     # Use commands.getoutput on Python 2
     from commands import getoutput
