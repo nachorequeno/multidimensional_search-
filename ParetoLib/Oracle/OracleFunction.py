@@ -216,11 +216,13 @@ class Condition:
         # type: (Condition, str, bool) -> None
         assert (fname != ''), 'Filename should not be null'
 
-        mode = 'rb'
-        finput = open(fname, mode)
+        mode = 'r'
         if human_readable:
+            finput = open(fname, mode)
             self.from_file_text(finput)
         else:
+            mode = mode + 'b'
+            finput = open(fname, mode)
             self.from_file_binary(finput)
         finput.close()
 
@@ -244,14 +246,16 @@ class Condition:
         assert (fname != ''), 'Filename should not be null'
 
         if append:
-            mode = 'ab'
+            mode = 'a'
         else:
-            mode = 'wb'
+            mode = 'w'
 
-        foutput = open(fname, mode)
         if human_readable:
+            foutput = open(fname, mode)
             self.to_file_text(foutput)
         else:
+            mode = mode + 'b'
+            foutput = open(fname, mode)
             self.to_file_binary(foutput)
         foutput.close()
 
@@ -387,7 +391,8 @@ class OracleFunction(Oracle):
         # print(xpoint)
         # keys = self.get_variables()
         keys = self.variables
-        var_xpoint = zip(keys, xpoint)
+        # var_xpoint = zip(keys, xpoint) # Works in Python 2.7
+        var_xpoint = list(zip(keys, xpoint)) # Works in Python 2.7 and Python 3.x
         return self.eval_zip_tuple(var_xpoint)
 
     def member_dict(self, xpoint):
@@ -411,18 +416,6 @@ class OracleFunction(Oracle):
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
-    def from_file(self, fname='', human_readable=False):
-        # type: (OracleFunction, str, bool) -> None
-        assert (fname != ''), 'Filename should not be null'
-
-        mode = 'rb'
-        finput = open(fname, mode)
-        if human_readable:
-            self.from_file_text(finput)
-        else:
-            self.from_file_binary(finput)
-        finput.close()
-
     def from_file_binary(self, finput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
         assert (finput is not None), 'File object should not be null'
@@ -439,22 +432,6 @@ class OracleFunction(Oracle):
             cond = Condition()
             cond.init_from_string(line)
             self.add(cond)
-
-    def to_file(self, fname='', append=False, human_readable=False):
-        # type: (OracleFunction, str, bool, bool) -> None
-        assert (fname != ''), 'Filename should not be null'
-
-        if append:
-            mode = 'ab'
-        else:
-            mode = 'wb'
-
-        foutput = open(fname, mode)
-        if human_readable:
-            self.to_file_text(foutput)
-        else:
-            self.to_file_binary(foutput)
-        foutput.close()
 
     def to_file_binary(self, foutput=None):
         # type: (OracleFunction, io.BinaryIO) -> None

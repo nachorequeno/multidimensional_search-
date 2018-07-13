@@ -83,7 +83,7 @@ def multidim_search(xspace,
                               logging=logging)
     end = time.time()
     time0 = end - start
-    print('Time multidim search: ', str(time0))
+    print('Time multidim search: ' + str(time0))
 
     return rs
 

@@ -62,11 +62,13 @@ class Oracle:
         assert (fname != ''), 'Filename should not be null'
         assert os.path.isfile(fname), 'File {0} does not exists or it is not a file'.format(fname)
 
-        mode = 'rb'
-        finput = open(fname, mode)
+        mode = 'r'
         if human_readable:
+            finput = open(fname, mode)
             self.from_file_text(finput)
         else:
+            mode = mode + 'b'
+            finput = open(fname, mode)
             self.from_file_binary(finput)
         finput.close()
 
@@ -83,14 +85,16 @@ class Oracle:
         assert (fname != ''), 'Filename should not be null'
 
         if append:
-            mode = 'ab'
+            mode = 'a'
         else:
-            mode = 'wb'
+            mode = 'w'
 
-        foutput = open(fname, mode)
         if human_readable:
+            foutput = open(fname, mode)
             self.to_file_text(foutput)
         else:
+            mode = mode + 'b'
+            foutput = open(fname, mode)
             self.to_file_binary(foutput)
         foutput.close()
 

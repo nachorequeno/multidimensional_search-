@@ -17,7 +17,7 @@ class SearchTestCase(unittest.TestCase):
         # This test only considers Oracles (in *.txt format) that are located in the root
         # of folders Oracle/OracleXXX/[1|2|3|N]D
 
-        self.this_dir = "Oracle"
+        self.this_dir = 'Oracle'
         self.oracle = Oracle()
 
         # By default, use min_corner in 0.0 and max_corner in 1.0
@@ -30,16 +30,15 @@ class SearchTestCase(unittest.TestCase):
         test1 = fora(xpoint) and (rs.member_yup(xpoint) or rs.member_border(xpoint))
         test2 = (not fora(xpoint)) and (rs.member_ylow(xpoint) or rs.member_border(xpoint))
 
-        vprint_string = 'Warning!\n'
-        vprint_string += 'Testing ', str(xpoint)
-        vprint_string += '(inYup, inYlow, inBorder): (%s, %s, %s)' \
-                         % (str(rs.member_yup(xpoint)), str(rs.member_ylow(xpoint)),
-                            str(rs.member_border(xpoint)))
-        vprint_string += 'Expecting\n'
-        vprint_string += '(inYup, inYlow): (%s, %s)' \
-                         % (str(fora(xpoint)), str(not fora(xpoint)))
+        print_string = 'Warning!\n'
+        print_string += 'Testing ', str(xpoint)
+        print_string += '(inYup, inYlow, inBorder): ({0}, {1}, {2})'.format(str(rs.member_yup(xpoint)),
+                                                                            str(rs.member_ylow(xpoint)),
+                                                                            str(rs.member_border(xpoint)))
+        print_string += 'Expecting\n'
+        print_string += '(inYup, inYlow): ({0}, {1})'.format(str(fora(xpoint)), str(not fora(xpoint)))
 
-        self.assertTrue(test1 or test2, vprint_string)
+        self.assertTrue(test1 or test2, print_string)
 
     # Auxiliar function for reporting ND results
     def _verifyND(self,
@@ -48,7 +47,7 @@ class SearchTestCase(unittest.TestCase):
                   list_test_points):
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
 
-        print 'Starting tests\n'
+        print('Starting tests\n')
         start = time.time()
         f1 = lambda p: 1 if rs.member_yup(p) else 0
         f2 = lambda p: 1 if rs.member_ylow(p) else 0
@@ -63,15 +62,18 @@ class SearchTestCase(unittest.TestCase):
         nBorder = sum(list_nBorder)
 
         # [self._closureMembershipTest(fora, rs, p) for p in list_test_points]
-        print 'Ok!\n' if all(self._closureMembershipTest(fora, rs, p) for p in list_test_points) else 'Not ok!\n'
+        if all(self._closureMembershipTest(fora, rs, p) for p in list_test_points):
+            print('Ok!\n')
+        else:
+            print('Not ok!\n')
         end = time.time()
         time0 = end - start
 
-        print rs.volume_report()
-        print 'Report Ylow: %s\n' % (str(nYlow))
-        print 'Report Yup: %s\n' % (str(nYup))
-        print 'Report Border: %s\n' % (str(nBorder))
-        print 'Time tests: %s\n' % str(time0)
+        print(rs.volume_report())
+        print('Report Ylow: %s\n'.format(str(nYlow)))
+        print('Report Yup: %s\n'.format(str(nYup)))
+        print('Report Border: %s\n'.format(str(nBorder)))
+        print('Time tests: %s\n'.format(str(time0)))
 
     def search_verify_ND(self, human_readable, list_test_files):
         # min_corner = 0.0
@@ -81,7 +83,7 @@ class SearchTestCase(unittest.TestCase):
 
         for bool_val in (True, False):
             for test in list_test_files:
-                print '\nTesting %s' % test
+                print('\nTesting {0}'.format(test))
                 self.assertTrue(os.path.isfile(test), test)
                 self.oracle.from_file(test, human_readable)
                 fora = self.oracle.membership()
@@ -112,25 +114,25 @@ class SearchOracleFunctionTestCase(SearchTestCase):
 
     def setUp(self):
         super(SearchOracleFunctionTestCase, self).setUp()
-        self.this_dir = "Oracle/OracleFunction"
+        self.this_dir = 'Oracle/OracleFunction'
         self.oracle = OracleFunction()
 
     def test_2D(self):
-        test_dir = os.path.join(self.this_dir, "2D")
+        test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_3D(self):
-        test_dir = os.path.join(self.this_dir, "3D")
+        test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_ND(self):
-        test_dir = os.path.join(self.this_dir, "ND")
+        test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
 
@@ -138,25 +140,25 @@ class SearchOraclePointTestCase(SearchTestCase):
 
     def setUp(self):
         super(SearchOraclePointTestCase, self).setUp()
-        self.this_dir = "Oracle/OraclePoint"
+        self.this_dir = 'Oracle/OraclePoint'
         self.oracle = OraclePoint()
 
     def test_2D(self):
-        test_dir = os.path.join(self.this_dir, "2D")
+        test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_3D(self):
-        test_dir = os.path.join(self.this_dir, "3D")
+        test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_ND(self):
-        test_dir = os.path.join(self.this_dir, "ND")
+        test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
 
@@ -164,7 +166,7 @@ class SearchOracleSTLTestCase(SearchTestCase):
 
     def setUp(self):
         super(SearchOracleSTLTestCase, self).setUp()
-        self.this_dir = "Oracle/OracleSTL"
+        self.this_dir = 'Oracle/OracleSTL'
         self.oracle = OracleSTL()
 
         # Run tests of the 'sincos' example.
@@ -173,15 +175,15 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.max_c = 2.0
 
     def test_1D(self):
-        test_dir = os.path.join(self.this_dir, "1D")
+        test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_2D(self):
-        test_dir = os.path.join(self.this_dir, "2D")
+        test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     # Currently, we only run OracleSTL tests for 1D and 2D because of the

@@ -10,7 +10,7 @@ from ParetoLib.Oracle.OracleSTL import *
 
 class OracleSTLTestCase(unittest.TestCase):
     def setUp(self):
-        self.this_dir = "Oracle/OracleSTL"
+        self.this_dir = 'Oracle/OracleSTL'
         self.files_to_clean = set()
         self.files_to_load = self.add_file_to_load()
 
@@ -23,7 +23,7 @@ class OracleSTLTestCase(unittest.TestCase):
         self.files_to_clean.add(filename)
 
     def add_file_to_load(self):
-        # local_dirs = [x[0] for x in os.walk("Oracle/OracleSTL")]
+        # local_dirs = [x[0] for x in os.walk('Oracle/OracleSTL')]
         local_dirs = [x[0] for x in os.walk(self.this_dir)]
         oraclestl_filenames = []
         for local_dir in local_dirs:
@@ -34,7 +34,7 @@ class OracleSTLTestCase(unittest.TestCase):
         # test_dir = self.this_dir + folder
         test_dir = folder
         files_path = os.listdir(test_dir)
-        test_txt = [os.path.join(test_dir, x) for x in files_path if x.endswith(".txt")]
+        test_txt = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
 
         assert all(os.path.isfile(test) for test in test_txt)
 
