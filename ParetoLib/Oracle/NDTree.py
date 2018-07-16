@@ -495,14 +495,19 @@ class Node:
         # Returns 'True' if x is dominated by any point stored in the Pareto archive
         # Use the rectangle associated to the Node for speeding up the evaluation
         rect = self.get_rectangle_sn()
-        if less_equal(rect.max_corner, x):
+        if less(rect.max_corner, x):
             # x is dominated by the Pareto front
             return True
-        elif less_equal(rect.min_corner, x) or less_equal(x, rect.max_corner):
-            # x is inside the rectangle enclosing the Pareto front
-            return any(n.dominates(x) for n in self.nodes)
-        # elif less_equal(x, rect.min_corner):
-        # x dominates the Pareto front
-        # return False
-        else:
+        elif less(x, rect.min_corner):
+            # x dominates the Pareto front
             return False
+        elif (rect.min_corner == x) or (rect.max_corner == x):
+            return True
+        else:
+            # x is inside the rectangle enclosing the Pareto front, or
+            # x is incomparable to the min and max corners.
+            # Therefore, we must explicitly check if x is dominated by
+            # any point of the current subtree.
+            test1 = any(less_equal(p, x) for p in self.L)
+            test2 = any(n.dominates(x) for n in self.nodes)
+            return test1 or test2

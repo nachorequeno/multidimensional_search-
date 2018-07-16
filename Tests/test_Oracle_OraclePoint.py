@@ -104,25 +104,32 @@ class OraclePointTestCase(unittest.TestCase):
             return 1 / x if x > 0.0 else 1000
 
         def f2(x):
-            return 0.1 + 1 / x if x > 0.0 else 1001
+            return 0.1 + (1 / x) if x > 0.0 else 1000.1
 
         def f3(x):
-            return -0.1 + 1 / x if x > 0.0 else 999
+            return -0.1 + (1 / x) if x > 0.0 else 999.9
 
         xs = np.arange(min_corner, max_corner, 0.1)
         y1s = [f1(x) for x in xs]
         y2s = [f2(x) for x in xs]
         y3s = [f3(x) for x in xs]
 
-        p1 = [(x, y) for x, y in zip(xs, y1s)]
-        p2 = [(x, y) for x, y in zip(xs, y2s)]
-        p3 = [(x, y) for x, y in zip(xs, y3s)]
+        p1 = list(zip(xs, y1s))
+        p2 = list(zip(xs, y2s))
+        p3 = list(zip(xs, y3s))
+
+        # p1 = [(float(x), float(y)) for x, y in zip(xs, y1s)]
+        # p2 = [(float(x), float(y)) for x, y in zip(xs, y2s)]
+        # p3 = [(float(x), float(y)) for x, y in zip(xs, y3s)]
+
+        p1 = sorted(p1)
+        p2 = sorted(p2)
+        p3 = sorted(p3)
 
         # Oracle
         ora1 = OraclePoint()
-        for x, y in zip(xs, y1s):
-            point = (x, y)
-            ora1.add_point(point)
+        for p in p1:
+            ora1.add_point(p)
 
         ora2 = OraclePoint()
         ora2.add_points(set(p1))
