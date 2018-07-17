@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #pip2 uninstall ParetoLib
 python setup.py clean --all
 python setup.py build
