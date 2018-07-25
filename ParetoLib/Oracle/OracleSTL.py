@@ -8,6 +8,7 @@ import io
 import sys
 import filecmp
 
+import ParetoLib.Oracle as ParOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.JAMT.JAMT import *
 
@@ -68,7 +69,8 @@ class OracleSTL(Oracle):
                           or filecmp.cmp(self.var_alias_file, other.var_alias_file))
             res = res or (self.stl_parameters == other.stl_parameters)
         except OSError:
-            print('Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
+            ParOracle.logger.error(
+                'Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
         return res
 
     def __ne__(self, other):
@@ -91,6 +93,7 @@ class OracleSTL(Oracle):
     @staticmethod
     def get_parameters_stl(stl_param_file):
         # type: (str) -> list
+        res = []
 
         # Each line of the stl_param_file contains the name of a parameter in the STL formula
         try:
@@ -98,10 +101,9 @@ class OracleSTL(Oracle):
             res = [line.replace(' ', '') for line in f]
             f.close()
         except IOError:
-            print('Warning! Parameter STL file does not appear to exist.')
-            res = []
-
-        return res
+            ParOracle.logger.warning('Parameter STL file does not appear to exist.')
+        finally:
+            return res
 
     def replace_par_val_stl_formula(self, xpoint):
         # type: (OracleSTL, tuple) -> str
@@ -115,7 +117,7 @@ class OracleSTL(Oracle):
             try:
                 res = str(eval(match.group(0)))
             except SyntaxError:
-                print('Syntax error: {0}'.format(str(match)))
+                ParOracle.logger.error('Syntax error: {0}'.format(str(match)))
             finally:
                 return res
             # return str(eval(match.group(0)))
@@ -257,8 +259,9 @@ class OracleSTL(Oracle):
             os.remove(stl_prop_file_subst_name)
             os.remove(result_file_name)
         else:
-            print('Warning! Evaluation of file {0} returns "unkown" (see {1}).'.format(stl_prop_file_subst_name,
-                                                                                       result_file_name))
+            ParOracle.logger.warning(
+                'Evaluation of file {0} returns "unkown" (see {1}).'.format(stl_prop_file_subst_name,
+                                                                            result_file_name))
 
         return res
 
@@ -294,10 +297,10 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    print('File {0} does not exists or it is not a file'.format(fname))
+                    ParOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            print('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
+            ParOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def from_file_text(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
@@ -330,10 +333,10 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    print('File {0} does not exists or it is not a file'.format(fname))
+                    ParOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            print('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
+            ParOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def to_file_binary(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None

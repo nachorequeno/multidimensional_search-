@@ -200,7 +200,6 @@ class Node:
 
     def report_rec(self):
         self.report()
-        # print('\n')
         [n.report_rec() for n in self.nodes]
 
     # Functions for checking the type of node
@@ -335,7 +334,6 @@ class Node:
 
     def has_points(self):
         # type: (Node) -> bool
-        # print('None') if self is None else None
         return (self is not None) and (len(self.L) > 0)
 
     # Relationship functions

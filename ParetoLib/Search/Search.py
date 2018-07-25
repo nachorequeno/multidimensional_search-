@@ -6,85 +6,81 @@ from ParetoLib.Oracle.OraclePoint import *
 from ParetoLib.Oracle.OracleSTL import *
 
 
-# from ParetoLib.Search.CommonSearch import *
-# import ParetoLib.Search.SeqSearch as SeqSearch
-# import ParetoLib.Search.ParSearch as ParSearch
-
 # Auxiliar functions used in 2D, 3D and ND
 # Creation of Spaces
 def create_2D_space(minx, miny, maxx, maxy):
-    print('Creating Space')
+    ParSearch.logger.debug('Creating Space')
     start = time.time()
     minc = (minx, miny)
     maxc = (maxx, maxy)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
 def create_3D_space(minx, miny, minz, maxx, maxy, maxz):
-    print('Creating Space')
+    ParSearch.logger.debug('Creating Space')
     start = time.time()
     minc = (minx, miny, minz)
     maxc = (maxx, maxy, maxz)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
 def create_ND_space(*args):
     # args = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
-    print('Creating Space')
+    ParSearch.logger.debug('Creating Space')
     start = time.time()
     minc = tuple(minx for minx, _ in args)
     maxc = tuple(maxx for _, maxx in args)
     xyspace = Rectangle(minc, maxc)
     end = time.time()
     time0 = end - start
-    print('Time creating Space: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time creating Space: {0}'.format(str(time0)))
     return xyspace
 
 
 def load_OracleFunction(nfile,
                         human_readable=True):
     # type: (str, bool) -> OracleFunction
-    print('Creating OracleFunction')
+    ParSearch.logger.debug('Creating OracleFunction')
     start = time.time()
     ora = OracleFunction()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OracleFunction: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time reading OracleFunction: {0}'.format(str(time0)))
     return ora
 
 
 def load_OraclePoint(nfile,
                      human_readable=True):
     # type: (str, bool) -> OraclePoint
-    print('Creating OraclePoint')
+    ParSearch.logger.debug('Creating OraclePoint')
     start = time.time()
     ora = OraclePoint()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OraclePoint: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time reading OraclePoint: {0}'.format(str(time0)))
     return ora
 
 
 def load_OracleSTL(nfile,
                    human_readable=True):
     # type: (str, bool) -> OracleSTL
-    print('Creating OracleSTL')
+    ParSearch.logger.debug('Creating OracleSTL')
     start = time.time()
     ora = OracleSTL()
     ora.from_file(nfile, human_readable=human_readable)
     end = time.time()
     time0 = end - start
-    print('Time reading OracleSTL: {0}'.format(str(time0)))
+    ParSearch.logger.debug('Time reading OracleSTL: {0}'.format(str(time0)))
     return ora
 
 

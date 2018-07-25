@@ -11,6 +11,7 @@ import tempfile
 import matplotlib.pyplot as plt
 
 from ParetoLib.Geometry.Rectangle import *
+import ParetoLib.Search as ParSearch
 
 
 class ResultSet:
@@ -717,7 +718,7 @@ class ResultSet:
                 # Adding new file to the .zip
                 zf.write(outfile, arcname=fname)
             except OSError:
-                print('Unexpected error when saving {0}: {1}'.format(outfile, sys.exc_info()[0]))
+                ParSearch.logger.error('Unexpected error when saving {0}: {1}'.format(outfile, sys.exc_info()[0]))
             os.remove(outfile)
         zf.close()
 
@@ -765,7 +766,7 @@ class ResultSet:
         try:
             zf.extractall(tempdir)
         except KeyError:
-            print('Error! Did not find {0} file'.format(f))
+            ParSearch.logger.error('Did not find {0} file'.format(f))
         else:
             zf.close()
 
@@ -786,10 +787,10 @@ class ResultSet:
                 try:
                     os.remove(infile)
                 except OSError:
-                    print('Unexpected error when removing {0}: {1}'.format(infile, sys.exc_info()[0]))
+                    ParSearch.logger.error('Unexpected error when removing {0}: {1}'.format(infile, sys.exc_info()[0]))
 
         # Remove temporary folder
         try:
             os.rmdir(tempdir)
         except OSError:
-            print('Unexpected error when removing folder {0}: {1}'.format(tempdir, sys.exc_info()[0]))
+            ParSearch.logger.error('Unexpected error when removing folder {0}: {1}'.format(tempdir, sys.exc_info()[0]))
