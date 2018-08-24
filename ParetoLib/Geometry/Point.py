@@ -1,4 +1,5 @@
 import math
+
 import ParetoLib.Geometry
 from ParetoLib._py3k import reduce
 

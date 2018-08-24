@@ -1,8 +1,9 @@
-import pickle
+import sys
+import resource
 import io
+import pickle
 
-from ParetoLib.Oracle.NDTree import *
-
+from ParetoLib.Oracle.NDTree import NDTree
 from ParetoLib.Oracle.Oracle import Oracle
 
 
@@ -110,10 +111,8 @@ class OraclePoint(Oracle):
         self.oracle = NDTree()
 
         point_list = (_line2tuple(line) for line in finput)
-        # point_list = (self._line2tuple(line) for line in finput)
-
-        # map(self.oracle.updatePoint, point_list)
-        [self.oracle.update_point(point) for point in point_list]
+        for point in point_list:
+            self.oracle.update_point(point)
 
     def to_file_binary(self, foutput=None):
         # type: (OraclePoint, io.BinaryIO) -> None

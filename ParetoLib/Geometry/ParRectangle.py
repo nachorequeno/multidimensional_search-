@@ -1,6 +1,7 @@
 from multiprocessing import Pool, cpu_count
 
-from ParetoLib.Geometry.Rectangle import *
+from ParetoLib.Geometry.Rectangle import Rectangle, brect
+from ParetoLib.Geometry.Point import dim
 
 
 ############################################################################

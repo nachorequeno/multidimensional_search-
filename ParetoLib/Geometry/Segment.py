@@ -1,4 +1,7 @@
-from ParetoLib.Geometry.Point import *
+import math
+
+from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal
+import ParetoLib.Geometry.Point as Point
 
 
 class Segment:
@@ -7,7 +10,7 @@ class Segment:
         # type: (Segment, tuple, tuple) -> None
         self.low = minimum(low, high)
         self.high = maximum(low, high)
-        assert dim(self.low) == dim(self.high)
+        assert Point.dim(self.low) == Point.dim(self.high)
         assert greater_equal(self.high, self.low)
 
     # Membership function
@@ -57,17 +60,17 @@ class Segment:
     # Segment properties
     def dim(self):
         # type: (Segment) -> int
-        return dim(self.low)
+        return Point.dim(self.low)
 
     # def __len__(self):
     def diag(self):
         # type: (Segment) -> tuple
-        return subtract(self.high, self.low)
+        return Point.subtract(self.high, self.low)
 
     def norm(self):
         # type: (Segment) -> float
         diagonal = self.diag()
-        return norm(diagonal)
+        return Point.norm(diagonal)
 
     def norm2(self):
         # type: (Segment) -> float

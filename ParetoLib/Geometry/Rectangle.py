@@ -1,10 +1,12 @@
+import math
 import numpy as np
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from itertools import product, tee
 
-from ParetoLib.Geometry.Segment import *
-from ParetoLib.Geometry.Point import *
+from ParetoLib.Geometry.Segment import Segment
+from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
+    incomparables, select, subt, int_to_bin_tuple, r
 from ParetoLib._py3k import reduce
 
 
@@ -20,11 +22,6 @@ class Rectangle:
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
 
-        # self.min_corner = tuple(__builtin__.min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        # self.max_corner = tuple(__builtin__.max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-
-        # self.min_corner = tuple(r(__builtin__.min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
-        # self.max_corner = tuple(r(__builtin__.max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
 
         self.min_corner = tuple(r(min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
         self.max_corner = tuple(r(max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
@@ -81,19 +78,24 @@ class Rectangle:
         # type: (Rectangle) -> int
         return dim(self.min_corner)
 
-    def diag(self):
+    def diag_length(self):
         # type: (Rectangle) -> tuple
         return subtract(self.max_corner, self.min_corner)
+
+    # def norm(self):
+    #     # type: (Rectangle) -> float
+    # diagonal_length = self.diag_length()
+    # return norm(diagonal_length)
 
     def norm(self):
         # type: (Rectangle) -> float
         diagonal = self.diag()
-        return norm(diagonal)
+        return diagonal.norm()
 
     def volume(self):
         # type: (Rectangle) -> float
-        diagonal = self.diag()
-        _prod = reduce(lambda si, sj: si * sj, diagonal)
+        diagonal_length = self.diag_length()
+        _prod = reduce(lambda si, sj: si * sj, diagonal_length)
         return abs(_prod)
 
     def num_vertices(self):
@@ -102,7 +104,7 @@ class Rectangle:
 
     def vertices(self):
         # type: (Rectangle) -> list
-        deltas = self.diag()
+        deltas = self.diag_length()
         vertex = self.min_corner
         vertices = []
         for i in range(self.num_vertices()):
@@ -113,13 +115,13 @@ class Rectangle:
         assert (len(vertices) == self.num_vertices()), 'Error in the number of vertices'
         return vertices
 
-    def diag_to_segment(self):
+    def diag(self):
         # type: (Rectangle) -> Segment
         return Segment(self.min_corner, self.max_corner)
 
     def center(self):
         # type: (Rectangle) -> tuple
-        offset = div(self.diag(), 2)
+        offset = div(self.diag_length(), 2)
         return add(self.min_corner, offset)
 
     def distance_to_center(self, xpoint):
@@ -133,7 +135,7 @@ class Rectangle:
         # Return n points along the rectangle diagonal, excluding min/max corners
         # n internal points = n + 1 internal segments
         m = n + 1
-        diag_step = div(self.diag(), m)
+        diag_step = div(self.diag_length(), m)
         min_point = add(self.min_corner, diag_step)
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
         return point_list
@@ -171,8 +173,6 @@ class Rectangle:
             new_union_vertices = (vert_self.union(vert_other)) - inter
             assert len(new_union_vertices) > 0, \
                 'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
-            # rect.min_corner = __builtin__.min(new_union_vertices)
-            # rect.max_corner = __builtin__.max(new_union_vertices)
 
             rect.min_corner = min(new_union_vertices)
             rect.max_corner = max(new_union_vertices)
@@ -193,8 +193,6 @@ class Rectangle:
             assert len(new_union_vertices) > 0, \
                 'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
 
-            # self.min_corner = __builtin__.min(new_union_vertices)
-            # self.max_corner = __builtin__.max(new_union_vertices)
 
             self.min_corner = min(new_union_vertices)
             self.max_corner = max(new_union_vertices)
@@ -204,8 +202,6 @@ class Rectangle:
         # type: (Rectangle, Rectangle) -> bool
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        # minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        # maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
@@ -216,8 +212,6 @@ class Rectangle:
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         if self.overlaps(other):
-            # minc = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            # maxc = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
 
             minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
             maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
@@ -230,8 +224,6 @@ class Rectangle:
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         if self.overlaps(other):
-            # self.min_corner = tuple(__builtin__.max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            # self.max_corner = tuple(__builtin__.min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
 
             self.min_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
             self.max_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
@@ -300,8 +292,8 @@ class Rectangle:
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
         assert (self.dim() >= 2), 'Dimension required >= 2'
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
-        width = self.diag()[xaxe]
-        height = self.diag()[yaxe]
+        width = self.diag_length()[xaxe]
+        height = self.diag_length()[yaxe]
         return patches.Rectangle(
             mc,  # (x,y)
             width,  # width

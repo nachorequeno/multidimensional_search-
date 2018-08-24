@@ -1,5 +1,5 @@
-from ParetoLib.Geometry.Point import *
-from ParetoLib.Geometry.Segment import *
+from ParetoLib.Geometry.Point import add, subtract, less, div
+from ParetoLib.Geometry.Segment import Segment
 
 # EPS = sys.float_info.epsilon
 # DELTA = sys.float_info.epsilon

@@ -1,21 +1,26 @@
-# import __builtin__
-import itertools
-from multiprocessing import Manager
-import multiprocessing as mp
+import os
 import copy
+import time
+import tempfile
+import itertools
+import multiprocessing as mp
 
+from multiprocessing import Manager, Pool, cpu_count
 from sortedcontainers import SortedSet
 
-import ParetoLib.Search as ParSearch
-from ParetoLib.Search.CommonSearch import *
-from ParetoLib.Search.ParResultSet import *
-from ParetoLib.Oracle.Oracle import *
+import ParetoLib.Search as RootSearch
 
+from ParetoLib.Search.CommonSearch import EPS, DELTA, STEPS, binary_search
+from ParetoLib.Search.ParResultSet import ParResultSet
+
+from ParetoLib.Oracle.Oracle import Oracle
+from ParetoLib.Geometry.Rectangle import Rectangle, irect
+from ParetoLib.Geometry.ParRectangle import pvol
 
 def pbin_search_ser(args):
     xrectangle, f, epsilon, n = args
     error = (epsilon,) * n
-    y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
+    y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
     return y
 
 
@@ -24,7 +29,7 @@ def pbin_search(args):
     ora = dict_man[mp.current_process().name]
     f = ora.membership()
     error = (epsilon,) * n
-    y, steps_binsearch = binary_search(xrectangle.diag_to_segment(), f, error)
+    y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
     return y
 
 
@@ -72,7 +77,7 @@ def multidim_search(xspace,
     # multidim_search_breadth_first_opt_1
     # multidim_search_breadth_first_opt_2
 
-    ParSearch.logger.info('Starting multidimensional search')
+    RootSearch.logger.info('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
                               oracle,
@@ -84,7 +89,7 @@ def multidim_search(xspace,
                               logging=logging)
     end = time.time()
     time0 = end - start
-    ParSearch.logger.info('Time multidim search: ' + str(time0))
+    RootSearch.logger.info('Time multidim search: ' + str(time0))
 
     return rs
 
@@ -163,23 +168,21 @@ def multidim_search_deep_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        # chunk = __builtin__.min(num_proc, remaining_steps)
-        # chunk = __builtin__.min(chunk, len(border))
         chunk = min(num_proc, remaining_steps)
         chunk = min(chunk, len(border))
 
@@ -261,7 +264,7 @@ def multidim_search_deep_first_opt_2(xspace,
         new_incomp_rects_iter = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        new_incomp_rects = set(chain.from_iterable(new_incomp_rects_iter))
+        new_incomp_rects = set(itertools.chain.from_iterable(new_incomp_rects_iter))
 
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
@@ -273,12 +276,12 @@ def multidim_search_deep_first_opt_2(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -362,23 +365,21 @@ def multidim_search_deep_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        # chunk = __builtin__.min(num_proc, remaining_steps)
-        # chunk = __builtin__.min(chunk, len(border))
         chunk = min(num_proc, remaining_steps)
         chunk = min(chunk, len(border))
 
@@ -441,7 +442,7 @@ def multidim_search_deep_first_opt_1(xspace,
         new_incomp_rects_iter = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        new_incomp_rects = set(chain.from_iterable(new_incomp_rects_iter))
+        new_incomp_rects = set(itertools.chain.from_iterable(new_incomp_rects_iter))
 
         ################################
         # Every Incomparable rectangle that dominates B0 is included in Ylow
@@ -467,12 +468,12 @@ def multidim_search_deep_first_opt_1(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -556,23 +557,21 @@ def multidim_search_deep_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Divide the list of incomparable rectangles in chunks of 'num_proc' elements.
         # We get the 'num_proc' elements with highest volume.
 
-        # chunk = __builtin__.min(num_proc, remaining_steps)
-        # chunk = __builtin__.min(chunk, len(border))
         chunk = min(num_proc, remaining_steps)
         chunk = min(chunk, len(border))
 
@@ -616,19 +615,19 @@ def multidim_search_deep_first_opt_0(xspace,
         new_incomp_rects_iter = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        new_incomp_rects = set(chain.from_iterable(new_incomp_rects_iter))
+        new_incomp_rects = set(itertools.chain.from_iterable(new_incomp_rects_iter))
 
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -710,21 +709,20 @@ def multidim_search_breadth_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        # chunk = __builtin__.min(remaining_steps, len(border))
         chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
@@ -803,7 +801,7 @@ def multidim_search_breadth_first_opt_2(xspace,
         new_incomp_rects = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        border = list(chain.from_iterable(new_incomp_rects))
+        border = list(itertools.chain.from_iterable(new_incomp_rects))
 
         ################################
         # Every rectangle in 'new_incomp_rects' is incomparable for current B0 and for all B0 included in Ylow
@@ -812,12 +810,12 @@ def multidim_search_breadth_first_opt_2(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -897,21 +895,20 @@ def multidim_search_breadth_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        # chunk = __builtin__.min(remaining_steps, len(border))
         chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
@@ -943,7 +940,7 @@ def multidim_search_breadth_first_opt_1(xspace,
         new_incomp_rects = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        border = list(chain.from_iterable(new_incomp_rects))
+        border = list(itertools.chain.from_iterable(new_incomp_rects))
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -970,12 +967,12 @@ def multidim_search_breadth_first_opt_1(xspace,
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
@@ -1055,21 +1052,20 @@ def multidim_search_breadth_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    ParSearch.logger.debug('xspace: ', xspace)
-    ParSearch.logger.debug('vol_border: ', vol_border)
-    ParSearch.logger.debug('delta: ', delta)
-    ParSearch.logger.debug('step: ', step)
-    ParSearch.logger.debug('incomparable: ', incomparable)
-    ParSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: ', xspace)
+    RootSearch.logger.debug('vol_border: ', vol_border)
+    RootSearch.logger.debug('delta: ', delta)
+    RootSearch.logger.debug('step: ', step)
+    RootSearch.logger.debug('incomparable: ', incomparable)
+    RootSearch.logger.debug('comparable: ', comparable)
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
 
-    ParSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
+    RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder')
     while (vol_border >= delta) and (remaining_steps > 0) and (len(border) > 0):
         # Process the 'border' until the number of maximum steps is reached
 
-        # chunk = __builtin__.min(remaining_steps, len(border))
         chunk = min(remaining_steps, len(border))
         border = border[:chunk]
         step += chunk
@@ -1099,16 +1095,16 @@ def multidim_search_breadth_first_opt_0(xspace,
         new_incomp_rects = p.imap_unordered(pborder, args_pborder)
 
         # Flatten list
-        border = list(chain.from_iterable(new_incomp_rects))
+        border = list(itertools.chain.from_iterable(new_incomp_rects))
 
         vol_border = vol_total - vol_yup - vol_ylow
 
-        ParSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
+        RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
 
         if sleep > 0.0:
-            # rs = pResultSet(list(border), ylow, yup, xspace)
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            # rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(list(border), ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:

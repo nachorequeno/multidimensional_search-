@@ -6,11 +6,13 @@ import csv
 import ast
 import io
 import sys
+import os
 import filecmp
 
 import ParetoLib.Oracle as ParOracle
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.JAMT.JAMT import *
+from ParetoLib.JAMT.JAMT import JAVA_BIN, JAVA_OPT_JAR, JAMT_BIN, JAMT_OPT_ALIAS, JAMT_OPT_STL, JAMT_OPT_RES, \
+    JAMT_OPT_SIGNAL
 
 
 class OracleSTL(Oracle):

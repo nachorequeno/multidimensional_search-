@@ -1,6 +1,5 @@
 import os
 import sys
-# import __builtin__
 import time
 import pickle
 from itertools import chain, combinations  # combinations_with_replacement
@@ -10,8 +9,8 @@ import tempfile
 
 import matplotlib.pyplot as plt
 
-from ParetoLib.Geometry.Rectangle import *
-import ParetoLib.Search as ParSearch
+from ParetoLib.Geometry.Rectangle import Rectangle
+import ParetoLib.Search as RootSearch
 
 
 class ResultSet:
@@ -304,7 +303,6 @@ class ResultSet:
         # type: (int, list) -> float
         min_cs = (rect.min_corner for rect in rect_list)
         mc_i = (mc[i] for mc in min_cs)
-        # return __builtin__.min(mc_i)
         return min(mc_i)
 
     def get_min_val_dimension_yup(self, i):
@@ -324,7 +322,6 @@ class ResultSet:
         # type: (int, list) -> float
         max_cs = (rect.max_corner for rect in rect_list)
         mc_i = (mc[i] for mc in max_cs)
-        # return __builtin__.max(mc_i)
         return max(mc_i)
 
     def get_max_val_dimension_yup(self, i):
@@ -402,8 +399,6 @@ class ResultSet:
         xs = [vi[0] for vi in rs_vertices]
         ys = [vi[1] for vi in rs_vertices]
 
-        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
         targetx += [min(xs), max(xs)]
         targety += [min(ys), max(ys)]
 
@@ -472,8 +467,6 @@ class ResultSet:
         xs = [vi[0] for vi in rs_vertices]
         ys = [vi[1] for vi in rs_vertices]
 
-        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
         targetx += [min(xs), max(xs)]
         targety += [min(ys), max(ys)]
 
@@ -564,9 +557,6 @@ class ResultSet:
         ys = [vi[1] for vi in rs_vertices]
         zs = [vi[2] for vi in rs_vertices]
 
-        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
-        # targetz += [__builtin__.min(zs), __builtin__.max(zs)]
         targetx += [min(xs), max(xs)]
         targety += [min(ys), max(ys)]
         targetz += [min(zs), max(zs)]
@@ -638,9 +628,6 @@ class ResultSet:
         ys = [vi[1] for vi in rs_vertices]
         zs = [vi[2] for vi in rs_vertices]
 
-        # targetx += [__builtin__.min(xs), __builtin__.max(xs)]
-        # targety += [__builtin__.min(ys), __builtin__.max(ys)]
-        # targetz += [__builtin__.min(zs), __builtin__.max(zs)]
 
         targetx += [min(xs), max(xs)]
         targety += [min(ys), max(ys)]
@@ -718,7 +705,7 @@ class ResultSet:
                 # Adding new file to the .zip
                 zf.write(outfile, arcname=fname)
             except OSError:
-                ParSearch.logger.error('Unexpected error when saving {0}: {1}'.format(outfile, sys.exc_info()[0]))
+                RootSearch.logger.error('Unexpected error when saving {0}: {1}'.format(outfile, sys.exc_info()[0]))
             os.remove(outfile)
         zf.close()
 
@@ -766,7 +753,7 @@ class ResultSet:
         try:
             zf.extractall(tempdir)
         except KeyError:
-            ParSearch.logger.error('Did not find {0} file'.format(f))
+            RootSearch.logger.error('Did not find {0} file'.format(f))
         else:
             zf.close()
 
@@ -787,10 +774,10 @@ class ResultSet:
                 try:
                     os.remove(infile)
                 except OSError:
-                    ParSearch.logger.error('Unexpected error when removing {0}: {1}'.format(infile, sys.exc_info()[0]))
+                    RootSearch.logger.error('Unexpected error when removing {0}: {1}'.format(infile, sys.exc_info()[0]))
 
         # Remove temporary folder
         try:
             os.rmdir(tempdir)
         except OSError:
-            ParSearch.logger.error('Unexpected error when removing folder {0}: {1}'.format(tempdir, sys.exc_info()[0]))
+            RootSearch.logger.error('Unexpected error when removing folder {0}: {1}'.format(tempdir, sys.exc_info()[0]))

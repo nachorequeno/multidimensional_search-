@@ -1,9 +1,10 @@
 import sys
 import resource
-# import __builtin__
+import io
+import pickle
 
-from ParetoLib.Geometry.Rectangle import *
-from ParetoLib.Geometry.Point import *
+from ParetoLib.Geometry.Rectangle import Rectangle
+from ParetoLib.Geometry.Point import less, less_equal, distance, dim
 
 
 class NDTree:
@@ -101,6 +102,60 @@ class NDTree:
         # type: (NDTree, tuple) -> True
         # Returns 'True' if p is dominated by any point stored in the Pareto archive
         return self.root.dominates(p)
+
+    # Read/Write file functions
+    def from_file_binary(self, finput=None):
+        # type: (NDTree, io.BinaryIO) -> None
+        assert (finput is not None), 'File object should not be null'
+
+        # Setting maximum recursion. It is required for the NDTree build
+        # sys.getrecursionlimit()
+        max_rec = 0x100000
+        resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
+        sys.setrecursionlimit(max_rec)
+
+        self.root = pickle.load(finput)
+        self.max_points = pickle.load(finput)
+        self.min_children = pickle.load(finput)
+
+    def from_file_text(self, finput=None):
+        # type: (NDTree, io.BinaryIO) -> None
+        assert (finput is not None), 'File object should not be null'
+
+        def _line2tuple(inline):
+            line = inline
+            line = line.replace('(', '')
+            line = line.replace(')', '')
+            line = line.split(',')
+            return tuple(float(pi) for pi in line)
+
+        self.__init__()
+        point_list = (_line2tuple(line) for line in finput)
+        for point in point_list:
+            self.update_point(point)
+
+    def to_file_binary(self, foutput=None):
+        # type: (NDTree, io.BinaryIO) -> None
+        assert (foutput is not None), 'File object should not be null'
+
+        # Setting maximum recursion. It is required for the NDTree build
+        # sys.getrecursionlimit()
+        max_rec = 0x100000
+        resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
+        sys.setrecursionlimit(max_rec)
+
+        pickle.dump(self.root, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.max_points, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(self.min_children, foutput, pickle.HIGHEST_PROTOCOL)
+
+    def to_file_text(self, foutput=None):
+        # type: (NDTree, io.BinaryIO) -> None
+        assert (foutput is not None), 'File object should not be null'
+
+        setPoints = self.get_points()
+        for point in setPoints:
+            foutput.write(str(point))
+            foutput.write('\n')
 
 
 class Node:
@@ -475,8 +530,6 @@ class Node:
             # ideal = tuple(xi if xi < ideali else ideali for xi, ideali in zip(x, ideal))
             # nadir = tuple(xi if xi > nadiri else nadiri for xi, nadiri in zip(x, nadir))
 
-            # ideal = tuple(__builtin__.min(xi, ideali) for xi, ideali in zip(x, ideal))
-            # nadir = tuple(__builtin__.max(xi, nadiri) for xi, nadiri in zip(x, nadir))
 
             ideal = tuple(min(xi, ideali) for xi, ideali in zip(x, ideal))
             nadir = tuple(max(xi, nadiri) for xi, nadiri in zip(x, nadir))

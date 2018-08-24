@@ -1,5 +1,9 @@
-from ParetoLib.Geometry.ParRectangle import *
-from ParetoLib.Search.ResultSet import *
+from multiprocessing import Pool, cpu_count
+
+from ParetoLib.Geometry.Rectangle import Rectangle
+from ParetoLib.Geometry.ParRectangle import pvertices, pinside, pvol
+
+from ParetoLib.Search.ResultSet import ResultSet
 
 
 class ParResultSet(ResultSet):
