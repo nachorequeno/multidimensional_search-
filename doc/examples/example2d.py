@@ -1,5 +1,5 @@
-from ParetoLib.Oracle.OracleFunction import *
-from ParetoLib.Search.Search import *
+from ParetoLib.Oracle.OracleFunction import OracleFunction
+from ParetoLib.Search.Search import Search2D, EPS, DELTA, STEPS
 
 # File containing the definition of the Oracle
 nfile = '../../Tests/Oracle/OracleFunction/2D/test1.txt'
