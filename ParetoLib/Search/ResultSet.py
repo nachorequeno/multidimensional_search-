@@ -16,9 +16,13 @@ import ParetoLib.Search as RootSearch
 class ResultSet:
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
         # type: (ResultSet, list, list, list, Rectangle) -> None
-        self.border = border
-        self.ylow = ylow
-        self.yup = yup
+        # self.border = list(border) is required for forcing the creation of a local list.
+        # If two ResultSets are created by making an empty call to ResultSet() (i.e., rs1, rs2),
+        # then rs1.border and rs2.border will point to the same list. Modifications in rs1.border
+        # will change rs2.border
+        self.border = list(border)
+        self.ylow = list(ylow)
+        self.yup = list(yup)
         self.xspace = xspace
 
         self.filename_yup = 'up'
@@ -99,8 +103,12 @@ class ResultSet:
         return vertices
 
     # Simplification functions
+    # After running simplify(), the number of cubes in the boundary and in each closure should decrease.
+    # Besides, overlapping cubes in the boundary should also disappear, i.e.,
+    # overlapping_volume_border() == 0 and overlapping_volume_total() == 0
     def simplify(self):
         # type: (ResultSet) -> None
+        self.recalculate_border()
         self.fusion_rectangles_border()
         self.fusion_rectangles_ylow()
         self.fusion_rectangles_yup()
@@ -145,6 +153,32 @@ class ResultSet:
                         self.border.remove(rect2)
             len_after = len(self.border)
 
+    def recalculate_border(self):
+        # type: (ResultSet) -> None
+        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
+        # the boundary border is computed as border = xspace - yup - ylow
+
+        new_border = {self.xspace}
+
+        # Copy list
+        closure_list = []
+        closure_list.extend(self.yup)
+        closure_list.extend(self.ylow)
+
+        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # and remove from A the portion that intersects with B
+
+        intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b)]
+        while len(intersect_list) > 0:
+            a, b = intersect_list[0]
+
+            new_border.remove(a)
+            new_border = new_border.union(list(a - b))
+
+            intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b)]
+
+        self.border = list(new_border)
+
     # Volume functions
     @staticmethod
     def _overlapping_volume(pairs_of_rect):
@@ -156,11 +190,26 @@ class ResultSet:
         vol_overlapping_rect = (rect.volume() for rect in overlapping_rect)
         return sum(vol_overlapping_rect)
 
+    # By construction, overlapping of cubes should only happen in the boundary.
+    # Therefore,
+    # overlapping_volume_yup() == 0
+    # overlapping_volume_ylow() == 0
+    # overlapping_volume_border() >= 0
+    # overlapping_volume_total() >= 0
+    #
+    # WARNING!
+    # In some situations, some cubes of the border may also intersect cubes of upper (yup) or lower (ylow) closures.
+    # This fact makes that:
+    # overlapping_volume_total() != overlapping_volume_border()
+    #
+    # Does it happen because of the way cones crect and brect are calculated in Rectangle.py?
+    # It seems to be an inherent problem of the functions for computing crect/brect because it sometimes generates
+    # planes (2-dimensional) instead of cubes (n-dimensional) for spaces of n-dimension.
+
     def overlapping_volume_yup(self):
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = combinations_with_replacement(self.yup, 2)
         pairs_of_rect = combinations(self.yup, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
@@ -169,7 +218,6 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = combinations_with_replacement(self.ylow, 2)
         pairs_of_rect = combinations(self.ylow, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
@@ -178,22 +226,31 @@ class ResultSet:
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
         # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
-        # pairs_of_rect = combinations_with_replacement(self.border, 2)
         pairs_of_rect = combinations(self.border, 2)
+        # return self._overlapping_volume(pairs_of_rect)
+        return ResultSet._overlapping_volume(pairs_of_rect)
+
+    def overlapping_volume_total(self):
+        # type: (ResultSet) -> float
+        # total_rectangles = [rect1, rect2,..., rectn]
+        # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
+        total_rectangles = []
+        total_rectangles.extend(self.border)
+        total_rectangles.extend(self.yup)
+        total_rectangles.extend(self.ylow)
+        pairs_of_rect = combinations(total_rectangles, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
 
     def volume_yup(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.yup)
-        # vol_list = [rect.volume() for rect in self.yup]
         vol_list = (rect.volume() for rect in self.yup)
         return sum(vol_list)
 
     def volume_ylow(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.ylow)
-        # vol_list = [rect.volume() for rect in self.ylow]
         vol_list = (rect.volume() for rect in self.ylow)
         return sum(vol_list)
 
@@ -204,23 +261,16 @@ class ResultSet:
         vol_yup = self.volume_yup()
         return vol_total - vol_ylow - vol_yup
 
-    # By construction, overlapping of rectangles only happens in the boundary
-    def volume_border_exact(self):
+    def volume_border_2(self):
         # type: (ResultSet) -> float
         # vol_list = p.map(Rectangle.volume, self.border)
-        # vol_list = [rect.volume() for rect in self.border]
         vol_list = (rect.volume() for rect in self.border)
-        return sum(vol_list) - self.overlapping_volume_border()
+        return sum(vol_list) - self.overlapping_volume_total()
 
     def volume_total(self):
         # type: (ResultSet) -> float
+        # vol_total = self.volume_ylow() + self.volume_yup() + self.volume_border()
         vol_total = self.xspace.volume()
-        return vol_total
-
-    def volume_total_exact(self):
-        # type: (ResultSet) -> float
-        # vol_list = p.map(Rectangle.volume, self.border)
-        vol_total = self.volume_ylow() + self.volume_yup() + self.volume_border_exact()
         return vol_total
 
     def volume_report(self):
@@ -241,19 +291,20 @@ class ResultSet:
     def member_yup(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.yup)
-        # return any(isMember)
-        return any(isMember) and not self.member_border(xpoint)
+        return any(isMember)
+        # return any(isMember) and not self.member_border(xpoint)
 
     def member_ylow(self, xpoint):
         # type: (ResultSet, tuple) -> bool
         isMember = (rect.inside(xpoint) for rect in self.ylow)
-        # return any(isMember)
-        return any(isMember) and not self.member_border(xpoint)
+        return any(isMember)
+        # return any(isMember) and not self.member_border(xpoint)
 
     def member_border(self, xpoint):
         # type: (ResultSet, tuple) -> bool
-        isMember = (rect.inside(xpoint) for rect in self.border)
-        return any(isMember)
+        # isMember = (rect.inside(xpoint) for rect in self.border)
+        # return any(isMember)
+        return self.member_space(xpoint) and not self.member_yup(xpoint) and not self.member_ylow(xpoint)
 
     def member_space(self, xpoint):
         # type: (ResultSet, tuple) -> bool
@@ -263,7 +314,7 @@ class ResultSet:
     # Points of closure
     def get_points_yup(self, n):
         # type: (ResultSet, int) -> list
-        m = n / len(self.yup)
+        m = int(n / len(self.yup))
         m = 1 if m < 1 else m
         # point_list = [rect.get_points(m) for rect in self.yup]
         point_list = (rect.get_points(m) for rect in self.yup)
@@ -277,7 +328,7 @@ class ResultSet:
 
     def get_points_ylow(self, n):
         # type: (ResultSet, int) -> list
-        m = n / len(self.ylow)
+        m = int(n / len(self.ylow))
         m = 1 if m < 1 else m
         # point_list = [rect.get_points(m) for rect in self.ylow]
         point_list = (rect.get_points(m) for rect in self.ylow)
@@ -286,7 +337,7 @@ class ResultSet:
 
     def get_points_border(self, n):
         # type: (ResultSet, int) -> list
-        m = n / len(self.border)
+        m = int(n / len(self.border))
         m = 1 if m < 1 else m
         # point_list = [rect.get_points(m) for rect in self.border]
         point_list = (rect.get_points(m) for rect in self.border)
@@ -627,7 +678,6 @@ class ResultSet:
         xs = [vi[0] for vi in rs_vertices]
         ys = [vi[1] for vi in rs_vertices]
         zs = [vi[2] for vi in rs_vertices]
-
 
         targetx += [min(xs), max(xs)]
         targety += [min(ys), max(ys)]

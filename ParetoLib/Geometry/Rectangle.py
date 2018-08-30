@@ -22,7 +22,6 @@ class Rectangle:
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
 
-
         self.min_corner = tuple(r(min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
         self.max_corner = tuple(r(max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
 
@@ -121,7 +120,7 @@ class Rectangle:
 
     def center(self):
         # type: (Rectangle) -> tuple
-        offset = div(self.diag_length(), 2)
+        offset = div(self.diag_length(), 2.0)
         return add(self.min_corner, offset)
 
     def distance_to_center(self, xpoint):
@@ -193,7 +192,6 @@ class Rectangle:
             assert len(new_union_vertices) > 0, \
                 'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
 
-
             self.min_corner = min(new_union_vertices)
             self.max_corner = max(new_union_vertices)
         return self
@@ -201,7 +199,6 @@ class Rectangle:
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
-
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
@@ -224,7 +221,6 @@ class Rectangle:
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         if self.overlaps(other):
-
             self.min_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
             self.max_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
         return self

@@ -1,9 +1,15 @@
 import unittest
 
-from ParetoLib.Search.Search import *
-from ParetoLib.Oracle.OracleFunction import *
-from ParetoLib.Oracle.OraclePoint import *
-from ParetoLib.Oracle.OracleSTL import *
+import time
+import os
+import numpy as np
+
+from ParetoLib.Search.Search import SearchND
+
+from ParetoLib.Oracle.OracleFunction import OracleFunction
+from ParetoLib.Oracle.OraclePoint import OraclePoint
+from ParetoLib.Oracle.OracleSTL import OracleSTL
+from ParetoLib.Oracle.Oracle import Oracle
 
 EPS = 1e-5
 DELTA = 1e-5
@@ -64,11 +70,12 @@ class SearchTestCase(unittest.TestCase):
         nYlow = sum(list_nYlow)
         nBorder = sum(list_nBorder)
 
-        # [self.closureMembershipTest(fora, rs, p) for p in list_test_points]
-        if all(self.closureMembershipTest(fora, rs, p) for p in list_test_points):
+        if all(self.closureMembershipTest(fora, rs, tuple(p)) for p in list_test_points):
             print('Ok!\n')
         else:
             print('Not ok!\n')
+            raise ValueError
+
         end = time.time()
         time0 = end - start
 
@@ -158,7 +165,7 @@ class SearchOraclePointTestCase(SearchTestCase):
     def test_2D(self):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
         # test-2d-12points provides the maximum interval: [-1024, 1024]
         self.min_c = -1024.0
         self.max_c = 1024.0
@@ -167,7 +174,7 @@ class SearchOraclePointTestCase(SearchTestCase):
     def test_3D(self):
         test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
         # test-3d-[1000|2000] are LIDAR points between 0.0 and 600.0 approx.
         self.min_c = 0.0
         self.max_c = 600.0
@@ -176,7 +183,7 @@ class SearchOraclePointTestCase(SearchTestCase):
     def test_ND(self):
         test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
-        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
         # test-4d and test-5d are random points in the interval [1.0, 2.0]
         self.min_c = 1.0
         self.max_c = 2.0

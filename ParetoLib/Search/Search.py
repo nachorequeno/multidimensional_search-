@@ -7,10 +7,12 @@ import ParetoLib.Search.ParSearch as ParSearch
 import ParetoLib.Search as RootSearch
 
 from ParetoLib.Search.CommonSearch import EPS, DELTA, STEPS
+from ParetoLib.Search.ResultSet import ResultSet
 
 from ParetoLib.Oracle.OracleFunction import OracleFunction
 from ParetoLib.Oracle.OraclePoint import OraclePoint
 from ParetoLib.Oracle.OracleSTL import OracleSTL
+from ParetoLib.Oracle.Oracle import Oracle
 
 
 # Auxiliar functions used in 2D, 3D and ND

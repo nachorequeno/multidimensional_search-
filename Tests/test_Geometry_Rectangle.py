@@ -1,6 +1,6 @@
 import unittest
 
-from ParetoLib.Geometry.Rectangle import *
+from ParetoLib.Geometry.Rectangle import Rectangle
 
 
 #############

@@ -2,9 +2,10 @@ import os
 import tempfile as tf
 import copy
 import unittest
+import numpy as np
 
-from ParetoLib.Oracle.OraclePoint import *
-from ParetoLib.Oracle.NDTree import *
+from ParetoLib.Oracle.OraclePoint import OraclePoint
+from ParetoLib.Oracle.NDTree import NDTree
 
 
 ###############

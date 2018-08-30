@@ -1,7 +1,8 @@
+import os
 import tempfile as tf
 import unittest
 
-from ParetoLib.Oracle.OracleSTL import *
+from ParetoLib.Oracle.OracleSTL import OracleSTL
 
 
 ###############
