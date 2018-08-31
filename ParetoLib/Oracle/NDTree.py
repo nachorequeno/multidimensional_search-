@@ -63,8 +63,10 @@ class NDTree:
     def dim(self):
         # type: (NDTree) -> int
         rect = self.get_rectangle()
-        if rect is not None:
-            return Rectangle.dim(rect)
+        # if rect is not None:
+        #    return Rectangle.dim(rect)
+        if isinstance(rect, Rectangle):
+            return rect.dim()
         else:
             return 0
 

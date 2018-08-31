@@ -168,14 +168,16 @@ class ResultSet:
         # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
         # and remove from A the portion that intersects with B
 
-        intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b)]
+        intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b]
         while len(intersect_list) > 0:
             a, b = intersect_list[0]
 
-            new_border.remove(a)
             new_border = new_border.union(list(a - b))
+            # Remove 'a' after calculating the list of subrectangles (a-b)
+            # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+            new_border.remove(a)
 
-            intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b)]
+            intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b]
 
         self.border = list(new_border)
 
