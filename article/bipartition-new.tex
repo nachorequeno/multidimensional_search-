@@ -1,0 +1,403 @@
+\documentclass{llncs}%\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,color,graphicx,latexsym}
+\usepackage{algorithm, algpseudocode}
+%\biboptions{sort&compress}
+\input omac
+\newcommand{\N}{\mathbb{N}}
+\renewcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+\renewcommand{\T}{\mathbb{T}}
+\newcommand{\eps}{\epsilon}
+%\newtheorem{algorithm}{Algorithm}
+% \newtheorem{definition}{Definition}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{claim}{Claim}
+% \newtheorem{problem}{Problem}
+\newcommand{\ul}[1]{{\underline{#1}}}
+\renewcommand{\ov}[1]{{\overline{#1}}}
+\newcommand{\uX}{\ul{X}}
+\newcommand{\oX}{\ov{X}}
+\newcommand{\uY}{\ul{Y}}
+\newcommand{\oY}{\ov{Y}}
+\newcommand{\ux}{\ul{x}}
+\newcommand{\ox}{\ov{x}}
+\newcommand{\uy}{\ul{y}}
+\newcommand{\oy}{\ov{y}}
+\newcommand{\uz}{\ul{z}}
+\newcommand{\oz}{\ov{z}}
+\newcommand{\uq}{\ul{q}}
+\newcommand{\oq}{\ov{q}}
+\newcommand{\ull}{\ul{\ell}}
+\newcommand{\oll}{\ov{\ell}}
+\newcommand{\sta}{v}
+\newcommand{\qi}{\ov{\sta}}
+\newcommand{\qf}{\ul{\sta}}
+\newcommand{\nei}{\mathcal{N}}
+\newcommand\sm{\raisebox{1pt}{$\begin{array}{c}
+.\\[-10pt]-
+\end{array}$}}
+\newcommand{\bx}[2]{{\lfloor #1,#2\rceil}}
+\newcommand{\diag}[2]{{\langle #1,#2\rangle}}
+\renewcommand\vectorl[1]{\mathbf{#1}}
+\renewcommand{\baselinestretch}{1.00}
+\pagestyle{plain}
+\begin{document}
+
+\title{Learning Monotone Partitions \\ of Partially-Ordered Domains}
+
+\author{Nicolas Basset, Oded Maler, Jos\'e-Ignacio Reque\~no Jarabo \\
+      \{bassetni, oded.maler, jose-ignacio.requeno-jarabo\}@univ-grenoble-alpes.fr
+}
+\institute{VERIMAG, CNRS and Universit\'e Grenoble-Alpes, FRANCE}
+\date{\today}
+\maketitle
+
+\begin{abstract}
+We present an algorithm for  learning  the boundary between an upward-closed set  $\oX$ and its downward-closed  complement. The algorithm selects sampling points for which it submits membership queries $x\in \oX$. Based on the answers and relying on monotonicity, it constructs an approximation of the boundary. The algorithm generalizes binary search on the continuum from one-dimensional (and linearly-ordered) domains to multi-dimensional (and partially-ordered) ones.  Applications include the approximation of Pareto fronts in multi-criteria optimization and parameter synthesis for predicates where the influence of parameters is monotone.
+
+\end{abstract}
+
+\section{Introduction and Motivation}
+
+Let $X$ be a bounded and partially ordered set that we consider from now on \comment{, without loss of generality,} to be $[0,1]^n$. A subset $\oX$ of $X$ is \emph{upward closed} in $X$ if
+$$\forall x,x'\in X~(x \in \oX \wedge x'\geq x) \to x' \in \oX.$$ Naturally, the complement of $\oX$,   $\uX=X-\oX$ is downward closed, and we use the term \emph{monotone bi-partition} (or simply partition) for the pair $M=(\uX,\oX)$. \comment{Upward closure can be viewed as restricted notion of convexity: the latter disallows discontinuity in set membership along arbitrary straight lines while upward closure disallows them along straight lines of positive or negative slopes.}  We do not have an explicit representation of $M$  and we want to approximate it based on queries to a membership oracle which can answer for every $x\in X$ whether $x\in \oX$. Based on this information we construct an approximation of $M$ by a pair of sets, $(\uY,\oY)$ being, respectively, a downward-closed subset of  $\uX$ and  an upward-closed subset of $ \oX$, see Figure~\ref{fig:part-approx2}. This approximation, conservative in both directions, says nothing about points residing  in the gap between $\uY$ and $\oY$. This gap can be viewed as an over-approximation of $bd(M)$, the boundary between the two sets. There are two degenerate cases of monotone partitions, $(X,\emptyset)$ and $(\emptyset,X)$ that we ignore from now on, and thus assume that $\vzer \in\uX$ and $\vi\in\oX$, where  $\mathbf{r}$ denotes $(r,\ldots,r)$. We adopt the conventions that $bd(M)$ belongs to $\oX$.
+
+\begin{figure}
+  \centering
+\input part-approx3.PDFTEX_T
+  \caption{A monotone partition and its approximation.}\label{fig:part-approx2}
+\end{figure}
+
+Before presenting  the algorithmic solution that we offer to the problem, let us discuss some motivations. To start with, the problem is interesting for its own sake as a neat high-dimensional generalization of the problem of locating a boundary point that splits a straight line into two intervals. This problem is solved typically using binary (dichotomic) search, and indeed, the essence of our approach is in embedding binary search in higher dimension.
+
+One major motivation comes from the domain  of \emph{multi-criteria optimization} where solutions are evaluated according to several criteria and the cost of a solution can be viewed as a point in a multi-dimensional cost space $X$. The optimal cost of such optimization problems is rarely a single point but rather a set of incomparable points also, known as the \emph{Pareto front} of the problem. It consists of solutions that cannot be improved in one dimension without being worsened in another. Under certain assumptions, the Pareto front can be viewed as the boundary of a monotone partition. For a minimization problem,  $\uX$ corresponds to infeasible costs and $\oX$ represents the feasible costs. The Pareto front is the set $bd(M)=\min (\oX)$ and the approximation that is provided is $\min (\oY)$. In \cite{julien}  we developed a procedure for computing such an approximation using a variant of binary search that submits queries to a constraint solver concerning the existence of solutions of a given cost $x$. The costs used in the queries were selected in order to reduce the distance between the boundaries of $\oY$ and $\uY$ and improve approximation quality. The present algorithm provides an alternative (and hopefully more efficient) way to approximate Pareto fronts.
+
+ \comment{
+where $X$ is the cost space of the optimization problem. For minimization,   while for maximization it is the other way around. ,,  or its approximation by .  Note, however, that we do not know a priori whether $x$ is feasible or not, and the influence of the answer on the distance between $\uY$ and $\oY$ is different in the two cases.
+%
+\ni{\bf Remark}:  The set of costs associated with actual feasible solutions to combinatorial and mixed optimization problems can be a \emph{discrete} subset of $X$ and the upward closure property of $\oX$ is obtained by assuming that you can always pay more for the same solution. Hence the algorithm described in the sequel using a continuous terminology should be slightly modified to solve such optimization problems practically. In particular  a query concerning the membership of $x$ in $\oX$ may return a positive answer about some $x'<x$. We also postpone the treatment of practically non-terminating queries that may occur in hard problems as $x$ gets closer to the boundary between the feasible and the infeasible.
+}
+
+Another motivation comes from some classes of parametric identification problems. Consider a parameterized family of predicates/constraints $\{\f_p\}$ where $p$ is a vector of parameters ranging over some parameter space. Given an element $u$  from the domain of the predicates, we would like to know the range of parameters $p$ such that $\f_p(u)$ holds.  We say that a parameter $p$ has a fixed (positive or negative) polarity if increasing its value will have a monotone effect on the set of elements that satisfy it. For example if a parameter $p$ appears in a parameterized predicate $u\leq p$, then for any $p'>p$ and any $u$, $\f_p(u)$ implies $\f_{p'}(u)$. When no parameter appears in two constraints in opposing sides of an inequality, and after some pre-processing, the set of parameters that lead to satisfaction is upward closed. Its set of minimal elements indicates the set of tightest parameters that lead to satisfaction of $\f_p(u)$, which is a valuable information about $u$. In \cite{parametric} we explored the idea for the domain of real-valued signals $u(t)$ and temporal formulas such as $\exists t<p_1 ~ u(t)<p_2$.
+
+\section{Binary Search in One Dimension}
+
+Our major tool is  classical binary search over one-dimensional and totally-ordered domains, where a partition of $[0,1]$ is of the form $M=([0,z),[z,1])$ for some $0<z<1$. The outcome of the search procedure is a pair of numbers $\uy$ and $\oy$ such that $\uy<z<\oy$, which implies a partition approximation $M'=([0,\uy),[\oy,1])$. The quality of $M'$ is measured by the size of the gap $\oy-\uy$, which can be made as small as needed by running more steps. Note that in one dimension, $\oy-\uy$ is both the volume of $[\uy,\oy]$ and its diameter. We are going to apply binary search to straight lines of arbitrary position and arbitrary positive orientation inside high-dimensional $X$, hence we formulate it in terms that will facilitate its application in this context.
+
+
+\begin{definition}[Line Segments in High-Dimension]
+The line segment connecting two points  $\ux<\ox\in X =[0,1]^n$ is their
+convex hull
+$$\diag{\ux}{\ox}=\{(1-\l)\ux+\l \ox:\l \in [0,1]\}.$$
+The segment inherits a total order from $[0,1]$: $x\leq x'$ whenever $\l\leq \l'$.
+\end{definition}
+
+The input to the binary search procedure, written in Algorithm~\ref{alg:binary}, is a line segment $\ell$ and an oracle for a monotone partition $M=(\ull,\oll)=(\diag{\ux}{z},\diag{z}{\ox})$,  $\ux<z<\ox$. The output is a sub-segment $\diag{\uy}{\oy}$ containing the boundary point $z$. The procedure is parameterized by an error bound $\eps\geq 0$, with $\eps=0$ representing an ideal variant of the algorithm that runs indefinitely and finds the exact boundary point. Although realizable only in the limit, it is sometimes convenient to speak in terms of this variant. Figure~\ref{fig:bsearch-no-tree} illustrates several steps of the algorithm. 
+
+
+\comment{When $\eps>0$, and $\{\diag{\ux}{\uy},\diag{\uy}{\oy},\diag{\oy}{\ox}\}$ is a partition of $\ell$.}
+
+\comment{
+Binary search can be viewed also as selecting a path in a binary tree whose nodes are labeled by intervals, with the root labeled by $X$ and the sons of each interval $[a,b]$ are the intervals $[a,(a+b)/2]$ and $[(a+b)/2, b]$.}
+
+
+\begin{algorithm}
+  \caption{One dimensional binary search: $search(\diag{\ux}{\ox},\eps$)}
+  \label{alg:binary}
+  \begin{algorithmic}[1]
+    \State {{\bf Input}:  A line segment $\ell=\diag{\ux}{\ox}$, a monotone partition $M=(\ull,\oll)$ accessible via an oracle $member()$ for membership in $\oll$ and an error bound $\eps\geq 0$.}
+     \State {{\bf Output}:   %An approximation of $M$,  $M'=\{\diag{\ux}{\uy},\diag{\oy}{\ox}\}$
+     A line segment $\diag{\oy}{\uy}$  containing $bd(M)$ such that $\oy-\uy\leq\eps$.}
+          \smallskip
+     %     \State{$(\uq,\oq)=(member(\ux),member(\ox))$}
+        %  \If {$(\uq,\oq)=(0,0)$}
+        % \Return {$M_0$}
+         % \ElsIf {$(\uq,\oq)=(1,1)$}
+         % \Return {$M_1$}
+         % \Else \Comment{non-degenerate case}
+       \State {$\diag{\uy}{\oy}=\diag{\ux}{\ox}$}
+    \While {$\oy-\uy\geq\eps$}
+        \State {$y=(\uy+\oy)/2$}
+      \If {$member(y)$}
+          \State   {$\diag{\uy}{\oy}=\diag{\uy}{y}$} \Comment{left sub-interval}
+      \Else
+              \State   {$\diag{\uy}{\oy}=\diag{y}{\oy}$} \Comment{right sub-interval}
+      \EndIf
+          \EndWhile
+          \State{\Return {$\{\diag{\uy}{\oy}\}$}}
+    %  \EndIf
+  \end{algorithmic}
+\end{algorithm}
+%
+
+
+
+\begin{figure}[h]
+  \centering
+\scalebox{0.85}{\input bsearch-no-tree.PDFTEX_T }
+  \caption{Binary search and the successive reduction of the uncertainty interval. \comment{The rightmost known element of $\uX$ and leftmost known elements of $\oX$ are indicated by $-$ and $+$, respectively. On the right we see the same process interpreted as path selection in a binary tree.} }\label{fig:bsearch-no-tree}
+\end{figure}
+
+ \comment{
+ In Section~\ref{sec:high-dim} we  present some basic notions and facts concerning domination and incomparability between point and sets in partially-ordered domains. These are important for analyzing the complexity and limitation of our algorithm and for suggesting, eventually, some improvements. In Section~\ref{sec:algorithm} we describe the algorithm, first in an abstract manner and then provide more implementation details which are important for its robust operation.
+ }
+
+\clearpage
+
+\section{Monotone Partitions in High Dimension}
+
+\comment{
+Let $X$ be a partially-ordered set that we assume from now on, without loss of generality, to be $[0,1]^n$.
+%
+The approximations that we will produce are defined using finite unions of axes-parallel rectangles (boxes). More specifically, each such rectangle in the representation of $\oY$ (resp.\ $\uX$) will be defined as the set of points above (resp.\ below) a point known to be in $\oY$ (resp.\ $\uX$). Being above or below is termed domination in the multi-criteria literature and is in fact related to the basic definition of partial-orders over $\R^n$ and similar multi-dimensional domain.}
+
+The following definitions are commonly used in multi-criteria optimization and in partially-ordered sets in general.
+
+\begin{definition}[Domination and Incomparability]
+Let $x=(x_1,\ldots, x_n)$ and $x'=(x'_1,\ldots, x'_n)$ be two points. Then
+\begin{enumerate}
+\item $x\leq_i x'$ if $x_i\leq x'_i$; $x<_i x'$ if $x_i< x'_i$;
+\item $x\leq x'$ if $x \leq_i x'$ for every $i$;
+\item $x<x'$ if $x \leq x'$ and $x<_i x'$ for some $i$. In this case we say that $x$ dominates $x'$;
+\item $x||x'$ if $x\not \leq x'$ and $x'\not \leq x$, which means that $x<_i x'$ and $x'<_j x'$ for some $i$ and $j$. In this case we say that $x$ and $x'$ are incomparable.
+\end{enumerate}
+\end{definition}
+%
+Any two points $\ux<\ox$ define a rectangle $\bx{\ux}{\ox}=\{x:\ux \leq x \leq \ox\}$ for which they are, respectively, the minimal and maximal corners, as well as the endpoints of the diagonal $\diag{\ux}{\ox}$. A point $x$ defines various rectangles consisting of points with which it is in certain order relations. Similar relations can be associated with a rectangle $\bx{\ux}{\ox}$.
+
+
+\begin{definition}[Rectangular Half-Space]
+Let $i\in\{1,\ldots,n\}$ be a dimension.
+\begin{itemize}
+\item The orthogonal $i$-half-spaces associated with a point $x\in X$ are
+$$C_{i,0}(x)=\{x'\in X:x'\leq_i x\},~ C_{i,1}(x)=\{x'\in X:x'\geq_i  x\}.$$
+\item The orthogonal $i$-half-spaces associated with a rectangle $\bx{\ux}{\ox} \se X$ are
+$$C_{i,0}(\bx{\ux}{\ox} )=\{x'\in X:x'\leq_i \ox\},~ C_{i,1}(\bx{\ux}{\ox} )=\{x'\in X:x'\geq_i  \ux\}.$$
+\end{itemize}
+\end{definition}
+%
+Observe that for a point, the half-spaces $C_{i,0}(x)$ and $C_{i,1}(x)$ form a partition while for a rectangle $C_{i,0}(\bx{\ux}{\ox} )$  and $C_{i,1}(\bx{\ux}{\ox}$ overlap over the interval $[\ux_i,\ox_i]$. They can be defined, alternatively, as all the points $x'$ for which there exists $x\in \bx{\ux}{\ox}$ such that $x'\leq_i x$ (resp.\ $x\geq_i x'$).
+
+\begin{definition}[Rectangular Cones]
+Let  $\a\in \{0,1\}^n$ be a Boolean vector.
+\begin{itemize}
+\item The rectangular $\a$-cone induced by  a point $x$ is
+$$B_\a (x)=\bigcap_{i=1}^n C_{i,\a_i}(x).$$
+\item The rectangular $\a$-cone induced by  a rectangle $\bx{\ux}{\ox}$ is
+$$B_\a (\bx{\ux}{\ox})=\bigcap_{i=1}^n C_{i,\a_i}(\bx{\ux}{\ox}).$$
+\end{itemize}
+\end{definition}
+
+The rectangular cones of $x$ partition $X$ into $2^n$ boxes and $x$ is a corner of each.
+In particular, $B_{\vzer}(x)=\bx{\vzer}{x}$  and $B_{\vi}(x)=\bx{x}{\vi}$ are, the downward and upward cones of $x$, consisting, respectively, of points below and above $x$. The set of all other $2^n-2$ cones, denoted by $I(x)$, contains rectangles consisting of points incomparable to $x$. These notions are illustrated for $n=2$ in Figure~\ref{fig:cone-alph}. Naturally, the cones associated with a rectangle  do not form a partition, and only $B_{\vzer}(\bx{\ux}{\ox})=B_{\vzer}(\ux)$ and $B_{\vi}(\bx{\ux}{\ox})=B_{\vi}(\ox)$  are separated from the other cones. We use $I(\bx{\ux}{\ox})$ for the incomparable cones.
+
+\begin{figure}
+  \centering
+ \input cone-alph.pdftex_t
+  \caption{Rectangular cones in dimension $2$.}\label{fig:cone-alph}
+\end{figure}
+
+The multi-dimensional algorithm presented in the sequel is based on the observation that any line $\ell$ of a positive slope  inside a rectangle $\bx{\ux}{\ox}$ that admits a monotone partition $M$, intersects $bd(M)$ at most once. In particular, the diagonal $\ell=\diag{\ux}{\ox}$ of the rectangle  is guaranteed to intersect $bd(M)$. Hence $\ell$ admits by itself a monotone partition $(\ull,\oll)$ that can be subject to Algorithm~\ref{alg:binary} to obtain an approximation of $bd(M)\cap \ell$.
+
+Figure~\ref{fig:ideal-not} illustrates the interaction between the result of the one-dimensional search process on the diagonal and the approximation of the higher-dimensional partition. Initially both $\uY$ and $\oY$ are set to $\emptyset$ and their complement, the over-approximation of $bd(M),$ is the whole domain $X$. Figure~\ref{fig:ideal-not}-(a) shows the outcome of running the ideal version of Algorithm~\ref{alg:binary} which finds the boundary point $y$. In this case the upward cone of $y$ is added to $\oX$ and the downward cone is added to $\uY$. The boundary approximation is thus refined to become their complement, the union $B_{01}(y)\cup B_{10}(y)$ of the rectangles incomparable to $y$.
+
+The situation with the non-ideal variant of the search algorithm is a bit more involved qualitatively, but since $\eps$ can be easily made small, it does not make a big quantitative difference. Figure~\ref{fig:ideal-not}-(b) shows the outcome of a search process that approximates the boundary of the one-dimensional partition by $\diag{\uy}{\oy}$. In this case only $B_{11}(\oy)$ and  $B_{00}(\uy)$ can be classified with certainty while the partition of $\bx{\uy}{\oy}$ between $\uX$ and $\oX$ is unknown. In order to guarantee a safe approximation of the boundary, the points in $\bx{\uy}{\oy}$ are treated as incomparable. The boundary approximation is refined into  the union of the two overlapping rectangles $B_{01}(\bx{\uy}{\oy})$ and $B_{10}(\bx{\uy}{\oy})$. %These rectangles overlap as they both intersect $\bx{\uy}{\oy}$.
+
+\begin{figure}
+  \centering
+\input ideal-not.PDFTEX_T
+  \caption{(a) The effect of finding the exact intersection of the diagonal with the boundary; (b) The effect of finding an interval approximation of that intersection.}\label{fig:ideal-not}
+\end{figure}
+
+The whole procedure for learning/approximating a monotone partition is written down in Algorithm~\ref{alg:multi}. It maintains at any moment the current approximation $(\uY,\oY)$ of the partition as well s its complement represented as a list $L$ of rectangles whose union constitutes an over-approximation of the boundary. For efficiency reasons, $L$ is maintained in a decreasing size order. We successively take the largest rectangle from $L$, run binary search on its diagonal and refine it until some stopping criterion on the size of the boundary approximation  (for example total volume) is met. A Some steps of the algorithm are illustrated in Figure~\ref{fig:multi-dim-new}.
+
+
+\comment{We keep also $\uY\cup\oY$ determine its complement, the boundary approximation $L$, it seems more convenient to construct these objects simultaneously and incrementally rather then compute one of them and complement at the end.}
+
+
+ \begin{algorithm}
+  \caption{Approximating a monotone partition (and its boundary) by unions of rectangular cones.}
+  \label{alg:multi}
+  \begin{algorithmic}[1]
+    \State {{\bf Input}: A rectangle $X$, a partition $M=(\uX,\oX)$ accessed by a membership oracle for $\oX$ and an error bound $\d$.}
+     \State {{\bf Output}: An approximation $M'=(\uY,\oY)$ of $M$ and an approximation $L$ of the boundary $bd(M)$ such that $|L|\leq \d$. All sets are represented by unions of rectangles. }
+     \smallskip
+     \State{ $L=\{X\}$; $(\uY,\oY)=(\emptyset,\emptyset)$} \Comment{initialization}
+    \Repeat
+        \State {{\bf pop} first $\bx{\ux}{\ox} \in L$ } \Comment{take the largest rectangle from the boundary approximation}
+        \State {$\diag{\uy}{\oy}=search(\diag{\ux}{\ox},\eps$)} \Comment{run binary search on the  diagonal}
+        \State {$\uY=\uY\cup \{B_\vzer(\uy)\}$ } \Comment{add backward cone}
+         \State {$\oY=\oY\cup \{B_\vi(\oy)\}$ } \Comment{add forward cone}
+         \State {$L=L\cup I(\bx{\ux}{\ox})$} \Comment{insert incomparable rectangles to $L$}
+             \Until {$|L|\leq \d$} %\Comment{probably be a constraint on the size/diameter of $L$ or of the largest rectangle in it}
+  \end{algorithmic}
+\end{algorithm}
+%
+
+\begin{figure}
+  \centering
+\input multi-dim-new.PDFTEX_T
+  \caption{Successive approximation of the partition boundary by running binary search on diagonals of incomparable boxes.}\label{fig:multi-dim-new}
+\end{figure}
+
+%\clearpage
+
+\section{Current Status}
+
+Having presented the algorithm, what remains is to evaluate its performance, both empirically and theoretically. The algorithm has been implemented by Marcell Vazquez-Chanlatte, and it will hopefully be used in the future for systematic evaluation. Preliminary ideas on worst-case complexity were proposed by Nicolas Basset and Eugene Asarin. Other useful comments were made by Alexey Bakhirkin and Dogan Ulus. 
+
+\bibliographystyle{plain}
+\bibliography{bsearch}
+
+\end{document}
+
+
+
+
+\section{Motivation}
+
+Our initial motivation comes from \emph{multi-criteria optimization} where $X$ is the cost space of the optimization problem. For minimization,  $\uX$ corresponds to \emph{infeasible} costs and $\oX$ represents the \emph{feasible} costs, while for maximization it is the other way around. The solution of a multi-criteria optimization problem is the set $\min (\oX)$, also known as the \emph{Pareto front} of the problem,  or its approximation by $\min (\oY)$. In \cite{julien}  we developed a procedure for computing such an approximation using a variant of binary search that submits queries to a constraint solver concerning the existence of solutions of a given cost $x$. The costs used in the queries were selected in order to reduce the distance between $\oY$ and $\uY$ and improve approximation quality. Note, however, that we do not know a priori whether $x$ is feasible or not, and the influence of the answer on the distance between $\uY$ and $\oY$ is different in the two cases.
+
+\ni{\bf Remark}:  The set of costs associated with actual feasible solutions to combinatorial and mixed optimization problems can be a \emph{discrete} subset of $X$ and the upward closure property of $\oX$ is obtained by assuming that you can always pay more for the same solution. Hence the algorithm described in the sequel using a continuous terminology should be slightly modified to solve such optimization problems practically. In particular  a query concerning the membership of $x$ in $\oX$ may return a positive answer about some $x'<x$. We also postpone the treatment of practically non-terminating queries that may occur in hard problems as $x$ gets closer to the boundary between the feasible and the infeasible.
+
+Another motivation comes from parametric identification where we have a parameterized family of predicates/constraints $\{\f_p\}$ where $p$ is a vector of parameters ranging over some rectangle. Given one or more instances of objects from the domain of the predicates, we would like to know the range of parameters $p$ such that $\f_p$ holds on those instances.  As an example consider a real-valued signal $u(t)$ and a temporal formula of the form $\exists t<p_1 ~ u(t)<p_2$. It is not hard to see that for any signal, the set of parameters $p=(p_1,p_2)$ that render $\f_p$ satisfied is upward closed. In general, the problem can be trivially reduced to monotone partition approximation if the influence of each parameter on satisfaction is monotone  \cite{parametric}.
+
+It is worth noting that the problem we solve differs from some other work that goes by the name of multi-dimensional binary search, where one searches for a \emph{single point} while we want to approximate a \emph{surface} of a dimension $(d-1)$.
+
+\section{One Dimension}
+
+Below we formulate classical binary search in terms that will facilitate the extension to many dimensions.
+ When $d=1$, $X$ is a bounded interval that we assume without loss of generality to be $[0,1]$, $\uX=[0,p)$ and $\oX=[p,1]$ for some $0<p<1$. The outcome of the binary search procedure is an interval $[a,b]$ containing $p$ such that $([0,a),[b,1]))$ is an approximation of $([0,p),[p,1])$. In dimension $1,$ two styles of measuring the quality of the approximation coincide: $b-a$ is at the same time the ``volume" of the uncertainty set and its ``diameter", which is the Hausdorff distance between $\uY$ and $\oY$.
+
+ The binary search procedure is shown in Algorithm~\ref{alg:binary}. It uses an oracle for the membership of a point $x$ in $\uX$ or $\oX$. Figure~\ref{fig:search-tree} illustrates a run of the algorithm. Binary search can be viewed also as selecting a path in a binary tree whose nodes are labeled by intervals, with the root labeled by $X$ and the sons of each interval $[a,b]$ are the intervals $[a,(a+b)/2]$ and $[(a+b)/2, b]$.
+
+\begin{algorithm}
+  \caption{One dimensional binary search}
+  \label{alg:binary}
+  \begin{algorithmic}[1]
+    \State {{\bf Input}: An interval $[a,b]$ such that $a\in \uX$ and $b\in \oX$.}
+     \State {{\bf Output}: An interval $[a',b']$ such that  $a'\in \uX$, $b'\in \oX$ and $b'-a'<\epsilon$.}
+     \smallskip
+    \While {$b-a>\epsilon$}
+        \State {$q=(a+b)/2$}
+      \If {$q\in \uX$}
+          \State   {$[a,b]=[q,b]$}
+      \Else
+              \State   {$[a,b]=[a,q]$}
+      \EndIf
+          \EndWhile
+          \State {$[a',b']=[a,b]$}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[h]
+  \centering
+  \input search-tree.PDFTEX_T
+  \caption{Binary search and the successive reduction of the uncertainty interval. The rightmost known element of $\uX$ and leftmost known elements of $\oX$ are indicated by $-$ and $+$, respectively. On the right we see the same process interpreted as path selection in a binary tree.}\label{fig:search-tree}
+\end{figure}
+
+
+.\ft{This idea, I feel, is somehow related to the practice of reducing multi-criteria to single-criterion by taking a convex combination of the costs.}
+
+
+
+
+\section{Going Multi-Dimensional}
+
+%
+Concerning the complexity of the algorithm, for $d=2$, applying $search()$  to a rectangle of diagonal length $c$ involves $\log (c/\eps)$ queries and this becomes negligible as $c$ decreases during the process. Typically, when we apply this basic step to an uncertainty rectangle of volume $V$, we divide that volume by $2$.  Consider now a breadth-first execution of the algorithm. At the end of level $i$ we have invoked the $search()$ procedure $2^i$ times and divided the volume by $2^i$ and hence we can conclude that $O(1/\d)$ invocations of one-dimensional binary search are needed to get an approximation of quality $\d$.
+
+Unfortunately, the effectiveness of the method is reduced in higher dimension as the number (and weight) of the  incomparable cones grows. Each rectangle that we process spawns $2^d-2$ recursive sub-computations for each of those cones. This problem can perhaps be tackled using a smaller number of non-elementary overlapping cones as discussed in Section~\ref{sec:dim}. The main problem is that the reduction coefficient for the volume of the uncertainty space after adding the forward and backward cones to the approximation is  $(2^d-2)/2^d$, and tends to one as $d$ grows. Whether or not we should be worried about it depends on whether there are interesting and genuine applications in very high dimension.
+
+Concerning the implementation let us first note all rectangles are disjoint as they are created hierarchically and all elementary cones associated with a point are mutually disjoint. The volume of each rectangle is trivial to compute and hence we can maintain the cumulative volume of all elements of $L$ and stop the algorithm when it goes below the desired approximation error. As for heuristics, we can maintain $L$ sorted in a decreasing size (diameter, volume)  order and always pick the largest rectangle and proceed faster in the reduction of the uncertainty space, although breadth-first processing might give better coverage/diversity.  All these ideas need to be subject to implementation and empirical studies.
+
+The essence of the algorithm is that we treat one rectangle until completion, that is, until $b-a<\epsilon$, than proceed to process its remaining incomparable cones. To see if a more complicated alternative makes sense, let us look closer at what is going on implicitly during the execution of the algorithm, as shown in Figure~\ref{fig:gradual}. Assume that we add the cones associated with $a$ and $b$ to the approximation not only at the end of the search but at each step. Then, as the uncertainty interval along the diagonal gets tighter, the cones in the approximation are replaced by larger and larger cones. Consequently, the approximation of the boundary point on the diagonal by $q=(a+b)/2$ improves and the rectangles incomparable to $q$ become more faithful representatives of the uncertainty space. In the current algorithm they are treated only after the search along the diagonal of the current rectangle terminates according to $\epsilon$. Maybe some other variants of the algorithm can abandon this rectangle earlier, start exploring (some of) the incomparable cones and then maybe even return to the abandoned rectangle later (I am not sure this last feature makes sense). %Figure~\ref{fig:uncert-error} decomposes the volume of the uncertainty space into two parts (under construction).
+
+\begin{figure}
+  \centering
+    \input gradual.pdftex_t
+  \caption{Adding to the approximating larger and larger cones as the one dimensional search progresses, and making the incomparable cones of $q$ more faithful and having more weight in the volume of the uncertainty set.}\label{fig:gradual}
+\end{figure}
+%
+
+\comment{
+\begin{figure}
+  \centering
+    \input uncert-error.pdftex_t
+  \caption{The contribution of the the distance from $a$ to $b$ to the volume of the uncertainty space (compared to the contribution of the cones incomparable to $p$)}\label{fig:uncert-error}
+\end{figure}
+}
+
+\section{Additional Investigations}
+
+We need now to explore how the algorithm works for partition boundaries of different shapes. Figure~\ref{fig:multi-dim3} shows how the algorithm works on a less balanced boundary, very steep in one dimension. The reduction in volume seems to be better than for a balanced boundary but if we look at the alternative quality measure, the length of the box, we see that there will always remains a flat rectangle below with a large width. Perhaps something can be done about it if we add additional assumption on the curvature of the boundary. [to be continued].
+
+\begin{figure}
+  \centering
+  \input multi-dim3.PDFTEX_T
+  \caption{First steps in approximation a front which is steep in one dimension.}\label{fig:multi-dim3}
+\end{figure}
+%
+
+\section{A Fixed-Grid Alternative}
+%\clearpage
+
+Let us consider now an alternative based on the more commonly used concept of binary search, $k$-$d$-tress etc. Observe first that a rectangle intersects the boundary between $\uX$ and $\oX$ only if its minimal and maximal points satisfy $\ux\in \uX$ and $\ox\in \oX$. Other rectangles  can be safely moved to $\uY$ or $\oY$. Let $(P_1,P_2)=split(P,i)$  indicate cutting $P$ in the middle along dimension $i$ to obtain two rectangles. Algorithm~\ref{alg:fixed} approximates the partition by unions of rectangles taken from a fixed grid whose resolution is $2^{-j}$ for some $j$. Figure~\ref{fig:quad-tree} illustrates the behavior of the algorithm. The comparison with Figure~\ref{fig:multi-dim1} is a bit misleading because every point there corresponds to $\log(1/\epsilon)$ queries, yet I believe that the diagonal-based algorithm is better.
+
+Note that rectangles added at different stages can be merged into larger rectangles. This is easy to implement by representing elements of $\uY$ by their maximal corner and those in $\oY$ by their minimal corner. Then running a Pareto filter after every step will discard cones which are dominated by/included in other cones.
+
+
+ \begin{algorithm}
+  \caption{Approximating a monotone partition by fixed grid rectangles. }
+  \label{alg:fixed}
+  \begin{algorithmic}[1]
+    \State {{\bf Input}: A rectangle $X$ and a partition $(\uX,\oX)$ }
+     \State {{\bf Output}: An approximation $(\uY,\oY)$ by finite unions of rectangular cones}
+     \smallskip
+     \State{ $L=\{X\}$; $(\uY,\oY)=(\emptyset,\emptyset)$}
+    \Repeat
+        \State {{\bf pick} $P\in L$; $L=L-\{P\}$  }
+        \State {$(P_1,P_2)=split(P,i)$ where $i$ is one of the largest dimensions of $P$}
+        \If {$P_1\subset \uX$}
+        \State {$\uY=\uY\cup P_1$}
+        \Else
+        \State {$L=L\cup P_1$}
+        \EndIf
+           \If {$P_2\subset \oX$}
+        \State {$\oY=\oY\cup P_2$}
+        \Else
+        \State{ $L=L\cup P_2$}
+        \EndIf
+             \Until {happy}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[h]
+  \centering
+  \input quad-tree.PDFTEX_T
+  \caption{Approximation of the partition by rectangle taken from a fixed grid.}\label{fig:quad-tree}
+\end{figure}
+
+%\newpage
+
+\section{Fighting the Curse of Dimensionality}
+\label{sec:dim}
+
+In order to treat high dimension we can replace the elementary cones by cones of rank $2$ whose number is $2d(d-1)$, which is less than $2^d$ when $d\geq 6$. Such rectangles are based, so to speak, on minimal witnesses for incomparability, a pair of dimensions $(i,j)$ such that $x_i < x'_i$ and $x_j>x'_j$. Two such cones $(i,j)$ and $(i',j')$ are of course overlapping unless $i=j' \wedge j=i'$ and the effect of this fact on the behavior of the algorithm is an empirical question.
+Figure~\ref{fig:multi-dim2} illustrates the effect of using overlapping rectangles,  the cones $B_{0\bot}$, $B_{1\bot}$, $B_{\bot 0}$ and $B_{\bot 1}$ of rank $1$. At a first glance it seems that using such cones produces less balanced coverage of the boundary, due to intersections of diagonals.
+
+\begin{figure}
+  \centering
+  \input multi-dim2.PDFTEX_T
+  \caption{The effect of using overlapping rectangular cones of rank $1$, that is, rectangles characterized by $x_1<q_1$, $x_1>q_1$, $x_2<q_2$ and $x_2>q_2$. }\label{fig:multi-dim2}
+\end{figure}
+\clearpage
+
+
+\end{document}
+
+A point in $x\in X \se \R^n$  splits the box $X$ into three qualitative subsets, dominated (back cone), dominating (forward cone) and incomparable (the rest): $$
+X= B^-(x)\cup B^+(x) \cup I(x).$$ There are always two rectangular cones in any dimension but their non-convex complement can be decomposed into a union of boxes in different (non-canonical)  ways which grows severely with dimension. The relative position of a point $y$ wrt $x$ can be characterized as a branch in a binary tree where at level $i$ we branch left or right according to whether $y_i<x_i$ or $y_i>x_i$. For $n=1$ we have $0$ (smaller) and $1$ (larger). For $n=2$ we have $00$ (smaller), $11$ (larger) and two incomparable boxes $01$ and $10$.  For $n=3$ we have $000$ (smaller), $111$ (larger) and six incomparable boxes, some of which can be merged into larger boxes. The number grows too fast $2^n -2$ so let's consider boxes where all but two dimensions are considered don't care and two other dimensions should have opposite signs, e.g.\ $01*$ or $0*1$ (which have non-empty intersections). This gives a canonical way to write the incomparable sub-space as union of $2 n (n-1)$ rectangles.
+
+There are always two rectangular cones in any dimension but their non-convex complement can be decomposed into a union of boxes in different (non-canonical)  ways which grows severely with dimension. The relative position of a point $y$ wrt $x$ can be characterized as a branch in a binary tree where at level $i$ we branch left or right according to whether $y_i<x_i$ or $y_i>x_i$. For $d=1$ we have $0$ (smaller) and $1$ (larger). For $d=2$ we have $00$ (smaller), $11$ (larger) and two incomparable boxes $01$ and $10$.  For $d=3$ we have $000$ (smaller), $111$ (larger) and six incomparable boxes, some of which can be merged into larger boxes. The number grows too fast $2^d -2$ so let's consider boxes where all but two dimensions are considered don't care and two other dimensions should have opposite signs, e.g.\ $01*$ or $0*1$ (which have non-empty intersections). This gives a canonical way to write the incomparable sub-space as union of $2 d (d-1)$ rectangles. Whether this behaves better than the straightforward decomposition is an empirical question.

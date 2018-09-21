@@ -1,0 +1,29 @@
+\begin{picture}(0,0)%
+\includegraphics{part-approx3.pdf}%
+\end{picture}%
+%
+%  Created by WinFIG version 6.0 final 
+%  METADATA <version>1.0</version> 
+%
+\setlength{\unitlength}{1973sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFont\undefined%
+\gdef\SetFigFont#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(9012,3833)(1405,-3919)
+%  METADATA <id>43</id> 
+\put(7578,-2941){\makebox(0,0)[lb]{\smash{{\SetFigFont{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\uY$}%
+}}}}
+%  METADATA <id>44</id> 
+\put(9232,-578){\makebox(0,0)[lb]{\smash{{\SetFigFont{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\oY$}%
+}}}}
+%  METADATA <id>48</id> 
+\put(2127,-2941){\makebox(0,0)[lb]{\smash{{\SetFigFont{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\uX$}%
+}}}}
+%  METADATA <id>49</id> 
+\put(3780,-1051){\makebox(0,0)[lb]{\smash{{\SetFigFont{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\oX$}%
+}}}}
+\end{picture}%
