@@ -241,22 +241,39 @@ class Rectangle:
         if inter == self:
             yield self
         else:
+            # d is a list with dimension equal to the rectangle dimension.
             dimension = self.dim()
             d = [None] * dimension
             for i in range(dimension):
                 d[i] = {self.min_corner[i], self.max_corner[i]}
 
+            # For each dimension i, d[i] = {self.min_corner[i], self.max_corner[i]} plus
+            # all the points of rectangle 'other' that fall inside of rectangle 'self'
+            # At maximum:
+            # d[i] = {self.min_corner[i], self.max_corner[i], other.min_corner[i], other.max_corner[i]}
             for i in range(dimension):
                 if self.min_corner[i] < other.min_corner[i] < self.max_corner[i]:
                     d[i].add(other.min_corner[i])
                 if self.min_corner[i] < other.max_corner[i] < self.max_corner[i]:
                     d[i].add(other.max_corner[i])
 
+            # elem[i] = pairwise(d[i])
+            # if d[i] = {a, b, c, d} then
+            # elem[i] = [(a, b), (b, c), (c, d)]
             elem = (pairwise(sorted(item)) for item in d)
+
+            # Given:
+            # elem[i] = [(a, b), (b, c)]
+            # elem[j] = [(x, y), (y, z)]
             for vertex in product(*elem):
-                # vertex = ((x1, x2), (y1, y2), ...)
-                # x1 = min value for coord x
-                # x2 = max value for coord x
+                # product[0] = ((a, b), (x, y))
+                # product[1] = ((a, b), (y, z))
+                # product[2] = ((b, c), (x, y))
+                # product[3] = ((b, c), (y, z))
+                #
+                # vertex = ((a, b), (x, y))
+                # minc = (a, x)
+                # maxc = (b, y)
                 minc = tuple(item[0] for item in vertex)
                 maxc = tuple(item[1] for item in vertex)
                 instance = Rectangle(minc, maxc)
