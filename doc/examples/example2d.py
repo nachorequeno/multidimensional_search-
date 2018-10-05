@@ -23,4 +23,5 @@ rs = Search2D(ora=oracle,
               sleep=0,
               opt_level=0,
               parallel=False,
-              logging=True)
+              logging=True,
+              simplify=True)

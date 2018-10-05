@@ -117,6 +117,10 @@ class ResultSet:
         # Single points may appear in the boundary, so we don't remove them
         # self.border = [li for li in self.border if li.diag_length() != 0]
         self.recalculate_border()
+        # self.recalculate_yup()
+        # self.recalculate_ylow()
+
+    def fusion(self):
         self.fusion_rectangles_border()
         self.fusion_rectangles_ylow()
         self.fusion_rectangles_yup()
@@ -161,6 +165,67 @@ class ResultSet:
                         self.border.remove(rect2)
             len_after = len(self.border)
 
+
+    def recalculate_yup(self):
+        # type: (ResultSet) -> None
+        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
+        # the boundary border is computed as border = xspace - yup - ylow
+
+        new_yup = {self.xspace}
+
+        # Copy list
+        rest_list = []
+        rest_list.extend(self.border)
+        rest_list.extend(self.ylow)
+
+        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # and remove from A the portion that intersects with B
+
+        while True:
+            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            intersect_list = ((a, b) for a in new_yup for b in rest_list if a.overlaps(b) and a != b)
+            try:
+                a, b = next(intersect_list)
+                # new_border = new_border.union(list(a - b))
+                new_yup = new_yup.union(a - b)
+                # Remove 'a' after calculating the list of subrectangles (a-b)
+                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+                new_yup.remove(a)
+            except StopIteration:
+                break
+
+        self.yup = list(new_yup)
+
+    def recalculate_ylow(self):
+        # type: (ResultSet) -> None
+        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
+        # the boundary border is computed as border = xspace - yup - ylow
+
+        new_ylow = {self.xspace}
+
+        # Copy list
+        rest_list = []
+        rest_list.extend(self.border)
+        rest_list.extend(self.yup)
+
+        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # and remove from A the portion that intersects with B
+
+        while True:
+            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            intersect_list = ((a, b) for a in new_ylow for b in rest_list if a.overlaps(b) and a != b)
+            try:
+                a, b = next(intersect_list)
+                # new_border = new_border.union(list(a - b))
+                new_ylow = new_ylow.union(a - b)
+                # Remove 'a' after calculating the list of subrectangles (a-b)
+                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+                new_ylow.remove(a)
+            except StopIteration:
+                break
+
+        self.ylow = list(new_ylow)
+
     def recalculate_border(self):
         # type: (ResultSet) -> None
         # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
@@ -176,16 +241,18 @@ class ResultSet:
         # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
         # and remove from A the portion that intersects with B
 
-        intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b]
-        while len(intersect_list) > 0:
-            a, b = intersect_list[0]
-
-            new_border = new_border.union(list(a - b))
-            # Remove 'a' after calculating the list of subrectangles (a-b)
-            # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
-            new_border.remove(a)
-
-            intersect_list = [(a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b]
+        while True:
+            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            intersect_list = ((a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b)
+            try:
+                a, b = next(intersect_list)
+                # new_border = new_border.union(list(a - b))
+                new_border = new_border.union(a - b)
+                # Remove 'a' after calculating the list of subrectangles (a-b)
+                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+                new_border.remove(a)
+            except StopIteration:
+                break
 
         self.border = list(new_border)
 

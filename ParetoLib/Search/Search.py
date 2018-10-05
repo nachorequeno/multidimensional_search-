@@ -106,7 +106,8 @@ def Search2D(ora,
              sleep=0.0,
              opt_level=2,
              parallel=False,
-             logging=True):
+             logging=True,
+             simplify=True):
     # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool, bool) -> ResultSet
     xyspace = create_2D_space(min_cornerx, min_cornery, max_cornerx, max_cornery)
     if parallel:
@@ -123,9 +124,12 @@ def Search2D(ora,
     # xs = [point[0] for point in points]
     # ys = [point[1] for point in points]
 
+    if simplify:
+       rs.simplify()
+       rs.fusion()
+
     # rs.plot_2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
     # rs.plot_2D_light(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
-    rs.simplify()
     rs.plot_2D_light(blocking=True, var_names=ora.get_var_names())
     return rs
 
@@ -144,7 +148,8 @@ def Search3D(ora,
              sleep=0.0,
              opt_level=2,
              parallel=False,
-             logging=True):
+             logging=True,
+             simplify=True):
     # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool, bool) -> ResultSet
     xyspace = create_3D_space(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
 
@@ -163,9 +168,12 @@ def Search3D(ora,
     # ys = [point[1] for point in points]
     # zs = [point[2] for point in points]
 
+    if simplify:
+       rs.simplify()
+       rs.fusion()
+
     # rs.plot_3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
     # rs.plot_3D_light(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
-    rs.simplify()
     rs.plot_3D_light(blocking=True, var_names=ora.get_var_names())
     return rs
 
@@ -180,7 +188,8 @@ def SearchND(ora,
              sleep=0.0,
              opt_level=2,
              parallel=False,
-             logging=True):
+             logging=True,
+             simplify=True):
     # type: (Oracle, float, float, float, float, int, bool, float, int, bool, bool) -> ResultSet
     d = ora.dim()
 
@@ -194,5 +203,7 @@ def SearchND(ora,
     else:
         rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
-    rs.simplify()
+    if simplify:
+       rs.simplify()
+       rs.fusion()
     return rs

@@ -111,16 +111,18 @@ class SearchTestCase(unittest.TestCase):
                                   sleep=SLEEP_TIME,
                                   opt_level=opt_level,
                                   parallel=bool_val,
-                                  logging=bool_val)
+                                  logging=bool_val,
+                                  simplify=bool_val)
 
                     # Create numpoints_verify vectors of dimension d
                     # Continuous uniform distribution over the stated interval.
                     # To sample Unif[a, b), b > a
                     # (b - a) * random_sample() + a
                     d = self.oracle.dim()
+                    print('Dimension {0}'.format(d))
                     list_test_points = (max_corner - min_corner) * np.random.random_sample((self.numpoints_verify, d)) \
                                        + min_corner
-                    print('\nVerifying {0}'.format(test))
+                    print('Verifying {0}'.format(test))
                     self.verifyND(fora, rs, list_test_points)
 
 
@@ -139,7 +141,6 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        # self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
         self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
 
     def test_3D(self):

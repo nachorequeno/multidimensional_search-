@@ -20,4 +20,5 @@ rs = SearchND(ora=oracle,
               sleep=0,
               opt_level=0,
               parallel=False,
-              logging=True)
+              logging=True,
+              simplify=True)

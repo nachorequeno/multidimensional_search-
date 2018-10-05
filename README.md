@@ -21,7 +21,7 @@ This library is based on the work-in-progress paper [1].
 
 ## Installation
 
-This library requires Python 2.7.9. The dependencies are listed in requirements.txt. 
+This library requires Python 2.7.9 or Python 3.4+. The dependencies are listed in requirements.txt. 
 If you have the python tool 'pip' installed, then you can run the following command for
 installing the depencencies:
 
@@ -138,40 +138,48 @@ Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 
 ### Running the multidimensional search
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
-It is implemented by the function:
- 
-ParetoLib.Search.SeqSearch.multidim_search(xspace,
-                              oracle,
-                              epsilon=EPSILON,
-                              delta=DELTA,
-                              verbose=False,
-                              blocking=False,
-                              sleep=0.0,
-                              opt_level=2,
-                              logging=True)
+It is implemented by the module ParetoLib.Search.Search, which encapsulates the complexity of the learning 
+process in three functions (i.e., *Search2D*, *Search3D* and *SearchND*) depending on the dimension of 
+the space *X*.
 
-which takes as input the following parameters:
-* xspace: the N-dimensional space that contains the upper and lower closures.
-* oracle: the external knowledge repository that guides the learning process.
-* epsilon: error representing the maximum distance between a point 'x' of the 
-space and a point 'y' of the Pareto front.
-* delta: error representing the maximum area/volume contained in the border
- that separates the upper and lower closures.
-* verbose: boolean that specifies if the algorithm must print traces for
-debugging options.
-* blocking: boolean that specifies if the learning algorithm musts plot 
-intermediate results in 2D/3D graphics.
-* sleep: time in seconds that the intermediate 2D/3D graphic must be shown in the screen.
-                    
-As a result, the function returns an object of the class *ResultSet*. 
-*Search2D*, *Search3D* and *SearchND* functions are wrappers that simplify 
-and automatize the calling to the multidimensional search for *OracleFunction*, 
+The learning algorithm is compatible for any dimension *N*, and for any *Oracle* defined according to the 
+template ParetoLib.Oracle.Oracle. For the moment, ParetoLib includes support for *OracleFunction*, 
 *OraclePoint* and *OracleSTL* oracles.
-A set of running examples for 2D, 3D and ND can be found in Test/test_Search.py.
+
+The invokation parameters of the learning process are the following:
+* xspace: the N-dimensional space that contains the upper and lower closures, 
+represented by a list of minimum and maximum possible values for each dimension
+ (i.e., min_cornerx, max_cornerx, etc.).
+* oracle: the external knowledge repository that guides the learning process.
+* epsilon: a real representing the maximum desired distance between a point *x* 
+of the space and a point *y* of the Pareto front.
+* delta: a real representing the maximum area/volume contained in the border
+ that separates the upper and lower closures; delta is used as a stopping criterion
+ for the learning algorithm (sum(volume(cube) for all cube in border) < delta).
+* max_step: the maximum number of cubes in the border that the learning algorithm 
+will analyze, in case of the stopping condition *delta* is not reached yet. 
+* sleep: time in seconds that each intermediate 2D/3D graphic must be shown in the screen 
+(i.e, 0 for not showing intermediate results).
+* blocking: boolean that specifies if the intermediate 2D/3D graphics must be explicitly
+ closed by the user, or they are automatically closed after *sleep* seconds.
+* simplify: boolean that specifies if the number of cubes in the 2D/3D graphics must
+be minimized. 
+* opt_level: an integer specifying which version of the learning algorithm to use
+ (i.e., 0, 1 or 2; use 2 for fast convergence).
+* parallel: boolean that specifies if the user desire to take advantage of the 
+multithreading capabilities of the computer.
+* logging: boolean that specifies if the algorithm must print traces for
+debugging options.
+               
+   
+As a result, the function returns an object of the class *ResultSet* with the distribution
+of the space *X* in three subspaces: a lower closure, an upper closure and a border which 
+ contains the Pareto front.
+A set of running examples for 2D, 3D and ND can be found in doc/examples and in Test/test_Search.py.
 
 ```python
-from ParetoLib.Oracle.OracleFunction import *
-from ParetoLib.Search.Search import *
+from ParetoLib.Oracle.OracleFunction import OracleFunction
+from ParetoLib.Search.Search import Search2D, EPS, DELTA, STEPS
 
 # File containing the definition of the Oracle
 nfile='Tests/Search/OracleFunction/2D/test0.txt'
@@ -191,11 +199,12 @@ rs = Search2D(ora=oracle,
               epsilon=EPS,
               delta=DELTA,
               max_step=STEPS,
-              blocking=False,
               sleep=0,
+              blocking=False,
+              simplify=False,
               opt_level=0,
               parallel=False,
-              logging=True)
+              logging=False)
 ```                          
 
 ### Saving and plotting the results
@@ -204,7 +213,7 @@ This object is a data structure composed of three elements: the upper closure (*
 lower closure (*X2*), and the gap between X1 and X2 representing the precision error of the
 learning process. 
 The size of this gap depends on the accuracy of the learning process, which can be tuned by 
-the EPSILON and DELTA parameters during the invocation of the learning method.
+the EPS and DELTA parameters during the invocation of the learning method.
 
 The ResultSet class provides functions for:
 - Testing the membership of a new point *y* to any of the closures.

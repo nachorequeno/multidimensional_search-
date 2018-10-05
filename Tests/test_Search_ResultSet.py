@@ -375,6 +375,7 @@ class ResultSetTestCase(unittest.TestCase):
         # rs_sim = copy.deepcopy(self.rs_2D)
         rs_sim = ResultSet(self.border_2D, self.ylow_2D, self.yup_2D, self.xspace_2D)
         rs_sim.simplify()
+        rs_sim.fusion()
 
         self.assertEqual(0.0, rs_sim.overlapping_volume_yup())
         self.assertEqual(0.0, rs_sim.overlapping_volume_ylow())
@@ -409,6 +410,7 @@ class ResultSetTestCase(unittest.TestCase):
         # rs_sim = copy.deepcopy(self.rs_3D)
         rs_sim = ResultSet(self.border_3D, self.ylow_3D, self.yup_3D, self.xspace_3D)
         rs_sim.simplify()
+        rs_sim.fusion()
 
         self.assertEqual(0.0, rs_sim.overlapping_volume_yup())
         self.assertEqual(0.0, rs_sim.overlapping_volume_ylow())
