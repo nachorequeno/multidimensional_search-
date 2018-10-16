@@ -402,7 +402,7 @@ def incomp_compressed(d):
 def incomp(d, opt=True):
     # type: (int, bool) -> list
     # # Set of incomparable rectangles
-    if opt:
+    if opt and d >= 3:
         return incomp_compressed(d)
     else:
         return incomp_expanded(d)
