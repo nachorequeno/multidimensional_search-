@@ -1,7 +1,6 @@
 import os
 import time
 import tempfile
-import itertools
 
 from sortedcontainers import SortedListWithKey, SortedSet
 
@@ -11,7 +10,7 @@ from ParetoLib.Search.CommonSearch import EPS, DELTA, STEPS, binary_search
 from ParetoLib.Search.ResultSet import ResultSet
 
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.Geometry.Rectangle import Rectangle, irect
+from ParetoLib.Geometry.Rectangle import Rectangle, irect, comp, incomp
 
 
 # Multidimensional search
@@ -72,19 +71,14 @@ def multidim_search_opt_2(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]
@@ -261,19 +255,14 @@ def multidim_search_opt_1(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]
@@ -421,19 +410,14 @@ def multidim_search_opt_0(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]

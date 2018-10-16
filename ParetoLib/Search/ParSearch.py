@@ -14,8 +14,9 @@ from ParetoLib.Search.CommonSearch import EPS, DELTA, STEPS, binary_search
 from ParetoLib.Search.ParResultSet import ParResultSet
 
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.Geometry.Rectangle import Rectangle, irect
+from ParetoLib.Geometry.Rectangle import Rectangle, irect, comp, incomp
 from ParetoLib.Geometry.ParRectangle import pvol
+
 
 def pbin_search_ser(args):
     xrectangle, f, epsilon, n = args
@@ -120,19 +121,14 @@ def multidim_search_deep_first_opt_2(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]
@@ -277,7 +273,8 @@ def multidim_search_deep_first_opt_2(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)
@@ -317,19 +314,14 @@ def multidim_search_deep_first_opt_1(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]
@@ -469,7 +461,8 @@ def multidim_search_deep_first_opt_1(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)
@@ -509,19 +502,14 @@ def multidim_search_deep_first_opt_0(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     # border = [xspace]
@@ -623,7 +611,8 @@ def multidim_search_deep_first_opt_0(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)
@@ -665,19 +654,14 @@ def multidim_search_breadth_first_opt_2(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     border = [xspace]
@@ -811,7 +795,8 @@ def multidim_search_breadth_first_opt_2(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)
@@ -851,19 +836,14 @@ def multidim_search_breadth_first_opt_1(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     border = [xspace]
@@ -968,7 +948,8 @@ def multidim_search_breadth_first_opt_1(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)
@@ -1008,19 +989,14 @@ def multidim_search_breadth_first_opt_0(xspace,
     # Dimension
     n = xspace.dim()
 
-    # Alpha in [0,1]^n
-    alphaprime = (range(2),) * n
-    alpha = itertools.product(*alphaprime)
-
-    # Particular cases of alpha
-    # zero = (0_1,...,0_n)    random.uniform(min_corner, max_corner)
-    zero = (0,) * n
+    # Set of comparable and incomparable rectangles, represented by 'alpha' indices
+    comparable = comp(n)
+    incomparable = incomp(n)
+    # comparable = [zero, one]
+    # incomparable = list(set(alpha) - set(comparable))
+    # with:
+    # zero = (0_1,...,0_n)
     # one = (1_1,...,1_n)
-    one = (1,) * n
-
-    # Set of comparable and incomparable rectangles
-    comparable = [zero, one]
-    incomparable = list(set(alpha) - set(comparable))
 
     # List of incomparable rectangles
     border = [xspace]
@@ -1100,7 +1076,8 @@ def multidim_search_breadth_first_opt_0(xspace,
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
-                              .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup), len(border)))
+                               .format(step, vol_ylow, vol_yup, vol_border, vol_total, len(ylow), len(yup),
+                                       len(border)))
 
         if sleep > 0.0:
             # rs = ResultSet(list(border), ylow, yup, xspace)

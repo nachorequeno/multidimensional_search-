@@ -126,6 +126,16 @@ class ResultSet:
         self.fusion_rectangles_yup()
 
     def fusion_rectangles_yup(self):
+        while True:
+            concat_list = ((rect1, rect2) for rect1 in self.yup for rect2 in self.yup if rect1.is_concatenable(rect2))
+            try:
+                rect1, rect2 = next(concat_list)
+                rect1.concatenate_update(rect2)
+                self.yup.remove(rect2)
+            except StopIteration:
+                break
+
+    def fusion_rectangles_yup_2(self):
         # type: (ResultSet) -> None
         len_before = float('inf')
         len_after = len(self.yup)
@@ -140,6 +150,16 @@ class ResultSet:
             len_after = len(self.yup)
 
     def fusion_rectangles_ylow(self):
+        while True:
+            concat_list = ((rect1, rect2) for rect1 in self.ylow for rect2 in self.ylow if rect1.is_concatenable(rect2))
+            try:
+                rect1, rect2 = next(concat_list)
+                rect1.concatenate_update(rect2)
+                self.ylow.remove(rect2)
+            except StopIteration:
+                break
+
+    def fusion_rectangles_ylow_2(self):
         # type: (ResultSet) -> None
         len_before = float('inf')
         len_after = len(self.ylow)
@@ -153,6 +173,16 @@ class ResultSet:
             len_after = len(self.ylow)
 
     def fusion_rectangles_border(self):
+        while True:
+            concat_list = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.is_concatenable(rect2))
+            try:
+                rect1, rect2 = next(concat_list)
+                rect1.concatenate_update(rect2)
+                self.border.remove(rect2)
+            except StopIteration:
+                break
+
+    def fusion_rectangles_border_2(self):
         # type: (ResultSet) -> None
         len_before = float('inf')
         len_after = len(self.border)

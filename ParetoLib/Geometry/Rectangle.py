@@ -346,14 +346,77 @@ class Rectangle:
         return faces
 
 
+#####################
 # Auxiliary functions
+#####################
+# Set of functions for generating the 'alphas' that will rule the creation of comparable and incomparable cubes
+# Alpha in [0,1]^n
+def comp(d):
+    # Set of comparable rectangles
+    # Particular cases of alpha
+    # zero = (0_1,...,0_d)
+    zero = (0,) * d
+    # one = (1_1,...,1_d)
+    one = (1,) * d
+    return [zero, one]
+
+
+def incomp_expanded(d):
+    # type: (int) -> list
+    alphaprime = (range(2),) * d
+    alpha = product(*alphaprime)
+
+    # Set of comparable and incomparable rectangles
+    comparable = comp(d)
+    incomparable = list(set(alpha) - set(comparable))
+    return incomparable
+
+
+def E(d):
+    # type: (int) -> list
+    # Compressed version for a set of alpha indices representing incomparable rectangles
+    if d == 3:
+        return ["0*1", "10*", "*10"]
+    elif d > 3:
+        return ["*" + i for i in E(d - 1)] + ["0" + "1" * (d - 1), "1" + "0" * (d - 1)]
+
+
+def incomp_compressed(d):
+    # type: (int) -> list
+    # Returns E(d) in alpha format
+    lin = E(d)
+    lout = []
+    # Changes:
+    # ["0*1", "10*", "*10"]
+    # By:
+    # ["021", "102", "210"]
+    # And finally:
+    # [(0, 2, 1), (1, 0, 2), (2, 1, 0)]
+    for i in range(len(lin)):
+        lin[i] = lin[i].replace("*", "2")
+        alpha = tuple(int(li) for li in lin[i])
+        lout.append(alpha)
+    return lout
+
+
+def incomp(d, opt=True):
+    # type: (int, bool) -> list
+    # # Set of incomparable rectangles
+    if opt:
+        return incomp_compressed(d)
+    else:
+        return incomp_expanded(d)
+
+#################
+# Cube generators
+#################
 def cpoint(i, alphai, ypoint, xspace):
     # type: (int, int, tuple, Rectangle) -> Rectangle
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
     if alphai == 0:
         # result_xspace.max_corner[i] = ypoint[i]
         result_xspace.max_corner = subt(i, xspace.max_corner, ypoint)
-    if alphai == 1:
+    elif alphai == 1:
         # result_xspace.min_corner[i] = ypoint[i]
         result_xspace.min_corner = subt(i, xspace.min_corner, ypoint)
     return result_xspace
@@ -361,10 +424,12 @@ def cpoint(i, alphai, ypoint, xspace):
 
 def crect(i, alphai, yrectangle, xspace):
     # type: (int, int, Rectangle, Rectangle) -> Rectangle
+    result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
     if alphai == 0:
-        return cpoint(i, alphai, yrectangle.max_corner, xspace)
-    if alphai == 1:
-        return cpoint(i, alphai, yrectangle.min_corner, xspace)
+        result_xspace = cpoint(i, alphai, yrectangle.max_corner, xspace)
+    elif alphai == 1:
+        result_xspace = cpoint(i, alphai, yrectangle.min_corner, xspace)
+    return result_xspace
 
 
 #########################################################################################
@@ -401,43 +466,6 @@ def brect(alpha, yrectangle, xspace):
 
 
 #########################################################################################
-def bpoint2(alpha, ypoint, xspace):
-    # type: (tuple, tuple, Rectangle) -> Rectangle
-    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
-        'xspace.min_corner and xspace.max_corner do not share the same dimension'
-    assert (dim(xspace.min_corner) == dim(ypoint)), \
-        'xspace.min_corner and xpoint do not share the same dimension'
-    # assert (dim(ypoint.max_corner) == dim(ypoint)), \
-    #    'xspace.max_corner and ypoint do not share the same dimension'
-    partial_rect = (cpoint(i, alphai, ypoint, xspace) for i, alphai in enumerate(alpha))
-    temp = Rectangle(xspace.min_corner, xspace.max_corner)
-    for part_rect in partial_rect:
-        temp = temp.intersection(part_rect) if temp.overlaps(part_rect) else temp
-    return temp
-
-
-def brect2(alpha, yrectangle, xspace):
-    # type: (tuple, Rectangle, Rectangle) -> Rectangle
-    assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
-        'xrectangle.min_corner and xrectangle.max_corner do not share the same dimension'
-    assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
-        'xspace.min_corner and xspace.max_corner do not share the same dimension'
-    assert (dim(alpha) == dim(yrectangle.min_corner)), \
-        'alpha and xrectangle.min_corner do not share the same dimension'
-    assert (dim(xspace.min_corner) == dim(yrectangle.min_corner)), \
-        'xspace.min_corner and xrectangle.min_corner do not share the same dimension'
-    # assert (dim(xspace.max_corner) == dim(yrectangle.max_corner)), \
-    #    'xspace.max_corner and yrectangle.max_corner do not share the same dimension'
-
-    partial_rect = (crect(i, alphai, yrectangle, xspace) for i, alphai in enumerate(alpha))
-    temp = Rectangle(xspace.min_corner, xspace.max_corner)
-    for part_rect in partial_rect:
-        temp = temp.intersection(part_rect) if temp.overlaps(part_rect) else temp
-    return temp
-
-
-#########################################################################################
-
 def irect(alphaincomp, yrectangle, xspace):
     # type: (list, Rectangle, Rectangle) -> list
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
