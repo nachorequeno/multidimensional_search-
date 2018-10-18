@@ -20,10 +20,13 @@ class ResultSet:
         # If two ResultSets are created by making an empty call to ResultSet() (i.e., rs1, rs2),
         # then rs1.border and rs2.border will point to the same list. Modifications in rs1.border
         # will change rs2.border
+        self.xspace = xspace
         self.border = list(border)
         self.ylow = list(ylow)
         self.yup = list(yup)
-        self.xspace = xspace
+
+        # self.ylow = [Rectangle(xspace.min_corner, r.max_corner) for r in ylow]
+        # self.yup = [Rectangle(r.min_corner, xspace.max_corner) for r in yup]
 
         self.filename_yup = 'up'
         self.filename_ylow = 'low'
@@ -174,7 +177,8 @@ class ResultSet:
 
     def fusion_rectangles_border(self):
         while True:
-            concat_list = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if rect1.is_concatenable(rect2))
+            concat_list = ((rect1, rect2) for rect1 in self.border for rect2 in self.border if
+                           rect1.is_concatenable(rect2))
             try:
                 rect1, rect2 = next(concat_list)
                 rect1.concatenate_update(rect2)
@@ -195,11 +199,10 @@ class ResultSet:
                         self.border.remove(rect2)
             len_after = len(self.border)
 
-
     def recalculate_yup(self):
         # type: (ResultSet) -> None
-        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
-        # the boundary border is computed as border = xspace - yup - ylow
+        # Given the space xspace, the boundary (border) and lower (ylow) closure of the Pareto front,
+        # the upper closure is computed as yup = xspace - border - ylow
 
         new_yup = {self.xspace}
 
@@ -208,11 +211,11 @@ class ResultSet:
         rest_list.extend(self.border)
         rest_list.extend(self.ylow)
 
-        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # Find cubes B of the border/lower closure that intersect any cube A from the upper closure
         # and remove from A the portion that intersects with B
 
         while True:
-            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            # At each iteration, intersection_list is updated and new cubes may overlap some cube of the closure
             intersect_list = ((a, b) for a in new_yup for b in rest_list if a.overlaps(b) and a != b)
             try:
                 a, b = next(intersect_list)
@@ -228,8 +231,8 @@ class ResultSet:
 
     def recalculate_ylow(self):
         # type: (ResultSet) -> None
-        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
-        # the boundary border is computed as border = xspace - yup - ylow
+        # Given the space xspace, the boundary (border) and upper (yup) closure of the Pareto front,
+        # the lower closure is computed as ylow = xspace - border - yup
 
         new_ylow = {self.xspace}
 
@@ -238,11 +241,11 @@ class ResultSet:
         rest_list.extend(self.border)
         rest_list.extend(self.yup)
 
-        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # Find cubes B of the border/upper closure that intersect any cube A from the lower closure
         # and remove from A the portion that intersects with B
 
         while True:
-            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            # At each iteration, intersection_list is updated and new cubes may overlap some cube of the closure
             intersect_list = ((a, b) for a in new_ylow for b in rest_list if a.overlaps(b) and a != b)
             try:
                 a, b = next(intersect_list)
@@ -257,6 +260,36 @@ class ResultSet:
         self.ylow = list(new_ylow)
 
     def recalculate_border(self):
+        # type: (ResultSet) -> None
+        # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
+        # the boundary border is computed as border = xspace - yup - ylow
+
+        new_border = {self.xspace}
+
+        # Copy list
+        closure_list = []
+        closure_list.extend(self.yup)
+        closure_list.extend(self.ylow)
+
+        # Find cubes B of the upper/lower closures that intersect any cube A from the boundary
+        # and remove from A the portion that intersects with B
+
+        while True:
+            # At each iteration, new_border is updated and new cubes may overlap some cube of the closure
+            intersect_list = ((a, b) for a in new_border for b in closure_list if a.overlaps(b) and a != b)
+            try:
+                a, b = next(intersect_list)
+                # new_border = new_border.union(list(a - b))
+                new_border = new_border.union(a - b)
+                # Remove 'a' after calculating the list of subrectangles (a-b)
+                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+                new_border.remove(a)
+            except StopIteration:
+                break
+
+        self.border = list(new_border)
+
+    def recalculate_border2(self):
         # type: (ResultSet) -> None
         # Given the space xspace, the upper (yup) and lower (ylow) closures of the Pareto front,
         # the boundary border is computed as border = xspace - yup - ylow
@@ -650,6 +683,69 @@ class ResultSet:
         plt.close()
         return plt
 
+    def plot_2D_pareto(self,
+                       filename='',
+                       xaxe=0,
+                       yaxe=1,
+                       var_names=list(),
+                       blocking=False,
+                       sec=0.0,
+                       opacity=1.0):
+        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+
+        fig1 = plt.figure()
+        # ax1 = fig1.add_subplot(111, aspect='equal')
+        ax1 = fig1.add_subplot(111)
+        # ax1.set_title('Approximation of the Pareto front, Parameters (' + str(xaxe) + ', ' + str(yaxe) + ')')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
+
+        points_lower_closure = (r.max_corner for r in self.ylow)
+        points_upper_closure = (r.min_corner for r in self.yup)
+
+        xs = []
+        ys = []
+        for pi in points_lower_closure:
+            xs.append(pi[0])
+            ys.append(pi[1])
+        ax1.scatter(xs, ys, c='r', marker='p')
+
+        xs = []
+        ys = []
+        for pi in points_upper_closure:
+            xs.append(pi[0])
+            ys.append(pi[1])
+        ax1.scatter(xs, ys, c='g', marker='p')
+
+        # plt.plot(xs, ys, 'kp')
+        # ax1.scatter(targetx, targety,  c='k')
+        # ax1.autoscale_view()
+
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+
+        plt.show(block=blocking)
+        time.sleep(sec)
+
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+
+        plt.close()
+        return plt
+
     def plot_space_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
         faces = [self.xspace.plot_3D('blue', xaxe, yaxe, zaxe, opacity)]
@@ -791,6 +887,72 @@ class ResultSet:
         targetz += [min(zs), max(zs)]
 
         plt.plot(targetx, targety, targetz, 'kp')
+        # ax1.scatter(targetx, targety, targetz, c='k')
+        # ax1.autoscale_view()
+
+        #
+        fig1.tight_layout()
+        plt.tight_layout()
+        #
+
+        # plt.autoscale()
+        plt.xscale('linear')
+        plt.yscale('linear')
+        # plt.zscale('linear')
+
+        plt.show(block=blocking)
+        time.sleep(sec)
+
+        if filename != '':
+            fig1.savefig(filename, dpi=90, bbox_inches='tight')
+        plt.close()
+        return plt
+
+    def plot_3D_pareto(self,
+                       filename='',
+                       xaxe=0,
+                       yaxe=1,
+                       zaxe=2,
+                       var_names=list(),
+                       blocking=False,
+                       sec=0.0):
+        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
+        fig1 = plt.figure()
+        # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
+        ax1 = fig1.add_subplot(111, projection='3d')
+        ax1.set_title('Approximation of the Pareto front')
+
+        # The name of the inferred parameters using Pareto search are written in the axes of the graphic.
+        # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
+        # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
+        # lexicographic characters by default.
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
+        ax1.set_xlabel(var_names[xaxe % len(var_names)])
+        ax1.set_ylabel(var_names[yaxe % len(var_names)])
+        ax1.set_zlabel(var_names[zaxe % len(var_names)])
+
+        points_lower_closure = (r.max_corner for r in self.ylow)
+        points_upper_closure = (r.min_corner for r in self.yup)
+
+        xs = []
+        ys = []
+        zs = []
+        for pi in points_lower_closure:
+            xs.append(pi[0])
+            ys.append(pi[1])
+            zs.append(pi[2])
+        ax1.scatter(xs, ys, zs, c='r', marker='p')
+
+        xs = []
+        ys = []
+        zs = []
+        for pi in points_upper_closure:
+            xs.append(pi[0])
+            ys.append(pi[1])
+            zs.append(pi[2])
+        ax1.scatter(xs, ys, zs, c='g', marker='p')
+
+        # plt.plot(xs, ys, zs, 'kp')
         # ax1.scatter(targetx, targety, targetz, c='k')
         # ax1.autoscale_view()
 

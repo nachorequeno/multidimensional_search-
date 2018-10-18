@@ -392,9 +392,9 @@ def incomp_compressed(d):
     # ["021", "102", "210"]
     # And finally:
     # [(0, 2, 1), (1, 0, 2), (2, 1, 0)]
-    for i in range(len(lin)):
-        lin[i] = lin[i].replace("*", "2")
-        alpha = tuple(int(li) for li in lin[i])
+    for i in lin:
+        lin_temp = i.replace("*", "2")
+        alpha = tuple(int(li) for li in lin_temp)
         lout.append(alpha)
     return lout
 
