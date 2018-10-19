@@ -223,18 +223,18 @@ def multidim_search_opt_2(xspace,
                                        steps_binsearch,
                                        len(border_overlapping_b0), len(border_overlapping_b1)))
         if sleep > 0.0:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
-    return ResultSet(list(border), ylow, yup, xspace)
+    return ResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_opt_1(xspace,
@@ -378,18 +378,18 @@ def multidim_search_opt_1(xspace,
                                        steps_binsearch,
                                        vol_ylow_opt_1, vol_ylow_opt_2, vol_yup_opt_1, vol_yup_opt_2))
         if sleep > 0.0:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
-    return ResultSet(list(border), ylow, yup, xspace)
+    return ResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_opt_0(xspace,
@@ -496,15 +496,15 @@ def multidim_search_opt_0(xspace,
                                                                  len(ylow), len(yup), len(border),
                                                                  steps_binsearch))
         if sleep > 0.0:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ResultSet(list(border), ylow, yup, xspace)
+            rs = ResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
-    return ResultSet(list(border), ylow, yup, xspace)
+    return ResultSet(border, ylow, yup, xspace)

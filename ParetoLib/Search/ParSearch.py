@@ -277,15 +277,14 @@ def multidim_search_deep_first_opt_2(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
@@ -293,7 +292,7 @@ def multidim_search_deep_first_opt_2(xspace,
     p.close()
     p.join()
 
-    return ParResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_deep_first_opt_1(xspace,
@@ -465,15 +464,14 @@ def multidim_search_deep_first_opt_1(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
@@ -481,7 +479,7 @@ def multidim_search_deep_first_opt_1(xspace,
     p.close()
     p.join()
 
-    return ParResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 def multidim_search_deep_first_opt_0(xspace,
@@ -615,15 +613,14 @@ def multidim_search_deep_first_opt_0(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
@@ -631,7 +628,7 @@ def multidim_search_deep_first_opt_0(xspace,
     p.close()
     p.join()
 
-    return ParResultSet(list(border), ylow, yup, xspace)
+    return ParResultSet(border, ylow, yup, xspace)
 
 
 ########################################################################################################################
@@ -799,15 +796,14 @@ def multidim_search_breadth_first_opt_2(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
@@ -952,15 +948,14 @@ def multidim_search_breadth_first_opt_1(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
@@ -1080,15 +1075,14 @@ def multidim_search_breadth_first_opt_0(xspace,
                                        len(border)))
 
         if sleep > 0.0:
-            # rs = ResultSet(list(border), ylow, yup, xspace)
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             if n == 2:
                 rs.plot_2D_light(blocking=blocking, sec=sleep, opacity=0.7)
             elif n == 3:
                 rs.plot_3D_light(blocking=blocking, sec=sleep, opacity=0.7)
 
         if logging:
-            rs = ParResultSet(list(border), ylow, yup, xspace)
+            rs = ParResultSet(border, ylow, yup, xspace)
             name = os.path.join(tempdir, str(step))
             rs.to_file(name)
 
