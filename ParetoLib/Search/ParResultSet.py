@@ -9,7 +9,7 @@ from ParetoLib.Search.ResultSet import ResultSet
 
 class ParResultSet(ResultSet):
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
-        # type: (ParResultSet, list, list, list, Rectangle) -> None
+        # type: (ParResultSet, iter, iter, iter, Rectangle) -> None
         # super(ParResultSet, self).__init__(border, ylow, yup, xspace)
         ResultSet.__init__(self, border, ylow, yup, xspace)
         self.p = Pool(cpu_count())
