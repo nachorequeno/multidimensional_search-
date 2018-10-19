@@ -228,7 +228,7 @@ class Rectangle:
     __and__ = intersection
 
     def difference(self, other):
-        # type: (Rectangle, Rectangle) -> Rectangle
+        # type: (Rectangle, Rectangle) -> iter
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         def pairwise(iterable):
@@ -243,12 +243,11 @@ class Rectangle:
         else:
             # d is a list with dimension equal to the rectangle dimension.
             dimension = self.dim()
-            d = [None] * dimension
-            for i in range(dimension):
-                d[i] = {self.min_corner[i], self.max_corner[i]}
 
             # For each dimension i, d[i] = {self.min_corner[i], self.max_corner[i]} plus
             # all the points of rectangle 'other' that fall inside of rectangle 'self'
+            d = [{self.min_corner[i], self.max_corner[i]} for i in range(dimension)]
+
             # At maximum:
             # d[i] = {self.min_corner[i], self.max_corner[i], other.min_corner[i], other.max_corner[i]}
             for i in range(dimension):
@@ -279,8 +278,16 @@ class Rectangle:
                 instance = Rectangle(minc, maxc)
                 if instance != inter:
                     yield instance
+            # At maximum, len(vertex) = product of len(elem[i]) for i in range(d) = 3**d
+            # The maximum number of sub-cubes is 3**d - 1 because the intersection is removed
 
-    __sub__ = difference
+    def min_set_difference(self, other):
+        # type: (Rectangle, Rectangle) -> list
+        assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
+        return Rectangle.fusion_rectangles(self.difference(other))
+
+    # __sub__ = difference
+    __sub__ = min_set_difference
 
     # Domination
     def dominates_point(self, xpoint):
@@ -345,10 +352,58 @@ class Rectangle:
         faces.set_alpha(opacity)
         return faces
 
+    #####################
+    # Auxiliary functions
+    #####################
 
-#####################
-# Auxiliary functions
-#####################
+    # Concatenation of cubes in a list
+    @staticmethod
+    def fusion_rectangles(list_rect):
+        # type: (iter) -> list
+
+        # Copy list_rect
+        list_out = list(list_rect)
+        while True:
+            concat_list = ((rect1, rect2) for rect1 in list_out for rect2 in list_out if
+                           rect1 != rect2 and rect1.is_concatenable(rect2))
+            try:
+                rect1, rect2 = next(concat_list)
+                rect1.concatenate_update(rect2)
+                list_out.remove(rect2)
+            except StopIteration:
+                break
+        return list_out
+
+    # Difference of cubes in a list
+    @staticmethod
+    def difference_rectangles(rect, list_rect):
+        # type: (Rectangle, list) -> list
+        # Given a rectangle 'rect' and a list of rectangles 'list_rect', the algorithm computes
+        # rect = rect - ri for every ri in list_rect
+
+        new_rect = {rect}
+
+        # Find cubes B from 'list_rect' that intersect any subrectangle A from the original 'rect'
+        # and remove from A the portion that intersects with B
+
+        while True:
+            # At each iteration, intersection_list is updated and new cubes may overlap some cube of the closure
+            intersect_list = ((a, b) for a in new_rect for b in list_rect if a.overlaps(b) and a != b)
+            try:
+                a, b = next(intersect_list)
+                new_rect = new_rect.union(a - b)
+                # Remove 'a' after calculating the list of subrectangles (a-b)
+                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
+                new_rect.remove(a)
+            except StopIteration:
+                break
+
+        return Rectangle.fusion_rectangles(new_rect)
+
+
+##################
+# Alpha generators
+##################
 # Set of functions for generating the 'alphas' that will rule the creation of comparable and incomparable cubes
 # Alpha in [0,1]^n
 def comp(d):
@@ -406,6 +461,7 @@ def incomp(d, opt=True):
         return incomp_compressed(d)
     else:
         return incomp_expanded(d)
+
 
 #################
 # Cube generators

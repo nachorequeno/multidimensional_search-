@@ -125,8 +125,8 @@ def Search2D(ora,
     # ys = [point[1] for point in points]
 
     if simplify:
-       rs.simplify()
-       rs.fusion()
+        rs.simplify()
+        rs.fusion()
 
     # rs.plot_2D(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
     # rs.plot_2D_light(targetx=xs, targety=ys, blocking=True, var_names=ora.get_var_names())
@@ -169,8 +169,8 @@ def Search3D(ora,
     # zs = [point[2] for point in points]
 
     if simplify:
-       rs.simplify()
-       rs.fusion()
+        rs.simplify()
+        rs.fusion()
 
     # rs.plot_3D(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
     # rs.plot_3D_light(targetx=xs, targety=ys, targetz=zs, blocking=True, var_names=ora.get_var_names())
@@ -204,6 +204,6 @@ def SearchND(ora,
         rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     if simplify:
-       rs.simplify()
-       rs.fusion()
+        rs.simplify()
+        rs.fusion()
     return rs
