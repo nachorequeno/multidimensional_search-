@@ -14,7 +14,7 @@ from ParetoLib._py3k import reduce
 # Rectangular Half-Space
 # Rectangular Cones
 
-class Rectangle:
+class Rectangle(object):
     # min_corner, max_corner
     def __init__(self,
                  min_corner=(float('-inf'),) * 2,
@@ -24,8 +24,24 @@ class Rectangle:
 
         self.min_corner = tuple(r(min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
         self.max_corner = tuple(r(max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
+        # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners)
+        self.vol = None
 
         assert greater_equal(self.max_corner, self.min_corner) or incomparables(self.min_corner, self.max_corner)
+
+    # Attribute access
+    def __setattr__(self, name, value):
+        # type: (Rectangle, str) -> None
+        # Every time a corner is changed, the volume is marked as 'outdated'. 
+        # It is used for a lazy computation of volume when requested by the user,
+        # and therefore avoiding unecessary computations
+        str_vol = 'vol'
+        if name != str_vol:
+            # self.__dict__[str_vol] = None
+            object.__setattr__(self, str_vol, None)
+        # self.__dict__[name] = None
+        object.__setattr__(self, name, value)
 
     # Membership function
     def __contains__(self, xpoint):
@@ -91,11 +107,18 @@ class Rectangle:
         diagonal = self.diag()
         return diagonal.norm()
 
-    def volume(self):
+    def _volume(self):
         # type: (Rectangle) -> float
         diagonal_length = self.diag_length()
         _prod = reduce(lambda si, sj: si * sj, diagonal_length)
         return abs(_prod)
+
+    def volume(self):
+        # type: (Rectangle) -> float
+        # Recalculate volume if it is outdated
+        if self.vol is None:
+            self.vol = self._volume()
+        return self.vol
 
     def num_vertices(self):
         # type: (Rectangle) -> int
@@ -105,13 +128,14 @@ class Rectangle:
         # type: (Rectangle) -> list
         deltas = self.diag_length()
         vertex = self.min_corner
-        vertices = []
-        for i in range(self.num_vertices()):
-            delta_index = int_to_bin_tuple(i, self.dim())
+        num_vertex = self.num_vertices()
+        d = self.dim()
+        vertices = [None] * num_vertex
+        for i in range(num_vertex):
+            delta_index = int_to_bin_tuple(i, d)
             deltai = select(deltas, delta_index)
-            temp_vertex = add(vertex, deltai)
-            vertices += [temp_vertex]
-        assert (len(vertices) == self.num_vertices()), 'Error in the number of vertices'
+            vertices[i] = add(vertex, deltai)
+        assert (len(vertices) == num_vertex), 'Error in the number of vertices'
         return vertices
 
     def diag(self):
@@ -196,22 +220,27 @@ class Rectangle:
             self.max_corner = max(new_union_vertices)
         return self
 
+    @staticmethod
+    def _overlaps(minc, maxc):
+        return less(minc, maxc)
+
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        return less(minc, maxc)
+        # return less(minc, maxc)
+        return self._overlaps(minc, maxc)
 
     def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        if self.overlaps(other):
-
-            minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # if less(minc, maxc):
+        if self._overlaps(minc, maxc):
             return Rectangle(minc, maxc)
         else:
             return Rectangle(self.min_corner, self.max_corner)
@@ -220,9 +249,12 @@ class Rectangle:
         # type: (Rectangle, Rectangle) -> Rectangle
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        if self.overlaps(other):
-            self.min_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            self.max_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # if less(minc, maxc):
+        if self._overlaps(minc, maxc):
+            self.min_corner = minc
+            self.max_corner = maxc
         return self
 
     __and__ = intersection
@@ -348,8 +380,8 @@ class Rectangle:
         faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
         # faces.set_facecolor((0,0,1,0.1))
         # faces.set_facecolor('r')
-        faces.set_facecolor(c)
         faces.set_alpha(opacity)
+        faces.set_facecolor(c)
         return faces
 
     #####################

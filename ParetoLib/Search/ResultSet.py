@@ -504,9 +504,8 @@ class ResultSet:
                        yaxe=1,
                        var_names=list(),
                        blocking=False,
-                       sec=0.0,
-                       opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+                       sec=0.0):
+        # type: (ResultSet, str, int, int, list, bool, float) -> plt
 
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal')
@@ -731,7 +730,7 @@ class ResultSet:
                        var_names=list(),
                        blocking=False,
                        sec=0.0):
-        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, int, list, bool, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
