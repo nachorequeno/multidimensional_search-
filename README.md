@@ -101,13 +101,8 @@ For instance, *x1 = x2* may define the boundary. Every point *x* having the coor
 *x1 > x2* will belong to *X1*, while every point *x* having *x1 < x2* will belong to *X2*
 
 The second *Oracle*, named *OraclePoint*, defines the membership of point *x*
-to the closure *X1* based on a cloud of points. For instance, next image shows a dense
-cloud of points in *X1* (dark side).
-
-![alt text][cloudpoints]
-
-The Pareto front is abbreviated by the following image, which only shows the points in the 
-frontier. The Pareto front is obtained by a NDTree [3].
+to the closure *X1* based on a cloud of points that denote the border. For instance, next image shows the Pareto front,
+which is internally stored in a NDTree data structure [3]. 
 
 ![alt text][paretofront]
 
@@ -129,12 +124,12 @@ and can be set arbitrarily small depending on the accuracy required by the user.
 Samples of *OracleFunction*, *OraclePoint* and *OracleSTL* definitions can be found in 
 Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 
-[cloudpoints]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/cloud_points.png "Cloud of points"
 [paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/pareto_front.png "Pareto front"
 [multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/multidim_search.png "Upper and lower closures"
 
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
-[4] [STL⁎: Extending signal temporal logic with signal-value freezing operator] (https://doi.org/10.1016/j.ic.2014.01.012)
+
+[4] [Monitoring Temporal Properties of Continuous Signals] (https://doi.org/10.1007/978-3-540-30206-3_12)
 
 ### Running the multidimensional search
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
