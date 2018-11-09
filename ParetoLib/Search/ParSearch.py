@@ -222,6 +222,12 @@ def multidim_search_deep_first_opt_2(xspace,
             b0_extended = Rectangle(xspace.min_corner, yl)
             b1_extended = Rectangle(yh, xspace.max_corner)
 
+            # Every cube in the boundary overlaps another cube in the boundary
+            # When cubes from the boundary are moved to ylow or yup, they may still have a complementary cube
+            # remaining in the boundary with a non-empty intersection.
+            border_overlapping_ylow = [r for r in ylow if r.overlaps(b0_extended)]
+            border_overlapping_yup = [r for r in yup if r.overlaps(b1_extended)]
+
             border_overlapping_b0 = [rect for rect in border if b0_extended.overlaps(rect)]
             for rect in border_overlapping_b0:
                 border |= list(rect - b0_extended)
@@ -237,11 +243,26 @@ def multidim_search_deep_first_opt_2(xspace,
 
             # Use [] (list, static) instead of () (iterator, dynamic) for preventing interleaving and racing conditions
             # of copy.deepcopy when running in parallel
-            args_pborder_dominatedby_b0 = [(copy.deepcopy(b0_extended), rect) for rect in border_overlapping_b0]
-            args_pborder_dominatedby_b1 = [(copy.deepcopy(b1_extended), rect) for rect in border_overlapping_b1]
+            # args_pborder_dominatedby_b0 = [(copy.deepcopy(b0_extended), rect) for rect in border_overlapping_b0]
+            # args_pborder_dominatedby_b1 = [(copy.deepcopy(b1_extended), rect) for rect in border_overlapping_b1]
 
-            border_dominatedby_b0 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b0)
-            border_dominatedby_b1 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b1)
+            # border_dominatedby_b0 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b0)
+            # border_dominatedby_b1 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b1)
+
+            # Warning: Be aware of the overlapping areas of the cubes in the border.
+            # If we calculate the intersection of b{0|1}_extended with all the cubes in the frontier, and two cubes
+            # 'a' and 'b' partially overlaps, then the volume of this overlapping portion will be considered twice
+            # Solution: Project the 'shadow' of the cubes in the border over b{0|1}_extended.
+
+            border_dominatedby_b0_shadow = Rectangle.difference_rectangles(b0_extended, border_overlapping_b0)
+            border_dominatedby_b1_shadow = Rectangle.difference_rectangles(b1_extended, border_overlapping_b1)
+
+            # The negative of this image returns a set of cubes in the boundary without overlapping.
+            # border_dominatedby_b{0|1} will be appended to yup/ylow.
+            # Remove the portion of the negative that overlaps any cube is already appended to yup/ylow
+
+            border_dominatedby_b0 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b0_shadow + border_overlapping_ylow) # ylow
+            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b1_shadow + border_overlapping_yup) # yup
 
             ylow.extend(border_dominatedby_b0)
             yup.extend(border_dominatedby_b1)
@@ -735,6 +756,12 @@ def multidim_search_breadth_first_opt_2(xspace,
             b0_extended = Rectangle(xspace.min_corner, yl)
             b1_extended = Rectangle(yh, xspace.max_corner)
 
+            # Every cube in the boundary overlaps another cube in the boundary
+            # When cubes from the boundary are moved to ylow or yup, they may still have a complementary cube
+            # remaining in the boundary with a non-empty intersection.
+            border_overlapping_ylow = [r for r in ylow if r.overlaps(b0_extended)]
+            border_overlapping_yup = [r for r in yup if r.overlaps(b1_extended)]
+
             # border_non_dominatedby_b0 = []
             # for rect in border_overlapping_b0:
             #    border_non_dominatedby_b0 += list(rect - b0_extended)
@@ -760,11 +787,26 @@ def multidim_search_breadth_first_opt_2(xspace,
             # Use [] (list, static) instead of () (iterator, dynamic) for preventing interleaving and racing conditions
             # of copy.deepcopy when running in parallel
 
-            args_pborder_dominatedby_b0 = [(copy.deepcopy(b0_extended), rect) for rect in border_overlapping_b0]
-            args_pborder_dominatedby_b1 = [(copy.deepcopy(b1_extended), rect) for rect in border_overlapping_b1]
+            # args_pborder_dominatedby_b0 = [(copy.deepcopy(b0_extended), rect) for rect in border_overlapping_b0]
+            # args_pborder_dominatedby_b1 = [(copy.deepcopy(b1_extended), rect) for rect in border_overlapping_b1]
 
-            border_dominatedby_b0 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b0)
-            border_dominatedby_b1 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b1)
+            # border_dominatedby_b0 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b0)
+            # border_dominatedby_b1 = p.map(pborder_dominatedby_bi, args_pborder_dominatedby_b1)
+
+            # Warning: Be aware of the overlapping areas of the cubes in the border.
+            # If we calculate the intersection of b{0|1}_extended with all the cubes in the frontier, and two cubes
+            # 'a' and 'b' partially overlaps, then the volume of this overlapping portion will be considered twice
+            # Solution: Project the 'shadow' of the cubes in the border over b{0|1}_extended.
+
+            border_dominatedby_b0_shadow = Rectangle.difference_rectangles(b0_extended, border_overlapping_b0)
+            border_dominatedby_b1_shadow = Rectangle.difference_rectangles(b1_extended, border_overlapping_b1)
+
+            # The negative of this image returns a set of cubes in the boundary without overlapping.
+            # border_dominatedby_b{0|1} will be appended to yup/ylow.
+            # Remove the portion of the negative that overlaps any cube is already appended to yup/ylow
+
+            border_dominatedby_b0 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b0_shadow + border_overlapping_ylow) # ylow
+            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b1_shadow + border_overlapping_yup) # yup
 
             yup.extend(border_dominatedby_b1)
             ylow.extend(border_dominatedby_b0)

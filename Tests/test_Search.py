@@ -76,6 +76,10 @@ class SearchTestCase(unittest.TestCase):
             print('Not ok!\n')
             raise ValueError
 
+        # Yup and ylow does not contain overlapping rectangles
+        self.assertEqual(rs.overlapping_volume_yup(), 0)
+        self.assertEqual(rs.overlapping_volume_ylow(), 0)
+
         end = time.time()
         time0 = end - start
 

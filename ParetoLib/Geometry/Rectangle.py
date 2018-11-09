@@ -27,12 +27,19 @@ class Rectangle(object):
         # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
         # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners)
         self.vol = None
+        self.vertx = None
 
         assert greater_equal(self.max_corner, self.min_corner) or incomparables(self.min_corner, self.max_corner)
 
     # Attribute access
     def __setattr__(self, name, value):
         # type: (Rectangle, str) -> None
+
+        str_vertx = 'vertx'
+        if name != str_vertx:
+            # self.__dict__[str_vertx] = None
+            object.__setattr__(self, str_vertx, None)
+
         # Every time a corner is changed, the volume is marked as 'outdated'. 
         # It is used for a lazy computation of volume when requested by the user,
         # and therefore avoiding unecessary computations
@@ -40,6 +47,7 @@ class Rectangle(object):
         if name != str_vol:
             # self.__dict__[str_vol] = None
             object.__setattr__(self, str_vol, None)
+
         # self.__dict__[name] = None
         object.__setattr__(self, name, value)
 
@@ -124,7 +132,7 @@ class Rectangle(object):
         # type: (Rectangle) -> int
         return int(math.pow(2, self.dim()))
 
-    def vertices(self):
+    def _vertices(self):
         # type: (Rectangle) -> list
         deltas = self.diag_length()
         vertex = self.min_corner
@@ -137,6 +145,13 @@ class Rectangle(object):
             vertices[i] = add(vertex, deltai)
         assert (len(vertices) == num_vertex), 'Error in the number of vertices'
         return vertices
+
+    def vertices(self):
+        # type: (Rectangle) -> list
+        # Recalculate vertices if it is outdated
+        if self.vertx is None:
+            self.vertx = self._vertices()
+        return self.vertx
 
     def diag(self):
         # type: (Rectangle) -> Segment
@@ -332,8 +347,8 @@ class Rectangle(object):
 
     def dominates_rect(self, other):
         # type: (Rectangle, Rectangle) -> bool
-        # return less_equal(self.max_corner, other.min_corner)
-        return less_equal(self.min_corner, other.min_corner) and less_equal(self.max_corner, other.max_corner)
+        return less_equal(self.max_corner, other.min_corner) # testing. Strict dominance and not overlap
+        # return less_equal(self.min_corner, other.min_corner) and less_equal(self.max_corner, other.max_corner) # working
 
     def is_dominated_by_rect(self, other):
         # type: (Rectangle, Rectangle) -> bool
@@ -395,6 +410,30 @@ class Rectangle(object):
 
         # Copy list_rect
         list_out = list(list_rect)
+        keep_merging = True
+        while keep_merging:
+            keep_merging = False
+            i = 0
+            while i < len(list_out):
+                j = i + 1
+                while j < len(list_out):
+                    if list_out[i].is_concatenable(list_out[j]):
+                        list_out[i].concatenate_update(list_out[j])
+                        # list_out.remove(list_out[j])
+                        list_out.pop(j)
+                        keep_merging = True
+                    else:
+                        j = j + 1
+                i = i + 1
+        return list_out
+
+
+    @staticmethod
+    def fusion_rectangles_func(list_rect):
+        # type: (iter) -> list
+
+        # Copy list_rect
+        list_out = list(list_rect)
         while True:
             concat_list = ((rect1, rect2) for rect1 in list_out for rect2 in list_out if
                            rect1 != rect2 and rect1.is_concatenable(rect2))
@@ -415,23 +454,47 @@ class Rectangle(object):
 
         new_rect = {rect}
 
-        # Find cubes B from 'list_rect' that intersect any subrectangle A from the original 'rect'
-        # and remove from A the portion that intersects with B
+        for b in list_rect:
+            temp = set()
+            for a in new_rect:
+                # Add 'a' to the temporal set of cubes
+                temp.add(a)
+                if b.overlaps(a):
+                    # Add the set of cubes 'a' - 'b'
+                    temp = temp.union(a - b)
+                    # Remove 'a'
+                    temp.discard(a)
+            new_rect = temp
 
-        while True:
-            # At each iteration, intersection_list is updated and new cubes may overlap some cube of the closure
-            intersect_list = ((a, b) for a in new_rect for b in list_rect if a.overlaps(b) and a != b)
-            try:
-                a, b = next(intersect_list)
-                new_rect = new_rect.union(a - b)
-                # Remove 'a' after calculating the list of subrectangles (a-b)
-                # Sometimes, 'a' is fully contained inside 'b', and a copy of 'a' is inside list(a-b)
-                new_rect.remove(a)
-            except StopIteration:
-                break
-
+        # return list(new_rect)
         return Rectangle.fusion_rectangles(new_rect)
 
+    @staticmethod
+    def difference_rectangles_func(rect, list_rect):
+        # type: (Rectangle, list) -> list
+        # Given a rectangle 'rect' and a list of rectangles 'list_rect', the algorithm computes
+        # rect = rect - ri for every ri in list_rect
+
+        new_rect = {rect}
+
+        for b in list_rect:
+            temp = set()
+            for a in new_rect:
+                if b.overlaps(a):
+                    if b.intersection(a) != a:
+                        # Add the set of cubes 'a' - 'b'
+                        temp = temp.union(a - b)
+                    # else: # b.intersection(a) == a:
+                    # 'a' is fully contained inside 'b'
+                    # No need to calculate the difference.
+                    # Discard 'a'
+                    temp.discard(a)
+                else:
+                    temp.add(a)
+            new_rect = temp
+
+        # return list(new_rect)
+        return Rectangle.fusion_rectangles(new_rect)
 
 ##################
 # Alpha generators
