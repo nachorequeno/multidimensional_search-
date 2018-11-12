@@ -1,6 +1,6 @@
 import math
 
-from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal
+from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal, r
 import ParetoLib.Geometry.Point as Point
 
 
@@ -18,6 +18,14 @@ class Segment:
         # type: (Segment, tuple) -> bool
         return (greater_equal(xpoint, self.low) and
                 less_equal(xpoint, self.high))
+
+    # Attribute access
+    def __setattr__(self, name, value):
+        # type: (Segment, str, iter) -> None
+        # Round the elements of 'value' when assigning them to self.low or self.high
+        val = tuple(r(vi) for vi in value)
+        self.__dict__[name] = val
+        # object.__setattr__(self, name, val)
 
     # Printers
     def to_str(self):

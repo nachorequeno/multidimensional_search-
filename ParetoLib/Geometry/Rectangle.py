@@ -6,7 +6,7 @@ from itertools import product, tee
 
 from ParetoLib.Geometry.Segment import Segment
 from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
-    incomparables, select, subt, int_to_bin_tuple, r
+    incomparables, select, subt, int_to_bin_tuple
 from ParetoLib._py3k import reduce
 
 
@@ -22,8 +22,8 @@ class Rectangle(object):
         # type: (Rectangle, tuple, tuple) -> None
         assert dim(min_corner) == dim(max_corner)
 
-        self.min_corner = tuple(r(min(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
-        self.max_corner = tuple(r(max(mini, maxi)) for mini, maxi in zip(min_corner, max_corner))
+        self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
         # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
         # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners)
         self.vol = None
@@ -33,7 +33,7 @@ class Rectangle(object):
 
     # Attribute access
     def __setattr__(self, name, value):
-        # type: (Rectangle, str) -> None
+        # type: (Rectangle, str, None) -> None
 
         str_vertx = 'vertx'
         if name != str_vertx:
