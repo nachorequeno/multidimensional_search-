@@ -448,7 +448,7 @@ class Rectangle(object):
     # Difference of cubes in a list
     @staticmethod
     def difference_rectangles(rect, list_rect):
-        # type: (Rectangle, list) -> list
+        # type: (Rectangle, iter) -> list
         # Given a rectangle 'rect' and a list of rectangles 'list_rect', the algorithm computes
         # rect = rect - ri for every ri in list_rect
 
@@ -523,6 +523,14 @@ def incomp_expanded(d):
 
 
 def E(d):
+    # type: (int) -> tuple
+    # Compressed version for a set of alpha indices representing incomparable rectangles
+    if d == 3:
+        return ("0*1", "10*", "*10")
+    elif d > 3:
+        return tuple("*" + i for i in E(d - 1)) + tuple("0" + "1" * (d - 1)) + tuple("1" + "0" * (d - 1))
+
+def E2(d):
     # type: (int) -> list
     # Compressed version for a set of alpha indices representing incomparable rectangles
     if d == 3:
