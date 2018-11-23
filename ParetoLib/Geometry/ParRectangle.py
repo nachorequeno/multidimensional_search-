@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""ParRectangle.
+
+This module introduces a set of operations for parallelizing
+the creation of comparable and incomparable rectangles of the space.
+"""
 from multiprocessing import Pool, cpu_count
 
 from ParetoLib.Geometry.Rectangle import Rectangle, brect

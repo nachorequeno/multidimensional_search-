@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""OracleFunction.
+
+This module instantiate the abstract interface Oracle.
+The OracleFunction defines the boundary between the upper and lower
+closures based on polynomial constraints. For instance in a 2D
+space, the border x_2^1 + x_2^2 = 1 contains all the points
+x = (x_1, x_ 2) in the surface of a sphere of radius one. Every point
+whose coordinates satisfy x_2^1 + x_2^2 > 1 falls in the upper
+closure, and, conversely, every point x_2^1 + x_2^2< 1 in the lower
+closure. This oracle has been created as a ‘proof of concept’ for
+testing and debugging purposes.
+"""
+
 import re
 import pickle
 import io
@@ -49,13 +68,12 @@ class Condition:
         regex = r'(?P<f>({0}))(?P<op>({1}))(?P<g>({2}))'.format(f_regex, op_regex, g_regex)
         regex_comp = re.compile(regex)
         result = regex_comp.match(poly_function)
-        # RootOracle.logger.debug('Parsing result ', str(result))
+        # RootOracle.logger.debug('Parsing result ' + str(result))
         # if regex_comp is not None:
         if result is not None:
             self.op = result.group('op')
             self.f = simplify(result.group('f'))
             self.g = simplify(result.group('g'))
-            # RootOracle.logger.debug('(op, f, g): (%s, %s, %s) ' % (self.op, self.f, self.g))
 
             if not self.all_coeff_are_positive():
                 RootOracle.logger.warning(
@@ -66,13 +84,13 @@ class Condition:
     # Printers
     def __repr__(self):
         # type: (Condition) -> str
-        return self.to_str()
+        return self._to_str()
 
     def __str__(self):
         # type: (Condition) -> str
-        return self.to_str()
+        return self._to_str()
 
-    def to_str(self):
+    def _to_str(self):
         # type: (Condition) -> str
         return str(self.f) + self.op + str(self.g)
 
@@ -158,7 +176,7 @@ class Condition:
         # expr.subs([(x, 2), (y, 4), (z, 0)])
         res = expr.subs(var_xpoint)
         ex = str(res) + self.op + '0'
-        # RootOracle.logger.debug('Expression ', str(simplify(ex)))
+        # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
         return simplify(ex)
 
     def eval_tuple(self, xpoint):
@@ -166,8 +184,7 @@ class Condition:
         keys_fv = self.get_variables()
         di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
 
-        # RootOracle.logger.debug('Condition ', str(self), ' evaluates ', str(xpoint), ' to ', str(self.eval_dict(di)))
-        # RootOracle.logger.debug('di ', str(di))
+        # RootOracle.logger.debug('di ' + str(di))
         return self.eval_dict(di)
 
     def eval_dict(self, d=None):
@@ -186,7 +203,7 @@ class Condition:
         expr = self.get_expression()
         res = expr.subs(di)
         ex = str(res) + self.op + '0'
-        # RootOracle.logger.debug('Expression ', str(simplify(ex)))
+        # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
         return simplify(ex)
 
     def eval_var_val(self, variable=None, val='0'):
@@ -199,7 +216,7 @@ class Condition:
         expr = self.get_expression()
         res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
-        # RootOracle.logger.debug('Expression ', str(simplify(ex)))
+        # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
         return simplify(ex)
 
     # Membership functions
@@ -292,13 +309,13 @@ class OracleFunction(Oracle):
     # Printers
     def __repr__(self):
         # type: (OracleFunction) -> str
-        return self.to_str()
+        return self._to_str()
 
     def __str__(self):
         # type: (OracleFunction) -> str
-        return self.to_str()
+        return self._to_str()
 
-    def to_str(self):
+    def _to_str(self):
         # type: (OracleFunction) -> str
         return str(self.oracle)
 
@@ -344,7 +361,6 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        # RootOracle.logger.debug('OracleFunction evaluates ', str(var_xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_tuple(self, xpoint):
@@ -356,7 +372,6 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        # RootOracle.logger.debug('OracleFunction evaluates ', str(xpoint), ' to ', str(_eval))
         return _eval
 
     def eval_dict(self, d=None):
@@ -368,7 +383,6 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        # RootOracle.logger.debug('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     def eval_var_val(self, var=None, val='0'):
@@ -379,7 +393,6 @@ class OracleFunction(Oracle):
         _eval = all(_eval_list)
         # Any condition is true (i.e., 'or' policy)
         # _eval = any(_eval_list)
-        # RootOracle.logger.debug('OracleFunction evaluates ', str(_eval_list), ' in ', self.to_str(), ' to ', str(_eval))
         return _eval
 
     # Membership functions

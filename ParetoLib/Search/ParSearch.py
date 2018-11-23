@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""ParSearch.
+
+This module implements a multithreading version of the learning
+algorithms described in [1] for searching the Pareto front.
+
+[1] Learning Monotone Partitions of Partially-Ordered Domains,
+Nicolas Basset, Oded Maler, J.I Requeno, in
+doc/article.pdf.
+"""
+
 import os
 import copy
 import time
@@ -164,12 +180,12 @@ def multidim_search_deep_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -377,12 +393,12 @@ def multidim_search_deep_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -564,12 +580,12 @@ def multidim_search_deep_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -711,12 +727,12 @@ def multidim_search_breadth_first_opt_2(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -913,12 +929,12 @@ def multidim_search_breadth_first_opt_1(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -1065,12 +1081,12 @@ def multidim_search_breadth_first_opt_0(xspace,
     for proc in mp.active_children():
         dict_man[proc.name] = copy.deepcopy(oracle)
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()

@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""OracleSTL.
+
+This module instantiate the abstract interface Oracle.
+It encapsulates the interaction with the AMT 2.0 tool.
+"""
+
 import re
 import pickle
 import subprocess
@@ -35,13 +47,13 @@ class OracleSTL(Oracle):
     # Printers
     def __repr__(self):
         # type: (OracleSTL) -> str
-        return self.to_str()
+        return self._to_str()
 
     def __str__(self):
         # type: (OracleSTL) -> str
-        return self.to_str()
+        return self._to_str()
 
-    def to_str(self):
+    def _to_str(self):
         # type: (OracleSTL) -> str
         s = 'STL property file: {0}\n'.format(self.stl_prop_file)
         s += 'STL alias file: {0}\n'.format(self.var_alias_file)
@@ -50,14 +62,6 @@ class OracleSTL(Oracle):
         return s
 
     # Equality functions
-    def __eq__old(self, other):
-        # type: (OracleSTL, OracleSTL) -> bool
-        # return hash(self) == hash(other)
-        return (self.stl_prop_file == other.stl_prop_file) and \
-               (self.vcd_signal_file == other.vcd_signal_file) and \
-               (self.var_alias_file == other.var_alias_file) and \
-               (self.stl_parameters == other.stl_parameters)
-
     def __eq__(self, other):
         # type: (OracleSTL, OracleSTL) -> bool
         # return hash(self) == hash(other)
@@ -240,7 +244,7 @@ class OracleSTL(Oracle):
         assert self.var_alias_file != ''
         assert self.stl_parameters != []
 
-        # Invokation example of the monitoring tool (AMT).
+        # Invoke example of the monitoring tool (AMT).
         # AMT evaluates a STL formula (.stl) over a signal (.vcd) following a variable aliasing (.alias)
         # and exports the result to an output file (out).
         #

@@ -1,3 +1,25 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""ResultSet.
+
+The result of the discovery process of the Pareto front is saved in
+an object of the ResultSet class. This object is a data structure
+composed of three elements: the upper closure (X1), the lower
+closure (X2), and the gap between X1 and X2 representing the
+precision error of the learning process.
+The size of this gap depends on the accuracy of the learning process,
+which can be tuned by the EPS and DELTA parameters during the
+invocation of the learning method.
+
+The ResultSet class provides functions for:
+- Testing the membership of a new point y to any of the closures.
+- Plotting 2D and 3D spaces
+- Exporting/Importing the results to text and binary files.
+"""
 import os
 import sys
 import time
@@ -38,7 +60,7 @@ class ResultSet:
         self.filename_space = 'space'
 
     # Printers
-    def to_str(self):
+    def _to_str(self):
         # type: (ResultSet) -> str
         # _string = '('
         # for i, data in enumerate(self.low):
@@ -57,11 +79,11 @@ class ResultSet:
 
     def __repr__(self):
         # type: (ResultSet) -> str
-        return self.to_str()
+        return self._to_str()
 
     def __str__(self):
         # type: (ResultSet) -> str
-        return self.to_str()
+        return self._to_str()
 
     # Equality functions
     def __eq__(self, other):
@@ -367,22 +389,22 @@ class ResultSet:
         return ResultSet._get_max_val_dimension_rect_list(i, self.border)
 
     # MatPlot Graphics
-    def plot_space_2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def _plot_space_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
         patch = [self.xspace.plot_2D('blue', xaxe, yaxe, opacity)]
         return patch
 
-    def plot_yup_2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def _plot_yup_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
         patch = [rect.plot_2D('green', xaxe, yaxe, opacity) for rect in self.yup]
         return patch
 
-    def plot_ylow_2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def _plot_ylow_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
         patch = [rect.plot_2D('red', xaxe, yaxe, opacity) for rect in self.ylow]
         return patch
 
-    def plot_border_2D(self, xaxe=0, yaxe=1, opacity=1.0):
+    def _plot_border_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
         patch = [rect.plot_2D('blue', xaxe, yaxe, opacity) for rect in self.border]
         return patch
@@ -412,9 +434,9 @@ class ResultSet:
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
-        pathpatch_yup = self.plot_yup_2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.plot_ylow_2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.plot_border_2D(xaxe, yaxe, opacity)
+        pathpatch_yup = self._plot_yup_2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self._plot_ylow_2D(xaxe, yaxe, opacity)
+        pathpatch_border = self._plot_border_2D(xaxe, yaxe, opacity)
 
         pathpatch = pathpatch_yup
         pathpatch += pathpatch_ylow
@@ -480,9 +502,9 @@ class ResultSet:
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
-        pathpatch_yup = self.plot_yup_2D(xaxe, yaxe, opacity)
-        pathpatch_ylow = self.plot_ylow_2D(xaxe, yaxe, opacity)
-        pathpatch_border = self.plot_space_2D(xaxe, yaxe, 0.2)
+        pathpatch_yup = self._plot_yup_2D(xaxe, yaxe, opacity)
+        pathpatch_ylow = self._plot_ylow_2D(xaxe, yaxe, opacity)
+        pathpatch_border = self._plot_space_2D(xaxe, yaxe, 0.2)
 
         pathpatch = pathpatch_border
         pathpatch += pathpatch_ylow
@@ -584,22 +606,22 @@ class ResultSet:
         plt.close()
         return plt
 
-    def plot_space_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def _plot_space_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
         faces = [self.xspace.plot_3D('blue', xaxe, yaxe, zaxe, opacity)]
         return faces
 
-    def plot_yup_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def _plot_yup_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
         faces = [rect.plot_3D('green', xaxe, yaxe, zaxe, opacity) for rect in self.yup]
         return faces
 
-    def plot_ylow_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def _plot_ylow_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
         faces = [rect.plot_3D('red', xaxe, yaxe, zaxe, opacity) for rect in self.ylow]
         return faces
 
-    def plot_border_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
+    def _plot_border_3D(self, xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (ResultSet, int, int, int, float) -> list
         faces = [rect.plot_3D('blue', xaxe, yaxe, zaxe, opacity) for rect in self.border]
         return faces
@@ -631,9 +653,9 @@ class ResultSet:
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
-        faces_yup = self.plot_yup_3D(xaxe, yaxe, zaxe, opacity)
-        faces_ylow = self.plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
-        faces_border = self.plot_border_3D(xaxe, yaxe, zaxe, opacity)
+        faces_yup = self._plot_yup_3D(xaxe, yaxe, zaxe, opacity)
+        faces_ylow = self._plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
+        faces_border = self._plot_border_3D(xaxe, yaxe, zaxe, opacity)
 
         faces = faces_yup
         faces += faces_ylow
@@ -702,9 +724,9 @@ class ResultSet:
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
-        faces_yup = self.plot_yup_3D(xaxe, yaxe, zaxe, opacity)
-        faces_ylow = self.plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
-        faces_border = self.plot_space_3D(xaxe, yaxe, zaxe, 0.2)
+        faces_yup = self._plot_yup_3D(xaxe, yaxe, zaxe, opacity)
+        faces_ylow = self._plot_ylow_3D(xaxe, yaxe, zaxe, opacity)
+        faces_border = self._plot_space_3D(xaxe, yaxe, zaxe, 0.2)
 
         faces = faces_border
         faces += faces_ylow

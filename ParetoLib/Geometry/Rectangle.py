@@ -1,3 +1,68 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""Rectangle.
+
+This module introduces the Rectangle class. It includes a set of
+operations for creating and handling rectangles. This module also
+offers special features and methods for generating alpha vectors
+and (in)comparable boxes.
+
+##################
+# Alpha generators
+##################
+
+Set of functions for generating the index words, i.e., 'alphas',
+that will rule the creation of comparable and incomparable boxes.
+Alpha is a word of length d in [0,1] (i.e., [0,1]^d), and
+Alpha' is a word of length d in [0,1,*] (i.e., [0,1,*]^d),
+according to the notation of [1].
+
+The function for creating a list of comparable boxes via alphas is:
+- comp(d)
+
+The function for creating a list of incomparable boxes via alphas is:
+- incomp(d, opt=True)
+
+Option 'opt' means whether the result is a list of incomparable
+alphas (opt=False) or a list of incomparable alphas' (opt=True).
+- incomp_expanded(d)
+- incomp_compressed(d)
+- E(d)
+
+Variable 'd' is the dimension of the space.
+
+#################
+# Cube generators
+#################
+
+Set of functions for generating rectangular half-spaces and cones,
+according to the notation of [2].
+These functions are:
+- cpoint(i, alphai, ypoint, xspace)
+- crect(i, alphai, yrectangle, xspace)
+- bpoint(alpha, ypoint, xspace)
+- brect(alpha, yrectangle, xspace)
+- irect(alphaincomp, yrectangle, xspace)
+
+They all return a rectangle, except for 'irect', that returns a list
+of incomparable rectangles.
+
+They require as input:
+- A point (ypoint) or rectangle (yrectangle) close to the Pareto front,
+- An index word (alpha) or the i-th component of the index word (alphai),
+- The space,
+
+[1] Learning Monotone Partitions of Partially-Ordered Domains,
+Nicolas Basset, Oded Maler, J.I Requeno, in
+doc/article.pdf.
+[2] [Learning Monotone Partitions of Partially-Ordered Domains (Work in Progress) 2017.
+〈hal-01556243〉] (https://hal.archives-ouvertes.fr/hal-01556243/)
+"""
+
 import math
 import numpy as np
 import matplotlib.patches as patches
@@ -10,16 +75,18 @@ from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, a
 from ParetoLib._py3k import reduce
 
 
-# Rectangle
-# Rectangular Half-Space
-# Rectangular Cones
-
 class Rectangle(object):
     # min_corner, max_corner
     def __init__(self,
                  min_corner=(float('-inf'),) * 2,
                  max_corner=(float('-inf'),) * 2):
         # type: (Rectangle, tuple, tuple) -> None
+        """
+        A Rectangle is represented by a couple of points (x, x'), i.e., the
+        minimal (left, bottom) corner x, and the maximal (right, up) corner x'.
+        All the points contained in the rectangle are greater than x and
+        smaller than x'.
+        """
         assert dim(min_corner) == dim(max_corner)
 
         self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
@@ -40,7 +107,7 @@ class Rectangle(object):
             # self.__dict__[str_vertx] = None
             object.__setattr__(self, str_vertx, None)
 
-        # Every time a corner is changed, the volume is marked as 'outdated'. 
+        # Every time a corner is changed, the volume is marked as 'outdated'.
         # It is used for a lazy computation of volume when requested by the user,
         # and therefore avoiding unecessary computations
         str_vol = 'vol'
@@ -51,21 +118,58 @@ class Rectangle(object):
         # self.__dict__[name] = None
         object.__setattr__(self, name, value)
 
-    # Membership function
+    #
     def __contains__(self, xpoint):
         # type: (Rectangle, tuple) -> bool
-        # xpoint is strictly inside the rectangle (i.e., is not along the border)
+        """
+        Membership function that checks whether a point is
+        strictly contained in the Rectangle or not.
+
+        Args:
+            self (Rectangle): The Rectangle.
+            xpoint (tuple): The Point.
+
+        Returns:
+            bool: True if xpoint is strictly inside the rectangle
+            (i.e., it is not along the border)
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> x in r
+        >>> False
+        """
         return (greater(xpoint, self.min_corner) and
                 less(xpoint, self.max_corner))
 
     def inside(self, xpoint):
         # type: (Rectangle, tuple) -> bool
+        """
+        Membership function that checks whether a point is
+        contained in the Rectangle or not.
+
+        Args:
+            self (Rectangle): The Rectangle.
+            xpoint (tuple): The Point.
+
+        Returns:
+            bool: True if xpoint is inside the rectangle
+            or along the border
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> x in r
+        >>> False
+        """
         # xpoint is inside the rectangle or along the border
         return (greater_equal(xpoint, self.min_corner) and
                 less_equal(xpoint, self.max_corner))
 
     # Printers
-    def to_str(self):
+    def _to_str(self):
         # type: (Rectangle) -> str
         _string = '['
         _string += str(self.min_corner)
@@ -76,11 +180,11 @@ class Rectangle(object):
 
     def __repr__(self):
         # type: (Rectangle) -> str
-        return self.to_str()
+        return self._to_str()
 
     def __str__(self):
         # type: (Rectangle) -> str
-        return self.to_str()
+        return self._to_str()
 
     # Equality functions
     def __eq__(self, other):
@@ -99,19 +203,62 @@ class Rectangle(object):
     # Rectangle properties
     def dim(self):
         # type: (Rectangle) -> int
+        """
+        Dimension of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            int: Dimension of the Rectangle.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.dim()
+        >>> 3
+        """
         return dim(self.min_corner)
 
     def diag_length(self):
         # type: (Rectangle) -> tuple
-        return subtract(self.max_corner, self.min_corner)
+        """
+        Maximal distance between corners of the Rectangle.
 
-    # def norm(self):
-    #     # type: (Rectangle) -> float
-    # diagonal_length = self.diag_length()
-    # return norm(diagonal_length)
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            tuple: Maximal distance between corners of the Rectangle.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.diag_length()
+        >>> (2.0,2.0,2.0)
+        """
+        return subtract(self.max_corner, self.min_corner)
 
     def norm(self):
         # type: (Rectangle) -> float
+        """
+        Norm of the diagonal.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            float: Norm of the diagonal.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.norm()
+        >>> 3.464
+        """
         diagonal = self.diag()
         return diagonal.norm()
 
@@ -123,6 +270,22 @@ class Rectangle(object):
 
     def volume(self):
         # type: (Rectangle) -> float
+        """
+        Volume of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            float: Volume of the Rectangle.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.volume()
+        >>> 8.0
+        """
         # Recalculate volume if it is outdated
         if self.vol is None:
             self.vol = self._volume()
@@ -130,6 +293,22 @@ class Rectangle(object):
 
     def num_vertices(self):
         # type: (Rectangle) -> int
+        """
+        Number of vertices of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            int: 2**rectangle.dim()
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.num_vertices()
+        >>> 4
+        """
         return int(math.pow(2, self.dim()))
 
     def _vertices(self):
@@ -148,6 +327,22 @@ class Rectangle(object):
 
     def vertices(self):
         # type: (Rectangle) -> list
+        """
+        List of vertices of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            list: List of vertices of the Rectangle.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.vertices()
+        >>> [(0.0,0.0), (0.0,1.0), (1.0,0.0), (1.0,1.0)]
+        """
         # Recalculate vertices if it is outdated
         if self.vertx is None:
             self.vertx = self._vertices()
@@ -155,24 +350,89 @@ class Rectangle(object):
 
     def diag(self):
         # type: (Rectangle) -> Segment
+        """
+        Diagonal of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            Segment: Diagonal of the Rectangle.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.diag()
+        >>> (1.0,1.0)
+        """
         return Segment(self.min_corner, self.max_corner)
 
     def center(self):
         # type: (Rectangle) -> tuple
+        """
+        Center of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            tuple: Center of the Rectangle.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.center()
+        >>> (0.5,0.5)
+        """
         offset = div(self.diag_length(), 2.0)
         return add(self.min_corner, offset)
 
     def distance_to_center(self, xpoint):
         # type: (Rectangle, tuple) -> float
+        """
+        Distance of a point to the center of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+            xpoint (tuple): The point.
+
+        Returns:
+            float: Distance of xpoint to the center of the Rectangle.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.distance_to_center(x)
+        >>> 0.707
+        """
         middle_point = self.center()
         euclidean_dist = distance(xpoint, middle_point)
         return euclidean_dist
 
     def get_points(self, n):
         # type: (Rectangle, int) -> list
-        # Return n points along the rectangle diagonal, excluding min/max corners
+        """
+        List of points of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+            n (int): Number of points
+
+        Returns:
+            list: n points along the diagonal, excluding corners.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> r = Rectangle(x,y)
+        >>> r.get_points(2)
+        >>> [(0.333, 0.333), (0.666, 0.666)]
+        """
         # n internal points = n + 1 internal segments
-        m = n + 1
+        m = float(n + 1)  # Type conversion required for Point operations
         diag_step = div(self.diag_length(), m)
         min_point = add(self.min_corner, diag_step)
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
@@ -181,6 +441,26 @@ class Rectangle(object):
     # Geometric operations between two rectangles
     def is_concatenable(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Adjacency of two rectangles.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             bool: True if self and other are adjacent.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.is_concatenable(r1)
+         >>> True
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         d = self.dim()
@@ -195,6 +475,28 @@ class Rectangle(object):
 
     def concatenate(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the concatenation of two adjacent
+         rectangles (if possible).
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Concatenation of self and other, if possible.
+             Else, self.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.concatenate(r1)
+         >>> [(0.0,0.0), (2.0,2.0)]
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
         assert (not self.overlaps(other)), 'Rectangles should not overlap'
 
@@ -218,6 +520,32 @@ class Rectangle(object):
 
     def concatenate_update(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the concatenation of two adjacent
+         rectangles (if possible).
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Concatenation of self and other, if possible.
+             Else, self.
+             Side effect: self is updated with the concatenation
+             of self and other, if possible.
+             Else, self keeps unchanged.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.concatenate(r1)
+         >>> [(0.0,0.0), (2.0,2.0)]
+        """
+
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
         assert (not self.overlaps(other)), 'Rectangles should not overlap'
 
@@ -241,6 +569,25 @@ class Rectangle(object):
 
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        """
+         Existence of overlap between two rectangles.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             bool: True if self and other intersects.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(x,z)
+         >>> r2.overlaps(r1)
+         >>> True
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
@@ -250,6 +597,26 @@ class Rectangle(object):
 
     def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the intersection of two rectangles (if any).
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Intersection of self and other, if any.
+             Else, self.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(x,z)
+         >>> r2.intersection(r1)
+         >>> [(0.0,0.0), (1.0,1.0)]
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
@@ -262,6 +629,30 @@ class Rectangle(object):
 
     def intersection_update(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the intersection of two rectangles (if any).
+         If there is no intersection, returns self.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Intersection of self and other.
+             Side effect: self is updated with the intersection
+             of self and other, if any.
+             Else, self keeps unchanged.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(x,z)
+         >>> r2.intersection_update(r1)
+         >>> r2
+         >>> [(0.0,0.0), (1.0,1.0)]
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
@@ -273,9 +664,32 @@ class Rectangle(object):
         return self
 
     __and__ = intersection
+    """
+    Synonym of intersection(self, other)
+    """
 
     def difference(self, other):
         # type: (Rectangle, Rectangle) -> iter
+        """
+         Set of rectangles resulting from the difference of two rectangles (if any).
+         If there is no intersection, returns self.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             iter: Iterator for reading the set of rectangles.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(x,z)
+         >>> r2.difference(r1)
+         >>> {[(1.0,0.0), (2.0,2.0)]}
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
         def pairwise(iterable):
@@ -330,11 +744,19 @@ class Rectangle(object):
 
     def min_set_difference(self, other):
         # type: (Rectangle, Rectangle) -> list
+        """
+         Equivalent to difference(self, other).
+         This function tries to minimize the number of rectangles in the output set
+         by concatenating adjacent rectangles.
+        """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
         return Rectangle.fusion_rectangles(self.difference(other))
 
     # __sub__ = difference
     __sub__ = min_set_difference
+    """
+    Synonym of min_set_difference(self, other)
+    """
 
     # Domination
     def dominates_point(self, xpoint):
@@ -347,7 +769,7 @@ class Rectangle(object):
 
     def dominates_rect(self, other):
         # type: (Rectangle, Rectangle) -> bool
-        return less_equal(self.max_corner, other.min_corner) # testing. Strict dominance and not overlap
+        return less_equal(self.max_corner, other.min_corner)  # testing. Strict dominance and not overlap
         # return less_equal(self.min_corner, other.min_corner) and less_equal(self.max_corner, other.max_corner) # working
 
     def is_dominated_by_rect(self, other):
@@ -357,6 +779,21 @@ class Rectangle(object):
     # Matplot functions
     def plot_2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
         # type: (Rectangle, str, int, int, float) -> patches.Rectangle
+        """
+         Function that creates a graphical representation of the rectangle in 2D.
+         In case that the rectangle has dimension higher than 2,
+         the user must select which axes wants to print.
+
+         Args:
+             self (Rectangle): The Rectangle,
+             c (str): The color (look at the colors that are supported by MatplotLib),
+             xaxe, yaxe (int): Axes that the user wants to display, between 0..Rectangle.dim()-1
+             opacity (float): Opacity of the rectangle, between 0.0..1.0
+
+         Returns:
+             patches.Rectangle: 2D representation of the rectangle as a MatplotLib object.
+
+        """
         assert (self.dim() >= 2), 'Dimension required >= 2'
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
         width = self.diag_length()[xaxe]
@@ -373,6 +810,21 @@ class Rectangle(object):
 
     def plot_3D(self, c='red', xaxe=0, yaxe=1, zaxe=2, opacity=1.0):
         # type: (Rectangle, str, int, int, int, float) -> Poly3DCollection
+        """
+         Function that creates a graphical representation of the rectangle in 3D.
+         In case that the rectangle has dimension higher than 3,
+         the user must select which axes wants to print.
+
+         Args:
+             self (Rectangle): The Rectangle,
+             c (str): The color (look at the colors that are supported by MatplotLib),
+             xaxe, yaxe, zaxe (int): Axes that the user wants to display, between 0..Rectangle.dim()-1
+             opacity (float): Opacity of the rectangle, between 0.0..1.0
+
+         Returns:
+             patches.Rectangle: 3D representation of the rectangle as a MatplotLib object.
+
+        """
         assert (self.dim() >= 3), 'Dimension required >= 3'
 
         minc = (self.min_corner[xaxe], self.min_corner[yaxe], self.min_corner[zaxe],)
@@ -403,10 +855,30 @@ class Rectangle(object):
     # Auxiliary functions
     #####################
 
-    # Concatenation of cubes in a list
     @staticmethod
     def fusion_rectangles(list_rect):
         # type: (iter) -> list
+        """
+         Concatenation of the rectangles in a list,
+         whenever it is possible. If no concatenation is possible,
+         returns the original list.
+
+         Args:
+             list_rect (list): List of rectangles.
+
+         Returns:
+             list: list of rectangles obtained by concatenation.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> Rectangle.fusion_rectangles([r1, r2])
+         >>> [[(0.0,0.0), (2.0,2.0)]]
+        """
 
         # Copy list_rect
         list_out = list(list_rect)
@@ -415,43 +887,50 @@ class Rectangle(object):
             keep_merging = False
             i = 0
             while i < len(list_out):
+                # Check if current rectangle liste_out[i] is concatenable with any successor liste_out[j]
                 j = i + 1
                 while j < len(list_out):
                     if list_out[i].is_concatenable(list_out[j]):
+                        # Concatenate rectangle liste_out[j] to liste_out[j]
                         list_out[i].concatenate_update(list_out[j])
-                        # list_out.remove(list_out[j])
+                        # Discard rectangle liste_out[j] from the list
                         list_out.pop(j)
                         keep_merging = True
                     else:
+                        # Move to the next element of the list
+                        # Index 'j' needs to be updated only if we do not concatenate rectangles
                         j = j + 1
                 i = i + 1
-        return list_out
-
-
-    @staticmethod
-    def fusion_rectangles_func(list_rect):
-        # type: (iter) -> list
-
-        # Copy list_rect
-        list_out = list(list_rect)
-        while True:
-            concat_list = ((rect1, rect2) for rect1 in list_out for rect2 in list_out if
-                           rect1 != rect2 and rect1.is_concatenable(rect2))
-            try:
-                rect1, rect2 = next(concat_list)
-                rect1.concatenate_update(rect2)
-                list_out.remove(rect2)
-            except StopIteration:
-                break
         return list_out
 
     # Difference of cubes in a list
     @staticmethod
     def difference_rectangles(rect, list_rect):
         # type: (Rectangle, iter) -> list
-        # Given a rectangle 'rect' and a list of rectangles 'list_rect', the algorithm computes
-        # rect = rect - ri for every ri in list_rect
+        """
+          List of rectangles resulting from the difference of a rectangle
+          and a list of rectangles (if any).
+          If there is no intersection, returns self.
 
+          Args:
+              rect (Rectangle): The Rectangle.
+              list_rect (list): List of rectangles.
+
+          Returns:
+              list: List of rectangles resulting from applying
+              rect = rect - ri for every ri in list_rect.
+
+          Example:
+          >>> x = (0,0)
+          >>> y = (1,1)
+          >>> z = (1,0)
+          >>> t = (2,2)
+          >>> r1 = Rectangle(x,y)
+          >>> r2 = Rectangle(z,t)
+          >>> r3 = Rectangle(x,t)
+          >>> Rectangle.difference_rectangles(r3, [r1, r2])
+          >>> []
+         """
         new_rect = {rect}
 
         for b in list_rect:
@@ -469,38 +948,11 @@ class Rectangle(object):
         # return list(new_rect)
         return Rectangle.fusion_rectangles(new_rect)
 
-    @staticmethod
-    def difference_rectangles_func(rect, list_rect):
-        # type: (Rectangle, list) -> list
-        # Given a rectangle 'rect' and a list of rectangles 'list_rect', the algorithm computes
-        # rect = rect - ri for every ri in list_rect
-
-        new_rect = {rect}
-
-        for b in list_rect:
-            temp = set()
-            for a in new_rect:
-                if b.overlaps(a):
-                    if b.intersection(a) != a:
-                        # Add the set of cubes 'a' - 'b'
-                        temp = temp.union(a - b)
-                    # else: # b.intersection(a) == a:
-                    # 'a' is fully contained inside 'b'
-                    # No need to calculate the difference.
-                    # Discard 'a'
-                    temp.discard(a)
-                else:
-                    temp.add(a)
-            new_rect = temp
-
-        # return list(new_rect)
-        return Rectangle.fusion_rectangles(new_rect)
 
 ##################
 # Alpha generators
 ##################
-# Set of functions for generating the 'alphas' that will rule the creation of comparable and incomparable cubes
-# Alpha in [0,1]^n
+
 def comp(d):
     # Set of comparable rectangles
     # Particular cases of alpha
@@ -509,6 +961,15 @@ def comp(d):
     # one = (1_1,...,1_d)
     one = (1,) * d
     return [zero, one]
+
+
+def incomp(d, opt=True):
+    # type: (int, bool) -> list
+    # # Set of incomparable rectangles
+    if opt and d >= 3:
+        return incomp_compressed(d)
+    else:
+        return incomp_expanded(d)
 
 
 def incomp_expanded(d):
@@ -520,23 +981,6 @@ def incomp_expanded(d):
     comparable = comp(d)
     incomparable = list(set(alpha) - set(comparable))
     return incomparable
-
-
-def E(d):
-    # type: (int) -> tuple
-    # Compressed version for a set of alpha indices representing incomparable rectangles
-    if d == 3:
-        return ("0*1", "10*", "*10")
-    elif d > 3:
-        return tuple("*" + i for i in E(d - 1)) + tuple("0" + "1" * (d - 1)) + tuple("1" + "0" * (d - 1))
-
-def E2(d):
-    # type: (int) -> list
-    # Compressed version for a set of alpha indices representing incomparable rectangles
-    if d == 3:
-        return ["0*1", "10*", "*10"]
-    elif d > 3:
-        return ["*" + i for i in E(d - 1)] + ["0" + "1" * (d - 1), "1" + "0" * (d - 1)]
 
 
 def incomp_compressed(d):
@@ -557,18 +1001,19 @@ def incomp_compressed(d):
     return lout
 
 
-def incomp(d, opt=True):
-    # type: (int, bool) -> list
-    # # Set of incomparable rectangles
-    if opt and d >= 3:
-        return incomp_compressed(d)
-    else:
-        return incomp_expanded(d)
+def E(d):
+    # type: (int) -> list
+    # Compressed version for a set of alpha indices representing incomparable rectangles
+    if d == 3:
+        return ["0*1", "10*", "*10"]
+    elif d > 3:
+        return ["*" + i for i in E(d - 1)] + ["0" + "1" * (d - 1), "1" + "0" * (d - 1)]
 
 
 #################
 # Cube generators
 #################
+
 def cpoint(i, alphai, ypoint, xspace):
     # type: (int, int, tuple, Rectangle) -> Rectangle
     result_xspace = Rectangle(xspace.min_corner, xspace.max_corner)
@@ -591,7 +1036,6 @@ def crect(i, alphai, yrectangle, xspace):
     return result_xspace
 
 
-#########################################################################################
 def bpoint(alpha, ypoint, xspace):
     # type: (tuple, tuple, Rectangle) -> Rectangle
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -624,7 +1068,6 @@ def brect(alpha, yrectangle, xspace):
     return temp
 
 
-#########################################################################################
 def irect(alphaincomp, yrectangle, xspace):
     # type: (list, Rectangle, Rectangle) -> list
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \

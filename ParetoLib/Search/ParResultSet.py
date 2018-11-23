@@ -1,3 +1,26 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""ParResultSet.
+
+The result of the discovery process of the Pareto front is saved in
+an object of the *ResultSet* class. This object is a data structure
+composed of three elements: the upper closure (*X1*), the lower
+closure (*X2*), and the gap between X1 and X2 representing the
+precision error of the learning process.
+The size of this gap depends on the accuracy of the learning process,
+which can be tuned by the EPS and DELTA parameters during the
+invocation of the learning method.
+
+The ResultSet class provides functions for:
+- Testing the membership of a new point *y* to any of the closures.
+- Plotting 2D and 3D spaces
+- Exporting/Importing the results to text and binary files.
+"""
+
 from multiprocessing import Pool, cpu_count
 from itertools import combinations
 

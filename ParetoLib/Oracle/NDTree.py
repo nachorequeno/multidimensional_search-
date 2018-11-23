@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""NDTree.
+
+This module implements a NDTree [1], a data structure that is optimised
+for storing a Pareto front by removing redundant non-dominating points
+from the surface. The data structure definition, notation and algorithms
+are extracted directly from [1].
+
+[1] Andrzej Jaszkiewicz and Thibaut Lust.
+ND-Tree-based update: a fast algorithm for the dynamic non-dominance problem.
+IEEE Transactions on Evolutionary Computation, 2018.
+https://ieeexplore.ieee.org/document/8274915/
+"""
+
 import sys
 import resource
 import io
@@ -8,10 +27,6 @@ from ParetoLib.Geometry.Point import less, less_equal, distance, dim
 
 
 class NDTree:
-    # The data structure definition, notation and algorithms are extracted from the paper
-    # 'ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem'
-    # https://ieeexplore.ieee.org/document/8274915/
-
     # root: Node
     def __init__(self, max_points=2, min_children=2):
         # type: (NDTree, int, int) -> None
@@ -362,12 +377,6 @@ class Node:
     def get_points(self):
         # type: (Node) -> set
         return set(self.L)
-
-    # def getPointsRec(self):
-    #    # type: (Node) -> set
-    #    pointrec_list = [n.getPointsRec() for n in self.nodes]
-    #    points = set.union(*pointrec_list)
-    #    return points.union(self.get_points())
 
     def get_points_rec(self):
         # type: (Node) -> set

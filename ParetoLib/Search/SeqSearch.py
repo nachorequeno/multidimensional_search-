@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""SeqSearch.
+
+This module implements the sequential version of the learning
+algorithms described in [1] for searching the Pareto front.
+
+[1] Learning Monotone Partitions of Partially-Ordered Domains,
+Nicolas Basset, Oded Maler, J.I Requeno, in
+doc/article.pdf.
+"""
+
 import os
 import time
 import tempfile
@@ -99,12 +115,12 @@ def multidim_search_opt_2(xspace,
     vol_border = vol_total
     step = 0
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -113,19 +129,19 @@ def multidim_search_opt_2(xspace,
         'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        RootSearch.logger.debug('border:', border)
+        RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        RootSearch.logger.debug('xrectangle: ', xrectangle)
-        RootSearch.logger.debug('xrectangle.volume: ', xrectangle.volume())
-        RootSearch.logger.debug('xrectangle.norm : ', xrectangle.norm())
+        RootSearch.logger.debug('xrectangle: {0}'.format(xrectangle))
+        RootSearch.logger.debug('xrectangle.volume: {0}'.format(xrectangle.volume()))
+        RootSearch.logger.debug('xrectangle.norm: {0}'.format(xrectangle.norm()))
 
         # y, segment
         # y = search(xrectangle.diag(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
-        RootSearch.logger.debug('y: ', y)
+        RootSearch.logger.debug('y: {0}'.format(y))
         # discovered_segments.append(y)
 
         b0 = Rectangle(xrectangle.min_corner, y.low)
@@ -137,11 +153,11 @@ def multidim_search_opt_2(xspace,
         vol_ylow += b0.volume()
         vol_yup += b1.volume()
 
-        RootSearch.logger.debug('b0: ', b0)
-        RootSearch.logger.debug('b1: ', b1)
+        RootSearch.logger.debug('b0: {0}'.format(b0))
+        RootSearch.logger.debug('b1: {0}'.format(b1))
 
-        RootSearch.logger.debug('ylow: ', ylow)
-        RootSearch.logger.debug('yup: ', yup)
+        RootSearch.logger.debug('ylow: {0}'.format(ylow))
+        RootSearch.logger.debug('yup: {0}'.format(yup))
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -236,7 +252,7 @@ def multidim_search_opt_2(xspace,
         # l.extend(i)
 
         border |= i
-        RootSearch.logger.debug('irect: ', i)
+        RootSearch.logger.debug('irect: {0}'.format(i))
 
         vol_border = vol_total - vol_yup - vol_ylow
 
@@ -305,12 +321,12 @@ def multidim_search_opt_1(xspace,
     vol_border = vol_total
     step = 0
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -319,35 +335,35 @@ def multidim_search_opt_1(xspace,
                            'BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        RootSearch.logger.debug('border:', border)
+        RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        RootSearch.logger.debug('xrectangle: ', xrectangle)
-        RootSearch.logger.debug('xrectangle.volume: ', xrectangle.volume())
-        RootSearch.logger.debug('xrectangle.norm : ', xrectangle.norm())
+        RootSearch.logger.debug('xrectangle: {0}'.format(xrectangle))
+        RootSearch.logger.debug('xrectangle.volume: {0}'.format(xrectangle.volume()))
+        RootSearch.logger.debug('xrectangle.norm: {0}'.format(xrectangle.norm()))
 
         # y, segment
         # y = search(xrectangle.diag(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
-        RootSearch.logger.debug('y: ', y)
+        RootSearch.logger.debug('y: {0}'.format(y))
 
         # b0 = Rectangle(xspace.min_corner, y.low)
         b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
-        RootSearch.logger.debug('b0: ', b0)
-        RootSearch.logger.debug('ylow: ', ylow)
+        RootSearch.logger.debug('b0: {0}'.format(b0))
+        RootSearch.logger.debug('ylow: {0}'.format(ylow))
 
         # b1 = Rectangle(y.high, xspace.max_corner)
         b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
-        RootSearch.logger.debug('b1: ', b1)
-        RootSearch.logger.debug('yup: ', yup)
+        RootSearch.logger.debug('b1: {0}'.format(b1))
+        RootSearch.logger.debug('yup: {0}'.format(yup))
 
         ################################
         # Every Border rectangle that dominates B0 is included in Ylow
@@ -391,7 +407,7 @@ def multidim_search_opt_1(xspace,
         ################################
 
         border += i
-        RootSearch.logger.debug('irect: ', i)
+        RootSearch.logger.debug('irect: {0}'.format(i))
 
         vol_border = vol_total - vol_yup - vol_ylow
 
@@ -460,12 +476,12 @@ def multidim_search_opt_0(xspace,
     vol_border = vol_total
     step = 0
 
-    RootSearch.logger.debug('xspace: ', xspace)
-    RootSearch.logger.debug('vol_border: ', vol_border)
-    RootSearch.logger.debug('delta: ', delta)
-    RootSearch.logger.debug('step: ', step)
-    RootSearch.logger.debug('incomparable: ', incomparable)
-    RootSearch.logger.debug('comparable: ', comparable)
+    RootSearch.logger.debug('xspace: {0}'.format(xspace))
+    RootSearch.logger.debug('vol_border: {0}'.format(vol_border))
+    RootSearch.logger.debug('delta: {0}'.format(delta))
+    RootSearch.logger.debug('step: {0}'.format(step))
+    RootSearch.logger.debug('incomparable: {0}'.format(incomparable))
+    RootSearch.logger.debug('comparable: {0}'.format(comparable))
 
     # Create temporary directory for storing the result of each step
     tempdir = tempfile.mkdtemp()
@@ -473,35 +489,35 @@ def multidim_search_opt_0(xspace,
     RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        RootSearch.logger.debug('border:', border)
+        RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
 
-        RootSearch.logger.debug('xrectangle: ', xrectangle)
-        RootSearch.logger.debug('xrectangle.volume: ', xrectangle.volume())
-        RootSearch.logger.debug('xrectangle.norm : ', xrectangle.norm())
+        RootSearch.logger.debug('xrectangle: {0}'.format(xrectangle))
+        RootSearch.logger.debug('xrectangle.volume: {0}'.format(xrectangle.volume()))
+        RootSearch.logger.debug('xrectangle.norm: {0}'.format(xrectangle.norm()))
 
         # y, segment
         # y = search(xrectangle.diag(), f, epsilon)
         y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
-        RootSearch.logger.debug('y: ', y)
+        RootSearch.logger.debug('y: {0}'.format(y))
 
         # b0 = Rectangle(xspace.min_corner, y.low)
         b0 = Rectangle(xrectangle.min_corner, y.low)
         ylow.append(b0)
         vol_ylow += b0.volume()
 
-        RootSearch.logger.debug('b0: ', b0)
-        RootSearch.logger.debug('ylow: ', ylow)
+        RootSearch.logger.debug('b0: {0}'.format(b0))
+        RootSearch.logger.debug('ylow: {0}'.format(ylow))
 
         # b1 = Rectangle(y.high, xspace.max_corner)
         b1 = Rectangle(y.high, xrectangle.max_corner)
         yup.append(b1)
         vol_yup += b1.volume()
 
-        RootSearch.logger.debug('b1: ', b1)
-        RootSearch.logger.debug('yup: ', yup)
+        RootSearch.logger.debug('b1: {0}'.format(b1))
+        RootSearch.logger.debug('yup: {0}'.format(yup))
 
         yrectangle = Rectangle(y.low, y.high)
         i = irect(incomparable, yrectangle, xrectangle)
@@ -509,7 +525,7 @@ def multidim_search_opt_0(xspace,
         # l.extend(i)
 
         border += i
-        RootSearch.logger.debug('irect: ', i)
+        RootSearch.logger.debug('irect: {0}'.format(i))
 
         vol_border = vol_total - vol_yup - vol_ylow
 

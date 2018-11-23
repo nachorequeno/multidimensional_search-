@@ -9,6 +9,7 @@ from ParetoLib.Search.Search import SearchND
 from ParetoLib.Oracle.OracleFunction import OracleFunction
 from ParetoLib.Oracle.OraclePoint import OraclePoint
 from ParetoLib.Oracle.OracleSTL import OracleSTL
+from ParetoLib.Oracle.OracleSTLe import OracleSTLe
 from ParetoLib.Oracle.Oracle import Oracle
 
 EPS = 1e-5
@@ -32,6 +33,8 @@ class SearchTestCase(unittest.TestCase):
         # Use N sample points for verifying that the result of the Pareto search is correct.
         # We compare the membership of a point to a ResultSet closure and the answer of the Oracle.
         self.numpoints_verify = 30
+        # Number of examples that will execute
+        self.numfiles_test = 1
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def closureMembershipTest(self, fora, rs, xpoint):
@@ -145,19 +148,25 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_3D(self):
         test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_ND(self):
         test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
 
 class SearchOraclePointTestCase(SearchTestCase):
@@ -171,28 +180,34 @@ class SearchOraclePointTestCase(SearchTestCase):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
         # test-2d-12points provides the maximum interval: [-1024, 1024]
         self.min_c = -1024.0
         self.max_c = 1024.0
-        self.search_verify_ND(human_readable=False, list_test_files=sorted(list_test_files))
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_3D(self):
         test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
         # test-3d-[1000|2000] are LIDAR points between 0.0 and 600.0 approx.
         self.min_c = 0.0
         self.max_c = 600.0
-        self.search_verify_ND(human_readable=False, list_test_files=sorted(list_test_files))
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_ND(self):
         test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
         # test-4d and test-5d are random points in the interval [1.0, 2.0]
         self.min_c = 1.0
         self.max_c = 2.0
-        self.search_verify_ND(human_readable=False, list_test_files=sorted(list_test_files))
+        self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
 
 class SearchOracleSTLTestCase(SearchTestCase):
@@ -211,13 +226,17 @@ class SearchOracleSTLTestCase(SearchTestCase):
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_2D(self):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
-        self.search_verify_ND(human_readable=True, list_test_files=sorted(list_test_files))
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     # Currently, we only run OracleSTL tests for 1D and 2D because of the
     # complexity in verifying the results and the computational cost of
@@ -228,6 +247,31 @@ class SearchOracleSTLTestCase(SearchTestCase):
 
     # def test_ND(self):
     #     self.search_verify_ND(False)
+
+
+class SearchOracleSTLeTestCase(SearchTestCase):
+
+    def setUp(self):
+        super(SearchOracleSTLeTestCase, self).setUp()
+        self.this_dir = 'Oracle/OracleSTLe'
+        self.oracle = OracleSTLe()
+
+        # Run tests of the 'stabilization' example.
+        # The validity of the parametric domain is [-1.0, 1.0]  for p1 (signal)
+        self.min_c = -1.0
+        self.max_c = 1.0
+
+    def test_1D(self):
+        test_dir = os.path.join(self.this_dir, '1D')
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
+
+    # Currently, we only run OracleSTL tests for 1D because of the
+    # complexity in verifying the results and the computational cost of
+    # evaluating STL properties in the Test folder.
 
 
 if __name__ == '__main__':

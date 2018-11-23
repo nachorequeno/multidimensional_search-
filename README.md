@@ -141,7 +141,7 @@ The learning algorithm is compatible for any dimension *N*, and for any *Oracle*
 template ParetoLib.Oracle.Oracle. For the moment, ParetoLib includes support for *OracleFunction*, 
 *OraclePoint* and *OracleSTL* oracles.
 
-The invokation parameters of the learning process are the following:
+The input parameters of the learning process are the following:
 * xspace: the N-dimensional space that contains the upper and lower closures, 
 represented by a list of minimum and maximum possible values for each dimension
  (i.e., min_cornerx, max_cornerx, etc.).

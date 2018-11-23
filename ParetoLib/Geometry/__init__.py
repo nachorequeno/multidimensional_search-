@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 J.I. Requeno et al
+#
+# This file is part of the ParetoLib software tool and governed by the
+# 'GNU License v3'. Please see the LICENSE file that should have been
+# included as part of this software.
+"""Geometry package.
+
+This package introduces a set of modules for manipulating Segments,
+ Rectangles and Points.
+
+Regarding arithmetic precision, the maximum number of significant
+decimal digits is indicated by __numdigits__
+"""
+
 import sys
 from math import log, floor
 

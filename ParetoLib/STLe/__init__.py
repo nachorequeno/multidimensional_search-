@@ -4,13 +4,15 @@
 # This file is part of the ParetoLib software tool and governed by the
 # 'GNU License v3'. Please see the LICENSE file that should have been
 # included as part of this software.
-"""JAMT package.
+"""STLe package.
 
-This module acts as an interface to the AMT 2.0 tool, a tool for
+This module acts as an interface to the STLe tool [1], a tool for
 monitoring signals and evaluating properties written in Signal
 Temporal Logic (STL) over them.
+
+[1] https://gitlab.com/abakhirkin/StlEval
 """
 
 __version__ = 1.
-__name__ = 'JAMT'
-__all__ = ['JAMT']
+__name__ = 'STLe'
+__all__ = ['STLe.py']

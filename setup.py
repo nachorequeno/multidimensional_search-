@@ -186,9 +186,10 @@ setup_args = {'name': 'ParetoLib',
               'author': 'J. Ignacio Requeno',
               'author_email': 'jose-ignacio.requeno-jarabo@univ-grenoble-alpes.fr',
               'url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/',
+              'license': 'GNU GPLv3',
               'description': 'ParetoLib is a free multidimensional boundary learning library for ' \
                              'tools for Python 2.7.9 and Python 3.4 or newer',
-              'download_url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/repository/master/' \
+              'download_url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/repository/master/' \
                               'archive.tar.gz',
               'cmdclass': {'install': install_paretolib,
                            'build_py': build_py_paretolib,
@@ -198,8 +199,11 @@ setup_args = {'name': 'ParetoLib',
                            'ParetoLib.JAMT',
                            'ParetoLib.Oracle',
                            'ParetoLib.Search',
+                           'ParetoLib.STLe',
                            'ParetoLib._py3k'],
-              'package_data': {'ParetoLib.JAMT': ['*.jar']},
+              'package_data': {'ParetoLib.JAMT': ['*.jar'],
+                               'ParetoLib.STLe': ['*.bin', '*.exe']},
+              'platform': 'OS Independent',
               }
 
 try:
