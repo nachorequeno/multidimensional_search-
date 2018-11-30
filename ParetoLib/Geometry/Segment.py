@@ -42,14 +42,16 @@ class Segment:
 
         Args:
             self (Segment): A Segment.
-            low (tuple): a Point
-            high (tuple): another Point
+            low (tuple): A point.
+            high (tuple): Another point.
 
         Returns:
             None
 
         Example:
-        >>> s = Segment((2, 4, 6), (2, 4, 7))
+        >>> x = (2, 4, 6)
+        >>> y = (2, 4, 7)
+        >>> s = Segment(x, y)
         """
 
         self.low = minimum(low, high)
@@ -66,32 +68,52 @@ class Segment:
 
         Args:
             self (Segment): A Segment.
-            xpoint (tuple): a Point
+            xpoint (tuple): A point.
 
         Returns:
             bool: True if xpoint is inside the interval
-            [self.low, self.high]
+            [self.low, self.high].
 
         Example:
-        >>> p = (2, 4, 8)
-        >>> s = Segment((2, 4, 6), (2, 4, 8))
+        >>> p = (2, 4, 7)
+        >>> x = (2, 4, 6)
+        >>> y = (2, 4, 8)
+        >>> s = Segment(x, y)
         >>> p in s
         >>> True
         """
         return (greater_equal(xpoint, self.low) and
                 less_equal(xpoint, self.high))
 
-    # Attribute access
     def __setattr__(self, name, value):
         # type: (Segment, str, iter) -> None
+        """
+        Assignation of a value to a class attribute.
+
+        Args:
+            self (Segment): The Segment.
+            name (str): The attribute.
+            value (None): The value
+
+        Returns:
+            None: self.name = value.
+
+        Example:
+        >>> x = (2, 4, 6)
+        >>> y = (2, 4, 7)
+        >>> s = Segment(x, y)
+        >>> s.high = y
+        """
         # Round the elements of 'value' when assigning them to self.low or self.high
         val = tuple(r(vi) for vi in value)
         self.__dict__[name] = val
         # object.__setattr__(self, name, val)
 
-    # Printers
     def _to_str(self):
         # type: (Segment) -> str
+        """
+        Printer.
+        """
         _string = '<'
         _string += str(self.low)
         _string += ', '
@@ -101,24 +123,37 @@ class Segment:
 
     def __repr__(self):
         # type: (Segment) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def __str__(self):
         # type: (Segment) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
-    # Equality functions
     def __eq__(self, other):
         # type: (Segment) -> bool
+        """
+        self == other
+        """
         return (other.low == self.low) and (other.high == self.high)
 
     def __ne__(self, other):
         # type: (Segment) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (Segment) -> float
+        """
+        Identity function (via hashing).
+        """
         return hash((self.low, self.high))
 
     # Segment properties
@@ -131,10 +166,12 @@ class Segment:
             self (Segment): A Segment.
 
         Returns:
-            int: len(self.low)
+            int: len(self.low).
 
         Example:
-        >>> s = Segment((2, 4, 6), (2, 4, 7))
+        >>> x = (2, 4, 6)
+        >>> y = (2, 4, 7)
+        >>> s = Segment(x, y)
         >>> s.dim()
         >>> 3
         """
@@ -150,10 +187,12 @@ class Segment:
             self (Segment): A Segment.
 
         Returns:
-            tuple: substract(self.high, self.low)
+            tuple: substract(self.high, self.low).
 
         Example:
-        >>> s = Segment((0, 1, 2), (3, 4, 5))
+        >>> x = (0, 1, 2)
+        >>> y = (3, 4, 5)
+        >>> s = Segment(x, y)
         >>> s.diag()
         >>> (3.0, 3.0, 3.0)
         """
@@ -169,10 +208,12 @@ class Segment:
             self (Segment): A Segment.
 
         Returns:
-            float: norm(self.diag())
+            float: norm(self.diag()).
 
         Example:
-        >>> s = Segment((0, 1, 2), (3, 4, 5))
+        >>> x = (0, 1, 2)
+        >>> y = (3, 4, 5)
+        >>> s = Segment(x, y)
         >>> s.norm()
         >>> 5.196
         """

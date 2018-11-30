@@ -106,12 +106,18 @@ which is internally stored in a NDTree data structure [3].
 
 ![alt text][paretofront]
 
-Finally, the last *Oracle*, named *OracleSTL*, defines the membership of point *x* depending
+The third *Oracle*, named *OracleSTL*, defines the membership of point *x* depending
 on the success in evaluating a Signal Temporal Logic (STL) [4] formula over a signal.
 The STL formula is parametrized with a set of variables which correspond to the coordinates
 of the point *x* (i.e., the number of parameters in the STL formula is equal to the dimension of *x*). 
 Every point *x* satisfying the STL formula will belong to *X1*, while every point *x* 
 falsifying it will belong to *X2*.
+
+
+Finally, the last *Oracle*, named *OracleSTLe*, defines the membership of point *x* depending
+on the success in evaluating a quantitative measure over a signal by using an extension of 
+Signal Temporal Logic (STLe) [5]. The STLe formula is parametrized similarly to a STL formula
+used by the *OracleSTL*.
 
 The last image shows the partitioning that is learnt by our algorithm thanks to
 the *Oracle* guidance. The green side corresponds to *X1* and the red side corresponds 
@@ -121,8 +127,8 @@ and can be set arbitrarily small depending on the accuracy required by the user.
 ![alt text][multidim_search]
 
 
-Samples of *OracleFunction*, *OraclePoint* and *OracleSTL* definitions can be found in 
-Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
+Samples of *OracleFunction*, *OraclePoint*, *OracleSTL* and *OracleSTLe* definitions 
+can be found in Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 
 [paretofront]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/pareto_front.png "Pareto front"
 [multidim_search]: https://gricad-gitlab.univ-grenoble-alpes.fr/requenoj/multidimensional_search/blob/master/doc/image/multidim_search.png "Upper and lower closures"
@@ -130,6 +136,8 @@ Tests/Oracle/Oracle* and Tests/Search/Oracle* folders.
 [3] [ND-Tree-based update: a Fast Algorithm for the Dynamic Non-Dominance Problem] (https://ieeexplore.ieee.org/document/8274915/)
 
 [4] [Monitoring Temporal Properties of Continuous Signals] (https://doi.org/10.1007/978-3-540-30206-3_12)
+
+[5] [Specification and Efficient Monitoring Beyond STL] (pending)
 
 ### Running the multidimensional search
 The core of the library is the algorithm implementing the multidimensional search of the Pareto boundary.
@@ -139,7 +147,7 @@ the space *X*.
 
 The learning algorithm is compatible for any dimension *N*, and for any *Oracle* defined according to the 
 template ParetoLib.Oracle.Oracle. For the moment, ParetoLib includes support for *OracleFunction*, 
-*OraclePoint* and *OracleSTL* oracles.
+*OraclePoint*, *OracleSTL* and *OracleSTLe* oracles.
 
 The input parameters of the learning process are the following:
 * xspace: the N-dimensional space that contains the upper and lower closures, 

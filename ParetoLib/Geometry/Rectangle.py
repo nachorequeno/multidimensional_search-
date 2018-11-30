@@ -54,11 +54,12 @@ of incomparable rectangles.
 They require as input:
 - A point (ypoint) or rectangle (yrectangle) close to the Pareto front,
 - An index word (alpha) or the i-th component of the index word (alphai),
-- The space,
+- The space (xspace).
 
 [1] Learning Monotone Partitions of Partially-Ordered Domains,
 Nicolas Basset, Oded Maler, J.I Requeno, in
 doc/article.pdf.
+
 [2] [Learning Monotone Partitions of Partially-Ordered Domains (Work in Progress) 2017.
 〈hal-01556243〉] (https://hal.archives-ouvertes.fr/hal-01556243/)
 """
@@ -76,7 +77,6 @@ from ParetoLib._py3k import reduce
 
 
 class Rectangle(object):
-    # min_corner, max_corner
     def __init__(self,
                  min_corner=(float('-inf'),) * 2,
                  max_corner=(float('-inf'),) * 2):
@@ -89,19 +89,36 @@ class Rectangle(object):
         """
         assert dim(min_corner) == dim(max_corner)
 
+        # min_corner, max_corner
         self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
         self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
         # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
-        # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners)
+        # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners).
         self.vol = None
+        # Vertices are also cached.
         self.vertx = None
 
         assert greater_equal(self.max_corner, self.min_corner) or incomparables(self.min_corner, self.max_corner)
 
-    # Attribute access
     def __setattr__(self, name, value):
         # type: (Rectangle, str, None) -> None
+        """
+        Assignation of a value to a class attribute.
 
+        Args:
+            self (Rectangle): The Rectangle.
+            name (str): The attribute.
+            value (None): The value
+
+        Returns:
+            None: self.name = value.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.min_corner = x
+        """
         str_vertx = 'vertx'
         if name != str_vertx:
             # self.__dict__[str_vertx] = None
@@ -127,11 +144,11 @@ class Rectangle(object):
 
         Args:
             self (Rectangle): The Rectangle.
-            xpoint (tuple): The Point.
+            xpoint (tuple): The point.
 
         Returns:
             bool: True if xpoint is strictly inside the rectangle
-            (i.e., it is not along the border)
+            (i.e., it is not along the border).
 
         Example:
         >>> x = (0,0,0)
@@ -151,26 +168,28 @@ class Rectangle(object):
 
         Args:
             self (Rectangle): The Rectangle.
-            xpoint (tuple): The Point.
+            xpoint (tuple): The point.
 
         Returns:
             bool: True if xpoint is inside the rectangle
-            or along the border
+            or along the border.
 
         Example:
         >>> x = (0,0,0)
         >>> y = (2,2,2)
         >>> r = Rectangle(x,y)
         >>> x in r
-        >>> False
+        >>> True
         """
         # xpoint is inside the rectangle or along the border
         return (greater_equal(xpoint, self.min_corner) and
                 less_equal(xpoint, self.max_corner))
 
-    # Printers
     def _to_str(self):
         # type: (Rectangle) -> str
+        """
+        Printer.
+        """
         _string = '['
         _string += str(self.min_corner)
         _string += ', '
@@ -180,24 +199,37 @@ class Rectangle(object):
 
     def __repr__(self):
         # type: (Rectangle) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def __str__(self):
         # type: (Rectangle) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
-    # Equality functions
     def __eq__(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        """
+        self == other
+        """
         return (other.min_corner == self.min_corner) and (other.max_corner == self.max_corner)
 
     def __ne__(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (Rectangle) -> int
+        """
+        Identity function (via hashing).
+        """
         return hash((self.min_corner, self.max_corner))
 
     # Rectangle properties
@@ -300,7 +332,7 @@ class Rectangle(object):
             self (Rectangle): The Rectangle.
 
         Returns:
-            int: 2**rectangle.dim()
+            int: 2**rectangle.dim().
 
         Example:
         >>> x = (0,0)
@@ -432,7 +464,7 @@ class Rectangle(object):
         >>> [(0.333, 0.333), (0.666, 0.666)]
         """
         # n internal points = n + 1 internal segments
-        m = float(n + 1)  # Type conversion required for Point operations
+        m = float(n + 1)  # Type conversion required for point operations
         diag_step = div(self.diag_length(), m)
         min_point = add(self.min_corner, diag_step)
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
@@ -665,7 +697,7 @@ class Rectangle(object):
 
     __and__ = intersection
     """
-    Synonym of intersection(self, other)
+    Synonym of intersection(self, other).
     """
 
     def difference(self, other):
@@ -755,25 +787,37 @@ class Rectangle(object):
     # __sub__ = difference
     __sub__ = min_set_difference
     """
-    Synonym of min_set_difference(self, other)
+    Synonym of min_set_difference(self, other).
     """
 
     # Domination
     def dominates_point(self, xpoint):
         # type: (Rectangle, tuple) -> bool
+        """
+        Synonym of Point.dominates(self.max_corner, xpoint).
+        """
         return less_equal(self.max_corner, xpoint)
 
     def is_dominated_by_point(self, xpoint):
         # type: (Rectangle, tuple) -> bool
+        """
+        Synonym of Point.dominates(xpoint, self.min_corner).
+        """
         return less_equal(xpoint, self.min_corner)
 
     def dominates_rect(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        """
+        Synonym of Point.dominates(self.max_corner, other.min_corner).
+        """
         return less_equal(self.max_corner, other.min_corner)  # testing. Strict dominance and not overlap
         # return less_equal(self.min_corner, other.min_corner) and less_equal(self.max_corner, other.max_corner) # working
 
     def is_dominated_by_rect(self, other):
         # type: (Rectangle, Rectangle) -> bool
+        """
+        Synonym of Rectangle.dominates(other, self).
+        """
         return other.dominates_rect(self)
 
     # Matplot functions

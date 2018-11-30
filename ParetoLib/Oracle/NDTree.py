@@ -9,7 +9,7 @@
 This module implements a NDTree [1], a data structure that is optimised
 for storing a Pareto front by removing redundant non-dominating points
 from the surface. The data structure definition, notation and algorithms
-are extracted directly from [1].
+are directly extracted from [1].
 
 [1] Andrzej Jaszkiewicz and Thibaut Lust.
 ND-Tree-based update: a fast algorithm for the dynamic non-dominance problem.
@@ -24,12 +24,17 @@ import pickle
 
 from ParetoLib.Geometry.Rectangle import Rectangle
 from ParetoLib.Geometry.Point import less, less_equal, distance, dim
+import ParetoLib.Oracle as RootOracle
 
 
 class NDTree:
-    # root: Node
     def __init__(self, max_points=2, min_children=2):
         # type: (NDTree, int, int) -> None
+        """
+        A NDTree is a tree with a Node in the root.
+        The root has max_children descendants of type Node.
+        Each Node (including the root) stores up to max_points.
+        """
         self.root = None
         self.max_points = max_points
         self.min_children = min_children
@@ -40,43 +45,90 @@ class NDTree:
         resource.setrlimit(resource.RLIMIT_STACK, [0x100 * max_rec, resource.RLIM_INFINITY])
         sys.setrecursionlimit(max_rec)
 
-    # Membership
     def __contains__(self, p):
         # type: (NDTree, tuple) -> bool
+        """
+        Membership function that checks whether a point is
+        in the NDTree or not.
+
+        Args:
+            self (NDTree): The NDTree.
+            p (tuple): The point.
+
+        Returns:
+            bool: True if p is in the NDTree.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        >>> x in nd
+        >>> True
+        """
         return self.root.has_point_rec(p) if not self.is_empty() else False
         # return item in self.root
 
-    # Printers
     def __repr__(self):
         # type: (NDTree) -> str
+        """
+        Printer.
+        """
         return self.root.to_str_rec(0) if not self.is_empty() else ''
 
     def __str__(self):
         # type: (NDTree) -> str
+        """
+        Printer.
+        """
         return self.root.to_str_rec(0) if not self.is_empty() else ''
 
-    # Equality functions
     def __eq__(self, other):
         # type: (NDTree, NDTree) -> bool
+        """
+        self == other
+        """
         sameContent = (other.max_points == self.max_points) and \
                       (other.min_children == self.min_children)
         return (hash(self.root) == hash(other.root)) and sameContent
 
     def __ne__(self, other):
         # type: (NDTree, NDTree) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (NDTree) -> int
+        """
+        Identity function (via hashing)
+        """
         return hash((self.root, self.max_points, self.min_children))
 
-    # Report functions
-    def report(self):
+    def _report(self):
+        """
+        Report function
+        """
         self.root.report_rec() if not self.is_empty() else ''
 
     def dim(self):
         # type: (NDTree) -> int
+        """
+        Dimension of the points stored in the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+
+        Returns:
+            int: Dimension of the points in the NDTree.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        >>> nd.dim()
+        >>> 3
+        """
         rect = self.get_rectangle()
         # if rect is not None:
         #    return Rectangle.dim(rect)
@@ -87,24 +139,108 @@ class NDTree:
 
     def is_empty(self):
         # type: (NDTree) -> bool
+        """
+        Testing the emptiness of the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+
+        Returns:
+            bool: True if there is no point in the NDTree.
+
+        Example:
+        >>> nd = NDTree()
+        >>> nd.is_empty()
+        >>> True
+        """
         return self.root is None
 
     def get_rectangle(self):
         # type: (NDTree) -> Rectangle
+        """
+        Rectangle that encloses all the points in the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+
+        Returns:
+            Rectangle: Rectangle that encloses all the points in the NDTree.
+            If the NDTree is empty, it returns a Rectangle() (i.e., default value).
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (1,1,1)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        >>> nd.update_point(y)
+        >>> nd.get_rectangle()
+        >>> [(0,0,0), (0,0,0)]
+        """
         # return self.root.getRectangleSn() if not self.isEmpty() else None
         return self.root.get_rectangle_sn() if not self.is_empty() else Rectangle()
 
     def get_points(self):
         # type: (NDTree) -> set
+        """
+        Set of the points stored in the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+
+        Returns:
+            set: Set of the points in the NDTree.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (1,1,1)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        >>> nd.update_point(y)
+        >>> nd.get_points()
+        >>> {(0,0,0), (1,1,1)}
+        """
         points = self.root.get_points_rec() if self.root is not None else set()
         return points
 
     def remove_point(self, p):
         # type: (NDTree, tuple) -> None
+        """
+        Deletion of a point from the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+            p (tuple): The point
+
+        Returns:
+            None: p is deleted from the NDTree (if p is inside self).
+
+        Example:
+        >>> x = (0,0,0)
+        >>> nd = NDTree()
+        >>> nd.remove_point(x)
+        """
         self.root.remove_point_rec(p) if self.root is not None else None
 
     def update_point(self, p):
         # type: (NDTree, tuple) -> None
+        """
+        Addition of a point to the NDTree.
+
+        Args:
+            self (NDTree): The NDTree.
+            p (tuple): The point
+
+        Returns:
+            None: p is inserted in the NDTree if it is not dominated by
+            any point of the NDTree.
+            Side effect: all the points that are dominated by p
+            are discarded.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        """
         n = self.root
         if n is None:
             n = Node(max_points=self.max_points, min_children=self.min_children)
@@ -117,12 +253,44 @@ class NDTree:
 
     def dominates(self, p):
         # type: (NDTree, tuple) -> True
-        # Returns 'True' if p is dominated by any point stored in the Pareto archive
+        """
+        Testing the dominance of the NDTree over a point.
+
+        Args:
+            self (NDTree): The NDTree.
+
+        Returns:
+            bool: True if p is dominated by any point stored in the Pareto archive.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (1,1,1)
+        >>> nd = NDTree()
+        >>> nd.update_point(x)
+        >>> nd.dominates(y)
+        >>> True
+        """
         return self.root.dominates(p)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
         # type: (NDTree, io.BinaryIO) -> None
+        """
+        Loading an NDTree from a binary file.
+
+        Args:
+            self (NDTree): The NDTree.
+            finput (io.BinaryIO): The file where the NDTree is saved.
+
+        Returns:
+            None: The NDTree is loaded from finput.
+
+        Example:
+        >>> nd = NDTree()
+        >>> infile = open('filename', 'rb')
+        >>> nd.from_file_binary(infile)
+        >>> infile.close()
+        """
         assert (finput is not None), 'File object should not be null'
 
         # Setting maximum recursion. It is required for the NDTree build
@@ -137,9 +305,28 @@ class NDTree:
 
     def from_file_text(self, finput=None):
         # type: (NDTree, io.BinaryIO) -> None
+        """
+        Loading an NDTree from a text file.
+
+        Args:
+            self (NDTree): The NDTree.
+            finput (io.BinaryIO): The file where the NDTree is saved.
+
+        Returns:
+            None: The NDTree is loaded from finput.
+
+        Example:
+        >>> nd = NDTree()
+        >>> infile = open('filename', 'r')
+        >>> nd.from_file_text(infile)
+        >>> infile.close()
+        """
         assert (finput is not None), 'File object should not be null'
 
         def _line2tuple(inline):
+            """
+            line = (x1,x2,...,xn)
+            """
             line = inline
             line = line.replace('(', '')
             line = line.replace(')', '')
@@ -153,6 +340,23 @@ class NDTree:
 
     def to_file_binary(self, foutput=None):
         # type: (NDTree, io.BinaryIO) -> None
+        """
+        Writing of an NDTree to a binary file.
+
+        Args:
+            self (NDTree): The Oracle.
+            foutput (io.BinaryIO): The file where the NDTree will
+                                   be saved.
+
+        Returns:
+            None: The NDTree is saved in foutput.
+
+        Example:
+        >>> nd = NDTree()
+        >>> outfile = open('filename', 'wb')
+        >>> nd.to_file_binary(outfile)
+        >>> outfile.close()
+        """
         assert (foutput is not None), 'File object should not be null'
 
         # Setting maximum recursion. It is required for the NDTree build
@@ -167,22 +371,48 @@ class NDTree:
 
     def to_file_text(self, foutput=None):
         # type: (NDTree, io.BinaryIO) -> None
+        """
+        Writing of a NDTree to a text file.
+
+        Args:
+            self (NDTree): The NDTree.
+            foutput (io.BinaryIO): The file where the NDTree will
+                                   be saved.
+
+        Returns:
+            None: The NDTree is saved in foutput.
+
+        Example:
+        >>> nd = NDTree()
+        >>> outfile = open('filename', 'w')
+        >>> nd.to_file_text(outfile)
+        >>> outfile.close()
+        """
         assert (foutput is not None), 'File object should not be null'
 
         setPoints = self.get_points()
         for point in setPoints:
+            # line = (x1, x2, ..., xn)
             foutput.write(str(point))
             foutput.write('\n')
 
 
 class Node:
-    # nodes: list(1,..,n) of nodes
-    # rect: Rectangle
-    # L: list() of solutions
-
     def __init__(self, parent=None, max_points=2, min_children=2):
         # type: (Node, Node, int, int) -> None
-        # zero = (0, )
+        """
+        A Node is composed of:
+            - nodes: a list [n_1,..,n_n] of Nodes (i.e., descendants).
+            - L: a list [p_1,..,p_n] of points stored in the current Node.
+            - rect: a Rectangle that encloses all the points contained in L and the descendants.
+            (Rectangle rect is used for optimising some operations by comparing a point with the
+            corners of the rectangle)-
+
+        Extra parameteres are:
+            - parent: a pointer to the precedent Node.
+            - max_children: an integer that specifies the maximum length of self.nodes.
+            - max_points: an integer that specifies the maximum length of self.L.
+        """
         self.rect = None
         self.parent = parent
         self.nodes = []
@@ -195,10 +425,17 @@ class Node:
     # Membership function
     def has_point(self, x):
         # type: (Node, tuple) -> bool
+        """
+        Checking if point x is contained in self.L.
+        """
         return x in self.L
 
     def has_point_rec(self, x):
         # type: (Node, tuple) -> bool
+        """
+        Checking if point x is contained in self.L or in
+        any descendant Node.
+        """
         if self.is_leaf():
             return self.has_point(x)
         else:
@@ -207,11 +444,16 @@ class Node:
 
     def __contains__(self, x):
         # type: (Node, tuple) -> bool
+        """
+        Synonym for self.has_point_rec(x)
+        """
         return self.has_point_rec(x)
 
-    # Printers
-    def to_str(self, nesting_level=0):
+    def _to_str(self, nesting_level=0):
         # type: (Node, int) -> str
+        """
+        Printer.
+        """
         _string = '\t' * nesting_level
         _string += '['
         for i, x in enumerate(self.L):
@@ -223,23 +465,34 @@ class Node:
 
     def to_str_rec(self, nesting_level=0):
         # type: (Node, int) -> str
+        """
+        Printer.
+        """
         if self.is_leaf():
-            return self.to_str(nesting_level)
+            return self._to_str(nesting_level)
         else:
             _strings = (x.to_str_rec(nesting_level + 1) for x in self.nodes)
             return '\n'.join(_strings)
 
     def __repr__(self):
         # type: (Node) -> str
+        """
+        Printer.
+        """
         return self.to_str_rec(0)
 
     def __str__(self):
         # type: (Node) -> str
+        """
+        Printer.
+        """
         return self.to_str_rec(0)
 
-    # Equality functions
     def __eq__(self, other):
         # type: (Node, Node) -> bool
+        """
+        self == other
+        """
         eqRect = (hash(other.rect) == hash(self.rect))
         eqParent = (hash(other.parent) == hash(self.parent))
         sameContent = (other.nodes == self.nodes) and \
@@ -251,41 +504,61 @@ class Node:
 
     def __ne__(self, other):
         # type: (Node, Node) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (Node) -> int
+        """
+        Identity function (via hashing)
+        """
         # hash cannot be computed over 'list'; use 'tuple' instead
         # return hash((self.rect, self.parent, tuple(self.nodes), tuple(self.L), self.MAX_POINTS, self.MIN_CHILDREN))
         return hash((self.rect, self.parent, tuple(self.L), self.max_points, self.min_children))
 
     # Report functions
-    def report(self):
-        print('\tCurrent ', id(self))  # self type(self).__name__
-        print('\tParent ', id(self.parent))  # self.parent type(self.parent).__name__
-        print('\tNum Successors ', len(self.nodes))
-        print('\tSuccessors ', [id(n) for n in self.nodes])
-        print('\tNum Points ', len(self.L))
-        print('\tPoints ', self.L)
-        print('\tRect ', str(self.rect))
+    def _report(self):
+        """
+        Report function.
+        """
+        RootOracle.logger.info('\tCurrent {0}'.format(id(self)))  # self type(self).__name__
+        RootOracle.logger.info('\tParent {0}'.format(id(self.parent)))  # self.parent type(self.parent).__name__
+        RootOracle.logger.info('\tNum Successors {0}'.format(len(self.nodes)))
+        RootOracle.logger.info('\tSuccessors {0}'.format([id(n) for n in self.nodes]))
+        RootOracle.logger.info('\tNum Points {0}'.format(len(self.L)))
+        RootOracle.logger.info('\tPoints {0}'.format(self.L))
+        RootOracle.logger.info('\tRect {0}'.format(str(self.rect)))
 
     def report_rec(self):
-        self.report()
+        """
+        Report function.
+        """
+        self._report()
         [n.report_rec() for n in self.nodes]
 
     # Functions for checking the type of node
     def is_root(self):
         # type: (Node) -> bool
+        """
+        Checking if self has a parent.
+        """
         return self.parent is None
 
     def is_leaf(self):
         # type: (Node) -> bool
+        """
+        Checking if self has any descendant Node.
+        """
         return self.num_subnodes() == 0
 
     # Node operations
     def add_node(self, n, pos=-1):
         # type: (Node, Node, int) -> None
+        """
+        Addition or update of Node n as descendant of self.
+        """
         if n not in self.nodes:
             n.set_parent(self)
             if (pos >= 0) and (pos < len(self.nodes)):
@@ -295,17 +568,27 @@ class Node:
 
     def remove_node(self, n):
         # type: (Node, Node) -> None
+        """
+        Removal of a direct descendant Node n.
+        """
         if n in self.nodes:
             self.nodes.remove(n)
             del n
 
     def remove_node_rec(self, n):
         # type: (Node, Node) -> None
+        """
+        Removal of a descendant Node n from the tree
+        rooted by self.
+        """
         [npr.remove_node_rec(n) for npr in self.nodes]
         self.remove_node(n)
 
     def replace_node(self, n, npr):
         # type: (Node, Node, Node) -> None
+        """
+        Replacement of a direct descendant Node n by Node npr.
+        """
         if n in self.nodes:
             index = self.nodes.index(n)
             self.add_node(npr, index)
@@ -313,35 +596,58 @@ class Node:
 
     def replace_node_rec(self, n, npr):
         # type: (Node, Node) -> None
+        """
+        Replacement of a descendant Node n by Node npr
+        in the tree rooted by self.
+        """
         [x.replace_node_rec(n, npr) for x in self.nodes]
         self.replace_node(n, npr)
 
     def get_subnode(self, pos=0):
         # type: (Node, int) -> Node
+        """
+        Getting direct descendant at position pos.
+        """
         return self.nodes[pos]
 
     def get_subnodes(self):
         # type: (Node) -> set
+        """
+        Set of direct descendant.
+        """
         return set(self.nodes)
 
     def get_subnodes_rec(self):
         # type: (Node) -> set
+        """
+        Set of all descendant.
+        """
         subnode_list = [n.get_subnodes_rec() for n in self.nodes]
         nodes = set.union(*subnode_list)
         return nodes.union(self.get_subnodes())
 
     def num_subnodes(self):
         # type: (Node) -> int
+        """
+        Number of direct descendants.
+        """
         return len(self.nodes)
 
     def is_empty_solution(self):
         # type: (Node) -> bool
+        """
+        Testing the emptiness of current Node
+        (i.e., no points and no descendants).
+        """
         return (self is None) or \
                ((self.num_points() == 0) and (self.num_subnodes() == 0))
 
     # Point operations
     def add_point(self, x, pos=-1):
         # type: (Node, tuple, int) -> None
+        """
+        Addition of a new point to the current Node.
+        """
         if (pos >= 0) and (pos < len(self.L)):
             self.L.insert(pos, x)
         else:
@@ -349,17 +655,27 @@ class Node:
 
     def remove_point(self, x):
         # type: (Node, tuple) -> None
+        """
+        Removal of point x from current Node (if it is in).
+        """
         if x in self.L:
             self.L.remove(x)
             del x
 
     def remove_point_rec(self, x):
         # type: (Node, tuple) -> None
+        """
+        Removal of point x from current Node (if it is in),
+        and from all the descendants.
+        """
         [n.remove_point_rec(x) for n in self.nodes]
         self.remove_point(x)
 
     def replace_point(self, x, xp):
         # type: (Node, tuple, tuple) -> None
+        """
+        Replacement of point x by point xp if x is in the current Node.
+        """
         if x in self.L:
             index = self.L.index(x)
             self.add_point(xp, index)
@@ -367,24 +683,41 @@ class Node:
 
     def replace_point_rec(self, x, xp):
         # type: (Node, tuple, tuple) -> None
+        """
+        Replacement of point x by point xp if x is in the current
+        Node or in any descendant.
+        """
         [n.replace_point_rec(x, xp) for n in self.nodes]
         self.replace_point(x, xp)
 
     def get_point(self, pos=0):
         # type: (Node, int) -> tuple
+        """
+        Getting point from the current Node.
+        """
         return self.L[pos]
 
     def get_points(self):
         # type: (Node) -> set
+        """
+        Getting set of points from the current Node.
+        """
         return set(self.L)
 
     def get_points_rec(self):
         # type: (Node) -> set
+        """
+        Getting set of points from the current Node and from
+        its descendants.
+        """
         return self.s()
 
     # Set of points
     def s(self):
         # type: (Node) -> set
+        """
+        Synonym of self.get_points_rec().
+        """
         # if n == leaf, S(n) == L(n)
         if self.is_leaf():
             return set(self.L)
@@ -396,38 +729,62 @@ class Node:
 
     def num_points(self):
         # type: (Node) -> int
+        """
+        Number of points in the current Node.
+        """
         return len(self.L)
 
     def has_points(self):
         # type: (Node) -> bool
+        """
+        self.num_points() > 0.
+        """
         return (self is not None) and (len(self.L) > 0)
 
     # Relationship functions
     def get_parent(self):
         # type: (Node) -> Node
+        """
+        Getting parent Node.
+        """
         return self.parent
 
     def set_parent(self, parent):
         # type: (Node, Node) -> None
+        """
+        Setting parent Node.
+        """
         self.parent = parent
 
     # Rectangle Operations
     def get_rectangle_sn(self):
         # type: (Node) -> Rectangle
+        """
+        Getting rectangle self.rect.
+        """
         return self.rect
 
     def set_rectangle_sn(self, rect):
         # type: (Node, Rectangle) -> None
+        """
+        Setting rectangle self.rect.
+        """
         self.rect = rect
 
     # NDTree operations
     def find_closest_node(self, x):
         # type: (Node, tuple) -> Node
+        """
+        Searching for the Node containing the closest point to x.
+        """
         lsorted = sorted(self.nodes, key=lambda node: node.rect.distance_to_center(x))
         return lsorted[0]
 
     def insert(self, x):
         # type: (Node, tuple) -> None
+        """
+        Insertion of a point into the Node.
+        """
         if self.is_leaf():
             self.add_point(x)
             self.update_ideal_nadir(x)
@@ -440,6 +797,11 @@ class Node:
 
     def find_point_highest_average_euclidean_distance(self):
         # type: (Node) -> (tuple, int)
+        """
+        Computation of the 'center of mass' of the current Node,
+        and the mean distance between this center and each point
+        contained in the Node.
+        """
         d = dim(self.L[0]) if self.num_points() > 0 else 1
         y = (0,) * d
         mean_max_distance = 0
@@ -454,6 +816,11 @@ class Node:
 
     def split(self):
         # type: (Node) -> None
+        """
+        Creation of new descendant Nodes of current Node.
+        This function is called when the number of points hosted in
+        the current node increases until reaching a threshold.
+        """
         y, _ = self.find_point_highest_average_euclidean_distance()
         npr = Node(parent=self, max_points=self.max_points, min_children=self.min_children)
         npr.add_point(y)
@@ -475,6 +842,11 @@ class Node:
 
     def update_node(self, x):
         # type: (Node, tuple) -> (Node, bool)
+        """
+        Insertion of a new point in the Node; either in self.L
+        or in any descendant Node.
+        Side effect: removal of points that are dominated by x.
+        """
         nout = self
         rect = self.get_rectangle_sn()
         if less_equal(rect.max_corner, x):
@@ -514,6 +886,9 @@ class Node:
 
     def update_ideal_nadir(self, x):
         # type: (Node, tuple) -> None
+        """
+        Updating self.rect according to the value of point x.
+        """
         self.rect = self.get_rectangle_sn()
         if self.rect is None:
             # New Ideal and Nadir points
@@ -541,7 +916,6 @@ class Node:
             # ideal = tuple(xi if xi < ideali else ideali for xi, ideali in zip(x, ideal))
             # nadir = tuple(xi if xi > nadiri else nadiri for xi, nadiri in zip(x, nadir))
 
-
             ideal = tuple(min(xi, ideali) for xi, ideali in zip(x, ideal))
             nadir = tuple(max(xi, nadiri) for xi, nadiri in zip(x, nadir))
 
@@ -554,8 +928,11 @@ class Node:
 
     def dominates(self, x):
         # type: (Node, tuple) -> bool
-        # Returns 'True' if x is dominated by any point stored in the Pareto archive
-        # Use the rectangle associated to the Node for speeding up the evaluation
+        """
+        Checking if a point x is dominated by any point stored in the
+        current Node or in the descendants.
+        """
+        # Use the rectangle associated to the Node for speeding up the evaluation.
         rect = self.get_rectangle_sn()
         if less(rect.max_corner, x):
             # x is dominated by the Pareto front

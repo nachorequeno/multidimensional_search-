@@ -32,16 +32,24 @@ from ParetoLib.Oracle.Oracle import Oracle
 
 
 class Condition:
-    # Condition = f op g
-    # type(f) = sympy.Expr
-    # type(g) = sympy.Expr
-    # type(op) = string in {'>', '>=', '<', '<=', '==', '!='}
-    #
-    # Example
-    # inequality = (sympy.Poly(f - g), op)
-
     def __init__(self, f='x', op='==', g='0'):
         # type: (Condition, str, str, str) -> None
+        """
+        A Condition is an expression such that
+        Condition = f op g
+
+        Args:
+            self (Condition): The Condition.
+            f (str): The first operand.
+            op (str): An operator {'>', '>=', '<', '<=', '==', '!='}.
+            g (str): The second operand.
+
+        Returns:
+            None: Condition = f op g.
+
+        Example:
+        >>> cond = Condition("x + y", ">=", "0")
+        """
         self.comparison = ['==', '>', '<', '>=', '<=', '<>']
         assert (op in self.comparison), 'Operator ' + op + ' must be any of: {">", ">=", "<", "<=", "==", "!="}'
         assert (not f.isdigit() or not g.isdigit()), \
@@ -50,13 +58,33 @@ class Condition:
         self.f = simplify(f)
         self.g = simplify(g)
 
+        # Internally, type(f) and type(g) are sympy.Expr.
+        # Besides, Condition = [sympy.Poly(f - g) op 0] and checks that
+        # sympy.Poly(f - g) is monotone (i.e., all coefficients are positive)
+
         if not self.all_coeff_are_positive():
             RootOracle.logger.warning(
                 'Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()),
                                                                               str(
-                                                                                  self.get_expression_with_negative_coeff())))
+                                                                                  self._get_expression_with_negative_coeff())))
 
     def init_from_string(self, poly_function):
+        # type: (Condition, str) -> None
+        """
+        Initialize Condition according to a polynomial function.
+
+        Args:
+            self (Condition): The Condition.
+            poly_function (str): A polynomial function such as 'f op g'.
+
+        Returns:
+            None: Condition = f op g.
+
+        Example:
+        >>> cond = Condition()
+        >>> cond.init_from_string("x + y >= 0")
+        """
+
         # op_exp = (=|>|<|>=|<|<=|<>)\s\d+
         # f_regex = r'(\s*\w\s*)+'
         # g_regex = r'(\s*\w\s*)+'
@@ -79,40 +107,58 @@ class Condition:
                 RootOracle.logger.warning(
                     'Expression "{0}" contains negative coefficients: {1}'.format(str(self.get_expression()),
                                                                                   str(
-                                                                                      self.get_expression_with_negative_coeff())))
+                                                                                      self._get_expression_with_negative_coeff())))
 
-    # Printers
     def __repr__(self):
         # type: (Condition) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def __str__(self):
         # type: (Condition) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def _to_str(self):
         # type: (Condition) -> str
+        """
+        Printer.
+        """
         return str(self.f) + self.op + str(self.g)
 
-    # Equality functions
     def __eq__(self, other):
         # type: (Condition, Condition) -> bool
+        """
+        self == other
+        """
         return (self.f == other.f) and \
                (self.op == other.op) and \
                (self.g == other.g)
 
     def __ne__(self, other):
         # type: (Condition, Condition) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (Condition) -> int
+        """
+        Identity function (via hashing).
+        """
         return hash((self.f, self.op, self.g))
 
-    # Membership functions
     def __contains__(self, p):
         # type: (Condition, tuple) -> bool
+        """
+        Synonym of self.member(point)
+        """
+        # Due to a peculiar behaviour, it is required to compare the result with "True"
         return self.member(p) is True
 
     def all_coeff_are_positive(self):
@@ -125,6 +171,21 @@ class Condition:
 
     def get_coeff_of_expression(self):
         # type: (Condition) -> dict
+        """
+        Returns the coefficients of the polynomial expression represented by Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            dict: The keys of the dictionary are the Symbols (Sympy) of the polynomial
+            expression and values are the numerical coefficients.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.get_coeff_of_expression()
+        >>> {'x': 2, 'y': -4}
+        """
         expr = self.get_expression()
         expanded_expr = expand(expr)
         simpl_expr = simplify(expanded_expr)
@@ -133,6 +194,22 @@ class Condition:
 
     def get_positive_coeff_of_expression(self):
         # type: (Condition) -> dict
+        """
+        Returns the positive coefficients of the polynomial expression
+        represented by Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            dict: The keys of the dictionary are the Symbols (Sympy) of the polynomial
+            expression and values are the positive numerical coefficients.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.get_positive_coeff_of_expression()
+        >>> {'x': 2}
+        """
         expr = self.get_expression()
         expanded_expr = expand(expr)
         simpl_expr = simplify(expanded_expr)
@@ -142,6 +219,22 @@ class Condition:
 
     def get_negative_coeff_of_expression(self):
         # type: (Condition) -> dict
+        """
+        Returns the negative coefficients of the polynomial expression
+        represented by Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            dict: The keys of the dictionary are the Symbols (Sympy) of the polynomial
+            expression and values are the negative numerical coefficients.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.get_negative_coeff_of_expression()
+        >>> {'y': -4}
+        """
         expr = self.get_expression()
         expanded_expr = expand(expr)
         simpl_expr = simplify(expanded_expr)
@@ -149,13 +242,13 @@ class Condition:
         negative_coeff = {i: coeffs[i] for i in coeffs if coeffs[i] < 0}
         return negative_coeff
 
-    def get_expression_with_negative_coeff(self):
+    def _get_expression_with_negative_coeff(self):
         # type: (Condition) -> Expr
         negative_coeff = self.get_negative_coeff_of_expression()
         neg_expr = ['{0} * {1}'.format(negative_coeff[i], i) for i in negative_coeff]
         return simplify(''.join(neg_expr))
 
-    def get_expression_with_positive_coeff(self):
+    def _get_expression_with_positive_coeff(self):
         # type: (Condition) -> Expr
         positive_coeff = self.get_positive_coeff_of_expression()
         pos_expr = ['{0} * {1}'.format(positive_coeff[i], i) for i in positive_coeff]
@@ -163,32 +256,138 @@ class Condition:
 
     def get_expression(self):
         # type: (Condition) -> Expr
+        """
+        Returns the polynomial expression in Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            Expr: Polynomial expression (Sympy).
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "-10")
+        >>> cond.get_expression()
+        >>> '2x - 4y + 10 >= 0'
+        """
         return simplify(self.f - self.g)
 
     def get_variables(self):
         # type: (Condition) -> list
+        """
+        Returns the list of variables of the polynomial expression in Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            list: The list of variables.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.get_variables()
+        >>> ['x', 'y']
+        """
         expr = self.get_expression()
         return sorted(expr.free_symbols, key=default_sort_key)
 
-    def eval_zip_tuple(self, var_xpoint):
-        # type: (Condition, list) -> Expr
+    def eval_var_val(self, variable=None, val='0.0'):
+        # type: (Condition, Symbol, float) -> Expr
+        """
+        Substitutes a variable by a value in the polynomial expression of Condition.
+
+        Args:
+            self (Condition): The Condition.
+            variable (Symbol): The variable.
+            val (float): The value.
+
+        Returns:
+            Expr: The expression resulting of evaluating the variable with val.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.eval_var_val(Symbol('x'), 2.0)
+        >>> Expr('4-4y')
+        """
+        if variable is None:
+            fvset = self.get_variables()
+            fv = fvset.pop()
+        else:
+            fv = variable
         expr = self.get_expression()
-        # expr.subs([(x, 2), (y, 4), (z, 0)])
-        res = expr.subs(var_xpoint)
+        res = expr.subs(fv, val)
         ex = str(res) + self.op + '0'
         # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
         return simplify(ex)
 
-    def eval_tuple(self, xpoint):
+    def eval_tuple(self, point):
         # type: (Condition, tuple) -> Expr
-        keys_fv = self.get_variables()
-        di = {key: xpoint[i] for i, key in enumerate(keys_fv)}
+        """
+        Substitutes a tuple of values (value_1,..., value_n) in the polynomial expression of Condition.
+        The number of variables in Condition must be equal or greater to n (the length of the tuple).
+        Each value is assigned to a variable in Condition, following the lexicographic order.
 
+        Args:
+            self (Condition): The Condition.
+            point (tuple): The tuple.
+
+        Returns:
+            Expr: The expression resulting of evaluating the expression.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> point = (4, 2)
+        >>> cond.eval_tuple(point)
+        >>> True
+        """
+        keys_fv = self.get_variables()
+        di = {key: point[i] for i, key in enumerate(keys_fv)}
         # RootOracle.logger.debug('di ' + str(di))
         return self.eval_dict(di)
 
+    def eval_zip_tuple(self, var_point):
+        # type: (Condition, list) -> Expr
+        """
+        Substitutes a list of with pairs (variable, value) in the polynomial expression of Condition.
+
+        Args:
+            self (Condition): The Condition.
+            var_point (list): The list.
+
+        Returns:
+            Expr: The expression resulting of evaluating the expression.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> var_point = [(Symbol('x'), 4), (Symbol('y'), 2)]
+        >>> cond.eval_zip_tuple(var_point)
+        >>> True
+        """
+        expr = self.get_expression()
+        # expr.subs([(x, 2), (y, 4), (z, 0)])
+        res = expr.subs(var_point)
+        ex = str(res) + self.op + '0'
+        # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
+        return simplify(ex)
+
     def eval_dict(self, d=None):
         # type: (Condition, dict) -> Expr
+        """
+        Substitutes a dictionary of with pairs (variable, value) in the polynomial expression of Condition.
+
+        Args:
+            self (Condition): The Condition.
+            d (dict): The dictionary.
+
+        Returns:
+            Expr: The expression resulting of evaluating the expression.
+
+        Example:
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> d = {Symbol('x'): 4, Symbol('y'): 2}
+        >>> cond.eval_dict(d)
+        >>> True
+        """
         keys_fv = self.get_variables()
         if d is None:
             # di = dict.fromkeys(expr.free_symbols)
@@ -206,33 +405,71 @@ class Condition:
         # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
         return simplify(ex)
 
-    def eval_var_val(self, variable=None, val='0'):
-        # type: (Condition, Symbol, int) -> Expr
-        if variable is None:
-            fvset = self.get_variables()
-            fv = fvset.pop()
-        else:
-            fv = variable
-        expr = self.get_expression()
-        res = expr.subs(fv, val)
-        ex = str(res) + self.op + '0'
-        # RootOracle.logger.debug('Expression ' + str(simplify(ex)))
-        return simplify(ex)
-
     # Membership functions
-    def member(self, xpoint):
+    def member(self, point):
         # type: (Condition, tuple) -> Expr
+        """
+        Function answering whether a point satisfies the inequality
+        defined by Condition or not.
+
+        Args:
+            self (Condition): The Condition.
+            point (tuple): The point of the space that we inspect.
+
+        Returns:
+            Expr: True if the point belongs to the upward closure.
+
+        Example:
+        >>> p = (1.0, 1.0)
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> cond.member(p)
+        >>> False
+        """
         keys = self.get_variables()
-        di = {key: xpoint[i] for i, key in enumerate(keys)}
+        di = {key: point[i] for i, key in enumerate(keys)}
         return self.eval_dict(di)
 
     def membership(self):
-        # type: (Condition, tuple) -> callable
+        # type: (Condition) -> callable
+        """
+        Returns a function that evaluates the inequality defined by Condition.
+
+        Args:
+            self (Condition): The Condition.
+
+        Returns:
+            callable: Function that answers whether a point satisfies the
+                      inequality defined by Condition or not.
+
+        Example:
+        >>> p = (1.0, 1.0)
+        >>> cond = Condition("2x - 4y", ">=", "0")
+        >>> f = cond.membership()
+        >>> f(p)
+        >>> False
+        """
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def from_file(self, fname='', human_readable=False):
         # type: (Condition, str, bool) -> None
+        """
+        Loading a Condition from a file.
+
+        Args:
+            self (Condition): The Condition.
+            fname (string): The file name where the Condition is saved.
+            human_readable (bool): Boolean indicating if the
+                           Condition will be loaded from a binary or
+                           text file.
+
+        Returns:
+            None: The Condition is loaded from fname.
+
+        Example:
+        >>> cond = Condition()
+        >>> cond.from_file('filename')
+        """
         assert (fname != ''), 'Filename should not be null'
 
         mode = 'r'
@@ -247,6 +484,22 @@ class Condition:
 
     def from_file_binary(self, finput=None):
         # type: (Condition, io.BinaryIO) -> None
+        """
+        Loading an Condition from a binary file.
+
+        Args:
+            self (Condition): The Condition.
+            finput (io.BinaryIO): The file where the Condition is saved.
+
+        Returns:
+            None: The Condition is loaded from finput.
+
+        Example:
+        >>> cond = Condition()
+        >>> infile = open('filename', 'rb')
+        >>> cond.from_file_binary(infile)
+        >>> infile.close()
+        """
         assert (finput is not None), 'File object should not be null'
 
         self.f = pickle.load(finput)
@@ -255,6 +508,22 @@ class Condition:
 
     def from_file_text(self, finput=None):
         # type: (Condition, io.BinaryIO) -> None
+        """
+        Loading an Condition from a text file.
+
+        Args:
+            self (Condition): The Condition.
+            finput (io.BinaryIO): The file where the Condition is saved.
+
+        Returns:
+            None: The Condition is loaded from finput.
+
+        Example:
+        >>> cond = Condition()
+        >>> infile = open('filename', 'r')
+        >>> cond.from_file_text(infile)
+        >>> infile.close()
+        """
         assert (finput is not None), 'File object should not be null'
 
         poly_function = finput.readline()
@@ -262,6 +531,26 @@ class Condition:
 
     def to_file(self, fname='', append=False, human_readable=False):
         # type: (Condition, str, bool, bool) -> None
+        """
+        Writing of a Condition to a file.
+
+        Args:
+            self (Condition): The Condition.
+            fname (string): The file name where the Condition will
+                            be saved.
+            append (bool): Boolean indicating if the Condition will
+                           be appended at the end of the file.
+            human_readable (bool): Boolean indicating if the
+                           Condition will be saved in a binary or
+                           text file.
+
+        Returns:
+            None: The Condition is saved in fname.
+
+        Example:
+        >>> cond = Condition()
+        >>> cond.to_file('filename')
+        """
         assert (fname != ''), 'Filename should not be null'
 
         if append:
@@ -280,6 +569,23 @@ class Condition:
 
     def to_file_binary(self, foutput=None):
         # type: (Condition, io.BinaryIO) -> None
+        """
+        Writing of a Condition to a binary file.
+
+        Args:
+            self (Condition): The Condition.
+            foutput (io.BinaryIO): The file where the Condition will
+                                   be saved.
+
+        Returns:
+            None: The Condition is saved in foutput.
+
+        Example:
+        >>> cond = Condition()
+        >>> outfile = open('filename', 'w')
+        >>> cond.to_file_binary(outfile)
+        >>> outfile.close()
+        """
         assert (foutput is not None), 'File object should not be null'
 
         pickle.dump(self.f, foutput, pickle.HIGHEST_PROTOCOL)
@@ -288,6 +594,23 @@ class Condition:
 
     def to_file_text(self, foutput=None):
         # type: (Condition, io.BinaryIO) -> None
+        """
+        Writing of a Condition to a text file.
+
+        Args:
+            self (Condition): The Condition.
+            foutput (io.BinaryIO): The file where the Condition will
+                                   be saved.
+
+        Returns:
+            None: The Condition is saved in foutput.
+
+        Example:
+        >>> cond = Condition()
+        >>> outfile = open('filename', 'w')
+        >>> cond.to_file_text(outfile)
+        >>> outfile.close()
+        """
         assert (foutput is not None), 'File object should not be null'
 
         # str(self.f) + self.op + str(self.g)
@@ -295,99 +618,121 @@ class Condition:
 
 
 class OracleFunction(Oracle):
-    # class OracleFunction:
-    # An OracleFunction is a set of Conditions
     def __init__(self):
         # type: (OracleFunction) -> None
+        """
+        An OracleFunction is a set of Conditions.
+        """
         # super(OracleFunction, self).__init__()
         Oracle.__init__(self)
-        # self.variables = set()
-        # self.variables = SortedSet(key=default_sort_key)
         self.variables = SortedSet([], key=default_sort_key)
         self.oracle = set()
 
-    # Printers
     def __repr__(self):
         # type: (OracleFunction) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def __str__(self):
         # type: (OracleFunction) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def _to_str(self):
         # type: (OracleFunction) -> str
+        """
+        Printer.
+        """
         return str(self.oracle)
 
-    # Equality functions
     def __eq__(self, other):
         # type: (OracleFunction, OracleFunction) -> bool
+        """
+        self == other
+        """
         return self.oracle == other.oracle
 
     def __ne__(self, other):
         # type: (OracleFunction, OracleFunction) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (OracleFunction) -> int
+        """
+        Identity function (via hashing).
+        """
         return hash(tuple(self.oracle))
 
-    # Addition of a new condition
     def add(self, cond):
         # type: (OracleFunction, Condition) -> None
+        """
+        Addition of a new condition to the Oracle.
+
+        Args:
+            self (OracleFunction): The OracleFunction.
+            cond (Condition): The file where the Oracle will
+                                   be saved.
+
+        Returns:
+            None: A new condition is appended to the list of conditions
+            of the OracleFunction.
+
+        Example:
+        >>> ora = OracleFunction()
+        >>> cond = Condition("x + y", ">=", "0")
+        >>> ora.add(cond)
+        """
         self.variables = self.variables.union(cond.get_variables())
         self.oracle.add(cond)
 
     def dim(self):
         # type: (OracleFunction) -> int
+        """
+        See Oracle.dim().
+        """
         return len(self.get_variables())
 
     def get_var_names(self):
         # type: (OracleFunction) -> list
+        """
+        See Oracle.get_var_names().
+        """
         return [str(i) for i in self.variables]
 
     def get_variables(self):
         # type: (OracleFunction) -> list
+        """
+        Returns the list of variables of all the polynomial expressions
+        (i.e., Conditions) stored in the OracleFunction.
+
+        Args:
+            self (OracleFunction): The OracleFunction.
+
+        Returns:
+            list: The list of variables (Symbols).
+
+        Example:
+        >>> cond1 = Condition("2x - 4y", ">=", "0")
+        >>> cond2 = Condition("2x + z", ">=", "0")
+        >>> ora = OracleFunction()
+        >>> ora.add(cond1)
+        >>> ora.add(cond2)
+        >>> ora.get_variables()
+        >>> [Symbol('x'), Symbol('y'), Symbol('z')]
+        """
         # variable_list = sorted(self.variables, key=default_sort_key)
         variable_list = list(self.variables)
         return variable_list
 
-    def eval_zip_tuple(self, var_xpoint):
-        # type: (OracleFunction, list) -> bool
-        # _eval_list = [cond.eval_zip_tuple(var_xpoint) == True for cond in self.oracle]
-        _eval_list = [cond.eval_zip_tuple(var_xpoint) for cond in self.oracle]
-        # All conditions are true (i.e., 'and' policy)
-        _eval = all(_eval_list)
-        # Any condition is true (i.e., 'or' policy)
-        # _eval = any(_eval_list)
-        return _eval
-
-    def eval_tuple(self, xpoint):
-        # type: (OracleFunction, tuple) -> bool
-        # _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
-        # _eval_list = [cond.eval_tuple(xpoint) == True for cond in self.oracle]
-        _eval_list = [cond.eval_tuple(xpoint) for cond in self.oracle]
-        # All conditions are true (i.e., 'and' policy)
-        _eval = all(_eval_list)
-        # Any condition is true (i.e., 'or' policy)
-        # _eval = any(_eval_list)
-        return _eval
-
-    def eval_dict(self, d=None):
-        # type: (OracleFunction, dict) -> bool
-        # _eval_list = [cond.eval_dict(d) for cond in self.oracle]
-        # _eval_list = [cond.eval_dict(d) == True for cond in self.oracle]
-        _eval_list = [cond.eval_dict(d) for cond in self.oracle]
-        # All conditions are true (i.e., 'and' policy)
-        _eval = all(_eval_list)
-        # Any condition is true (i.e., 'or' policy)
-        # _eval = any(_eval_list)
-        return _eval
-
-    def eval_var_val(self, var=None, val='0'):
+    def _eval_var_val(self, var=None, val='0'):
         # type: (OracleFunction, Symbol, int) -> bool
-        # _eval_list = [cond.eval_var_val(var, val) == True for cond in self.oracle]
         _eval_list = [cond.eval_var_val(var, val) for cond in self.oracle]
         # All conditions are true (i.e., 'and' policy)
         _eval = all(_eval_list)
@@ -395,42 +740,83 @@ class OracleFunction(Oracle):
         # _eval = any(_eval_list)
         return _eval
 
-    # Membership functions
-    def __contains__(self, p):
+    def _eval_tuple(self, point):
         # type: (OracleFunction, tuple) -> bool
-        return self.member(p) is True
+        _eval_list = [cond.eval_tuple(point) for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        # _eval = any(_eval_list)
+        return _eval
 
-    def member_zip_var(self, xpoint):
+    def _eval_zip_tuple(self, var_point):
+        # type: (OracleFunction, list) -> bool
+        _eval_list = [cond.eval_zip_tuple(var_point) for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        # _eval = any(_eval_list)
+        return _eval
+
+    def _eval_dict(self, d=None):
+        # type: (OracleFunction, dict) -> bool
+        _eval_list = [cond.eval_dict(d) for cond in self.oracle]
+        # All conditions are true (i.e., 'and' policy)
+        _eval = all(_eval_list)
+        # Any condition is true (i.e., 'or' policy)
+        # _eval = any(_eval_list)
+        return _eval
+
+    def __contains__(self, point):
         # type: (OracleFunction, tuple) -> bool
-        # return self.eval_tuple(xpoint)
-        # keys = self.get_variables()
+        """
+        Synonym of self.member(point).
+        A point belongs to the Oracle if it satisfies all the conditions.
+        """
+        return self.member(point) is True
+
+    def _member_zip_tuple(self, point):
+        # type: (OracleFunction, tuple) -> bool
+        # keys = [x, y, z]
         keys = self.variables
-        # var_xpoint = zip(keys, xpoint) # Works in Python 2.7
-        var_xpoint = list(zip(keys, xpoint))  # Works in Python 2.7 and Python 3.x
-        return self.eval_zip_tuple(var_xpoint)
+        # point = (2, 4, 0)
+        # var_point = [(x, 2), (y, 4), (z, 0)]
+        var_point = list(zip(keys, point))  # Works in Python 2.7 and Python 3.x
+        # var_point = zip(keys, point) # Works only in Python 2.7
+        return self._eval_zip_tuple(var_point)
 
-    def member_dict(self, xpoint):
+    def _member_dict(self, point):
         # type: (OracleFunction, tuple) -> bool
-        # return self.eval_tuple(xpoint)
-        # keys = self.get_variables()
+        # keys = [x, y, z]
         keys = self.variables
-        di = {key: xpoint[i] for i, key in enumerate(keys)}
-        # di = dict.fromkeys(keys)
-        return self.eval_dict(di)
+        # point = (2, 4, 0)
+        # di = {x: 2, y: 4, z: 0}
+        di = {key: point[i] for i, key in enumerate(keys)}
+        return self._eval_dict(di)
 
-    def member(self, xpoint):
+    def member(self, point):
         # type: (OracleFunction, tuple) -> bool
+        """
+        See Oracle.member().
+        A point belongs to the Oracle if it satisfies all the conditions.
+        """
         # member_zip_var performs better than member_dict
-        return self.member_zip_var(xpoint)
-        # return self.member_dict(xpoint)
+        return self._member_zip_tuple(point)
+        # return self.member_dict(point)
 
     def membership(self):
-        # type: (OracleFunction) -> function
-        return lambda xpoint: self.member(xpoint)
+        # type: (OracleFunction) -> callable
+        """
+        See Oracle.membership().
+        """
+        return lambda point: self.member(point)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
+        """
+        See Oracle.from_file_binary().
+        """
         assert (finput is not None), 'File object should not be null'
 
         self.oracle = pickle.load(finput)
@@ -438,6 +824,9 @@ class OracleFunction(Oracle):
 
     def from_file_text(self, finput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
+        """
+        See Oracle.from_file_text().
+        """
         assert (finput is not None), 'File object should not be null'
 
         # Each line has a Condition
@@ -448,6 +837,9 @@ class OracleFunction(Oracle):
 
     def to_file_binary(self, foutput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
+        """
+        See Oracle.to_file_binary().
+        """
         assert (foutput is not None), 'File object should not be null'
 
         pickle.dump(self.oracle, foutput, pickle.HIGHEST_PROTOCOL)
@@ -455,6 +847,9 @@ class OracleFunction(Oracle):
 
     def to_file_text(self, foutput=None):
         # type: (OracleFunction, io.BinaryIO) -> None
+        """
+        See Oracle.to_file_text().
+        """
         assert (foutput is not None), 'File object should not be null'
 
         # Each line has a Condition

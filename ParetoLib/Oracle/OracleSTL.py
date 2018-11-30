@@ -21,7 +21,7 @@ import sys
 import os
 import filecmp
 
-import ParetoLib.Oracle as ParOracle
+import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.JAMT.JAMT import JAVA_BIN, JAVA_OPT_JAR, JAMT_BIN, JAMT_OPT_ALIAS, JAMT_OPT_STL, JAMT_OPT_RES, \
     JAMT_OPT_SIGNAL
@@ -44,26 +44,36 @@ class OracleSTL(Oracle):
         stl_param_file_trim = stl_param_file.strip(' \n\t')
         self.stl_parameters = OracleSTL.get_parameters_stl(stl_param_file_trim)
 
-    # Printers
     def __repr__(self):
         # type: (OracleSTL) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def __str__(self):
         # type: (OracleSTL) -> str
+        """
+        Printer.
+        """
         return self._to_str()
 
     def _to_str(self):
         # type: (OracleSTL) -> str
+        """
+        Printer.
+        """
         s = 'STL property file: {0}\n'.format(self.stl_prop_file)
         s += 'STL alias file: {0}\n'.format(self.var_alias_file)
         s += 'STL parameters file: {0}\n'.format(self.stl_parameters)
         s += 'VCD signal file: {0}\n'.format(self.vcd_signal_file)
         return s
 
-    # Equality functions
     def __eq__(self, other):
         # type: (OracleSTL, OracleSTL) -> bool
+        """
+        self == other
+        """
         # return hash(self) == hash(other)
         res = False
         try:
@@ -75,25 +85,36 @@ class OracleSTL(Oracle):
                           or filecmp.cmp(self.var_alias_file, other.var_alias_file))
             res = res or (self.stl_parameters == other.stl_parameters)
         except OSError:
-            ParOracle.logger.error(
+            RootOracle.logger.error(
                 'Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
         return res
 
     def __ne__(self, other):
         # type: (OracleSTL, OracleSTL) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (OracleSTL) -> int
+        """
+        Identity function (via hashing).
+        """
         return hash((self.stl_prop_file, self.vcd_signal_file, self.var_alias_file, self.stl_parameters))
 
     def dim(self):
         # type: (OracleSTL) -> int
+        """
+        See Oracle.dim().
+        """
         return len(self.stl_parameters)
 
     def get_var_names(self):
         # type: (OracleSTL) -> list
+        """
+        See Oracle.get_var_names().
+        """
         return [str(i) for i in self.stl_parameters]
 
     @staticmethod
@@ -107,7 +128,7 @@ class OracleSTL(Oracle):
             res = [line.replace(' ', '') for line in f]
             f.close()
         except IOError:
-            ParOracle.logger.warning('Parameter STL file does not appear to exist.')
+            RootOracle.logger.warning('Parameter STL file does not appear to exist.')
         finally:
             return res
 
@@ -123,7 +144,7 @@ class OracleSTL(Oracle):
             try:
                 res = str(eval(match.group(0)))
             except SyntaxError:
-                ParOracle.logger.error('Syntax error: {0}'.format(str(match)))
+                RootOracle.logger.error('Syntax error: {0}'.format(str(match)))
             finally:
                 return res
             # return str(eval(match.group(0)))
@@ -234,11 +255,16 @@ class OracleSTL(Oracle):
     # Membership functions
     def __contains__(self, p):
         # type: (OracleSTL, tuple) -> bool
+        """
+        Synonym of self.member(point)
+        """
         return self.member(p) is True
 
     def member(self, xpoint):
         # type: (OracleSTL, tuple) -> bool
-
+        """
+        See Oracle.member().
+        """
         assert self.stl_prop_file != ''
         assert self.vcd_signal_file != ''
         assert self.var_alias_file != ''
@@ -265,7 +291,7 @@ class OracleSTL(Oracle):
             os.remove(stl_prop_file_subst_name)
             os.remove(result_file_name)
         else:
-            ParOracle.logger.warning(
+            RootOracle.logger.warning(
                 'Evaluation of file {0} returns "unkown" (see {1}).'.format(stl_prop_file_subst_name,
                                                                             result_file_name))
 
@@ -273,11 +299,17 @@ class OracleSTL(Oracle):
 
     def membership(self):
         # type: (OracleSTL) -> callable
+        """
+        See Oracle.membership().
+        """
         return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
+        """
+        See Oracle.from_file_binary().
+        """
         assert (finput is not None), 'File object should not be null'
 
         try:
@@ -303,13 +335,16 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    ParOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+                    RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            ParOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
+            RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def from_file_text(self, finput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
+        """
+        See Oracle.from_file_text().
+        """
         assert (finput is not None), 'File object should not be null'
 
         try:
@@ -339,13 +374,16 @@ class OracleSTL(Oracle):
             fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
-                    ParOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+                    RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
 
         except EOFError:
-            ParOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
+            RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def to_file_binary(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
+        """
+        See Oracle.to_file_binary().
+        """
         assert (foutput is not None), 'File object should not be null'
 
         pickle.dump(os.path.abspath(self.stl_prop_file), foutput, pickle.HIGHEST_PROTOCOL)
@@ -355,6 +393,9 @@ class OracleSTL(Oracle):
 
     def to_file_text(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
+        """
+        See Oracle.to_file_text().
+        """
         assert (foutput is not None), 'File object should not be null'
 
         foutput.write(os.path.abspath(self.stl_prop_file) + '\n')

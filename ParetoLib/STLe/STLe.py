@@ -71,7 +71,11 @@ def get_stle_bin():
 # -------------------------------------------------------------------------------
 # STLE OPTIONS
 STLE_BIN = get_stle_bin()
-STLE_OPT_INPUTFILE_STL = '-ff'
+STLE_OPT_CSV = '-db'
+STLE_OPT_IN_MEM_CSV = '1'
+STLE_OPT_IN_FILE_CSV = '0'
+STLE_OPT_IN_MEM_STL = '-f'
+STLE_OPT_IN_FILE_STL = '-ff'
 STLE_OPT_TIMESTAMP = '-os'
 STLE_OPT_TIME = '0'
 STLE_OPT_HELP = '-h'

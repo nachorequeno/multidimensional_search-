@@ -24,27 +24,39 @@ class Oracle:
     def __init__(self):
         pass
 
-    # Printers
     def __repr__(self):
         # type: (Oracle) -> str
+        """
+        Printer.
+        """
         return ''
 
     def __str__(self):
         # type: (Oracle) -> str
+        """
+        Printer.
+        """
         return ''
 
-    # Equality functions
     def __eq__(self, other):
         # type: (Oracle, Oracle) -> bool
+        """
+        self == other
+        """
         return False
 
     def __ne__(self, other):
         # type: (Oracle, Oracle) -> bool
+        """
+        self != other
+        """
         return not self.__eq__(other)
 
-    # Identity function (via hashing)
     def __hash__(self):
         # type: (Oracle) -> int
+        """
+        Identity function (via hashing).
+        """
         return 0
 
     def dim(self):
@@ -86,7 +98,6 @@ class Oracle:
         # If parameter names are not provided, then we use lexicographic characters by default.
         return [chr(i) for i in range(ord('a'), ord('z') + 1)]
 
-    # Membership functions
     def __contains__(self, point):
         # type: (Oracle, tuple) -> bool
         """
@@ -223,7 +234,7 @@ class Oracle:
                             be saved.
             append (bool): Boolean indicating if the Oracle will
                            be appended at the end of the file.
-            human_readable (bool): Boolean inficating if the
+            human_readable (bool): Boolean indicating if the
                            Oracle will be saved in a binary or
                            text file.
 

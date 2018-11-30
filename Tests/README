@@ -4,8 +4,9 @@
 
 The following file contains information about every data file used in the test
 suite of ParetoLib. The structure of the Test folder is divided in three parts,
-one for each kind of Oracle. Internally, each folder is organised three subfolders
-depending on the dimension of the Oracle (OracleSTL also includes the trivial case of 1D).
+one for each kind of Oracle. Internally, each folder is organised in three subfolders
+depending on the dimension of the Oracle (OracleSTL and OracleSTLe also includes
+the trivial case of 1D).
 A detailed description of the examples is found inside each specific path.
 
 Oracle
@@ -22,3 +23,6 @@ Oracle
                 |_ 2D
                 |_ 3D
                 |_ ND
+    |_ OracleSTLe
+                |_ 1D
+                |_ 2D

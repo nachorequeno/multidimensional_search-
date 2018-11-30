@@ -1,7 +1,7 @@
 stages:
   - build:python2
-  - build:python3
   - test:python2
+  - build:python3
   - test:python3
 
 build:python2:
@@ -11,7 +11,7 @@ build:python2:
     - apt-get update
     - apt-get -y install python-pip
     - apt-get -y install python-tk
-    - install.sh
+    - ./install.sh
   artifacts:
     paths:
       - .local
@@ -23,7 +23,7 @@ build:python3:
     - apt-get update
     - apt-get -y install python-pip
     - apt-get -y install python-tk
-    - install.sh
+    - ./install.sh
   artifacts:
     paths:
       - .local
@@ -34,7 +34,7 @@ test:python2:
     - build:python2
   script:
     - apt-get -y install openjdk-8-jre
-    - test.sh
+    - ./test.sh
 
 test:python3:
   stage: test:python3
@@ -42,4 +42,4 @@ test:python3:
     - build:python3
   script:
     - apt-get -y install openjdk-8-jre
-    - test.sh
+    - ./test.sh

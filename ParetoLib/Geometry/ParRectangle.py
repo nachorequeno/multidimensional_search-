@@ -20,12 +20,18 @@ from ParetoLib.Geometry.Point import dim
 ############################################################################
 
 def pbrect(args):
+    """
+    Synonym of Rectangle.brect(alpha, yrectangle, xspace)
+    """
     alpha, yrectangle, xspace = args
     return brect(alpha, yrectangle, xspace)
 
 
 def pirect(alphaincomp, yrectangle, xspace):
     # type: (list, Rectangle, Rectangle) -> list
+    """
+    Synonym of Rectangle.irect(alphaincomp, yrectangle, xspace)
+    """
     assert (dim(yrectangle.min_corner) == dim(yrectangle.max_corner)), \
         'xrectangle.min_corner and xrectangle.max_corner do not share the same dimension'
     assert (dim(xspace.min_corner) == dim(xspace.max_corner)), \
@@ -57,14 +63,23 @@ def pirect(alphaincomp, yrectangle, xspace):
 
 def pvol(rect):
     # type: (Rectangle) -> float
+    """
+    Synonym of Rectangle.volume()
+    """
     return rect.volume()
 
 
 def pvertices(rect):
     # type: (Rectangle) -> list
+    """
+    Synonym of Rectangle.vertices()
+    """
     return rect.vertices()
 
 
 def pinside(args):
+    """
+    Synonym of Rectangle.inside(xpoint)
+    """
     rect, xpoint = args
     return rect.inside(xpoint)
