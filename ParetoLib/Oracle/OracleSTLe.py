@@ -129,7 +129,8 @@ class OracleSTLe(Oracle):
 
     def __del__(self):
         # type: (OracleSTLe) -> None
-        self.stle_oracle.terminate()
+        if self.stle_oracle is not None:
+            self.stle_oracle.terminate()
 
     def dim(self):
         # type: (OracleSTLe) -> int

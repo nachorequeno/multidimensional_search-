@@ -11,9 +11,6 @@ build:python2:
     - apt-get -y install python-pip
     - apt-get -y install python-tk
     - ./install.sh
-  artifacts:
-    paths:
-      - .local
 
 test:python2:
   stage: test:python2
@@ -22,4 +19,6 @@ test:python2:
   script:
     - pwd
     - echo $HOME
+    - PYTHONPATH=${PYTHONPATH}:${HOME}/.local/lib/python2.7/site-packages
+    - PATH=${PATH}:${HOME}/.local/lib/python2.7/site-packages
     - python setup.py test

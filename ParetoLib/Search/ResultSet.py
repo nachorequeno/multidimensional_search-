@@ -430,7 +430,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 2 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
@@ -498,7 +498,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 2 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
@@ -563,7 +563,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 2 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 2 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
 
@@ -648,7 +648,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 3 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
@@ -719,7 +719,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 3 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
@@ -786,7 +786,7 @@ class ResultSet:
         # For instance, axe 0 represents parameter 'P0', axe 1 represents parameter 'P1', etc.
         # If parameter names are not provided (var_names is empty or smaller than 2D), then we use
         # lexicographic characters by default.
-        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) <= 3 else var_names
+        var_names = [chr(i) for i in range(ord('a'), ord('z') + 1)] if len(var_names) < 3 else var_names
         ax1.set_xlabel(var_names[xaxe % len(var_names)])
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
