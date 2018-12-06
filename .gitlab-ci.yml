@@ -1,8 +1,6 @@
 stages:
   - build:python2
   - test:python2
-  - build:python3
-  - test:python3
 
 build:python2:
   image: python:2
@@ -17,29 +15,9 @@ build:python2:
     paths:
       - ./.local
 
-build:python3:
-  image: python:3
-  stage: build:python3
-  script:
-    - apt-get update
-    - apt-get -y install openjdk-8-jre
-    - apt-get -y install python-pip
-    - apt-get -y install python-tk
-    - ./install.sh
-  artifacts:
-    paths:
-      - ./.local
-
 test:python2:
   stage: test:python2
   dependencies:
     - build:python2
-  script:
-    - python setup.py test
-
-test:python3:
-  stage: test:python3
-  dependencies:
-    - build:python3
   script:
     - python setup.py test
