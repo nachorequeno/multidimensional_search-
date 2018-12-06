@@ -13,11 +13,13 @@ build:python2:
     - ./install.sh
   artifacts:
     paths:
-      - ./.local
+      - .local
 
 test:python2:
   stage: test:python2
   dependencies:
     - build:python2
   script:
+    - pwd
+    - echo $HOME
     - python setup.py test
