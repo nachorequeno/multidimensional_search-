@@ -18,8 +18,6 @@ Algorithms for the Construction and Analysis of Systems (TACAS)
 import re
 import pickle
 import subprocess
-import tempfile
-import ast
 import io
 import sys
 import os
@@ -27,24 +25,54 @@ import filecmp
 
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.STLe.STLe import STLE_BIN, STLE_OPT_IN_MEM_STL, STLE_OPT_IN_FILE_STL, STLE_OPT_TIME, STLE_OPT_TIMESTAMP, \
-    STLE_OPT_CSV, STLE_OPT_IN_MEM_CSV, STLE_OPT_IN_FILE_CSV
-
+from ParetoLib.STLe.STLe import STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_OK, MAX_STLE_CALLS
+import ParetoLib.Geometry
 
 class OracleSTLe(Oracle):
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
         # type: (OracleSTLe, str, str, str) -> None
-        # assert stl_prop_file != ''
-        # assert csv_signal_file != ''
-        # assert stl_param_file != ''
-
         Oracle.__init__(self)
 
+        # Load STLe formula
         self.stl_prop_file = stl_prop_file.strip(' \n\t')
+        self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
+
+        # Load parameters of the STLe formula
+        self.stl_param_file = stl_param_file.strip(' \n\t')
+        self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
+
+        # Load the signal
+        self.stle_oracle = None
         self.csv_signal_file = csv_signal_file.strip(' \n\t')
 
-        stl_param_file_trim = stl_param_file.strip(' \n\t')
-        self.stl_parameters = OracleSTLe.get_parameters_stl(stl_param_file_trim)
+        if self.csv_signal_file != '':
+            # Start STLe oracle in interactive mode (i.e., more efficient)
+            args = [STLE_BIN, STLE_INTERACTIVE]
+            RootOracle.logger.debug('Starting: {0}'.format(args))
+            self.stle_oracle = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True, bufsize=0)
+            # Loading the signal in memory
+            self._load_signal_in_mem()
+
+        # Number of calls to the STLe oracle
+        self.num_oracle_calls = 0
+
+    def _load_signal_in_mem(self):
+        # type: (OracleSTLe) -> None
+        # Load the signal in memory
+        # (read-signal-csv "file_name")
+        expression = '({0} "{1}")'.format(STLE_READ_SIGNAL, self.csv_signal_file)
+        RootOracle.logger.debug('Running: {0}'.format(expression))
+        self.stle_oracle.stdin.write(expression)
+        self.stle_oracle.stdin.flush()
+        #
+        ok = self.stle_oracle.stdout.readline()
+        ok = ok.strip(' \n\t')
+        #
+        RootOracle.logger.debug('ok: {0}'.format(ok))
+        if ok != STLE_OK:
+            message = 'Unexpected error when loading {0}: {1}'.format(self.csv_signal_file, ok)
+            RootOracle.logger.error(message)
+            raise RuntimeError(message)
 
     def __repr__(self):
         # type: (OracleSTLe) -> str
@@ -99,6 +127,10 @@ class OracleSTLe(Oracle):
         """
         return hash((self.stl_prop_file, self.csv_signal_file, self.stl_parameters))
 
+    def __del__(self):
+        # type: (OracleSTLe) -> None
+        self.stle_oracle.terminate()
+
     def dim(self):
         # type: (OracleSTLe) -> int
         """
@@ -121,83 +153,97 @@ class OracleSTLe(Oracle):
         # Each line of the stl_param_file contains the name of a parameter in the STL formula
         try:
             f = open(stl_param_file, 'rb')
-            res = [line.replace(' ', '') for line in f]
+            # res = [line.replace(' ', '') for line in f]
+            res = [line.strip(' \n\t') for line in f]
             f.close()
         except IOError:
             RootOracle.logger.warning('Parameter STL file does not appear to exist.')
         finally:
             return res
 
-    def replace_par_val_stl_formula(self, xpoint):
+    @staticmethod
+    def load_stl_formula(stl_file):
+        # type: (str) -> str
+        formula = ''
+        try:
+            f = open(stl_file, 'r')
+            formula = f.read()
+            f.close()
+
+        except IOError:
+            RootOracle.logger.warning('STL file does not appear to exist.')
+        finally:
+            return formula
+
+    def replace_val_stl_formula(self, xpoint):
         # type: (OracleSTLe, tuple) -> str
         # The number of parameters in the STL formula should be less or equal than
         # the number of coordinates in the tuple
         assert self.dim() <= len(xpoint)
 
         def eval_expr(match):
+            # type: (re.SRE_Pattern) -> str
             # Evaluate the arithmetic expression detected by 'match'
-            res = 0
+            result = '0'
+            #'{:.15f}'
+            float_format = '{:.' + str(ParetoLib.Geometry.__numdigits__) + 'f}'
             try:
-                res = str(eval(match.group(0)))
+                # result = str(eval(match.group(0)))
+                result = float_format.format(eval(match.group(0)))
             except SyntaxError:
                 RootOracle.logger.error('Syntax error: {0}'.format(str(match)))
             finally:
-                return res
+                return result
 
         ####
         # Regex for detecting an arithmetic expression inside a STL formula
-        # number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
         number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
         op = '(\*|\/|\+|\-)+'
         math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
-        # math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
-        # math_regex = r'(?P<expr>\b%s\b(%s\b%s\b)*)' % (number, op, number)
         pattern = re.compile(math_regex)
         ####
 
-        f = open(self.stl_prop_file, 'r')
-        stl_prop_file_subst = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        stl_prop_file_subst_name = stl_prop_file_subst.name
+        val_formula = self.stl_formula
+        for i, par in enumerate(self.stl_parameters):
+            val_formula = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), val_formula)
+        val_formula = pattern.sub(eval_expr, val_formula)
 
-        for line in f:
-            for i, par in enumerate(self.stl_parameters):
-                line = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), line)
+        return val_formula
 
-            line = pattern.sub(eval_expr, line)
-            stl_prop_file_subst.write(line)
-
-        f.close()
-        stl_prop_file_subst.close()
-
-        return stl_prop_file_subst_name
-
-    def eval_stl_formula(self, stl_prop_file):
+    def eval_stl_formula(self, stl_formula):
         # type: (OracleSTLe, str) -> bool
+        assert self.stle_oracle is not None
+        assert not self.stle_oracle.stdin.closed
+        assert not self.stle_oracle.stdout.closed
 
-        result = "0"
-        try:
-            # Invoke example of the monitoring tool (STLe).
-            # STLe evaluates a STL formula (.stl) over a signal (.csv)
-            # returns the result by the standard output (stdout).
-            #
-            # command means: "Given the signal in csv format,
-            # evaluate the formula stl_prop_file at time 0"
-            # command = ['STLe', csv_signal_file, '-db', '1', '-ff', stl_prop_file, '-os', '0']
-            command = [STLE_BIN, self.csv_signal_file,
-                       STLE_OPT_CSV, STLE_OPT_IN_MEM_CSV,
-                       STLE_OPT_IN_FILE_STL, stl_prop_file,
-                       STLE_OPT_TIMESTAMP, STLE_OPT_TIME]
+        res1 = '0'
+        # Evaluating formula
+        # (eval formula)
+        expression = '({0} {1})'.format(STLE_EVAL, stl_formula)
+        RootOracle.logger.debug('Running: {0}'.format(expression))
+        self.stle_oracle.stdin.write(expression)
+        self.stle_oracle.stdin.flush()
+        res1 = self.stle_oracle.stdout.readline()
+        RootOracle.logger.debug('result: {0}'.format(res1))
 
-            DEVNULL = open(os.path.devnull, 'w')
-            RootOracle.logger.debug('Command: {0}'.format(command))
-            # subprocess.call(command)
-            result = subprocess.check_output(command, stderr=DEVNULL, universal_newlines=True)
-        except subprocess.CalledProcessError as e:
-            message = 'Running "{0}" raised an exception'.format(' '.join(e.cmd))
-            raise RuntimeError(message)
-        finally:
-            # Return the result of evaluating the STL formula.
-            return OracleSTLe.parse_stle_result(result)
+        # Return the result of evaluating the STL formula.
+        return OracleSTLe.parse_stle_result(res1)
+
+    def _clean_cache(self):
+        # type: (OracleSTLe) -> None
+        assert self.stle_oracle is not None
+        assert not self.stle_oracle.stdin.closed
+        assert not self.stle_oracle.stdout.closed
+
+        # Cleaning cache
+        # (clear-monitor)
+        expression = '({0})'.format(STLE_RESET)
+        RootOracle.logger.debug('Running: {0}'.format(expression))
+        self.stle_oracle.stdin.write(expression)
+        self.stle_oracle.stdin.flush()
+        res2 = self.stle_oracle.stdout.readline()
+        RootOracle.logger.debug('result: {0}'.format(res2))
+
 
     @staticmethod
     def parse_stle_result(result):
@@ -221,24 +267,27 @@ class OracleSTLe(Oracle):
         """
         See Oracle.member().
         """
-        assert self.stl_prop_file != ''
-        assert self.csv_signal_file != ''
+        assert self.stle_oracle is not None
+        assert not self.stle_oracle.stdin.closed
+        assert not self.stle_oracle.stdout.closed
+        assert self.stl_formula != ''
         assert self.stl_parameters != []
 
+        # Cleaning the cache of STLe after MAX_ORACLE_CALLS (i.e., 'gargabe collector')
+        if self.num_oracle_calls > MAX_STLE_CALLS:
+            self.num_oracle_calls = 0
+            self._clean_cache()
+
         # Replace parameters of the STL formula with current values in xpoint tuple
-        stl_prop_file_subst_name = self.replace_par_val_stl_formula(xpoint)
+        val_stl_formula = self.replace_val_stl_formula(xpoint)
 
         # Invoke STLe for solving the STL formula for the current values for the parameters
         result = False
         try:
-            result = self.eval_stl_formula(stl_prop_file_subst_name)
-            with open(stl_prop_file_subst_name, 'r') as fin:
-                RootOracle.logger.debug(
-                    'Result of evaluating file {0}: {1}\n{2}.'.format(stl_prop_file_subst_name, result, fin.read()))
-            # Remove temporal files
-            os.remove(stl_prop_file_subst_name)
+            self.num_oracle_calls = self.num_oracle_calls + 1
+            result = self.eval_stl_formula(val_stl_formula)
         except RuntimeError:
-            RootOracle.logger.warning('Error when evaluating formula in file {0}.'.format(stl_prop_file_subst_name))
+            RootOracle.logger.warning('Error when evaluating formula {0}.'.format(val_stl_formula))
         finally:
             return result
 
@@ -260,15 +309,20 @@ class OracleSTLe(Oracle):
         try:
             current_path = os.path.dirname(os.path.abspath(finput.name))
             path = pickle.load(finput)
-            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = pickle.load(finput)
-            self.csv_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            self.stl_parameters = pickle.load(finput)
+            stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
 
-            fname_list = (self.stl_prop_file, self.csv_signal_file)
+            path = pickle.load(finput)
+            csv_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+
+            path = pickle.load(finput)
+            stl_param_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+
+            fname_list = (stl_prop_file, csv_signal_file, stl_param_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
                     RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+
+            self.__init__(stl_prop_file=stl_prop_file, stl_param_file=stl_param_file, csv_signal_file=csv_signal_file)
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
@@ -284,18 +338,29 @@ class OracleSTLe(Oracle):
             # Each file line contains the path to a configuration file required by STLe.
             # If it is a relative path, we calculate the absolute path.
             # If it is a absolute path, we do nothing.
-
+            #
+            # os.path.join creates absolute path from relative path "./something.txt"
+            # os.path.realpath uniforms path "2D/./signal.csv" by "2D/signal.csv"
+            #
             current_path = os.path.dirname(os.path.abspath(finput.name))
             path = finput.readline().strip(' \n\t')
-            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = finput.readline().strip(' \n\t')
-            self.csv_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+            stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            stl_prop_file = os.path.realpath(stl_prop_file)
 
-            fname_list = (self.stl_prop_file, self.csv_signal_file)
+            path = finput.readline().strip(' \n\t')
+            csv_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            csv_signal_file = os.path.realpath(csv_signal_file)
+
+            path = finput.readline().strip(' \n\t')
+            stl_param_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            stl_param_file = os.path.realpath(stl_param_file)
+
+            fname_list = (stl_prop_file, csv_signal_file, stl_param_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
                     RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+
+            self.__init__(stl_prop_file=stl_prop_file, stl_param_file=stl_param_file, csv_signal_file=csv_signal_file)
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
@@ -309,7 +374,7 @@ class OracleSTLe(Oracle):
 
         pickle.dump(os.path.abspath(self.csv_signal_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(os.path.abspath(self.stl_prop_file), foutput, pickle.HIGHEST_PROTOCOL)
-        pickle.dump(self.stl_parameters, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.stl_param_file), foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
         # type: (OracleSTLe, io.BinaryIO) -> None
@@ -320,4 +385,4 @@ class OracleSTLe(Oracle):
 
         foutput.write(os.path.abspath(self.csv_signal_file) + '\n')
         foutput.write(os.path.abspath(self.stl_prop_file) + '\n')
-        foutput.write(str(self.stl_parameters) + '\n')
+        foutput.write(os.path.abspath(self.stl_param_file) + '\n')

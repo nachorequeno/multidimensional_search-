@@ -40,7 +40,7 @@ They correspond to files required by the JAMT tool.
 The first line points to the file containing a parametrised STL formula.
 The STLe will check a particular instance of this STL formula over a signal.
 The second line points to the file containing a representation of the signal in CSV format.
-The last line is the list of parameters of the STL formula (in Python list format).
+The last line is a file that contains the list of parameters of the STL formula.
 These parameters implicitly define the n-dimensional space of the Pareto search, i.e.,
 the first parameter matches the coordinate 'x', the second parameter matches the coordinate 'y' and so on.
 The dimension of the n-dimensional space is equal to the number of parameters in the STL formula.
