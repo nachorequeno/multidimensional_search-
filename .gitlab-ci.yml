@@ -15,7 +15,7 @@ build:python2:
     - ./install.sh
   artifacts:
     paths:
-      - .local
+      - ./.local
 
 build:python3:
   image: python:3
@@ -28,18 +28,18 @@ build:python3:
     - ./install.sh
   artifacts:
     paths:
-      - .local
+      - ./.local
 
 test:python2:
   stage: test:python2
   dependencies:
     - build:python2
   script:
-    - ./test.sh
+    - python setup.py test
 
 test:python3:
   stage: test:python3
   dependencies:
     - build:python3
   script:
-    - ./test.sh
+    - python setup.py test
