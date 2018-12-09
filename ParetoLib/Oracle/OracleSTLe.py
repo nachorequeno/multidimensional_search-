@@ -26,7 +26,7 @@ import filecmp
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.STLe.STLe import STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_OK, MAX_STLE_CALLS
-import ParetoLib.Geometry
+# import ParetoLib.Geometry
 
 class OracleSTLe(Oracle):
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
@@ -52,6 +52,9 @@ class OracleSTLe(Oracle):
             self.stle_oracle = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True, bufsize=0)
             # Loading the signal in memory
             self._load_signal_in_mem()
+
+        # Load the pattern for evaluating arithmetic expressions in STLe
+        self.pattern = OracleSTLe._regex_arithm_expr_stl_eval()
 
         # Number of calls to the STLe oracle
         self.num_oracle_calls = 0
@@ -176,6 +179,15 @@ class OracleSTLe(Oracle):
         finally:
             return formula
 
+    @staticmethod
+    def _regex_arithm_expr_stl_eval():
+        # type: () -> re.Pattern
+        # Regex for detecting an arithmetic expression inside a STL formula
+        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
+        op = '(\*|\/|\+|\-)+'
+        math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
+        return re.compile(math_regex)
+
     def replace_val_stl_formula(self, xpoint):
         # type: (OracleSTLe, tuple) -> str
         # The number of parameters in the STL formula should be less or equal than
@@ -187,27 +199,20 @@ class OracleSTLe(Oracle):
             # Evaluate the arithmetic expression detected by 'match'
             result = '0'
             #'{:.15f}'
-            float_format = '{:.' + str(ParetoLib.Geometry.__numdigits__) + 'f}'
+            # float_format = '{:.' + str(ParetoLib.Geometry.__numdigits__) + 'f}'
             try:
-                # result = str(eval(match.group(0)))
-                result = float_format.format(eval(match.group(0)))
+                result = str(eval(match.group(0)))
+                # result = float_format.format(eval(match.group(0)))
             except SyntaxError:
                 RootOracle.logger.error('Syntax error: {0}'.format(str(match)))
             finally:
                 return result
 
-        ####
-        # Regex for detecting an arithmetic expression inside a STL formula
-        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
-        op = '(\*|\/|\+|\-)+'
-        math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
-        pattern = re.compile(math_regex)
-        ####
 
         val_formula = self.stl_formula
         for i, par in enumerate(self.stl_parameters):
             val_formula = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), val_formula)
-        val_formula = pattern.sub(eval_expr, val_formula)
+        val_formula = self.pattern.sub(eval_expr, val_formula)
 
         return val_formula
 

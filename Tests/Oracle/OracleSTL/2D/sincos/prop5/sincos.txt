@@ -1,4 +1,4 @@
 ./sincos.stl
 ../sincos500.vcd
 ./sincos.alias
-['mp1', 'mp2']
+./sincos.param

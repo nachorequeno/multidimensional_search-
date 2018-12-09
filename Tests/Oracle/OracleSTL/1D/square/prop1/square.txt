@@ -1,4 +1,4 @@
 ./square.stl
 ../../../2D/square/square.vcd
 ./square.alias
-['p1']
+./square.param

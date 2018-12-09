@@ -150,28 +150,20 @@ class ResultSet:
         extended_yup = [Rectangle(r.min_corner, self.xspace.max_corner) for r in self.yup]
 
         self.border = Rectangle.difference_rectangles(self.xspace, extended_ylow + extended_yup)
+        self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
+        self.ylow = Rectangle.difference_rectangles(self.xspace, extended_yup + self.border)
 
-        new_yup = []
-        for a in extended_yup:
-            temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_yup if a.overlaps(b) and a != b))
-            new_yup.extend(temp)
-        self.yup.extend(new_yup)
+        ##new_yup = []
+        ##for a in extended_yup:
+        ##    temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_yup if a.overlaps(b) and a != b))
+        ##    new_yup.extend(temp)
+        ##self.yup.extend(new_yup)
 
-        new_ylow = []
-        for a in extended_ylow:
-            temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_ylow if a.overlaps(b) and a != b))
-            new_ylow.extend(temp)
-        self.ylow.extend(new_ylow)
-
-        # self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
-        # print(len(self.yup))
-
-        # self.ylow = Rectangle.difference_rectangles(self.xspace, self.border + extended_yup)
-        # print(len(self.ylow))
-
-        # self.border = Rectangle.difference_rectangles(self.xspace, self.ylow + self.yup)
-        # self.yup = Rectangle.difference_rectangles(self.xspace, self.ylow + self.border)
-        # self.ylow = Rectangle.difference_rectangles(self.xspace, self.border + self.yup)
+        ##new_ylow = []
+        ##for a in extended_ylow:
+        ##    temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_ylow if a.overlaps(b) and a != b))
+        ##    new_ylow.extend(temp)
+        ##self.ylow.extend(new_ylow)
 
     def fusion(self):
         # type: (ResultSet) -> None

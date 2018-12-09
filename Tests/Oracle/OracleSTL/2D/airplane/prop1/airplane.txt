@@ -1,4 +1,4 @@
 ./airplane.stl
 ../airplane.vcd
 ./airplane.alias
-['p1', 'p2']
+./airplane.param

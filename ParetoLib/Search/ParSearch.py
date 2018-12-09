@@ -277,8 +277,10 @@ def multidim_search_deep_first_opt_2(xspace,
             # border_dominatedby_b{0|1} will be appended to yup/ylow.
             # Remove the portion of the negative that overlaps any cube is already appended to yup/ylow
 
-            border_dominatedby_b0 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b0_shadow + border_overlapping_ylow) # ylow
-            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b1_shadow + border_overlapping_yup) # yup
+            border_dominatedby_b0 = Rectangle.difference_rectangles(b0_extended,
+                                                                    border_dominatedby_b0_shadow + border_overlapping_ylow)  # ylow
+            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended,
+                                                                    border_dominatedby_b1_shadow + border_overlapping_yup)  # yup
 
             ylow.extend(border_dominatedby_b0)
             yup.extend(border_dominatedby_b1)
@@ -821,8 +823,10 @@ def multidim_search_breadth_first_opt_2(xspace,
             # border_dominatedby_b{0|1} will be appended to yup/ylow.
             # Remove the portion of the negative that overlaps any cube is already appended to yup/ylow
 
-            border_dominatedby_b0 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b0_shadow + border_overlapping_ylow) # ylow
-            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended, border_dominatedby_b1_shadow + border_overlapping_yup) # yup
+            border_dominatedby_b0 = Rectangle.difference_rectangles(b1_extended,
+                                                                    border_dominatedby_b0_shadow + border_overlapping_ylow)  # ylow
+            border_dominatedby_b1 = Rectangle.difference_rectangles(b1_extended,
+                                                                    border_dominatedby_b1_shadow + border_overlapping_yup)  # yup
 
             yup.extend(border_dominatedby_b1)
             ylow.extend(border_dominatedby_b0)

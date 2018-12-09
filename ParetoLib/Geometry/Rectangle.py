@@ -178,7 +178,7 @@ class Rectangle(object):
         >>> x = (0,0,0)
         >>> y = (2,2,2)
         >>> r = Rectangle(x,y)
-        >>> x in r
+        >>> r.inside(x)
         >>> True
         """
         # xpoint is inside the rectangle or along the border

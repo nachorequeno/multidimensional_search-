@@ -1,4 +1,4 @@
 ./sincos/prop6/sincos.stl
 ./sincos/sincos500.vcd
 ./sincos/prop6/sincos.alias
-['p1', 'mp2']
+./sincos/prop6/sincos.param

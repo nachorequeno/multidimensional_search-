@@ -42,12 +42,14 @@ class SearchTestCase(unittest.TestCase):
         test2 = (not fora(xpoint)) and (rs.member_ylow(xpoint) or rs.member_border(xpoint))
 
         print_string = 'Warning!\n'
-        print_string += 'Testing {0}'.format(str(xpoint))
-        print_string += '(inYup, inYlow, inBorder): ({0}, {1}, {2})'.format(str(rs.member_yup(xpoint)),
-                                                                            str(rs.member_ylow(xpoint)),
-                                                                            str(rs.member_border(xpoint)))
+        print_string += 'Testing {0}\n'.format(str(xpoint))
+        print_string += '(inYup, inYlow, inBorder, inSpace): ({0}, {1}, {2}, {3})\n'.format(rs.member_yup(xpoint),
+                                                                            rs.member_ylow(xpoint),
+                                                                            rs.member_border(xpoint),
+                                                                            rs.member_space(xpoint))
         print_string += 'Expecting\n'
-        print_string += '(inYup, inYlow): ({0}, {1})'.format(str(fora(xpoint)), str(not fora(xpoint)))
+        print_string += '(inYup, inYlow): ({0}, {1})\n'.format(fora(xpoint), not fora(xpoint))
+        print_string += '(test1, test2): ({0}, {1})\n'.format(test1, test2)
 
         self.assertTrue(test1 or test2, print_string)
 
@@ -73,6 +75,7 @@ class SearchTestCase(unittest.TestCase):
         nYlow = sum(list_nYlow)
         nBorder = sum(list_nBorder)
 
+        print('Membership query:')
         if all(self.closureMembershipTest(fora, rs, tuple(p)) for p in list_test_points):
             print('Ok!\n')
         else:
@@ -80,8 +83,12 @@ class SearchTestCase(unittest.TestCase):
             raise ValueError
 
         # Yup and ylow does not contain overlapping rectangles
-        self.assertEqual(rs.overlapping_volume_yup(), 0)
-        self.assertEqual(rs.overlapping_volume_ylow(), 0)
+        self.assertAlmostEqual(rs.overlapping_volume_yup(), 0)
+        self.assertAlmostEqual(rs.overlapping_volume_ylow(), 0)
+
+        # Volume is conserved
+        # self.assertEqual(rs.volume_total(), rs.volume_border() + rs.volume_yup() + rs.volume_ylow())
+        self.assertLessEqual(rs.volume_yup() + rs.volume_ylow(), rs.volume_total())
 
         end = time.time()
         time0 = end - start
@@ -108,6 +115,7 @@ class SearchTestCase(unittest.TestCase):
                     print('Optimisation level {0}'.format(opt_level))
                     print('Parallel search {0}'.format(bool_val))
                     print('Logging {0}'.format(bool_val))
+                    print('Simplify {0}'.format(bool_val))
                     rs = SearchND(ora=self.oracle,
                                   min_corner=min_corner,
                                   max_corner=max_corner,

@@ -15,7 +15,6 @@ import pickle
 import subprocess
 import tempfile
 import csv
-import ast
 import io
 import sys
 import os
@@ -30,19 +29,22 @@ from ParetoLib.JAMT.JAMT import JAVA_BIN, JAVA_OPT_JAR, JAMT_BIN, JAMT_OPT_ALIAS
 class OracleSTL(Oracle):
     def __init__(self, stl_prop_file='', vcd_signal_file='', var_alias_file='', stl_param_file=''):
         # type: (OracleSTL, str, str, str, str) -> None
-        # assert stl_prop_file != ''
-        # assert vcd_signal_file != ''
-        # assert var_alias_file != ''
-        # assert stl_param_file != ''
-
         Oracle.__init__(self)
 
+        # Load STLe formula
         self.stl_prop_file = stl_prop_file.strip(' \n\t')
+        self.stl_formula = OracleSTL.load_stl_formula(self.stl_prop_file)
+
+        # Load parameters of the STLe formula
+        self.stl_param_file = stl_param_file.strip(' \n\t')
+        self.stl_parameters = OracleSTL.get_parameters_stl(self.stl_param_file)
+
+        # Load the signal
         self.vcd_signal_file = vcd_signal_file.strip(' \n\t')
         self.var_alias_file = var_alias_file.strip(' \n\t')
 
-        stl_param_file_trim = stl_param_file.strip(' \n\t')
-        self.stl_parameters = OracleSTL.get_parameters_stl(stl_param_file_trim)
+        # Load the pattern for evaluating arithmetic expressions in STL
+        self.pattern = OracleSTL._regex_arithm_expr_stl_eval()
 
     def __repr__(self):
         # type: (OracleSTL) -> str
@@ -125,12 +127,36 @@ class OracleSTL(Oracle):
         # Each line of the stl_param_file contains the name of a parameter in the STL formula
         try:
             f = open(stl_param_file, 'rb')
-            res = [line.replace(' ', '') for line in f]
+            # res = [line.replace(' ', '') for line in f]
+            res = [line.strip(' \n\t') for line in f]
             f.close()
         except IOError:
             RootOracle.logger.warning('Parameter STL file does not appear to exist.')
         finally:
             return res
+
+    @staticmethod
+    def load_stl_formula(stl_file):
+        # type: (str) -> str
+        formula = ''
+        try:
+            f = open(stl_file, 'r')
+            formula = f.read()
+            f.close()
+
+        except IOError:
+            RootOracle.logger.warning('STL file does not appear to exist.')
+        finally:
+            return formula
+
+    @staticmethod
+    def _regex_arithm_expr_stl_eval():
+        # type: () -> re.Pattern
+        # Regex for detecting an arithmetic expression inside a STL formula
+        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
+        op = '(\*|\/|\+|\-)+'
+        math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
+        return re.compile(math_regex)
 
     def replace_par_val_stl_formula(self, xpoint):
         # type: (OracleSTL, tuple) -> str
@@ -147,32 +173,18 @@ class OracleSTL(Oracle):
                 RootOracle.logger.error('Syntax error: {0}'.format(str(match)))
             finally:
                 return res
-            # return str(eval(match.group(0)))
-            # return str(eval(match.group('expr')))
 
-        ####
-        # Regex for detecting an arithmetic expression inside a STL formula
-        # number = '([+-]?(\d+(\.\d*)?)|(\.\d+))'
-        number = '([+-]?(\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?'
-        op = '(\*|\/|\+|\-)+'
-        math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
-        # math_regex = r'(\b%s\b(%s\b%s\b)*)' % (number, op, number)
-        # math_regex = r'(?P<expr>\b%s\b(%s\b%s\b)*)' % (number, op, number)
-        pattern = re.compile(math_regex)
-        ####
-
-        f = open(self.stl_prop_file, 'r')
+        # Create a temporal file with an instance of the STL formula
         stl_prop_file_subst = tempfile.NamedTemporaryFile(mode='w', delete=False)
         stl_prop_file_subst_name = stl_prop_file_subst.name
 
-        for line in f:
-            for i, par in enumerate(self.stl_parameters):
-                line = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), line)
+        # Substitute the parameters in the parametric STL formula by numbers
+        val_formula = self.stl_formula
+        for i, par in enumerate(self.stl_parameters):
+            val_formula = re.sub(r'\b{0}\b'.format(par), str(xpoint[i]), val_formula)
+        val_formula = self.pattern.sub(eval_expr, val_formula)
 
-            line = pattern.sub(eval_expr, line)
-            stl_prop_file_subst.write(line)
-
-        f.close()
+        stl_prop_file_subst.write(val_formula)
         stl_prop_file_subst.close()
 
         return stl_prop_file_subst_name
@@ -202,7 +214,7 @@ class OracleSTL(Oracle):
             subprocess.check_output(command, stderr=DEVNULL, universal_newlines=True)
         except subprocess.CalledProcessError as e:
             message = 'Running "{0}" raised an exception'.format(' '.join(e.cmd))
-            print(message)
+            RootOracle.logger.info(message)
             # raise RuntimeError(message)
         finally:
             # Return the result of evaluating the STL formula
@@ -225,6 +237,7 @@ class OracleSTL(Oracle):
         # Remove empty spaces for each file line
         f = open(res_file, 'rb')
         f2 = (line.replace(' ', '') for line in f)
+        # f2 = (line.strip(' \n\t') for line in f)
 
         # The first line of the CSV file defines the keys for accessing the values in the following entries
         # fieldnames = ['assert', 'result']
@@ -249,7 +262,8 @@ class OracleSTL(Oracle):
         delete = len(_unknown_list) == 0
 
         f.close()
-
+        RootOracle.logger.debug('Result of evaluating {0}: {1}'.format(res_file, _eval))
+        
         return _eval, delete
 
     # Membership functions
@@ -313,29 +327,26 @@ class OracleSTL(Oracle):
         assert (finput is not None), 'File object should not be null'
 
         try:
-            # self.stl_prop_file = pickle.load(finput)
-            # self.vcd_signal_file = pickle.load(finput)
-            # self.var_alias_file = pickle.load(finput)
-            # self.stl_parameters = pickle.load(finput)
-
-            # self.stl_prop_file = os.path.abspath(pickle.load(finput))
-            # self.vcd_signal_file = os.path.abspath(pickle.load(finput))
-            # self.var_alias_file = os.path.abspath(pickle.load(finput))
-            # self.stl_parameters = pickle.load(finput)
-
             current_path = os.path.dirname(os.path.abspath(finput.name))
             path = pickle.load(finput)
-            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = pickle.load(finput)
-            self.vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = pickle.load(finput)
-            self.var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            self.stl_parameters = pickle.load(finput)
+            stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
 
-            fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
+            path = pickle.load(finput)
+            vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+
+            path = pickle.load(finput)
+            var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+
+            path = pickle.load(finput)
+            stl_param_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+
+            fname_list = (stl_prop_file, vcd_signal_file, var_alias_file, stl_param_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
                     RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+
+            self.__init__(stl_prop_file=stl_prop_file, stl_param_file=stl_param_file, var_alias_file=var_alias_file,
+                          vcd_signal_file=vcd_signal_file)
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
@@ -348,33 +359,37 @@ class OracleSTL(Oracle):
         assert (finput is not None), 'File object should not be null'
 
         try:
-            # self.stl_prop_file = finput.readline().strip(' \n\t')
-            # self.vcd_signal_file = finput.readline().strip(' \n\t')
-            # self.var_alias_file = finput.readline().strip(' \n\t')
-            # self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
-
-            # self.stl_prop_file = os.path.abspath(finput.readline().strip(' \n\t'))
-            # self.vcd_signal_file = os.path.abspath(finput.readline().strip(' \n\t'))
-            # self.var_alias_file = os.path.abspath(finput.readline().strip(' \n\t'))
-            # self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
-
-            # Each file line contains the path to a configuration file required by JAMT.
+            # Each file line contains the path to a configuration file required by STLe.
             # If it is a relative path, we calculate the absolute path.
             # If it is a absolute path, we do nothing.
-
+            #
+            # os.path.join creates absolute path from relative path "./something.txt"
+            # os.path.realpath uniforms path "2D/./signal.csv" by "2D/signal.csv"
+            #
             current_path = os.path.dirname(os.path.abspath(finput.name))
             path = finput.readline().strip(' \n\t')
-            self.stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = finput.readline().strip(' \n\t')
-            self.vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            path = finput.readline().strip(' \n\t')
-            self.var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
-            self.stl_parameters = ast.literal_eval(finput.readline().strip(' \n\t'))
+            stl_prop_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            stl_prop_file = os.path.realpath(stl_prop_file)
 
-            fname_list = (self.stl_prop_file, self.vcd_signal_file, self.var_alias_file)
+            path = finput.readline().strip(' \n\t')
+            vcd_signal_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            vcd_signal_file = os.path.realpath(vcd_signal_file)
+
+            path = finput.readline().strip(' \n\t')
+            var_alias_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            var_alias_file = os.path.realpath(var_alias_file)
+
+            path = finput.readline().strip(' \n\t')
+            stl_param_file = os.path.join(current_path, path) if not os.path.isabs(path) else path
+            stl_param_file = os.path.realpath(stl_param_file)
+
+            fname_list = (stl_prop_file, vcd_signal_file, var_alias_file, stl_param_file)
             for fname in fname_list:
                 if not os.path.isfile(fname):
                     RootOracle.logger.info('File {0} does not exists or it is not a file'.format(fname))
+
+            self.__init__(stl_prop_file=stl_prop_file, stl_param_file=stl_param_file, var_alias_file=var_alias_file,
+                          vcd_signal_file=vcd_signal_file)
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
@@ -389,7 +404,7 @@ class OracleSTL(Oracle):
         pickle.dump(os.path.abspath(self.stl_prop_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(os.path.abspath(self.vcd_signal_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(os.path.abspath(self.var_alias_file), foutput, pickle.HIGHEST_PROTOCOL)
-        pickle.dump(self.stl_parameters, foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.stl_param_file), foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
         # type: (OracleSTL, io.BinaryIO) -> None
@@ -401,4 +416,4 @@ class OracleSTL(Oracle):
         foutput.write(os.path.abspath(self.stl_prop_file) + '\n')
         foutput.write(os.path.abspath(self.vcd_signal_file) + '\n')
         foutput.write(os.path.abspath(self.var_alias_file) + '\n')
-        foutput.write(str(self.stl_parameters) + '\n')
+        foutput.write(os.path.abspath(self.stl_param_file) + '\n')

@@ -1,4 +1,4 @@
 ./sincos.stl
 ../../../2D/sincos/sincos500.vcd
 ./sincos.alias
-['mp1']
+./sincos.param
