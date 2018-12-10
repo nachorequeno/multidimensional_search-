@@ -1,6 +1,6 @@
 stages:
-  - build:python2
-  - test:python2
+  - build
+  - test
 
 build:
   image: python:2
