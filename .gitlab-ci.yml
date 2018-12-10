@@ -2,9 +2,9 @@ stages:
   - build:python2
   - test:python2
 
-build:python2:
+build:
   image: python:2
-  stage: build:python2
+  stage: build
   script:
     - apt-get update
     - apt-get -y install openjdk-8-jre
@@ -12,13 +12,11 @@ build:python2:
     - apt-get -y install python-tk
     - ./install.sh
 
-test:python2:
-  stage: test:python2
+test:
+  stage: test
   dependencies:
-    - build:python2
+    - build
   script:
-    - pwd
-    - echo $HOME
-    - PYTHONPATH=${PYTHONPATH}:${HOME}/.local/lib/python2.7/site-packages
-    - PATH=${PATH}:${HOME}/.local/lib/python2.7/site-packages
-    - python setup.py test
+    - cd Tests
+    - pytest --ignore=Tests/test_Search.py
+    - pytes Tests/test_Search.py::SearchOracleFunctionTestCase
