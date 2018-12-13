@@ -202,7 +202,7 @@ setup_args = {'name': 'ParetoLib',
                            'ParetoLib.STLe',
                            'ParetoLib._py3k'],
               'package_data': {'ParetoLib.JAMT': ['*.jar'],
-                               'ParetoLib.STLe': ['*.bin', '*.exe']},
+                               'ParetoLib.STLe': ['*.bin', '*.exe', '*.so.1', '*.dll']},
               'platforms': 'OS Independent',
               }
 

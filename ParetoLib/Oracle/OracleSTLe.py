@@ -22,12 +22,18 @@ import io
 import sys
 import os
 import filecmp
+from ctypes import c_int, c_double, c_char_p, c_void_p, pointer
 
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.STLe.STLe import STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_OK, MAX_STLE_CALLS
+from ParetoLib.STLe.STLe import stl_read_pcsignal_csv_fname, stl_delete_pcsignal, stl_make_exprset, stl_delete_exprset, \
+    stl_parse_sexpr_str, stl_pcsignal_size, stl_make_signalvars_xn, stl_delete_signalvars, stl_make_offlinepcmonitor, \
+    stl_offlinepcmonitor_make_output, stl_offlinepcmonitor_delete, stl_pcseries_value0
+
 # import ParetoLib.Geometry
 
+# OracleSTLe interacts with the binary executable STLe via PIPEs and string passing.
 class OracleSTLe(Oracle):
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
         # type: (OracleSTLe, str, str, str) -> None
@@ -193,6 +199,8 @@ class OracleSTLe(Oracle):
         # The number of parameters in the STL formula should be less or equal than
         # the number of coordinates in the tuple
         assert self.dim() <= len(xpoint)
+        assert self.stl_formula != ''
+        assert self.stl_parameters != []
 
         def eval_expr(match):
             # type: (re.SRE_Pattern) -> str
@@ -273,13 +281,7 @@ class OracleSTLe(Oracle):
         """
         See Oracle.member().
         """
-        assert self.stle_oracle is not None
-        assert not self.stle_oracle.stdin.closed
-        assert not self.stle_oracle.stdout.closed
-        assert self.stl_formula != ''
-        assert self.stl_parameters != []
-
-        # Cleaning the cache of STLe after MAX_ORACLE_CALLS (i.e., 'gargabe collector')
+        # Cleaning the cache of STLe after MAX_ORACLE_CALLS (i.e., 'gargage collector')
         if self.num_oracle_calls > MAX_STLE_CALLS:
             self.num_oracle_calls = 0
             self._clean_cache()
@@ -392,3 +394,129 @@ class OracleSTLe(Oracle):
         foutput.write(os.path.abspath(self.csv_signal_file) + '\n')
         foutput.write(os.path.abspath(self.stl_prop_file) + '\n')
         foutput.write(os.path.abspath(self.stl_param_file) + '\n')
+
+# OracleSTLeLib interacts directly with the C library of STLe via the C API that STLe exports.
+class OracleSTLeLib(OracleSTLe):
+    def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
+        # type: (OracleSTLeLib, str, str, str) -> None
+        Oracle.__init__(self)
+
+        # Load STLe formula
+        self.stl_prop_file = stl_prop_file.strip(' \n\t')
+        self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
+        # exprset is a set of STLe formulas in C API format
+        self.exprset = None
+
+        # Load parameters of the STLe formula
+        self.stl_param_file = stl_param_file.strip(' \n\t')
+        self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
+        # signalvars are the parameters of STLe formula in C API format
+        self.signalvars = None
+
+        # Load the signal
+        self.monitor = None
+        self.signal = None
+        self.csv_signal_file = csv_signal_file.strip(' \n\t')
+
+        if self.csv_signal_file != '':
+            RootOracle.logger.debug('Starting: {0}'.format(self.csv_signal_file))
+            # Loading the signal in memory
+            self._load_signal_in_mem()
+            # Cleaning the cache
+            self._clean_cache()
+
+        # Load the pattern for evaluating arithmetic expressions in STLe
+        self.pattern = OracleSTLe._regex_arithm_expr_stl_eval()
+
+        # Number of calls to the STLe oracle
+        self.num_oracle_calls = 0
+
+    def __del__(self):
+        # type: (OracleSTLeLib) -> None
+        if self.signal is not None:
+            stl_delete_pcsignal(self.signal)
+        if self.signalvars is not None:
+            stl_delete_signalvars(self.signalvars)
+        if self.exprset is not None:
+            stl_delete_exprset(self.exprset)
+        if self.monitor is not None:
+            stl_offlinepcmonitor_delete(self.monitor)
+
+    def _load_signal_in_mem(self):
+        # type: (OracleSTLeLib) -> None
+        # Load the signal in memory
+        RootOracle.logger.debug('Loading signal "{0}" into memory'.format(self.csv_signal_file))
+        self.signal = stl_read_pcsignal_csv_fname(c_char_p(self.csv_signal_file), c_int(0))
+
+        if self.signal is None:
+            message = 'Unexpected error when loading {0}'.format(self.csv_signal_file)
+            RootOracle.logger.error(message)
+            raise RuntimeError(message)
+
+        n = stl_pcsignal_size(self.signal)
+        # self.signalvars = stl_make_signalvars_xn(c_int(n))
+        self.signalvars = stl_make_signalvars_xn(n)
+        RootOracle.logger.debug('Signalvars created: {0}'.format(self.signalvars ))
+
+    def _clean_cache(self):
+        # type: (OracleSTLeLib) -> None
+        assert self.signalvars is not None
+
+        # Cleaning cache
+        RootOracle.logger.debug('Cleaning cache of exprsets')
+        if self.exprset is not None:
+            stl_delete_exprset(self.exprset)
+
+        if self.monitor is not None:
+            stl_offlinepcmonitor_delete(self.monitor)
+
+        # Create a new exprset
+        self.exprset = stl_make_exprset(None)
+
+        RootOracle.logger.debug('Exprset created: {0}'.format(self.exprset))
+
+        # Create a monitor for analyzing the signal
+        self.monitor = stl_make_offlinepcmonitor(self.signal, self.signalvars, self.exprset)
+        RootOracle.logger.debug('Monitor created: {0}'.format(self.monitor))
+
+    @staticmethod
+    def parse_stle_result(result):
+        # type: (c_double) -> bool
+        #
+        # STLe may return:
+        # - a boolean value (i.e, "0" for False and "1" for True),
+        # - a boolean signal,
+        # - a real value (i.e., min/max of a real value signal).
+        # We assume that the output is a boolean value.
+        RootOracle.logger.debug('Result: {0}'.format(result))
+        return int(result) == 1
+
+    def eval_stl_formula(self, stl_formula):
+        # type: (OracleSTLeLib, str) -> bool
+        assert self.monitor is not None
+        assert self.signal is not None
+        assert self.signalvars is not None
+        assert self.exprset is not None
+
+        RootOracle.logger.debug('Evaluating: {0}'.format(stl_formula))
+
+        # Add STLe formula to the expression set
+        pos = c_int(0)
+        # expr = stl_parse_sexpr_str(self.exprset, stl_formula, c_void_p(pos))
+        expr = stl_parse_sexpr_str(self.exprset, c_char_p(stl_formula), pointer(pos))
+
+        RootOracle.logger.debug('STLe formula parsed: {0}'.format(expr))
+
+        # Evaluating formula
+        rewrite = c_int(1)
+        rewritten = c_void_p(0)
+        stl_series = stl_offlinepcmonitor_make_output(self.monitor, expr, rewrite, rewritten)
+
+        RootOracle.logger.debug('STLe series: {0}'.format(stl_series))
+
+        res = stl_pcseries_value0(stl_series)
+        RootOracle.logger.debug('Result: {0}'.format(res))
+
+        # Return the result of evaluating the STL formula.
+        return OracleSTLeLib.parse_stle_result(res)
+
