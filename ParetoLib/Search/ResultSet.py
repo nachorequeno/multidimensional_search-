@@ -459,8 +459,13 @@ class ResultSet:
         plt.xscale('linear')
         plt.yscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
@@ -527,8 +532,13 @@ class ResultSet:
         plt.xscale('linear')
         plt.yscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
@@ -589,8 +599,13 @@ class ResultSet:
         plt.xscale('linear')
         plt.yscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
@@ -681,8 +696,13 @@ class ResultSet:
         plt.yscale('linear')
         # plt.zscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
@@ -752,8 +772,13 @@ class ResultSet:
         plt.yscale('linear')
         # plt.zscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')
@@ -818,8 +843,13 @@ class ResultSet:
         plt.yscale('linear')
         # plt.zscale('linear')
 
-        plt.show(block=blocking)
-        time.sleep(sec)
+        if sec > 0.0 and not blocking:
+            plt.ion()
+            plt.show()
+            plt.pause(int(sec))
+        else:
+            plt.ioff()
+            plt.show()
 
         if filename != '':
             fig1.savefig(filename, dpi=90, bbox_inches='tight')

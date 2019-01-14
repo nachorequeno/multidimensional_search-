@@ -20,4 +20,4 @@ test:
   script:
     - cd Tests
     - pytest --ignore=Tests/test_Search.py
-    - pytes Tests/test_Search.py::SearchOracleFunctionTestCase
+    - pytest Tests/test_Search.py::SearchOracleFunctionTestCase
