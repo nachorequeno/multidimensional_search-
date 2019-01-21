@@ -7,17 +7,22 @@ build:
   stage: build
   script:
     - apt-get update
-    - apt-get -y install openjdk-8-jre
     - apt-get -y install python-pip
     - apt-get -y install python-tk
-    - apt-get -y install python-pytest
     - ./install.sh
+  cache:
+    paths:
+      - .local
+      -  /usr/lib/python2.7
 
 test:
   stage: test
   dependencies:
     - build
   script:
+    - apt-get update
+    - apt-get -y install openjdk-8-jre
+    - apt-get -y install python-pytest
     - cd Tests
     - pytest --ignore=Tests/test_Search.py
     - pytest Tests/test_Search.py::SearchOracleFunctionTestCase
