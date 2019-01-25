@@ -418,10 +418,10 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(0.0, rs_sim.overlapping_volume_total())
 
         # May differ in the last decimals because of arithmetic precision
-        self.assertAlmostEqual(rs_sim.volume_yup(), self.rs_3D.volume_yup())
-        self.assertAlmostEqual(rs_sim.volume_ylow(), self.rs_3D.volume_ylow())
-        self.assertAlmostEqual(rs_sim.volume_border(), self.rs_3D.volume_border())
-        self.assertAlmostEqual(rs_sim.volume_border_2(), self.rs_3D.volume_border_2())
+        self.assertAlmostEqual(0.34374141701118816, rs_sim.volume_yup())
+        self.assertAlmostEqual(0.3124945163472164, rs_sim.volume_ylow())
+        self.assertAlmostEqual(0.3437640666415955, rs_sim.volume_border())
+        self.assertAlmostEqual(0.3437640666415954, rs_sim.volume_border_2())
         self.assertAlmostEqual(rs_sim.volume_border(), rs_sim.volume_border_2())
 
     def test_points_2D(self):
@@ -458,12 +458,12 @@ class ResultSetTestCase(unittest.TestCase):
         nfile = tmpfile.name
 
         # Plot 2D by screen
-        self.rs_2D.plot_2D()
-        self.rs_2D.plot_2D_light()
+        self.rs_2D.plot_2D(sec=1.0)
+        self.rs_2D.plot_2D_light(sec=1.0)
 
         # Plot 2D by file
-        self.rs_2D.plot_2D(filename=nfile)
-        self.rs_2D.plot_2D_light(filename=nfile)
+        self.rs_2D.plot_2D(sec=1.0, filename=nfile)
+        self.rs_2D.plot_2D_light(sec=1.0, filename=nfile)
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -474,12 +474,12 @@ class ResultSetTestCase(unittest.TestCase):
         nfile = tmpfile.name
 
         # Plot 3D by screen
-        self.rs_3D.plot_3D()
-        self.rs_3D.plot_3D_light()
+        self.rs_3D.plot_3D(sec=1.0)
+        self.rs_3D.plot_3D_light(sec=1.0)
 
         # Plot 3D by file
-        self.rs_3D.plot_3D(filename=nfile)
-        self.rs_3D.plot_3D_light(filename=nfile)
+        self.rs_3D.plot_3D(sec=1.0, filename=nfile)
+        self.rs_3D.plot_3D_light(sec=1.0, filename=nfile)
 
         # Remove tempfile
         # os.unlink(nfile)
