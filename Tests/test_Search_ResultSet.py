@@ -455,7 +455,7 @@ class ResultSetTestCase(unittest.TestCase):
             self.assertTrue(self.rs_3D.member_space(r))
 
     @pytest.mark.skipif(
-        os.environ['DISPLAY'] is None,
+        'DISPLAY' not in os.environ,
         reason='Display is not defined'
     )
     def test_plot_2D(self):
@@ -475,7 +475,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.add_file_to_clean(nfile)
 
     @pytest.mark.skipif(
-        os.environ['DISPLAY'] is None,
+        'DISPLAY' not in os.environ,
         reason='Display is not defined'
     )
     def test_plot_3D(self):
