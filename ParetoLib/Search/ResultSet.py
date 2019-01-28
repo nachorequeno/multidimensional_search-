@@ -775,7 +775,7 @@ class ResultSet:
         if sec > 0.0 and not blocking:
             plt.ion()
             plt.show()
-            plt.pause(int(sec))
+            plt.pause(float(sec))
         else:
             plt.ioff()
             plt.show()
@@ -846,7 +846,7 @@ class ResultSet:
         if sec > 0.0 and not blocking:
             plt.ion()
             plt.show()
-            plt.pause(int(sec))
+            plt.pause(float(sec))
         else:
             plt.ioff()
             plt.show()

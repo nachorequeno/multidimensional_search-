@@ -151,6 +151,7 @@ class ParResultSet(ResultSet):
     def member_border(self, xpoint):
         # type: (ParResultSet, tuple) -> bool
         # isMember = (rect.inside(xpoint) for rect in self.border)
-        args_member = ((rect, xpoint) for rect in self.border)
-        isMember = self.p.imap_unordered(pinside, args_member)
-        return any(isMember)
+        # args_member = ((rect, xpoint) for rect in self.border)
+        # isMember = self.p.imap_unordered(pinside, args_member)
+        # return any(isMember)
+        return self.member_space(xpoint) and not self.member_yup(xpoint) and not self.member_ylow(xpoint)
