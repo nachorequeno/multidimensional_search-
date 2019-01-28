@@ -12,5 +12,5 @@ build_test:
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
     - ./install.sh
-    - pytest --ignore=Tests/test_Search_ResultSet.py::test_plot_2D --ignore=Tests/test_Search_ResultSet.py::test_plot_3D --ignore=Tests/test_Search.py
+    - pytest --ignore=Tests/test_Search.py
     - pytest Tests/test_Search.py::SearchOracleFunctionTestCase

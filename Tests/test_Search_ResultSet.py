@@ -453,6 +453,10 @@ class ResultSetTestCase(unittest.TestCase):
         for r in self.rs_3D.get_points_space(n):
             self.assertTrue(self.rs_3D.member_space(r))
 
+    @pytest.mark.skipif(
+        os.environ['DISPLAY'] is None,
+        reason='Display is not defined'
+    )
     def test_plot_2D(self):
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
@@ -469,6 +473,10 @@ class ResultSetTestCase(unittest.TestCase):
         # os.unlink(nfile)
         self.add_file_to_clean(nfile)
 
+    @pytest.mark.skipif(
+        os.environ['DISPLAY'] is None,
+        reason='Display is not defined'
+    )
     def test_plot_3D(self):
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
