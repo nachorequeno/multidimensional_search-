@@ -15,7 +15,11 @@ from ParetoLib.Oracle.Oracle import Oracle
 EPS = 1e-5
 DELTA = 1e-5
 STEPS = 20
-SLEEP_TIME = 0.1
+
+if 'DISPLAY' not in os.environ:
+    SLEEP_TIME = 0.0
+else:
+    SLEEP_TIME = 0.1
 
 
 class SearchTestCase(unittest.TestCase):
