@@ -1,6 +1,7 @@
 import os
 import tempfile as tf
 import unittest
+import pytest
 import copy
 
 from ParetoLib.Geometry.Rectangle import Rectangle
