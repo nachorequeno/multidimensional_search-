@@ -341,6 +341,16 @@ class ResultSet:
         # type: (ResultSet, int) -> list
         return self.xspace.get_points(n)
 
+    def set_points_pareto(self, l):
+        # type: (ResultSet, list) -> None
+        self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
+        self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
+        self.border = [Rectangle(p, p) for p in l]
+
+    def get_points_pareto(self):
+        # type: (ResultSet) -> list
+        return [r.max_corner for r in self.ylow] + [r.min_corner for r in self.yup]
+
     # Maximum/minimum values for each parameter
     @staticmethod
     def _get_min_val_dimension_rect_list(i, rect_list):
