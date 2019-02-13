@@ -1,5 +1,5 @@
 (F (0 p1)
-   (G (p1 inf)
-      (< (On (p1 inf) (- (Max x0) (Min x0))) p2)
+   (G (0 200-p1)
+      (< (On (0 200-p1) (- (Max x0) (Min x0))) p2)
    )
 )
