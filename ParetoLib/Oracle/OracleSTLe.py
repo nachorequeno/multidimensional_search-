@@ -65,6 +65,11 @@ class OracleSTLe(Oracle):
         # Number of calls to the STLe oracle
         self.num_oracle_calls = 0
 
+    # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
+    # deepcopy cannot handle regex
+    def __deepcopy__(self, memo):
+        return OracleSTLe(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file, stl_param_file=self.stl_param_file)
+
     def _load_signal_in_mem(self):
         # type: (OracleSTLe) -> None
         # Load the signal in memory
@@ -430,6 +435,11 @@ class OracleSTLeLib(OracleSTLe):
 
         # Number of calls to the STLe oracle
         self.num_oracle_calls = 0
+
+    # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
+    # deepcopy cannot handle regex
+    def __deepcopy__(self, memo):
+        return OracleSTLeLib(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file, stl_param_file=self.stl_param_file)
 
     def __del__(self):
         # type: (OracleSTLeLib) -> None

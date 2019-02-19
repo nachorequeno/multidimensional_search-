@@ -46,6 +46,11 @@ class OracleSTL(Oracle):
         # Load the pattern for evaluating arithmetic expressions in STL
         self.pattern = OracleSTL._regex_arithm_expr_stl_eval()
 
+    # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
+    # deepcopy cannot handle regex
+    def __deepcopy__(self, memo):
+        return OracleSTL(stl_prop_file=self.stl_prop_file, vcd_signal_file=self.vcd_signal_file, var_alias_file=self.var_alias_file, stl_param_file=self.stl_param_file)
+
     def __repr__(self):
         # type: (OracleSTL) -> str
         """
