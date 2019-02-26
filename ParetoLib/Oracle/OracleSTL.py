@@ -33,11 +33,11 @@ class OracleSTL(Oracle):
 
         # Load STLe formula
         self.stl_prop_file = stl_prop_file.strip(' \n\t')
-        self.stl_formula = OracleSTL.load_stl_formula(self.stl_prop_file)
+        self.stl_formula = None
 
         # Load parameters of the STLe formula
         self.stl_param_file = stl_param_file.strip(' \n\t')
-        self.stl_parameters = OracleSTL.get_parameters_stl(self.stl_param_file)
+        self.stl_parameters = None
 
         # Load the signal
         self.vcd_signal_file = vcd_signal_file.strip(' \n\t')
@@ -46,10 +46,45 @@ class OracleSTL(Oracle):
         # Load the pattern for evaluating arithmetic expressions in STL
         self.pattern = OracleSTL._regex_arithm_expr_stl_eval()
 
-    # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
-    # deepcopy cannot handle regex
-    def __deepcopy__(self, memo):
+    def _lazy_init(self):
+        # type: (OracleSTL) -> None
+        # Lazy initialization of the OracleSTLe
+
+        assert self.stl_prop_file != ''
+        assert self.stl_param_file != ''
+        assert self.vcd_signal_file != ''
+        assert self.var_alias_file != ''
+
+        self.stl_formula = OracleSTL.load_stl_formula(self.stl_prop_file)
+        self.stl_parameters = OracleSTL.get_parameters_stl(self.stl_param_file)
+
+    def __copy__(self):
         return OracleSTL(stl_prop_file=self.stl_prop_file, vcd_signal_file=self.vcd_signal_file, var_alias_file=self.var_alias_file, stl_param_file=self.stl_param_file)
+
+    def __deepcopy__(self, memo):
+        # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
+        # deepcopy cannot handle regex
+        return OracleSTL(stl_prop_file=self.stl_prop_file, vcd_signal_file=self.vcd_signal_file, var_alias_file=self.var_alias_file, stl_param_file=self.stl_param_file)
+
+    def __getattr__(self, name):
+        # type: (OracleSTL, str) -> _
+        elem = object.__getattribute__(self, name)
+        if elem is None:
+            RootOracle.logger.debug('Initializating Oracle')
+            self._lazy_init()
+            elem = object.__getattribute__(self, name)
+            RootOracle.logger.debug('Initialized Oracle')
+        RootOracle.logger.debug('__getattr__: {0}, {1}'.format(name, elem))
+        # s = input()
+        return elem
+
+    def __getattribute__(self, name):
+        # type: (OracleSTL, str) -> _
+        elem = object.__getattribute__(self, name)
+        RootOracle.logger.debug('__getattribute__: {0}'.format(name))
+        if elem is None:
+            raise AttributeError
+        return elem
 
     def __repr__(self):
         # type: (OracleSTL) -> str
@@ -72,7 +107,8 @@ class OracleSTL(Oracle):
         """
         s = 'STL property file: {0}\n'.format(self.stl_prop_file)
         s += 'STL alias file: {0}\n'.format(self.var_alias_file)
-        s += 'STL parameters file: {0}\n'.format(self.stl_parameters)
+        s += 'STL parameters file: {0}\n'.format(self.stl_param_file)
+        s += 'STL parameters: {0}\n'.format(self.stl_parameters)
         s += 'VCD signal file: {0}\n'.format(self.vcd_signal_file)
         return s
 
@@ -90,7 +126,8 @@ class OracleSTL(Oracle):
                           or filecmp.cmp(self.vcd_signal_file, other.vcd_signal_file))
             res = res or ((self.var_alias_file == other.var_alias_file)
                           or filecmp.cmp(self.var_alias_file, other.var_alias_file))
-            res = res or (self.stl_parameters == other.stl_parameters)
+            res = res or ((self.stl_param_file == other.stl_param_file)
+                          or (self.stl_parameters == other.stl_parameters))
         except OSError:
             RootOracle.logger.error(
                 'Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
@@ -108,7 +145,7 @@ class OracleSTL(Oracle):
         """
         Identity function (via hashing).
         """
-        return hash((self.stl_prop_file, self.vcd_signal_file, self.var_alias_file, self.stl_parameters))
+        return hash((self.stl_prop_file, self.vcd_signal_file, self.var_alias_file, self.stl_param_file))
 
     def dim(self):
         # type: (OracleSTL) -> int
@@ -179,6 +216,7 @@ class OracleSTL(Oracle):
             finally:
                 return res
 
+        RootOracle.logger.debug('Evaluating STL formula')
         # Create a temporal file with an instance of the STL formula
         stl_prop_file_subst = tempfile.NamedTemporaryFile(mode='w', delete=False)
         stl_prop_file_subst_name = stl_prop_file_subst.name
@@ -296,6 +334,7 @@ class OracleSTL(Oracle):
         # java -jar ./jamt.jar -x ./stl_formula.stl -s ./signal.vcd -a ./variables.alias -v out
         #
 
+        RootOracle.logger.debug('Running membership function')
         # Replace parameters of the STL formula with current values in xpoint tuple
         stl_prop_file_subst_name = self.replace_par_val_stl_formula(xpoint)
 

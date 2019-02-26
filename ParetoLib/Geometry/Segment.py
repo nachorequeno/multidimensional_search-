@@ -22,7 +22,7 @@ from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal
 import ParetoLib.Geometry.Point as Point
 
 
-class Segment:
+class Segment (object):
     def __init__(self, low, high):
         # type: (Segment, tuple, tuple) -> None
         """
@@ -106,8 +106,8 @@ class Segment:
         """
         # Round the elements of 'value' when assigning them to self.low or self.high
         val = tuple(r(vi) for vi in value)
-        self.__dict__[name] = val
-        # object.__setattr__(self, name, val)
+        # self.__dict__[name] = val
+        object.__setattr__(self, name, val)
 
     def _to_str(self):
         # type: (Segment) -> str

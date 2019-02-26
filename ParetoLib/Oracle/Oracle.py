@@ -19,7 +19,7 @@ import io
 
 # Oracle template
 
-class Oracle:
+class Oracle(object):
 
     def __init__(self):
         pass

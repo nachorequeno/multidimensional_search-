@@ -36,17 +36,27 @@ from ParetoLib.Geometry.ParRectangle import pvol
 
 def pbin_search_ser(args):
     xrectangle, f, epsilon, n = args
+    RootSearch.logger.debug('Executing serial binary search')
+    RootSearch.logger.debug('xrectangle, epsilon, n: {0}, {1}, {2}'.format(xrectangle, epsilon, n))
     error = (epsilon,) * n
     y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
+    RootSearch.logger.debug('End serial binary search')
+    RootSearch.logger.debug('y, steps_binsearch: {0}, {1}'.format(y, steps_binsearch))
     return y
 
 
 def pbin_search(args):
     xrectangle, dict_man, epsilon, n = args
+    RootSearch.logger.debug('Executing parallel binary search')
+    RootSearch.logger.debug('xrectangle, epsilon, n: {0}, {1}, {2}'.format(xrectangle, epsilon, n))
+    RootSearch.logger.debug('dict_man[{0}]: {1}'.format(mp.current_process().name, dict_man[mp.current_process().name]))
     ora = dict_man[mp.current_process().name]
     f = ora.membership()
+    RootSearch.logger.debug('f = {0}'.format(f))
     error = (epsilon,) * n
     y, steps_binsearch = binary_search(xrectangle.diag(), f, error)
+    RootSearch.logger.debug('End parallel binary search')
+    RootSearch.logger.debug('y, steps_binsearch: {0}, {1}'.format(y, steps_binsearch))
     return y
 
 
