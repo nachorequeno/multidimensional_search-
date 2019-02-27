@@ -28,10 +28,6 @@ import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.STLe.STLe import STLE_LIB, STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_OK, MAX_STLE_CALLS
 
-#from ParetoLib.STLe.STLe import stl_read_pcsignal_csv_fname, stl_delete_pcsignal, stl_make_exprset, stl_delete_exprset, \
-#    stl_parse_sexpr_str, stl_pcsignal_size, stl_make_signalvars_xn, stl_delete_signalvars, stl_make_offlinepcmonitor, \
-#    stl_offlinepcmonitor_make_output, stl_offlinepcmonitor_delete, stl_pcseries_value0
-
 
 class OracleSTLe(Oracle):
     # OracleSTLe interacts with the binary executable STLe via PIPEs and string passing.
@@ -458,13 +454,14 @@ class STLeInterface:
         self._stl_delete_pcsignal = None
         self._stl_make_exprset = None
         self._stl_delete_exprset = None
+        self._stl_unref_expr = None
         self._stl_parse_sexpr_str = None
         self._stl_pcsignal_size = None
         self._stl_make_signalvars_xn = None
         self._stl_delete_signalvars = None
         self._stl_make_offlinepcmonitor = None
         self._stl_offlinepcmonitor_make_output = None
-        self._stl_offlinepcmonitor_delete = None
+        self._stl_delete_offlinepcmonitor = None
         self._stl_pcseries_value0 = None
 
         # Initialize C interfaze with STLe
@@ -475,86 +472,98 @@ class STLeInterface:
 
         # Version of STLe
         # const char *stl_version(void)
-        self._stl_version = self._stle.stl_version
+        self._stl_version = self._stle.stle_version
         self._stl_version.argtypes = [c_void_p]
         self._stl_version.restype = c_char_p
 
         # Read a signal from a csv file
-        # struct stl_pcsignal *stl_read_pcsignal_csv_fname(const char *fileName, int flags)
+        # struct stle_pcsignal *stle_read_pcsignal_csv_fname(const char *fileName, int flags)
         # 'flags': specify the way to interpret signals (i.e., 0 default)
         # Return 0 if it fails to read the file
-        self._stl_read_pcsignal_csv_fname = self._stle.stl_read_pcsignal_csv_fname
+        self._stl_read_pcsignal_csv_fname = self._stle.stle_read_pcsignal_csv_fname
         self._stl_read_pcsignal_csv_fname.argtypes = [c_char_p, c_int]
         self._stl_read_pcsignal_csv_fname.restype = c_void_p
 
         # Delete signal
-        # void stl_delete_pcsignal(struct stl_pcsignal *signal)
-        self._stl_delete_pcsignal = self._stle.stl_delete_pcsignal
+        # void stle_delete_pcsignal(struct stle_pcsignal *signal)
+        self._stl_delete_pcsignal = self._stle.stle_delete_pcsignal
         self._stl_delete_pcsignal.argtypes = [c_void_p]
-        self._stl_delete_pcsignal.restypes = c_void_p
+        self._stl_delete_pcsignal.restypes = None
 
         # Create an expression set (it will contain the formula)
-        # struct stl_exprset *stl_make_exprset(void);
-        self._stl_make_exprset = self._stle.stl_make_exprset
+        # struct stle_exprset *stle_make_exprset(void)
+        self._stl_make_exprset = self._stle.stle_make_exprset
         self._stl_make_exprset.argtypes = [c_void_p]
         self._stl_make_exprset.restype = c_void_p
 
         # Delete expression set
-        # void stl_delete_exprset(struct stl_exprset *exprset)
-        self._stl_delete_exprset = self._stle.stl_delete_exprset
+        # void stle_delete_exprset(struct stle_exprset *exprset)
+        self._stl_delete_exprset = self._stle.stle_delete_exprset
         self._stl_delete_exprset.argtypes = [c_void_p]
-        self._stl_delete_exprset.restype = c_void_p
+        self._stl_delete_exprset.restype = None
+
+        # Delete expression
+        # void stle_unref_expr(const struct stle_expr *expr)
+        self._stl_unref_expr = self._stle.stle_unref_expr
+        self._stl_unref_expr.argtypes = [c_void_p]
+        self._stl_unref_expr.restype = None
+
+        # Comparison of expressions (via equality of struct stle_expr_impl *)
+        # const struct stle_expr_impl *stle_get_expr_impl(const struct stle_expr *expr)
+        self._stl_get_expr_impl = self._stle.stle_get_expr_impl
+        self._stl_get_expr_impl.argtypes = [c_void_p]
+        self._stl_get_expr_impl.restype = c_void_p
 
         # Parse a formula from a string
-        # const struct stl_expr *stl_parse_sexpr_str(struct stl_exprset *exprset, const char *str, int *pos)
+        # const struct stle_expr *stle_parse_sexpr_str(struct stle_exprset *exprset, const char *str, int *pos)
         # 'pos': pointer to an integer that will receive the position of the first character after the formula
         # (i.e. how many character the parser read). Pass 0 if you don't care.
         # Return 0 if it fails to read the file
-        self._stl_parse_sexpr_str = self._stle.stl_parse_sexpr_str
+        self._stl_parse_sexpr_str = self._stle.stle_parse_sexpr_str
         self._stl_parse_sexpr_str.argtypes = [c_void_p, c_char_p, c_void_p]  # c_int
         self._stl_parse_sexpr_str.restype = c_void_p
 
         # Get the number of parameters (n) of the signal
-        # int stl_pcsignal_size(const struct stl_pcsignal *signal)
-        self._stl_pcsignal_size = self._stle.stl_pcsignal_size
+        # int stle_pcsignal_size(const struct stle_pcsignal *signal)
+        self._stl_pcsignal_size = self._stle.stle_pcsignal_size
         self._stl_pcsignal_size.argtypes = [c_void_p]
         self._stl_pcsignal_size.restype = c_int
 
         # Define the number of parameters (n) of the formula
-        # struct stl_signalvars *stl_make_signalvars_xn(int n)
-        self._stl_make_signalvars_xn = self._stle.stl_make_signalvars_xn
+        # struct stle_signalvars *stle_make_signalvars_xn(int n)
+        self._stl_make_signalvars_xn = self._stle.stle_make_signalvars_xn
         self._stl_make_signalvars_xn.argtypes = [c_int]
         self._stl_make_signalvars_xn.restype = c_void_p
 
         # Delete the mapping between signal and variables
-        # void stl_delete_signalvars(struct stl_signalvars *signalvars)
-        self._stl_delete_signalvars = self._stle.stl_delete_signalvars
+        # void stle_delete_signalvars(struct stle_signalvars *signalvars)
+        self._stl_delete_signalvars = self._stle.stle_delete_signalvars
         self._stl_delete_signalvars.argtypes = [c_void_p]
-        self._stl_delete_signalvars.restype = c_void_p
+        self._stl_delete_signalvars.restype = None
 
         # Create a monitor
-        # struct stl_offlinepcmonitor *stl_make_offlinepcmonitor(struct stl_pcsignal *signal, const struct stl_signalvars *signalvars, struct stl_exprset *exprset)
-        self._stl_make_offlinepcmonitor = self._stle.stl_make_offlinepcmonitor
+        # struct stle_offlinepcmonitor *stle_make_offlinepcmonitor(struct stle_pcsignal *signal, const struct stle_signalvars *signalvars, struct stle_exprset *exprset)
+        self._stl_make_offlinepcmonitor = self._stle.stle_make_offlinepcmonitor
         self._stl_make_offlinepcmonitor.argtypes = [c_void_p, c_void_p, c_void_p]
         self._stl_make_offlinepcmonitor.restype = c_void_p
 
         # Running the monitor
-        # const struct stl_pcseries *stl_offlinepcmonitor_make_output(struct stl_offlinepcmonitor *monitor, const stl_expr *expr, int rewrite, const stl_expr **rewritten)
+        # const struct stle_pcseries *stle_offlinepcmonitor_make_output(struct stle_offlinepcmonitor *monitor, const stle_expr *expr, int rewrite, const stle_expr **rewritten)
         # rewrite = 1
         # rewritten = 0
-        self._stl_offlinepcmonitor_make_output = self._stle.stl_offlinepcmonitor_make_output
+        self._stl_offlinepcmonitor_make_output = self._stle.stle_offlinepcmonitor_make_output
         self._stl_offlinepcmonitor_make_output.argtypes = [c_void_p, c_void_p, c_int, c_void_p]
         self._stl_offlinepcmonitor_make_output.restype = c_void_p
 
         # Delete the monitor
-        # void stl_offlinepcmonitor_delete(struct stl_offlinepcmonitor *monitor)
-        self._stl_offlinepcmonitor_delete = self._stle.stl_offlinepcmonitor_delete
-        self._stl_offlinepcmonitor_delete.argtypes = [c_void_p]
-        self._stl_offlinepcmonitor_delete.restype = c_void_p
+        # void stle_delete_offlinepcmonitor(struct stle_offlinepcmonitor *monitor)
+        self._stl_delete_offlinepcmonitor = self._stle.stle_delete_offlinepcmonitor
+        self._stl_delete_offlinepcmonitor.argtypes = [c_void_p]
+        self._stl_delete_offlinepcmonitor.restype = None
 
         # Get the value of the output at time 0
-        # double stl_pcseries_value0(const struct stl_pcseries *series)
-        self._stl_pcseries_value0 = self._stle.stl_pcseries_value0
+        # double stle_pcseries_value0(const struct stle_pcseries *series)
+        self._stl_pcseries_value0 = self._stle.stle_pcseries_value0
         self._stl_pcseries_value0.argtypes = [c_void_p]
         self._stl_pcseries_value0.restype = c_double
 
@@ -570,59 +579,67 @@ class STLeInterface:
 
     def stl_version(self):
         # type: (STLeInterface) -> c_char_p
-        return self._stle.stl_version(None)
+        return self._stl_version(None)
 
     def stl_read_pcsignal_csv_fname(self, csv_signal_file, val=0):
         # type: (STLeInterface, str, int) -> c_void_p
-        return self._stle.stl_read_pcsignal_csv_fname(c_char_p(csv_signal_file), c_int(val))
+        return self._stl_read_pcsignal_csv_fname(c_char_p(csv_signal_file), c_int(val))
 
     def stl_delete_pcsignal(self, signal):
-        # type: (STLeInterface) -> c_void_p
+        # type: (STLeInterface, c_void_p) -> None
         return self._stl_delete_pcsignal(signal)
 
     def stl_make_exprset(self):
         # type: (STLeInterface) -> c_void_p
-        return self._stle.stl_make_exprset(None)
+        return self._stl_make_exprset(None)
 
     def stl_delete_exprset(self, exprset):
-        # type: (STLeInterface) -> c_void_p
-        return self._stle.stl_delete_exprset(exprset)
+        # type: (STLeInterface, c_void_p) -> None
+        return self._stl_delete_exprset(exprset)
+
+    def stl_unref_expr(self, expr):
+        # type: (STLeInterface, c_void_p) -> None
+        return self._stl_unref_expr(expr)
+
+    def stl_get_expr_impl(self, expr):
+        # type: (STLeInterface, c_void_p) -> c_void_p
+        return self._stl_get_expr_impl(expr)
 
     def stl_parse_sexpr_str(self, exprset, stl_formula, val=0):
         # type: (STLeInterface, c_void_p, str, int) -> c_void_p
         pos = c_int(val)
         # expr = stl_parse_sexpr_str(self.exprset, stl_formula, c_void_p(pos))
-        return self._stle.stl_parse_sexpr_str(exprset, c_char_p(stl_formula), pointer(pos))
+        return self._stl_parse_sexpr_str(exprset, c_char_p(stl_formula), pointer(pos))
 
     def stl_pcsignal_size(self, signal):
         # type: (STLeInterface, c_void_p) -> c_int
-        return self._stle.stl_pcsignal_size(signal)
+        return self._stl_pcsignal_size(signal)
 
     def stl_make_signalvars_xn(self, n):
         # type: (STLeInterface, c_int) -> c_void_p
-        return self._stle.stl_make_signalvars_xn(n)
+        return self._stl_make_signalvars_xn(n)
 
     def stl_delete_signalvars(self, delete_signalvars):
-        # type: (STLeInterface, c_void_p) -> c_void_p
-        return self._stle.stl_delete_signalvars(delete_signalvars)
+        # type: (STLeInterface, c_void_p) -> None
+        return self._stl_delete_signalvars(delete_signalvars)
 
     def stl_make_offlinepcmonitor(self, signal, signalvars, exprset):
         # type: (STLeInterface, c_void_p, c_void_p, c_void_p) -> c_void_p
-        return self._stle.stl_make_offlinepcmonitor(signal, signalvars, exprset)
+        return self._stl_make_offlinepcmonitor(signal, signalvars, exprset)
 
     def stl_offlinepcmonitor_make_output(self, monitor, expr, val_rewrite=1, val_rewritten=0):
         # type: (STLeInterface, c_void_p, c_void_p, int, int) -> c_void_p
         rewrite = c_int(val_rewrite)
         rewritten = c_void_p(val_rewritten)
-        return self._stle.stl_offlinepcmonitor_make_output(monitor, expr, rewrite, rewritten)
+        return self._stl_offlinepcmonitor_make_output(monitor, expr, rewrite, rewritten)
 
-    def stl_offlinepcmonitor_delete(self, monitor):
-        # type: (STLeInterface, c_void_p) -> c_void_p
-        return self._stle.stl_offlinepcmonitor_delete(monitor)
+    def stl_delete_offlinepcmonitor(self, monitor):
+        # type: (STLeInterface, c_void_p) -> None
+        return self._stl_delete_offlinepcmonitor(monitor)
 
     def stl_pcseries_value0(self, stle_series):
         # type: (STLeInterface, c_void_p) -> c_double
-        return self._stle.stl_pcseries_value0(stle_series)
+        return self._stl_pcseries_value0(stle_series)
 
 
 class OracleSTLeLib(OracleSTLe):
@@ -722,7 +739,7 @@ class OracleSTLeLib(OracleSTLe):
 
         # Remove monitor
         if self.monitor is not None:
-            self.stle.stl_offlinepcmonitor_delete(self.monitor)
+            self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     def _create_monitor_exprset(self):
         # type: (OracleSTLeLib) -> None
@@ -760,7 +777,7 @@ class OracleSTLeLib(OracleSTLe):
         if self.exprset is not None:
             self.stle.stl_delete_exprset(self.exprset)
         if self.monitor is not None:
-            self.stle.stl_offlinepcmonitor_delete(self.monitor)
+            self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     @staticmethod
     def parse_stle_result(result):
@@ -791,11 +808,13 @@ class OracleSTLeLib(OracleSTLe):
 
         # Evaluating formula
         stl_series = self.stle.stl_offlinepcmonitor_make_output(self.monitor, expr)
-
         RootOracle.logger.debug('STLe series: {0}'.format(stl_series))
 
         res = self.stle.stl_pcseries_value0(stl_series)
         RootOracle.logger.debug('Result: {0}'.format(res))
+
+        # Remove STLe formula from the expression set
+        self.stle.stl_unref_expr(expr)
 
         # Return the result of evaluating the STL formula.
         return OracleSTLeLib.parse_stle_result(res)
