@@ -13,6 +13,5 @@ Temporal Logic (STL) over them.
 [1] https://gitlab.com/abakhirkin/StlEval
 """
 
-__version__ = 1.
 __name__ = 'STLe'
 __all__ = ['STLe.py']

@@ -22,7 +22,6 @@ The ResultSet class provides functions for:
 """
 import os
 import sys
-import time
 import pickle
 from itertools import chain, combinations  # combinations_with_replacement
 import zipfile

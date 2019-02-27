@@ -2,6 +2,8 @@ image: python:2
 
 stages:
   - build_test
+  - build
+  - test
 
 build_test:
   stage: build_test
@@ -12,6 +14,31 @@ build_test:
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
     - ./install.sh
+    - pytest --ignore=Tests/test_Search.py
+    - cd Tests
+    - pytest test_Search.py::SearchOracleFunctionTestCase
+
+build:
+  stage: build
+  script:
+    - apt-get update
+    - apt-get -y install python-pip
+    - python setup2.py bdist_wheel --universal
+    - python setup2.py bdist_egg
+  artifacts:
+    paths:
+      - dist/
+
+test:
+  stage: test
+  script:
+    - apt-get update
+    - apt-get -y install openjdk-8-jre
+    - apt-get -y install python-pip
+    - apt-get -y install python-tk
+    - apt-get -y install python-pytest
+    - cd dist/
+    - pip install *.whl
     - pytest --ignore=Tests/test_Search.py
     - cd Tests
     - pytest test_Search.py::SearchOracleFunctionTestCase

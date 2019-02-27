@@ -11,6 +11,5 @@ monitoring signals and evaluating properties written in Signal
 Temporal Logic (STL) over them.
 """
 
-__version__ = 1.
 __name__ = 'JAMT'
 __all__ = ['JAMT']

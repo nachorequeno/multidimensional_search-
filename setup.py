@@ -174,7 +174,7 @@ elif ((sys.version_info[0] == 3) and (sys.version_info[:2] < (3, 4))):
 __version__ = 'unknown'
 for line in open('ParetoLib/__init__.py'):
     if (line.startswith('__version__')):
-        exec(line.strip())
+        exec(line.strip('. '))
 
 old_path = os.getcwd()
 src_path = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -182,7 +182,7 @@ os.chdir(src_path)
 sys.path.insert(0, src_path)
 
 setup_args = {'name': 'ParetoLib',
-              'version': '1.0',
+              'version': '{0}'.format(__version__),
               'author': 'J. Ignacio Requeno',
               'author_email': 'jose-ignacio.requeno-jarabo@univ-grenoble-alpes.fr',
               'url': 'https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/',

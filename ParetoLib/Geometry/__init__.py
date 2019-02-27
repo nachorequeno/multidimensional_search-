@@ -16,7 +16,6 @@ decimal digits is indicated by __numdigits__
 import sys
 from math import log, floor
 
-__version__ = 1.
 __name__ = 'Geometry'
 __all__ = ['Segment', 'Rectangle', 'ParRectangle', 'Point', 'PPoint']
 
