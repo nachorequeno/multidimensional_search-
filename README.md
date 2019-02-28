@@ -21,9 +21,15 @@ This library is based on the work-in-progress paper [1].
 
 ## Installation
 
-This library requires Python 2.7.9 or Python 3.4+. The dependencies are listed in requirements.txt. 
-If you have the python tool 'pip' installed, then you can run the following command for
-installing the depencencies:
+This library requires Python 2.7.9 or Python 3.4+. 
+If you have the python tool 'pip' installed, just download the Wheel artifact (*.whl file) 
+from the Download->Artifact section in Gitlab and run:
+
+$ pip install *.whl --user 
+
+If you prefer to compile and install the source code by yourself, then execute the following steps. 
+The dependencies of the tool are listed in requirements.txt. 
+You can run the following command for installing them:
 
 $ pip install -r requirements.txt
 
