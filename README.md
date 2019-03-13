@@ -1,4 +1,7 @@
 # ParetoLib
+[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/commits/master)
+[![coverage report](https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/badges/master/coverage.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search/commits/master)
+
 **Multidimensional Pareto Boundary Learning Library for Python**
 
 This library implements an algorithm for learning the boundary between an 

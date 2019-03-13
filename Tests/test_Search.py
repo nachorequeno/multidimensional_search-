@@ -281,6 +281,14 @@ class SearchOracleSTLeTestCase(SearchTestCase):
         list_test_files = sorted(list_test_files)[:num_files_test]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
+    def test_2D(self):
+        test_dir = os.path.join(self.this_dir, '2D')
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
+
 
 class SearchOracleSTLeLibTestCase(SearchTestCase):
 
@@ -295,6 +303,14 @@ class SearchOracleSTLeLibTestCase(SearchTestCase):
         self.max_c = 1.0
 
     def test_1D(self):
+        test_dir = os.path.join(self.this_dir, '1D')
+        files_path = os.listdir(test_dir)
+        list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
+        num_files_test = min(self.numfiles_test, len(list_test_files))
+        list_test_files = sorted(list_test_files)[:num_files_test]
+        self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
+
+    def test_2D(self):
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
