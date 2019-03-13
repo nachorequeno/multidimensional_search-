@@ -66,6 +66,8 @@ class OracleSTLe(Oracle):
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
 
+        RootOracle.logger.info('Initializing OracleSTLe')
+
         self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
         self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
 
@@ -76,6 +78,9 @@ class OracleSTLe(Oracle):
 
         # Loading the signal in memory
         self._load_signal_in_mem()
+
+        # Marking the Oracle as initialized
+        self.initialized = True
 
     def _load_signal_in_mem(self):
         # type: (OracleSTLe) -> None
@@ -167,7 +172,7 @@ class OracleSTLe(Oracle):
 
     def __del__(self):
         # type: (OracleSTLe) -> None
-        if self.stle_oracle is not None:
+        if self.initialized and self.stle_oracle is not None:
             self.stle_oracle.terminate()
 
     def __copy__(self):
@@ -476,6 +481,9 @@ class OracleSTLeLib(OracleSTLe):
         self.exprset = None
         self.monitor = None
 
+        # Flag for indicating that Oracle is not initialized yet
+        self.initialized = False
+
     def _lazy_init(self):
         # type: (OracleSTLe) -> None
         # Lazy initialization of the OracleSTLe
@@ -483,6 +491,8 @@ class OracleSTLeLib(OracleSTLe):
         assert self.stl_prop_file != ''
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
+
+        RootOracle.logger.info('Initializing OracleSTLeLib')
 
         self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
         self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
@@ -495,6 +505,9 @@ class OracleSTLeLib(OracleSTLe):
 
         # Creating signal monitor and expression set
         self._create_monitor_exprset()
+
+        # Marking the Oracle as initialized
+        self.initialized = True
 
     def _load_signal_in_mem(self):
         # type: (OracleSTLeLib) -> None
@@ -583,16 +596,16 @@ class OracleSTLeLib(OracleSTLe):
 
     def __del__(self):
         # type: (OracleSTLeLib) -> None
-        assert self.stle is not None
 
-        if self.signal is not None:
-            self.stle.stl_delete_pcsignal(self.signal)
-        if self.signalvars is not None:
-            self.stle.stl_delete_signalvars(self.signalvars)
-        if self.exprset is not None:
-            self.stle.stl_delete_exprset(self.exprset)
-        if self.monitor is not None:
-            self.stle.stl_delete_offlinepcmonitor(self.monitor)
+        if self.initialized and self.stle is not None:
+            if self.signal is not None:
+                self.stle.stl_delete_pcsignal(self.signal)
+            if self.signalvars is not None:
+                self.stle.stl_delete_signalvars(self.signalvars)
+            if self.exprset is not None:
+                self.stle.stl_delete_exprset(self.exprset)
+            if self.monitor is not None:
+                self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     @staticmethod
     def parse_stle_result(result):

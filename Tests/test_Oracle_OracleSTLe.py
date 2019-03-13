@@ -71,16 +71,20 @@ class OracleSTLeTestCase(unittest.TestCase):
 
             print('Reading from {0}'.format(infile))
             ora1.from_file(infile, human_readable=True)
-            print(str(ora1))
 
             print('Writing to {0}'.format(outfile))
             ora1.to_file(outfile, append=False, human_readable=human_readable)
 
             print('Reading from {0}'.format(outfile))
             ora2.from_file(outfile, human_readable=human_readable)
-            print(str(ora2))
+
+            print('Oracle 1: {0}'.format(ora1))
+            print('Oracle 2: {0}'.format(ora2))
 
             self.assertEqual(ora1, ora2, 'Different files')
+
+            del ora1
+            del ora2
 
         # Remove tempfile
         # os.unlink(nfile)
