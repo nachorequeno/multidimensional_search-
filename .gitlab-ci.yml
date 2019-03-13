@@ -27,7 +27,6 @@ build:
     - python setup2.py bdist_egg
   artifacts:
     when: on_success
-    expire_in: 0
     paths:
       - dist/*whl
       - dist/*egg
