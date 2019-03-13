@@ -17,14 +17,17 @@ class RectangleTestCase(unittest.TestCase):
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
+        print('Rectangle 1: {0}'.format(r1))
 
         p3 = (0.5, 0.0)
         p4 = (1.5, 1.0)
         r2 = Rectangle(p3, p4)
+        print('Rectangle 2: {0}'.format(r2))
 
         p5 = (1.0, 1.0)
         p6 = (2.0, 2.0)
         r3 = Rectangle(p5, p6)
+        print('Rectangle 3: {0}'.format(r3))
 
         r4 = Rectangle()
         r5 = Rectangle()

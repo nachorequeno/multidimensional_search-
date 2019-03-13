@@ -112,7 +112,13 @@ class OracleFunctionTestCase(unittest.TestCase):
         ora2 = OracleFunction()
         ora2.from_file(nfile, human_readable=human_readable)
 
-        self.assertEqual(ora1, ora2)
+        print('Oracle 1: {0}'.format(ora1))
+        print('Oracle 2: {0}'.format(ora2))
+
+        self.assertEqual(ora1, ora2, 'Different oracles')
+
+        del ora1
+        del ora2
 
         # Remove tempfile
         # os.unlink(nfile)
