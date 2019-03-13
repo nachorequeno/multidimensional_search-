@@ -13,19 +13,22 @@ from ParetoLib.Oracle.OracleFunction import OracleFunction, Condition
 class OracleFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
+        # type: (OracleFunctionTestCase) -> None
         self.files_to_clean = set()
 
     def tearDown(self):
+        # type: (OracleFunctionTestCase) -> None
         for filename in self.files_to_clean:
             if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
+        # type: (OracleFunctionTestCase, str) -> None
         self.files_to_clean.add(filename)
 
     # Test polynomial conditions
     def test_membership_condition(self):
-
+        # type: (OracleFunctionTestCase) -> None
         c1 = Condition('x', '>', '2')
         c2 = Condition('y', '<', '0.75')
 
@@ -48,7 +51,7 @@ class OracleFunctionTestCase(unittest.TestCase):
         self.assertFalse(fora(p3))
 
     def test_class_equalities(self):
-
+        # type: (OracleFunctionTestCase) -> None
         # Condition
         c1 = Condition()
         c2 = Condition()
@@ -61,13 +64,13 @@ class OracleFunctionTestCase(unittest.TestCase):
         self.assertNotEqual(c1, c2)
 
     def test_files(self):
-
+        # type: (OracleFunctionTestCase) -> None
         self.read_write_files(False)
         self.read_write_files(True)
 
     def read_write_files(self,
                          human_readable=False):
-
+        # type: (OracleFunctionTestCase, bool) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 

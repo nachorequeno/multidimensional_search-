@@ -143,7 +143,7 @@ class OracleSTLe(Oracle):
             res = (self.stl_prop_file == other.stl_prop_file) \
                   or filecmp.cmp(self.stl_prop_file, other.stl_prop_file)
             res = res or ((self.csv_signal_file == other.csv_signal_file)
-                          or filecmp.cmp(self.csv_signal_file, other.vcd_signal_file))
+                          or filecmp.cmp(self.csv_signal_file, other.csv_signal_file))
             res = res or ((self.stl_param_file == other.stl_param_file)
                           or (self.stl_parameters == other.stl_parameters))
         except OSError:
@@ -184,7 +184,7 @@ class OracleSTLe(Oracle):
         # type: (OracleSTLe, str) -> _
         elem = object.__getattribute__(self, name)
         if elem is None:
-            RootOracle.logger.debug('Initializating Oracle')
+            RootOracle.logger.debug('Initializating OracleSTLe')
             self._lazy_init()
             elem = object.__getattribute__(self, name)
             RootOracle.logger.debug('Initialized Oracle')
@@ -425,8 +425,8 @@ class OracleSTLe(Oracle):
         """
         assert (foutput is not None), 'File object should not be null'
 
-        pickle.dump(os.path.abspath(self.csv_signal_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(os.path.abspath(self.stl_prop_file), foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(os.path.abspath(self.csv_signal_file), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(os.path.abspath(self.stl_param_file), foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
@@ -436,8 +436,8 @@ class OracleSTLe(Oracle):
         """
         assert (foutput is not None), 'File object should not be null'
 
-        foutput.write(os.path.abspath(self.csv_signal_file) + '\n')
         foutput.write(os.path.abspath(self.stl_prop_file) + '\n')
+        foutput.write(os.path.abspath(self.csv_signal_file) + '\n')
         foutput.write(os.path.abspath(self.stl_param_file) + '\n')
 
 
@@ -553,6 +553,14 @@ class OracleSTLeLib(OracleSTLe):
         self.monitor = self.stle.stl_make_offlinepcmonitor(self.signal, self.signalvars, self.exprset)
         RootOracle.logger.debug('Monitor created: {0}'.format(self.monitor))
 
+    def _to_str(self):
+        # type: (OracleSTLe) -> str
+        s = 'STL property file: {0}\n'.format(self.stl_prop_file)
+        s += 'STL parameters file: {0}\n'.format(self.stl_param_file)
+        # s += 'STL parameters: {0}\n'.format(self.stl_parameters)
+        s += 'CSV signal file: {0}\n'.format(self.csv_signal_file)
+        return s
+
     def __copy__(self):
         # type: (OracleSTLeLib) -> OracleSTLeLib
         return OracleSTLeLib(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file,
@@ -565,17 +573,33 @@ class OracleSTLeLib(OracleSTLe):
         return OracleSTLeLib(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file,
                              stl_param_file=self.stl_param_file)
 
+    def __getattr__(self, name):
+        # type: (OracleSTLeLib, str) -> _
+        return OracleSTLe.__getattribute__(self, name)
+
+    def __getattribute__(self, name):
+        # type: (OracleSTLeLib, str) -> _
+        return OracleSTLe.__getattribute__(self, name)
+
     def __del__(self):
         # type: (OracleSTLeLib) -> None
         assert self.stle is not None
 
         if self.signal is not None:
+            print("StleLib signal\n")
+            print(str(self.signal) + "\n")
             self.stle.stl_delete_pcsignal(self.signal)
         if self.signalvars is not None:
+            print("StleLib signalvars\n")
+            print(str(self.signalvars) + "\n")
             self.stle.stl_delete_signalvars(self.signalvars)
         if self.exprset is not None:
+            print("StleLib exprset\n")
+            print(str(self.exprset) + "\n")
             self.stle.stl_delete_exprset(self.exprset)
         if self.monitor is not None:
+            print("StleLib monitor\n")
+            print(str(self.monitor) + "\n")
             self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     @staticmethod

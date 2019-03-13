@@ -14,6 +14,7 @@ from ParetoLib.Search.Search import create_2D_space, create_3D_space
 class ResultSetTestCase(unittest.TestCase):
 
     def setUp(self):
+        # type: (ResultSetTestCase) -> None
         self.files_to_clean = set()
 
         # Set of rectangles calculated by doc/example/example2d.py
@@ -108,14 +109,17 @@ class ResultSetTestCase(unittest.TestCase):
         self.rs_3D = ResultSet(self.border_3D, self.ylow_3D, self.yup_3D, self.xspace_3D)
 
     def tearDown(self):
+        # type: (ResultSetTestCase) -> None
         for filename in self.files_to_clean:
             if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
+        # type: (ResultSetTestCase) -> None
         self.files_to_clean.add(filename)
 
     def test_files_2D(self):
+        # type: (ResultSetTestCase) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 
@@ -129,6 +133,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.add_file_to_clean(nfile)
 
     def test_files_3D(self):
+        # type: (ResultSetTestCase) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 
@@ -142,6 +147,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.add_file_to_clean(nfile)
 
     def test_vertices_2D(self):
+        # type: (ResultSetTestCase) -> None
 
         s1 = {(0.250003814697266, 1.0), (0.875003814930096, 0.12500953685958), (0.12500953685958, 1.0),
               (0.75, 0.250003814697266), (0.625, 0.375001907290425), (0.75, 0.375001907290425),
@@ -177,6 +183,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(s1.union(s2).union(s3), self.rs_2D.vertices())
 
     def test_vertices_3D(self):
+        # type: (ResultSetTestCase) -> None
 
         s1 = {(0.75, 0.500007629394531, 0.500007629394531), (0.250003814697266, 1.0, 0.500007629394531),
                (0.500007629394531, 1.0, 7.629510947e-06), (1.0, 0.250003814697266, 0.250003814697266),
@@ -319,6 +326,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(s1.union(s2).union(s3), self.rs_3D.vertices())
 
     def test_min_max_dimension_values_2D(self):
+        # type: (ResultSetTestCase) -> None
         # d = 2
         d = self.yup_2D[0].dim()
         self.assertEqual(2.0, d)
@@ -333,6 +341,7 @@ class ResultSetTestCase(unittest.TestCase):
             self.assertEqual(1.0, self.rs_2D.get_max_val_dimension_border(i))
 
     def test_min_max_dimension_values_3D(self):
+        # type: (ResultSetTestCase) -> None
         # d = 3
         d = self.yup_3D[0].dim()
         self.assertEqual(3.0, d)
@@ -358,6 +367,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(self.rs_3D.get_max_val_dimension_border(2), 1.0)
 
     def test_volume_2D(self):
+        # type: (ResultSetTestCase) -> None
 
         self.assertEqual(0.0, self.rs_2D.overlapping_volume_yup())
         self.assertEqual(0.0, self.rs_2D.overlapping_volume_ylow())
@@ -392,6 +402,7 @@ class ResultSetTestCase(unittest.TestCase):
         # self.assertEqual(0.1562628745887126, rs_sim.volume_border_2())
 
     def test_volume_3D(self):
+        # type: (ResultSetTestCase) -> None
 
         self.assertEqual(0.0, self.rs_3D.overlapping_volume_yup())
         self.assertEqual(0.0, self.rs_3D.overlapping_volume_ylow())
@@ -426,6 +437,7 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertAlmostEqual(rs_sim.volume_border(), rs_sim.volume_border_2())
 
     def test_points_2D(self):
+        # type: (ResultSetTestCase) -> None
         n = 10
         for r in self.rs_2D.get_points_yup(n):
             self.assertTrue(self.rs_2D.member_yup(r))
@@ -440,6 +452,7 @@ class ResultSetTestCase(unittest.TestCase):
             self.assertTrue(self.rs_2D.member_space(r))
 
     def test_points_3D(self):
+        # type: (ResultSetTestCase) -> None
         n = 10
         for r in self.rs_3D.get_points_yup(n):
             self.assertTrue(self.rs_3D.member_yup(r))
@@ -459,16 +472,19 @@ class ResultSetTestCase(unittest.TestCase):
         reason='Display is not defined'
     )
     def test_plot_2D(self):
+        # type: (ResultSetTestCase) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 
         # Plot 2D by screen
         self.rs_2D.plot_2D(sec=1.0)
         self.rs_2D.plot_2D_light(sec=1.0)
+        self.rs_2D.plot_2D_pareto(sec=1.0)
 
         # Plot 2D by file
         self.rs_2D.plot_2D(sec=1.0, filename=nfile)
         self.rs_2D.plot_2D_light(sec=1.0, filename=nfile)
+        self.rs_2D.plot_2D_pareto(sec=1.0, filename=nfile)
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -479,16 +495,19 @@ class ResultSetTestCase(unittest.TestCase):
         reason='Display is not defined'
     )
     def test_plot_3D(self):
+        # type: (ResultSetTestCase) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
 
         # Plot 3D by screen
         self.rs_3D.plot_3D(sec=1.0)
         self.rs_3D.plot_3D_light(sec=1.0)
+        self.rs_3D.plot_3D_pareto(sec=1.0)
 
         # Plot 3D by file
         self.rs_3D.plot_3D(sec=1.0, filename=nfile)
         self.rs_3D.plot_3D_light(sec=1.0, filename=nfile)
+        self.rs_3D.plot_3D_pareto(sec=1.0, filename=nfile)
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -501,6 +520,7 @@ class ResultSetTestCase(unittest.TestCase):
 
 class ParResultSetTestCase(ResultSetTestCase):
     def setUp(self):
+        # type: (ParResultSetTestCase) -> None
         super(ParResultSetTestCase, self).setUp()
         self.rs = ParResultSet(self.border_2D, self.ylow_2D, self.yup_2D, self.xspace_2D)
         self.rs2 = ParResultSet()

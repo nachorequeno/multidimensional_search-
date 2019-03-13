@@ -5,25 +5,29 @@ import unittest
 from ParetoLib.Oracle.OracleSTL import OracleSTL
 
 
-###############
+#############
 # OracleSTL #
-###############
+#############
 
 class OracleSTLTestCase(unittest.TestCase):
     def setUp(self):
+        # type: (OracleSTLTestCase) -> None
         self.this_dir = 'Oracle/OracleSTL'
         self.files_to_clean = set()
         self.files_to_load = self.add_file_to_load()
 
     def tearDown(self):
+        # type: (OracleSTLTestCase) -> None
         for filename in self.files_to_clean:
             if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
+        # type: (OracleSTLTestCase, str) -> None
         self.files_to_clean.add(filename)
 
     def add_file_to_load(self):
+        # type: (OracleSTLTestCase) -> list
         # local_dirs = [x[0] for x in os.walk('Oracle/OracleSTL')]
         local_dirs = [x[0] for x in os.walk(self.this_dir)]
         oraclestl_filenames = []
@@ -32,6 +36,7 @@ class OracleSTLTestCase(unittest.TestCase):
         return oraclestl_filenames
 
     def add_file_to_load_from_folder(self, folder):
+        # type: (OracleSTLTestCase, str) -> list
         # test_dir = self.this_dir + folder
         test_dir = folder
         files_path = os.listdir(test_dir)
@@ -43,6 +48,7 @@ class OracleSTLTestCase(unittest.TestCase):
 
     # Test OracleSTL
     def test_OracleSTL(self):
+        # type: (OracleSTLTestCase) -> None
         self.read_write_files(human_readable=False)
         self.read_write_files(human_readable=True)
 

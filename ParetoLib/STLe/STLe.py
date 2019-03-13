@@ -43,18 +43,17 @@ Options:
 -h      Print this message.
 """
 
-import os
+import os, stat
 import platform
 
 from ctypes import CDLL, c_int, c_double, c_char_p, c_void_p, pointer
 
-# STLe requires to be compiled for the OS
-# -------------------------------------------------------------------------------
 def get_stle_path():
     return os.path.dirname(os.path.realpath(__file__))
 
 
 def get_stle_exec_name():
+    # Selecting STLe binary file depending on the OS
     ext = ''
     if platform.system() == 'Linux':
         ext = '.bin'
@@ -68,10 +67,14 @@ def get_stle_exec_name():
 def get_stle_bin():
     stle_path = get_stle_path()
     stle_exec_name = get_stle_exec_name()
-    return os.path.join(stle_path, stle_exec_name)
+    path = os.path.join(stle_path, stle_exec_name)
+    # Making binary file executable for owner, group and others
+    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return path
 
 
 def get_stle_lib_name():
+    # Selecting STLe binary file depending on the OS
     ext = ''
     if platform.system() == 'Linux':
         # ext = '.so'
@@ -86,13 +89,17 @@ def get_stle_lib_name():
 def get_stle_lib():
     stle_path = get_stle_path()
     stle_lib_name = get_stle_lib_name()
-    return os.path.join(stle_path, stle_lib_name)
+    path = os.path.join(stle_path, stle_lib_name)
+    # Making binary file executable for owner, group and others
+    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return path
+
 
 # -------------------------------------------------------------------------------
 # Options of the STLe executable file
-########################
-### Offline commands ###
-########################
+####################
+# Offline commands #
+####################
 STLE_BIN = get_stle_bin()
 STLE_OPT_CSV = '-db'
 STLE_OPT_IN_MEM_CSV = '1'
@@ -102,9 +109,10 @@ STLE_OPT_IN_FILE_STL = '-ff'
 STLE_OPT_TIMESTAMP = '-os'
 STLE_OPT_TIME = '0'
 STLE_OPT_HELP = '-h'
-#####################
-## Online commands ##
-#####################
+
+###################
+# Online commands #
+###################
 # (read-signal-csv "file_name")
 # (eval formula)
 # (clear-monitor)

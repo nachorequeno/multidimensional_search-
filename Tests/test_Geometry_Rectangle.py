@@ -13,6 +13,7 @@ class RectangleTestCase(unittest.TestCase):
     # def tearDown(self):
 
     def test_equality(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -35,6 +36,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertEqual(r4, r5)
 
     def test_distance_to_center(self):
+        # type: (RectangleTestCase) -> None
         p5 = (1.0, 1.0)
         p6 = (2.0, 2.0)
         r3 = Rectangle(p5, p6)
@@ -46,6 +48,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertEqual(dist_p5, dist_p6)
 
     def test_volumes(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -69,6 +72,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertGreater(r2.volume(), r_intersect.volume())
 
     def test_vertices(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.0)
         p2 = (1.0, 1.0)
         rect = Rectangle(p1, p2)
@@ -83,6 +87,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertEqual(num_vertices, num_vertices_expected)
 
     def test_intersection(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -135,6 +140,7 @@ class RectangleTestCase(unittest.TestCase):
         ####
 
     def test_concatenation(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -185,6 +191,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertEqual(r4, r2.concatenate(r4).intersection(r4))
 
     def test_difference(self):
+        # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)
         p2 = (1.0, 1.75)
         r1 = Rectangle(p1, p2)
@@ -234,6 +241,7 @@ class RectangleTestCase(unittest.TestCase):
         self.assertLessEqual(len(r4 - r3), len(diff_result22))
         self.assertLessEqual(len(r4 - r5), len(diff_result31))
         self.assertLessEqual(len(r5 - r4), len(diff_result32))
+
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=2)

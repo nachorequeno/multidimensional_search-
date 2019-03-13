@@ -12,12 +12,15 @@ class PointTestCase(unittest.TestCase):
     REP = 100
 
     def setUp(self):
+        # type: (PointTestCase) -> None
         pass
 
     def tearDown(self):
+        # type: (PointTestCase) -> None
         pass
 
     def time_for_n_iterations(self, f, l):
+        # type: (PointTestCase, callable, iter) -> None
         start = time.time()
         for i in range(l):
             f(i)
@@ -27,6 +30,7 @@ class PointTestCase(unittest.TestCase):
     def operation_performance(self,
                               rep=REP,
                               dim=DIM):
+        # type: (PointTestCase, int, int) -> None
         xxprime = np.random.rand(2, dim)
 
         x = tuple(xxprime[0])
@@ -63,6 +67,7 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: pp.minimum(x, xprime), rep)
 
     def operation_correctness(self, dim=DIM):
+        # type: (PointTestCase, int) -> None
         xxprime = np.random.rand(2, dim)
 
         x = tuple(xxprime[0])
@@ -83,10 +88,12 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(p.minimum(x, xprime), pp.minimum(x, xprime))
 
     def test_point_operations_performance(self):
+        # type: (PointTestCase) -> None
         for dim in range(2, 10):
             self.operation_performance(rep=self.REP, dim=dim)
 
     def test_point_operations_correctness(self):
+        # type: (PointTestCase) -> None
         for dim in range(2, 10):
             self.operation_correctness(dim=dim)
 

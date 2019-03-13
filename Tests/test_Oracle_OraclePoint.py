@@ -14,14 +14,17 @@ from ParetoLib.Oracle.NDTree import NDTree
 
 class OraclePointTestCase(unittest.TestCase):
     def setUp(self):
+        # type: (OraclePointTestCase) -> None
         self.files_to_clean = set()
 
     def tearDown(self):
+        # type: (OraclePointTestCase) -> None
         for filename in self.files_to_clean:
             if os.path.isfile(filename):
                 os.remove(filename)
 
     def add_file_to_clean(self, filename):
+        # type: (OraclePointTestCase, str) -> None
         self.files_to_clean.add(filename)
 
     # Test ND-Tree structure
@@ -89,6 +92,7 @@ class OraclePointTestCase(unittest.TestCase):
 
     # Test OraclePoint
     def test_OraclePoints(self):
+        # type: (OraclePointTestCase) -> None
         self.read_write_files(human_readable=False)
         self.read_write_files(human_readable=True)
 

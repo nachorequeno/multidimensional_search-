@@ -26,11 +26,15 @@ build:
     - python setup2.py bdist_wheel --universal
     - python setup2.py bdist_egg
   artifacts:
+    when: on_success
+    expire_in: 0
     paths:
-      - dist/
+      - dist/*whl
+      - dist/*egg
 
 test:
   stage: test
+  image: python:3
   dependencies:
     - build
   script:
@@ -39,9 +43,8 @@ test:
     - apt-get -y install python-pip
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
+    - pip install coverage
     - cd dist/
     - pip install *.whl --user
-    - cd ..
-    - pytest --ignore=Tests/test_Search.py
-    - cd Tests
-    - pytest test_Search.py::SearchOracleFunctionTestCase
+    - cd ../Tests
+    - ./coverage_all.sh
