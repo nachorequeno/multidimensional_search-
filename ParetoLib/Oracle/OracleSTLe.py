@@ -575,31 +575,23 @@ class OracleSTLeLib(OracleSTLe):
 
     def __getattr__(self, name):
         # type: (OracleSTLeLib, str) -> _
-        return OracleSTLe.__getattribute__(self, name)
+        return super(OracleSTLeLib, self).__getattr__(name)
 
     def __getattribute__(self, name):
         # type: (OracleSTLeLib, str) -> _
-        return OracleSTLe.__getattribute__(self, name)
+        return super(OracleSTLeLib, self).__getattribute__(name)
 
     def __del__(self):
         # type: (OracleSTLeLib) -> None
         assert self.stle is not None
 
         if self.signal is not None:
-            print("StleLib signal\n")
-            print(str(self.signal) + "\n")
             self.stle.stl_delete_pcsignal(self.signal)
         if self.signalvars is not None:
-            print("StleLib signalvars\n")
-            print(str(self.signalvars) + "\n")
             self.stle.stl_delete_signalvars(self.signalvars)
         if self.exprset is not None:
-            print("StleLib exprset\n")
-            print(str(self.exprset) + "\n")
             self.stle.stl_delete_exprset(self.exprset)
         if self.monitor is not None:
-            print("StleLib monitor\n")
-            print(str(self.monitor) + "\n")
             self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     @staticmethod

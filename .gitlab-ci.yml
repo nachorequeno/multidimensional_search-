@@ -43,6 +43,7 @@ test:
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
     - pip install coverage
+    - pip install pytest
     - cd dist/
     - pip install *.whl --user
     - cd ../Tests
