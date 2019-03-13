@@ -73,7 +73,7 @@ from itertools import product, tee
 from ParetoLib.Geometry.Segment import Segment
 from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
     incomparables, select, subt, int_to_bin_tuple
-from ParetoLib._py3k import reduce
+from ParetoLib._py3k import red
 
 
 class Rectangle(object):
@@ -297,7 +297,7 @@ class Rectangle(object):
     def _volume(self):
         # type: (Rectangle) -> float
         diagonal_length = self.diag_length()
-        _prod = reduce(lambda si, sj: si * sj, diagonal_length)
+        _prod = red(lambda si, sj: si * sj, diagonal_length)
         return abs(_prod)
 
     def volume(self):

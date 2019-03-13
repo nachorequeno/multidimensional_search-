@@ -20,4 +20,4 @@ python -m coverage run --parallel-mode --concurrency=multiprocessing test_Search
 python -m coverage combine
 python -m coverage report
 #python -m coverage html -d coverage/report-python
-#python -m coverage erase
+python -m coverage erase

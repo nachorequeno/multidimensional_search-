@@ -22,7 +22,7 @@ if (sys.version_info[0] >= 3):
     import codecs, io
     from functools import reduce
 
-    def reduce(function, sequence):
+    def red(function, sequence):
         """Call 'reduce', which applies 'function' over all the elements of the sequence"""
         return reduce(function, sequence)
 
@@ -64,7 +64,7 @@ else:  # sys.version_info[0] < 3
     from __builtin__ import xrange as range
     from __builtin__ import raw_input as input
 
-    def reduce(function, sequence):
+    def red(function, sequence):
         """Call 'reduce', which applies 'function' over all the elements of the sequence"""
         return reduce(function, sequence)
 
