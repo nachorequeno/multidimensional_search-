@@ -66,7 +66,7 @@ class OracleSTLe(Oracle):
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
 
-        RootOracle.logger.info('Initializing OracleSTLe')
+        RootOracle.logger.debug('Initializing OracleSTLe')
 
         self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
         self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
@@ -492,7 +492,7 @@ class OracleSTLeLib(OracleSTLe):
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
 
-        RootOracle.logger.info('Initializing OracleSTLeLib')
+        RootOracle.logger.debug('Initializing OracleSTLeLib')
 
         self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
         self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)

@@ -43,10 +43,12 @@ Options:
 -h      Print this message.
 """
 
-import os, stat
+import os
+import stat
 import platform
 
 from ctypes import CDLL, c_int, c_double, c_char_p, c_void_p, pointer
+
 
 def get_stle_path():
     return os.path.dirname(os.path.realpath(__file__))
@@ -270,7 +272,7 @@ class STLeLibInterface:
 
     def stl_read_pcsignal_csv_fname(self, csv_signal_file, val=0):
         # type: (STLeLibInterface, str, int) -> c_void_p
-        return self._stl_read_pcsignal_csv_fname(c_char_p(csv_signal_file), c_int(val))
+        return self._stl_read_pcsignal_csv_fname(c_char_p(bytes(csv_signal_file, 'utf-8')), c_int(val))
 
     def stl_delete_pcsignal(self, signal):
         # type: (STLeLibInterface, c_void_p) -> None
@@ -296,7 +298,7 @@ class STLeLibInterface:
         # type: (STLeLibInterface, c_void_p, str, int) -> c_void_p
         pos = c_int(val)
         # expr = stl_parse_sexpr_str(self.exprset, stl_formula, c_void_p(pos))
-        return self._stl_parse_sexpr_str(exprset, c_char_p(stl_formula), pointer(pos))
+        return self._stl_parse_sexpr_str(exprset, c_char_p(bytes(stl_formula, 'utf-8')), pointer(pos))
 
     def stl_pcsignal_size(self, signal):
         # type: (STLeLibInterface, c_void_p) -> c_int

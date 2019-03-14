@@ -827,7 +827,7 @@ class ResultSet:
             xs.append(pi[0])
             ys.append(pi[1])
             zs.append(pi[2])
-        ax1.scatter(xs, ys, zs, c='r', marker='p')
+        ax1.scatter3D(xs, ys, zs, c='r', marker='p')
 
         xs = []
         ys = []
@@ -836,7 +836,7 @@ class ResultSet:
             xs.append(pi[0])
             ys.append(pi[1])
             zs.append(pi[2])
-        ax1.scatter(xs, ys, zs, c='g', marker='p')
+        ax1.scatter3D(xs, ys, zs, c='g', marker='p')
 
         # plt.plot(xs, ys, zs, 'kp')
         # ax1.scatter(targetx, targety, targetz, c='k')
