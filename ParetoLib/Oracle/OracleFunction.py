@@ -582,7 +582,7 @@ class Condition:
 
         Example:
         >>> cond = Condition()
-        >>> outfile = open('filename', 'w')
+        >>> outfile = open('filename', 'wb')
         >>> cond.to_file_binary(outfile)
         >>> outfile.close()
         """

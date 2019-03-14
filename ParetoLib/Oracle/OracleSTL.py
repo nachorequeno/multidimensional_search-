@@ -168,7 +168,7 @@ class OracleSTL(Oracle):
 
         # Each line of the stl_param_file contains the name of a parameter in the STL formula
         try:
-            f = open(stl_param_file, 'rb')
+            f = open(stl_param_file, 'r')
             # res = [line.replace(' ', '') for line in f]
             res = [line.strip(' \n\t') for line in f]
             f.close()
@@ -278,7 +278,7 @@ class OracleSTL(Oracle):
         tp_result = {'violated': False, 'satisfied': True, 'unknown': None}
 
         # Remove empty spaces for each file line
-        f = open(res_file, 'rb')
+        f = open(res_file, 'r')
         f2 = (line.replace(' ', '') for line in f)
         # f2 = (line.strip(' \n\t') for line in f)
 

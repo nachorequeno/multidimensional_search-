@@ -226,7 +226,7 @@ class OracleSTLe(Oracle):
 
         # Each line of the stl_param_file contains the name of a parameter in the STL formula
         try:
-            f = open(stl_param_file, 'rb')
+            f = open(stl_param_file, 'r')
             # res = [line.replace(' ', '') for line in f]
             res = [line.strip(' \n\t') for line in f]
             f.close()
