@@ -239,8 +239,8 @@ class OracleSTL(Oracle):
         # temp_dir = tempfile.gettempdir()
         # temp_name = next(tempfile._get_candidate_names())
         # result_file_name = os.path.join(temp_dir, temp_name)
-        result_file_name = tempfile.mktemp()
-
+        fd, result_file_name = tempfile.mkstemp()
+        os.close(fd)
         try:
             # java -jar ./jamt.jar -x ./stl_prop_file.stl -s ./vcd_signal_file.vcd -a ./variables.alias -v out
 
