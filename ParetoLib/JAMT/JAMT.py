@@ -12,6 +12,7 @@ evaluating properties written in Signal Temporal Logic (STL) over them.
 """
 
 import os
+import stat
 
 
 # JAMT requires java to be installed
@@ -36,7 +37,10 @@ def get_java_path():
 def get_java_bin():
     java_path = get_java_path()
     java_exec_name = get_java_exec_name()
-    return os.path.join(java_path, java_exec_name)
+    path = os.path.join(java_path, java_exec_name)
+    # Making binary file executable for owner, group and others
+    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+    return path
 
 
 # -------------------------------------------------------------------------------
@@ -52,7 +56,10 @@ def get_jamt_path():
 def get_jamt_bin():
     jamt_path = get_jamt_path()
     jamt_exec_name = get_jamt_exec_name()
-    return os.path.join(jamt_path, jamt_exec_name)
+    path = os.path.join(jamt_path, jamt_exec_name)
+    # Making binary file executable for owner, group and others
+    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+    return path
 
 
 # -------------------------------------------------------------------------------

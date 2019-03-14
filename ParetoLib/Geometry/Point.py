@@ -14,7 +14,7 @@ of n components.
 import math
 
 import ParetoLib.Geometry
-from ParetoLib._py3k import reduce
+from ParetoLib._py3k import red
 
 
 # Auxiliary functions for computing the algebraic properties
@@ -128,7 +128,7 @@ def hamming_distance(x, xprime):
     >>> 12.0
     """
     temp = subtract(x, xprime)
-    _sum = reduce(lambda si, sj: abs(si) + abs(sj), temp)
+    _sum = red(lambda si, sj: abs(si) + abs(sj), temp)
     return _sum
 
 
