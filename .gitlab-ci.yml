@@ -1,4 +1,4 @@
-image: python:2
+image: python:2.7
 
 stages:
   - build_test
@@ -33,7 +33,7 @@ build:
 
 test:
   stage: test
-  image: python:3
+  image: python:3.4
   dependencies:
     - build
   script:
