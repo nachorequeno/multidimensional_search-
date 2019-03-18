@@ -55,6 +55,7 @@ test:
     ## Configuring tests
     - pip install coverage
     - pip install pytest
+    - pip install pytest-timeout
     - cd dist/
     - pip install *.whl --user
     - cd ../Tests
