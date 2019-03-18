@@ -9,11 +9,14 @@ build_test:
   stage: build_test
   script:
     - apt-get update
+    ## Downloading requirements
     - apt-get -y install openjdk-8-jre
     - apt-get -y install python-pip
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
+    ## Installing
     - ./install.sh
+    ## Testing
     - pytest --ignore=Tests/test_Search.py
     - cd Tests
     - pytest test_Search.py::SearchOracleFunctionTestCase
@@ -22,7 +25,9 @@ build:
   stage: build
   script:
     - apt-get update
+    ## Downloading requirements
     - apt-get -y install python-pip
+    ## Building
     - python setup2.py bdist_wheel --universal
     - python setup2.py bdist_egg
   artifacts:
@@ -38,10 +43,16 @@ test:
     - build
   script:
     - apt-get update
+    ## Downloading requirements
     - apt-get -y install openjdk-8-jre
     - apt-get -y install python-pip
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
+    ## Configuring graphical interface
+    - apt-get install -yqq xvfb
+    - Xvfb :99 -screen 0 1280x720x24 -ac &
+    - export DISPLAY=:99
+    ## Configuring tests
     - pip install coverage
     - pip install pytest
     - cd dist/

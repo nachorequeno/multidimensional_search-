@@ -320,6 +320,8 @@ class OracleSTL(Oracle):
         # reader = csv.DictReader(f, fieldnames=fieldnames)
         reader = csv.DictReader(f2)
 
+        RootOracle.logger.debug('CSV keys of {0}: {1}'.format(res_file, reader.fieldnames))
+
         # Last column of the CSV file contains the result of the evaluation
         key_veredict = reader.fieldnames[-1]
 
