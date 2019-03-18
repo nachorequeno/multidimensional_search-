@@ -3,6 +3,7 @@ import unittest
 import time
 import os
 import numpy as np
+import pytest
 
 from ParetoLib.Search.Search import SearchND
 
@@ -240,6 +241,7 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.DELTA = 1e-1
         self.STEPS = 1
 
+    @pytest.mark.timeout(600)
     def test_1D(self):
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
@@ -248,6 +250,7 @@ class SearchOracleSTLTestCase(SearchTestCase):
         list_test_files = sorted(list_test_files)[:num_files_test]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
+    @pytest.mark.timeout(600)
     def test_2D(self):
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
