@@ -12,10 +12,6 @@ from ParetoLib.Oracle.OracleSTL import OracleSTL
 from ParetoLib.Oracle.OracleSTLe import OracleSTLe, OracleSTLeLib
 from ParetoLib.Oracle.Oracle import Oracle
 
-EPS = 1e-5
-DELTA = 1e-5
-STEPS = 20
-
 if 'DISPLAY' not in os.environ:
     SLEEP_TIME = 0.0
 else:
@@ -39,6 +35,11 @@ class SearchTestCase(unittest.TestCase):
         self.numpoints_verify = 30
         # Number of examples that will execute
         self.numfiles_test = 1
+
+        # Configuring searching parameters
+        self.EPS = 1e-5
+        self.DELTA = 1e-5
+        self.STEPS = 20
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def closureMembershipTest(self, fora, rs, xpoint):
@@ -123,9 +124,9 @@ class SearchTestCase(unittest.TestCase):
                     rs = SearchND(ora=self.oracle,
                                   min_corner=min_corner,
                                   max_corner=max_corner,
-                                  epsilon=EPS,
-                                  delta=DELTA,
-                                  max_step=STEPS,
+                                  epsilon=self.EPS,
+                                  delta=self.DELTA,
+                                  max_step=self.STEPS,
                                   blocking=False,
                                   sleep=SLEEP_TIME,
                                   opt_level=opt_level,
@@ -233,6 +234,11 @@ class SearchOracleSTLTestCase(SearchTestCase):
         # The validity of the parametric domain is [-2.0, 2.0] (sin and cos signals has module 1.0)
         self.min_c = -2.0
         self.max_c = 2.0
+
+        # Configuring searching parameters
+        self.EPS = 1e-1
+        self.DELTA = 1e-1
+        self.STEPS = 1
 
     def test_1D(self):
         test_dir = os.path.join(self.this_dir, '1D')
