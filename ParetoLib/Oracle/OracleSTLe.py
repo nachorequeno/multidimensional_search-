@@ -30,9 +30,12 @@ from ParetoLib.STLe.STLe import STLeLibInterface, STLE_BIN, STLE_INTERACTIVE, ST
 
 
 class OracleSTLe(Oracle):
-    # OracleSTLe interacts with the binary executable STLe via PIPEs and string passing.
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
         # type: (OracleSTLe, str, str, str) -> None
+        """
+        Initialization of OracleSTLe.
+        OracleSTLe interacts with the binary executable STLe via PIPEs and string passing.
+        """
         Oracle.__init__(self)
 
         # Load STLe formula
@@ -60,16 +63,15 @@ class OracleSTLe(Oracle):
 
     def _lazy_init(self):
         # type: (OracleSTLe) -> None
-        # Lazy initialization of the OracleSTLe
-
         assert self.stl_prop_file != ''
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
 
+        # Lazy initialization of the OracleSTLe
         RootOracle.logger.debug('Initializing OracleSTLe')
 
-        self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
-        self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
+        self.stl_formula = OracleSTLe._load_stl_formula(self.stl_prop_file)
+        self.stl_parameters = OracleSTLe._get_parameters_stl(self.stl_param_file)
 
         # Start STLe oracle in interactive mode (i.e., more efficient)
         args = [STLE_BIN, STLE_INTERACTIVE]
@@ -133,7 +135,7 @@ class OracleSTLe(Oracle):
         # type: (OracleSTLe) -> str
         s = 'STL property file: {0}\n'.format(self.stl_prop_file)
         s += 'STL parameters file: {0}\n'.format(self.stl_param_file)
-        # s += 'STL parameters: {0}\n'.format(self.stl_parameters)
+        s += 'STL parameters: {0}\n'.format(self.stl_parameters)
         s += 'CSV signal file: {0}\n'.format(self.csv_signal_file)
         return s
 
@@ -156,13 +158,6 @@ class OracleSTLe(Oracle):
                 'Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
         return res
 
-    def __ne__(self, other):
-        # type: (OracleSTLe, OracleSTLe) -> bool
-        """
-        self != other
-        """
-        return not self.__eq__(other)
-
     def __hash__(self):
         # type: (OracleSTLe) -> int
         """
@@ -172,33 +167,49 @@ class OracleSTLe(Oracle):
 
     def __del__(self):
         # type: (OracleSTLe) -> None
+        """
+        Removes 'self' from the namespace.
+        """
         if self.initialized and self.stle_oracle is not None:
             self.stle_oracle.terminate()
 
     def __copy__(self):
         # type: (OracleSTLe) -> OracleSTLe
+        """
+        other = copy.copy(self)
+        """
         return OracleSTLe(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file, stl_param_file=self.stl_param_file)
 
     def __deepcopy__(self, memo):
         # type: (OracleSTLe, dict) -> OracleSTLe
+        """
+        other = copy.deepcopy(self)
+        """
         # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
-        # deepcopy cannot handle regex
+        # deepcopy cannot handle neither regex nor Popen processes
         return OracleSTLe(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file, stl_param_file=self.stl_param_file)
 
     def __getattr__(self, name):
         # type: (OracleSTLe, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         elem = object.__getattribute__(self, name)
         if elem is None:
-            RootOracle.logger.debug('Initializating OracleSTLe')
+            RootOracle.logger.debug('Initializing OracleSTLe')
             self._lazy_init()
             elem = object.__getattribute__(self, name)
             RootOracle.logger.debug('Initialized Oracle')
         RootOracle.logger.debug('__getattr__: {0}, {1}'.format(name, elem))
-        # s = input()
         return elem
 
     def __getattribute__(self, name):
         # type: (OracleSTLe, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         elem = object.__getattribute__(self, name)
         RootOracle.logger.debug('__getattribute__: {0}'.format(name))
         if elem is None:
@@ -220,7 +231,7 @@ class OracleSTLe(Oracle):
         return [str(i) for i in self.stl_parameters]
 
     @staticmethod
-    def get_parameters_stl(stl_param_file):
+    def _get_parameters_stl(stl_param_file):
         # type: (str) -> list
         res = []
 
@@ -236,7 +247,7 @@ class OracleSTLe(Oracle):
             return res
 
     @staticmethod
-    def load_stl_formula(stl_file):
+    def _load_stl_formula(stl_file):
         # type: (str) -> str
         formula = ''
         try:
@@ -258,10 +269,15 @@ class OracleSTLe(Oracle):
         math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
         return re.compile(math_regex)
 
-    def replace_val_stl_formula(self, xpoint):
+    def _replace_val_stl_formula(self, xpoint):
         # type: (OracleSTLe, tuple) -> str
-        # The number of parameters in the STL formula should be less or equal than
-        # the number of coordinates in the tuple
+
+        # Replaces the parameters of the STL formula by the numerical values in tuple xpoint.
+        # The number of parameters in the STL formula should be less or equal than the number of coordinates
+        # in the tuple.
+        #
+        # Returns a string (STLe expression).
+
         assert self.dim() <= len(xpoint)
         assert self.stl_formula != ''
         assert self.stl_parameters != []
@@ -290,6 +306,21 @@ class OracleSTLe(Oracle):
 
     def eval_stl_formula(self, stl_formula):
         # type: (OracleSTLe, str) -> bool
+        """
+        Evaluates the instance of a parametrized STL formula.
+
+        Args:
+            self (OracleSTLeLib): The Oracle.
+            stl_formula: String representing the instance of the parametrized STL formula that will be evaluated.
+        Returns:
+            bool: True if the stl_formula is satisfied.
+
+        Example:
+        >>> ora = OracleSTLe()
+        >>> stl_formula = '(< (On (0 inf) (- (Max x0) (Min x0))) 0.5)'
+        >>> ora.eval_stl_formula(stl_formula)
+        >>> False
+        """
         assert self.stle_oracle is not None
         assert not self.stle_oracle.stdin.closed
         assert not self.stle_oracle.stdout.closed
@@ -305,11 +336,19 @@ class OracleSTLe(Oracle):
         RootOracle.logger.debug('result: {0}'.format(res1))
 
         # Return the result of evaluating the STL formula.
-        return OracleSTLe.parse_stle_result(res1)
+        return OracleSTLe._parse_stle_result(res1)
 
     @staticmethod
-    def parse_stle_result(result):
+    def _parse_stle_result(result):
         # type: (str) -> bool
+        """
+        Interprets the result of evaluating a parametrized STL formula.
+
+        Args:
+            result (str): The result provided by STLe.
+        Returns:
+            bool: True if the STL formula is satisfied.
+        """
         #
         # STLe may return:
         # - a boolean value (i.e, "0" for False and "1" for True),
@@ -319,17 +358,11 @@ class OracleSTLe(Oracle):
         RootOracle.logger.debug('Result: {0}'.format(result))
         return int(result) == 1
 
-    # Membership functions
-    def __contains__(self, p):
-        # type: (OracleSTLe, tuple) -> bool
-        return self.member(p) is True
-
     def member(self, xpoint):
         # type: (OracleSTLe, tuple) -> bool
         """
         See Oracle.member().
         """
-
         RootOracle.logger.debug('Running membership function')
         # Cleaning the cache of STLe after MAX_ORACLE_CALLS (i.e., 'gargage collector')
         if self.num_oracle_calls > MAX_STLE_CALLS:
@@ -337,7 +370,7 @@ class OracleSTLe(Oracle):
             self._clean_cache()
 
         # Replace parameters of the STL formula with current values in xpoint tuple
-        val_stl_formula = self.replace_val_stl_formula(xpoint)
+        val_stl_formula = self._replace_val_stl_formula(xpoint)
 
         # Invoke STLe for solving the STL formula for the current values for the parameters
         result = False
@@ -348,13 +381,6 @@ class OracleSTLe(Oracle):
             RootOracle.logger.warning('Error when evaluating formula {0}.'.format(val_stl_formula))
         finally:
             return result
-
-    def membership(self):
-        # type: (OracleSTLe) -> callable
-        """
-        See Oracle.membership().
-        """
-        return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
@@ -447,9 +473,15 @@ class OracleSTLe(Oracle):
 
 
 class OracleSTLeLib(OracleSTLe):
-    # OracleSTLeLib interacts directly with the C library of STLe via the C API that STLe exports.
+    #
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
         # type: (OracleSTLeLib, str, str, str) -> None
+        """
+        Initialization of OracleSTLeLib.
+        OracleSTLeLib interacts directly with the C library of STLe via the C API that STLe exports.
+        OracleSTLeLib should be usually faster than OracleSTLe
+        """
+
         Oracle.__init__(self)
 
         # Load STLe formula
@@ -464,7 +496,7 @@ class OracleSTLeLib(OracleSTLe):
         self.csv_signal_file = csv_signal_file.strip(' \n\t')
 
         # Load the pattern for evaluating arithmetic expressions in STLe
-        self.pattern = OracleSTLe._regex_arithm_expr_stl_eval()
+        self.pattern = super(OracleSTLeLib, self)._regex_arithm_expr_stl_eval()
 
         # Number of calls to the STLe oracle
         self.num_oracle_calls = 0
@@ -485,17 +517,16 @@ class OracleSTLeLib(OracleSTLe):
         self.initialized = False
 
     def _lazy_init(self):
-        # type: (OracleSTLe) -> None
-        # Lazy initialization of the OracleSTLe
-
+        # type: (OracleSTLeLib) -> None
         assert self.stl_prop_file != ''
         assert self.stl_param_file != ''
         assert self.csv_signal_file != ''
 
+        # Lazy initialization of the OracleSTLeLib
         RootOracle.logger.debug('Initializing OracleSTLeLib')
 
-        self.stl_formula = OracleSTLe.load_stl_formula(self.stl_prop_file)
-        self.stl_parameters = OracleSTLe.get_parameters_stl(self.stl_param_file)
+        self.stl_formula = super(OracleSTLeLib, self)._load_stl_formula(self.stl_prop_file)
+        self.stl_parameters = super(OracleSTLeLib, self)._get_parameters_stl(self.stl_param_file)
         self.stle = STLeLibInterface()
 
         RootOracle.logger.debug('Starting: {0}'.format(self.csv_signal_file))
@@ -523,7 +554,6 @@ class OracleSTLeLib(OracleSTLe):
             raise RuntimeError(message)
 
         n = self.stle.stl_pcsignal_size(self.signal)
-        # self.signalvars = stl_make_signalvars_xn(c_int(n))
         self.signalvars = self.stle.stl_make_signalvars_xn(n)
         RootOracle.logger.debug('Signalvars created: {0}'.format(self.signalvars))
 
@@ -568,35 +598,54 @@ class OracleSTLeLib(OracleSTLe):
 
     def _to_str(self):
         # type: (OracleSTLe) -> str
+        """
+        Printer.
+        """
         s = 'STL property file: {0}\n'.format(self.stl_prop_file)
         s += 'STL parameters file: {0}\n'.format(self.stl_param_file)
-        # s += 'STL parameters: {0}\n'.format(self.stl_parameters)
+        s += 'STL parameters: {0}\n'.format(self.stl_parameters)
         s += 'CSV signal file: {0}\n'.format(self.csv_signal_file)
         return s
 
     def __copy__(self):
         # type: (OracleSTLeLib) -> OracleSTLeLib
+        """
+        other = copy.copy(self)
+        """
         return OracleSTLeLib(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file,
                              stl_param_file=self.stl_param_file)
 
     def __deepcopy__(self, memo):
         # type: (OracleSTLeLib) -> OracleSTLeLib
+        """
+        other = copy.deepcopy(self)
+        """
         # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
-        # deepcopy cannot handle regex
+        # deepcopy cannot handle neither regex nor Popen processes
         return OracleSTLeLib(stl_prop_file=self.stl_prop_file, csv_signal_file=self.csv_signal_file,
                              stl_param_file=self.stl_param_file)
 
     def __getattr__(self, name):
         # type: (OracleSTLeLib, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         return super(OracleSTLeLib, self).__getattr__(name)
 
     def __getattribute__(self, name):
         # type: (OracleSTLeLib, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         return super(OracleSTLeLib, self).__getattribute__(name)
 
     def __del__(self):
         # type: (OracleSTLeLib) -> None
-
+        """
+        Removes 'self' from the namespace.
+        """
         if self.initialized and self.stle is not None:
             if self.signal is not None:
                 self.stle.stl_delete_pcsignal(self.signal)
@@ -608,7 +657,7 @@ class OracleSTLeLib(OracleSTLe):
                 self.stle.stl_delete_offlinepcmonitor(self.monitor)
 
     @staticmethod
-    def parse_stle_result(result):
+    def _parse_stle_result(result):
         # type: (c_double) -> bool
         #
         # STLe may return:
@@ -621,6 +670,21 @@ class OracleSTLeLib(OracleSTLe):
 
     def eval_stl_formula(self, stl_formula):
         # type: (OracleSTLeLib, str) -> bool
+        """
+        Evaluates the instance of a parametrized STL formula.
+
+        Args:
+            self (OracleSTLeLib): The Oracle.
+            stl_formula: String representing the instance of the parametrized STL formula that will be evaluated.
+        Returns:
+            bool: True if the stl_formula is satisfied.
+
+        Example:
+        >>> ora = OracleSTLeLib()
+        >>> stl_formula = '(< (On (0 inf) (- (Max x0) (Min x0))) 0.5)'
+        >>> ora.eval_stl_formula(stl_formula)
+        >>> False
+        """
         assert self.stle is not None
         assert self.monitor is not None
         assert self.signal is not None
@@ -645,5 +709,5 @@ class OracleSTLeLib(OracleSTLe):
         self.stle.stl_unref_expr(expr)
 
         # Return the result of evaluating the STL formula.
-        return OracleSTLeLib.parse_stle_result(res)
+        return OracleSTLeLib._parse_stle_result(res)
 

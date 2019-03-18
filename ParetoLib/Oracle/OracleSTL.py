@@ -48,38 +48,50 @@ class OracleSTL(Oracle):
 
     def _lazy_init(self):
         # type: (OracleSTL) -> None
-        # Lazy initialization of the OracleSTLe
-
         assert self.stl_prop_file != ''
         assert self.stl_param_file != ''
         assert self.vcd_signal_file != ''
         assert self.var_alias_file != ''
 
-        self.stl_formula = OracleSTL.load_stl_formula(self.stl_prop_file)
-        self.stl_parameters = OracleSTL.get_parameters_stl(self.stl_param_file)
+        # Lazy initialization of the OracleSTL
+        self.stl_formula = OracleSTL._load_stl_formula(self.stl_prop_file)
+        self.stl_parameters = OracleSTL._get_parameters_stl(self.stl_param_file)
 
     def __copy__(self):
+        """
+        other = copy.copy(self)
+        """
         return OracleSTL(stl_prop_file=self.stl_prop_file, vcd_signal_file=self.vcd_signal_file, var_alias_file=self.var_alias_file, stl_param_file=self.stl_param_file)
 
     def __deepcopy__(self, memo):
+        """
+        other = copy.deepcopy(self)
+        """
         # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
-        # deepcopy cannot handle regex
+        # deepcopy cannot handle neither regex nor Popen processes
         return OracleSTL(stl_prop_file=self.stl_prop_file, vcd_signal_file=self.vcd_signal_file, var_alias_file=self.var_alias_file, stl_param_file=self.stl_param_file)
 
     def __getattr__(self, name):
         # type: (OracleSTL, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         elem = object.__getattribute__(self, name)
         if elem is None:
-            RootOracle.logger.debug('Initializating Oracle')
+            RootOracle.logger.debug('Initializing OracleSTL')
             self._lazy_init()
             elem = object.__getattribute__(self, name)
-            RootOracle.logger.debug('Initialized Oracle')
+            RootOracle.logger.debug('Initialized OracleSTL')
         RootOracle.logger.debug('__getattr__: {0}, {1}'.format(name, elem))
-        # s = input()
         return elem
 
     def __getattribute__(self, name):
         # type: (OracleSTL, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
         elem = object.__getattribute__(self, name)
         RootOracle.logger.debug('__getattribute__: {0}'.format(name))
         if elem is None:
@@ -133,13 +145,6 @@ class OracleSTL(Oracle):
                 'Unexpected error when comparing: {0}\n{1}\n{2}'.format(sys.exc_info()[0], str(self), str(other)))
         return res
 
-    def __ne__(self, other):
-        # type: (OracleSTL, OracleSTL) -> bool
-        """
-        self != other
-        """
-        return not self.__eq__(other)
-
     def __hash__(self):
         # type: (OracleSTL) -> int
         """
@@ -162,7 +167,7 @@ class OracleSTL(Oracle):
         return [str(i) for i in self.stl_parameters]
 
     @staticmethod
-    def get_parameters_stl(stl_param_file):
+    def _get_parameters_stl(stl_param_file):
         # type: (str) -> list
         res = []
 
@@ -178,7 +183,7 @@ class OracleSTL(Oracle):
             return res
 
     @staticmethod
-    def load_stl_formula(stl_file):
+    def _load_stl_formula(stl_file):
         # type: (str) -> str
         formula = ''
         try:
@@ -200,10 +205,14 @@ class OracleSTL(Oracle):
         math_regex = r'(\b{0}\b({1}\b{2}\b)*)'.format(number, op, number)
         return re.compile(math_regex)
 
-    def replace_par_val_stl_formula(self, xpoint):
+    def _replace_par_val_stl_formula(self, xpoint):
         # type: (OracleSTL, tuple) -> str
-        # The number of parameters in the STL formula should be less or equal than
-        # the number of coordinates in the tuple
+
+        # Replaces the parameters of the STL formula by the numerical values in tuple xpoint.
+        # The number of parameters in the STL formula should be less or equal than the number of coordinates
+        # in the tuple.
+        #
+        # Returns a string (body of the JAMT stl file).
         assert self.dim() <= len(xpoint)
 
         def eval_expr(match):
@@ -234,13 +243,26 @@ class OracleSTL(Oracle):
 
     def eval_stl_formula(self, stl_prop_file):
         # type: (OracleSTL, str) -> str
+        """
+        Evaluates the instance of a parametrized STL formula.
 
+        Args:
+            self (OracleSTLeLib): The Oracle.
+            stl_prop_file: File containing the instance of the parametrized STL formula that will be evaluated.
+        Returns:
+            bool: True if the stl_prop_file is satisfied.
+
+        Example:
+        >>> ora = OracleSTL()
+        >>> stl_prop_file = '/tmp/tmp9878'
+        >>> ora.eval_stl_formula(stl_prop_file)
+        >>> False
+        """
         # File having the result of the STL property evaluation over the signal
         # temp_dir = tempfile.gettempdir()
         # temp_name = next(tempfile._get_candidate_names())
         # result_file_name = os.path.join(temp_dir, temp_name)
         fd, result_file_name = tempfile.mkstemp()
-        os.close(fd)
         try:
             # java -jar ./jamt.jar -x ./stl_prop_file.stl -s ./vcd_signal_file.vcd -a ./variables.alias -v out
 
@@ -260,12 +282,23 @@ class OracleSTL(Oracle):
             RootOracle.logger.info(message)
             # raise RuntimeError(message)
         finally:
+            # close the temporary file
+            os.close(fd)
             # Return the result of evaluating the STL formula
             return result_file_name
 
     @staticmethod
-    def parse_amt_result(res_file):
+    def _parse_amt_result(res_file):
         # type: (str) -> (bool, bool)
+        """
+        Interprets the result of evaluating a parametrized STL formula.
+
+        Args:
+            res_file (str): The file containing the result provided by JAMT (STL).
+        Returns:
+            bool: True if the STL formula is satisfied, else False.
+            bool: True if JAMT succeed in evaluating the STL expression (i.e., no error happened)
+        """
         #
         # CSV format of the AMT result file:
         # Assertion, Verdict
@@ -309,14 +342,6 @@ class OracleSTL(Oracle):
         
         return _eval, delete
 
-    # Membership functions
-    def __contains__(self, p):
-        # type: (OracleSTL, tuple) -> bool
-        """
-        Synonym of self.member(point)
-        """
-        return self.member(p) is True
-
     def member(self, xpoint):
         # type: (OracleSTL, tuple) -> bool
         """
@@ -336,13 +361,13 @@ class OracleSTL(Oracle):
 
         RootOracle.logger.debug('Running membership function')
         # Replace parameters of the STL formula with current values in xpoint tuple
-        stl_prop_file_subst_name = self.replace_par_val_stl_formula(xpoint)
+        stl_prop_file_subst_name = self._replace_par_val_stl_formula(xpoint)
 
         # Invoke AMT for solving the STL formula for the current values for the parameters
         result_file_name = self.eval_stl_formula(stl_prop_file_subst_name)
 
         # Parse the AMT result
-        res, delet = OracleSTL.parse_amt_result(result_file_name)
+        res, delet = OracleSTL._parse_amt_result(result_file_name)
 
         # Remove temporal files
         if delet:
@@ -354,13 +379,6 @@ class OracleSTL(Oracle):
                                                                             result_file_name))
 
         return res
-
-    def membership(self):
-        # type: (OracleSTL) -> callable
-        """
-        See Oracle.membership().
-        """
-        return lambda xpoint: self.member(xpoint)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
