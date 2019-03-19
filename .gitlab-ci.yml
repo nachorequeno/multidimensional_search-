@@ -9,6 +9,10 @@ build_test:
   stage: build_test
   script:
     - apt-get update
+    ## Configuring graphical interface
+    - apt-get install -yqq xvfb
+    - Xvfb :99 -screen 0 1280x720x24 -ac &
+    - export DISPLAY=:99
     ## Downloading requirements
     - apt-get -y install openjdk-8-jre
     - apt-get -y install python-pip
@@ -43,15 +47,15 @@ test:
     - build
   script:
     - apt-get update
+    ## Configuring graphical interface
+    - apt-get install -yqq xvfb
+    - Xvfb :99 -screen 0 1280x720x24 -ac &
+    - export DISPLAY=:99
     ## Downloading requirements
     - apt-get -y install openjdk-8-jre
     - apt-get -y install python-pip
     - apt-get -y install python-tk
     - apt-get -y install python-pytest
-    ## Configuring graphical interface
-    - apt-get install -yqq xvfb
-    - Xvfb :99 -screen 0 1280x720x24 -ac &
-    - export DISPLAY=:99
     ## Configuring tests
     - pip install coverage
     - pip install pytest
