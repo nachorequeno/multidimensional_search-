@@ -55,9 +55,9 @@ class SearchTestCase(unittest.TestCase):
         print_string = 'Warning!\n'
         print_string += 'Testing {0}\n'.format(str(xpoint))
         print_string += '(inYup, inYlow, inBorder, inSpace): ({0}, {1}, {2}, {3})\n'.format(rs.member_yup(xpoint),
-                                                                            rs.member_ylow(xpoint),
-                                                                            rs.member_border(xpoint),
-                                                                            rs.member_space(xpoint))
+                                                                                            rs.member_ylow(xpoint),
+                                                                                            rs.member_border(xpoint),
+                                                                                            rs.member_space(xpoint))
         print_string += 'Expecting\n'
         print_string += '(inYup, inYlow): ({0}, {1})\n'.format(fora(xpoint), not fora(xpoint))
         print_string += '(test1, test2): ({0}, {1})\n'.format(test1, test2)
@@ -112,57 +112,6 @@ class SearchTestCase(unittest.TestCase):
         print('Report Border: {0}'.format(str(nBorder)))
         print('Time tests: {0}'.format(str(time0)))
 
-    def search(self, opt_level, bool_val):
-        # type: (SearchTestCase, int, bool) -> ResultSet
-
-        d = self.oracle.dim()
-        if d == 2:
-            rs = Search2D(ora=self.oracle,
-                          min_cornerx=self.min_c,
-                          min_cornery=self.min_c,
-                          max_cornerx=self.max_c,
-                          max_cornery=self.max_c,
-                          epsilon=self.EPS,
-                          delta=self.DELTA,
-                          max_step=self.STEPS,
-                          blocking=False,
-                          sleep=SLEEP_TIME,
-                          opt_level=opt_level,
-                          parallel=bool_val,
-                          logging=bool_val,
-                          simplify=bool_val)
-        elif d == 3:
-            rs = Search3D(ora=self.oracle,
-                          min_cornerx=self.min_c,
-                          min_cornery=self.min_c,
-                          min_cornerz=self.min_c,
-                          max_cornerx=self.max_c,
-                          max_cornery=self.max_c,
-                          max_cornerz=self.max_c,
-                          epsilon=self.EPS,
-                          delta=self.DELTA,
-                          max_step=self.STEPS,
-                          blocking=False,
-                          sleep=SLEEP_TIME,
-                          opt_level=opt_level,
-                          parallel=bool_val,
-                          logging=bool_val,
-                          simplify=bool_val)
-        else:
-            rs = SearchND(ora=self.oracle,
-                          min_corner=self.min_c,
-                          max_corner=self.max_c,
-                          epsilon=self.EPS,
-                          delta=self.DELTA,
-                          max_step=self.STEPS,
-                          blocking=False,
-                          sleep=SLEEP_TIME,
-                          opt_level=opt_level,
-                          parallel=bool_val,
-                          logging=bool_val,
-                          simplify=bool_val)
-        return rs
-
     def search_verify_ND(self, human_readable, list_test_files):
         # type: (SearchTestCase, bool, list) -> None
 
@@ -180,7 +129,18 @@ class SearchTestCase(unittest.TestCase):
                     print('Logging {0}'.format(bool_val))
                     print('Simplify {0}'.format(bool_val))
 
-                    rs = self.search(opt_level, bool_val)
+                    rs = SearchND(ora=self.oracle,
+                                  min_corner=self.min_c,
+                                  max_corner=self.max_c,
+                                  epsilon=self.EPS,
+                                  delta=self.DELTA,
+                                  max_step=self.STEPS,
+                                  blocking=False,
+                                  sleep=SLEEP_TIME,
+                                  opt_level=opt_level,
+                                  parallel=bool_val,
+                                  logging=bool_val,
+                                  simplify=bool_val)
 
                     # Create numpoints_verify vectors of dimension d
                     # Continuous uniform distribution over the stated interval.
