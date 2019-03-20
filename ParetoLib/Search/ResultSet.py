@@ -100,7 +100,7 @@ class ResultSet:
     # Identity function (via hashing)
     def __hash__(self):
         # type: (ResultSet) -> int
-        return hash((self.border, self.ylow, self.yup, self.xspace))
+        return hash((tuple(self.border), tuple(self.ylow), tuple(self.yup), hash(self.xspace)))
 
     # Vertex functions
     def vertices_yup(self):

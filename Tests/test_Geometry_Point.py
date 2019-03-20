@@ -36,6 +36,8 @@ class PointTestCase(unittest.TestCase):
 
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
+        r1 = random.randint(0, len(x)-1)
+        r2 = random.randint(0, 10)
 
         print('Point (tuple)')
         self.time_for_n_iterations(lambda z: p.dim(x), rep)
@@ -53,9 +55,9 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.minimum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.incomparables(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: p.subt(random.randint(0, len(x)), x, xprime), rep)
-        self.time_for_n_iterations(lambda z: p.int_to_bin_list(random.randint(0, 10)), rep)
-        self.time_for_n_iterations(lambda z: p.int_to_bin_tuple(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: p.subt(r1, x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.int_to_bin_list(r2), rep)
+        self.time_for_n_iterations(lambda z: p.int_to_bin_tuple(r2), rep)
         self.time_for_n_iterations(lambda z: p.dominates(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.is_dominated(x, xprime), rep)
 
@@ -75,9 +77,9 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: pp.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.minimum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.incomparables(x, xprime), rep)
-        self.time_for_n_iterations(lambda z: pp.subt(random.randint(0, len(x)), x, xprime), rep)
-        self.time_for_n_iterations(lambda z: pp.int_to_bin_list(random.randint(0, 10)), rep)
-        self.time_for_n_iterations(lambda z: pp.int_to_bin_tuple(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: pp.subt(r1, x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.int_to_bin_list(r2), rep)
+        self.time_for_n_iterations(lambda z: pp.int_to_bin_tuple(r2), rep)
         self.time_for_n_iterations(lambda z: pp.dominates(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.is_dominated(x, xprime), rep)
 
@@ -87,7 +89,7 @@ class PointTestCase(unittest.TestCase):
 
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
-        r = random.randint(0, len(x))
+        r = random.randint(0, len(x)-1)
 
         self.assertEqual(p.dim(x), pp.dim(x))
         self.assertEqual(p.norm(x), pp.norm(x))
