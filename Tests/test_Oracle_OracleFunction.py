@@ -50,6 +50,23 @@ class OracleFunctionTestCase(unittest.TestCase):
         self.assertTrue(fora(p2))
         self.assertFalse(fora(p3))
 
+        self.assertFalse(p1 in ora)
+        self.assertTrue(p2 in ora)
+        self.assertFalse(p3 in ora)
+
+    def test_hash(self):
+        # type: (OracleFunctionTestCase) -> None
+        c1 = Condition('x', '>', '2')
+        c2 = Condition('y', '<', '0.75')
+
+        # Oracle
+        ora = OracleFunction()
+        ora.add(c1)
+        ora.add(c2)
+        hash(ora)
+
+        del ora
+
     def test_class_equalities(self):
         # type: (OracleFunctionTestCase) -> None
         # Condition
@@ -116,6 +133,7 @@ class OracleFunctionTestCase(unittest.TestCase):
         print('Oracle 2: {0}'.format(ora2))
 
         self.assertEqual(ora1, ora2, 'Different oracles')
+        self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
         del ora1
         del ora2

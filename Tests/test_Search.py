@@ -5,7 +5,8 @@ import os
 import numpy as np
 import pytest
 
-from ParetoLib.Search.Search import SearchND
+from ParetoLib.Search.Search import Search2D, Search3D, SearchND
+from ParetoLib.Search.ResultSet import ResultSet
 
 from ParetoLib.Oracle.OracleFunction import OracleFunction
 from ParetoLib.Oracle.OraclePoint import OraclePoint
@@ -22,6 +23,8 @@ else:
 class SearchTestCase(unittest.TestCase):
 
     def setUp(self):
+        # type: (SearchTestCase) -> None
+
         # This test only considers Oracles (in *.txt format) that are located in the root
         # of folders Oracle/OracleXXX/[1|2|3|N]D
 
@@ -44,6 +47,8 @@ class SearchTestCase(unittest.TestCase):
 
     #  Membership testing function used in verify2D, verify3D and verifyND
     def closureMembershipTest(self, fora, rs, xpoint):
+        # type: (SearchTestCase, callable, ResultSet, tuple) -> bool
+
         test1 = fora(xpoint) and (rs.member_yup(xpoint) or rs.member_border(xpoint))
         test2 = (not fora(xpoint)) and (rs.member_ylow(xpoint) or rs.member_border(xpoint))
 
@@ -66,6 +71,8 @@ class SearchTestCase(unittest.TestCase):
                  fora,
                  rs,
                  list_test_points):
+        # type: (SearchTestCase, callable, ResultSet, list) -> None
+
         # list_test_points = [(t1p, t2p, t3p) for t1p in t1 for t2p in t2 for t3p in t3]
 
         start = time.time()
@@ -105,44 +112,83 @@ class SearchTestCase(unittest.TestCase):
         print('Report Border: {0}'.format(str(nBorder)))
         print('Time tests: {0}'.format(str(time0)))
 
+    def search(self, opt_level, bool_val):
+        # type: (SearchTestCase, int, bool) -> ResultSet
+
+        d = self.oracle.dim()
+        if d == 2:
+            rs = Search2D(ora=self.oracle,
+                          min_cornerx=self.min_c,
+                          min_cornery=self.min_c,
+                          max_cornerx=self.max_c,
+                          max_cornery=self.max_c,
+                          epsilon=self.EPS,
+                          delta=self.DELTA,
+                          max_step=self.STEPS,
+                          blocking=False,
+                          sleep=SLEEP_TIME,
+                          opt_level=opt_level,
+                          parallel=bool_val,
+                          logging=bool_val,
+                          simplify=bool_val)
+        elif d == 3:
+            rs = Search3D(ora=self.oracle,
+                          min_cornerx=self.min_c,
+                          min_cornery=self.min_c,
+                          min_cornerz=self.min_c,
+                          max_cornerx=self.max_c,
+                          max_cornery=self.max_c,
+                          max_cornerz=self.max_c,
+                          epsilon=self.EPS,
+                          delta=self.DELTA,
+                          max_step=self.STEPS,
+                          blocking=False,
+                          sleep=SLEEP_TIME,
+                          opt_level=opt_level,
+                          parallel=bool_val,
+                          logging=bool_val,
+                          simplify=bool_val)
+        else:
+            rs = SearchND(ora=self.oracle,
+                          min_corner=self.min_c,
+                          max_corner=self.max_c,
+                          epsilon=self.EPS,
+                          delta=self.DELTA,
+                          max_step=self.STEPS,
+                          blocking=False,
+                          sleep=SLEEP_TIME,
+                          opt_level=opt_level,
+                          parallel=bool_val,
+                          logging=bool_val,
+                          simplify=bool_val)
+        return rs
+
     def search_verify_ND(self, human_readable, list_test_files):
-        # min_corner = 0.0
-        # max_corner = 1.0
-        min_corner = self.min_c
-        max_corner = self.max_c
+        # type: (SearchTestCase, bool, list) -> None
 
         for bool_val in (True, False):
             for test in list_test_files:
                 self.assertTrue(os.path.isfile(test), test)
                 self.oracle.from_file(test, human_readable)
                 fora = self.oracle.membership()
+                d = self.oracle.dim()
                 for opt_level in range(3):
                     print('\nTesting {0}'.format(test))
+                    print('Dimension {0}'.format(d))
                     print('Optimisation level {0}'.format(opt_level))
                     print('Parallel search {0}'.format(bool_val))
                     print('Logging {0}'.format(bool_val))
                     print('Simplify {0}'.format(bool_val))
-                    rs = SearchND(ora=self.oracle,
-                                  min_corner=min_corner,
-                                  max_corner=max_corner,
-                                  epsilon=self.EPS,
-                                  delta=self.DELTA,
-                                  max_step=self.STEPS,
-                                  blocking=False,
-                                  sleep=SLEEP_TIME,
-                                  opt_level=opt_level,
-                                  parallel=bool_val,
-                                  logging=bool_val,
-                                  simplify=bool_val)
+
+                    rs = self.search(opt_level, bool_val)
 
                     # Create numpoints_verify vectors of dimension d
                     # Continuous uniform distribution over the stated interval.
                     # To sample Unif[a, b), b > a
                     # (b - a) * random_sample() + a
-                    d = self.oracle.dim()
                     print('Dimension {0}'.format(d))
-                    list_test_points = (max_corner - min_corner) * np.random.random_sample((self.numpoints_verify, d)) \
-                                       + min_corner
+                    list_test_points = (self.max_c - self.min_c) * np.random.random_sample((self.numpoints_verify, d)) \
+                                       + self.min_c
                     print('Verifying {0}'.format(test))
                     self.verifyND(fora, rs, list_test_points)
 
@@ -150,6 +196,8 @@ class SearchTestCase(unittest.TestCase):
 class SearchOracleFunctionTestCase(SearchTestCase):
 
     def setUp(self):
+        # type: (SearchOracleFunctionTestCase) -> None
+
         super(SearchOracleFunctionTestCase, self).setUp()
         self.this_dir = 'Oracle/OracleFunction'
         self.oracle = OracleFunction()
@@ -159,6 +207,8 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.max_c = 2.0
 
     def test_2D(self):
+        # type: (SearchOracleFunctionTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -167,6 +217,8 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_3D(self):
+        # type: (SearchOracleFunctionTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -175,6 +227,8 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_ND(self):
+        # type: (SearchOracleFunctionTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -186,11 +240,15 @@ class SearchOracleFunctionTestCase(SearchTestCase):
 class SearchOraclePointTestCase(SearchTestCase):
 
     def setUp(self):
+        # type: (SearchOraclePointTestCase) -> None
+
         super(SearchOraclePointTestCase, self).setUp()
         self.this_dir = 'Oracle/OraclePoint'
         self.oracle = OraclePoint()
 
     def test_2D(self):
+        # type: (SearchOraclePointTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
@@ -202,6 +260,8 @@ class SearchOraclePointTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_3D(self):
+        # type: (SearchOraclePointTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '3D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
@@ -213,6 +273,8 @@ class SearchOraclePointTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=False, list_test_files=list_test_files)
 
     def test_ND(self):
+        # type: (SearchOraclePointTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, 'ND')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.bin')]
@@ -227,6 +289,8 @@ class SearchOraclePointTestCase(SearchTestCase):
 class SearchOracleSTLTestCase(SearchTestCase):
 
     def setUp(self):
+        # type: (SearchOracleSTLTestCase) -> None
+
         super(SearchOracleSTLTestCase, self).setUp()
         self.this_dir = 'Oracle/OracleSTL'
         self.oracle = OracleSTL()
@@ -236,13 +300,17 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.min_c = -2.0
         self.max_c = 2.0
 
+        self.numpoints_verify = 2
+
         # Configuring searching parameters
         self.EPS = float("inf")
         self.DELTA = 1e-1
         self.STEPS = 1
 
-    @pytest.mark.timeout(300, method='thread')
+    @pytest.mark.timeout(400, method='thread')
     def test_1D(self):
+        # type: (SearchOracleSTLTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -250,8 +318,10 @@ class SearchOracleSTLTestCase(SearchTestCase):
         list_test_files = sorted(list_test_files)[:num_files_test]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
-    @pytest.mark.timeout(300, method='thread')
+    @pytest.mark.timeout(400, method='thread')
     def test_2D(self):
+        # type: (SearchOracleSTLTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -273,6 +343,8 @@ class SearchOracleSTLTestCase(SearchTestCase):
 class SearchOracleSTLeTestCase(SearchTestCase):
 
     def setUp(self):
+        # type: (SearchOracleSTLeTestCase) -> None
+
         super(SearchOracleSTLeTestCase, self).setUp()
         self.this_dir = 'Oracle/OracleSTLe'
         self.oracle = OracleSTLe()
@@ -283,6 +355,8 @@ class SearchOracleSTLeTestCase(SearchTestCase):
         self.max_c = 1.0
 
     def test_1D(self):
+        # type: (SearchOracleSTLeTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -291,6 +365,8 @@ class SearchOracleSTLeTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_2D(self):
+        # type: (SearchOracleSTLeTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -302,6 +378,8 @@ class SearchOracleSTLeTestCase(SearchTestCase):
 class SearchOracleSTLeLibTestCase(SearchTestCase):
 
     def setUp(self):
+        # type: (SearchOracleSTLeLibTestCase) -> None
+
         super(SearchOracleSTLeLibTestCase, self).setUp()
         self.this_dir = 'Oracle/OracleSTLe'
         self.oracle = OracleSTLeLib()
@@ -312,6 +390,8 @@ class SearchOracleSTLeLibTestCase(SearchTestCase):
         self.max_c = 1.0
 
     def test_1D(self):
+        # type: (SearchOracleSTLeLibTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
@@ -320,6 +400,8 @@ class SearchOracleSTLeLibTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
     def test_2D(self):
+        # type: (SearchOracleSTLeLibTestCase) -> None
+
         test_dir = os.path.join(self.this_dir, '1D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]

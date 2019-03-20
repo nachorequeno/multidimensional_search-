@@ -127,6 +127,8 @@ class ResultSetTestCase(unittest.TestCase):
         self.rs2.from_file(nfile)
 
         self.assertTrue(self.rs_2D == self.rs2)
+        self.assertEqual(self.rs_2D, self.rs2)
+        self.assertEqual(hash(self.rs_2D), hash(self.rs2))
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -141,6 +143,8 @@ class ResultSetTestCase(unittest.TestCase):
         self.rs2.from_file(nfile)
 
         self.assertTrue(self.rs_3D == self.rs2)
+        self.assertEqual(self.rs_3D, self.rs2)
+        self.assertEqual(hash(self.rs_3D), hash(self.rs2))
 
         # Remove tempfile
         # os.unlink(nfile)

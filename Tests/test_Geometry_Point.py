@@ -1,3 +1,4 @@
+import random
 import time
 import unittest
 
@@ -37,6 +38,7 @@ class PointTestCase(unittest.TestCase):
         xprime = tuple(xxprime[1])
 
         print('Point (tuple)')
+        self.time_for_n_iterations(lambda z: p.dim(x), rep)
         self.time_for_n_iterations(lambda z: p.norm(x), rep)
         self.time_for_n_iterations(lambda z: p.distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.hamming_distance(x, xprime), rep)
@@ -50,8 +52,15 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.less_equal(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.minimum(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.incomparables(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.subt(random.randint(0, len(x)), x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.int_to_bin_list(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: p.int_to_bin_tuple(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: p.dominates(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.is_dominated(x, xprime), rep)
 
         print('Point (numpy)')
+        self.time_for_n_iterations(lambda z: pp.dim(x), rep)
         self.time_for_n_iterations(lambda z: pp.norm(x), rep)
         self.time_for_n_iterations(lambda z: pp.distance(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.hamming_distance(x, xprime), rep)
@@ -65,6 +74,12 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: pp.less_equal(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: pp.minimum(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.incomparables(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.subt(random.randint(0, len(x)), x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.int_to_bin_list(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: pp.int_to_bin_tuple(random.randint(0, 10)), rep)
+        self.time_for_n_iterations(lambda z: pp.dominates(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: pp.is_dominated(x, xprime), rep)
 
     def operation_correctness(self, dim=DIM):
         # type: (PointTestCase, int) -> None
@@ -72,7 +87,9 @@ class PointTestCase(unittest.TestCase):
 
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
+        r = random.randint(0, len(x))
 
+        self.assertEqual(p.dim(x), pp.dim(x))
         self.assertEqual(p.norm(x), pp.norm(x))
         self.assertEqual(p.distance(x, xprime), pp.distance(x, xprime))
         self.assertEqual(p.hamming_distance(x, xprime), pp.hamming_distance(x, xprime))
@@ -86,6 +103,12 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(p.less_equal(x, xprime), pp.less_equal(x, xprime))
         self.assertEqual(p.maximum(x, xprime), pp.maximum(x, xprime))
         self.assertEqual(p.minimum(x, xprime), pp.minimum(x, xprime))
+        self.assertEqual(p.incomparables(x, xprime), pp.incomparables(x, xprime))
+        self.assertEqual(p.subt(r, x, xprime), pp.subt(r, x, xprime))
+        self.assertEqual(p.int_to_bin_list(r), pp.int_to_bin_list(r))
+        self.assertEqual(p.int_to_bin_tuple(r), pp.int_to_bin_tuple(r))
+        self.assertEqual(p.dominates(x, xprime), pp.dominates(x, xprime))
+        self.assertEqual(p.is_dominated(x, xprime), pp.is_dominated(x, xprime))
 
     def test_point_operations_performance(self):
         # type: (PointTestCase) -> None

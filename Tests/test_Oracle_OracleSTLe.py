@@ -82,6 +82,7 @@ class OracleSTLeTestCase(unittest.TestCase):
             print('Oracle 2: {0}'.format(ora2))
 
             self.assertEqual(ora1, ora2, 'Different files')
+            self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
             del ora1
             del ora2

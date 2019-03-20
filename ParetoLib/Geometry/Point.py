@@ -394,10 +394,11 @@ def subt(i, x, xprime):
         tuple: (x[0],...,x[i-1], xprime[i], x[i+1],..., x[dim(x)-1]).
 
     Example:
+    >>> i = 3
     >>> x = (5, 6, 7)
     >>> xprime = (0, 0, 1)
-    >>> select(x, xprime)
-    >>> (0, 0, 7)
+    >>> subt(i, x, xprime)
+    >>> (5, 6, 1)
     """
     n = len(x)
     m = len(xprime)
@@ -477,9 +478,9 @@ def int_to_bin_tuple(x, pad=0):
 
     Example:
     >>> x = 4
-    >>> int_to_bin_list(x, 0)
+    >>> int_to_bin_tuple(x, 0)
     >>> (1, 0, 0)
-    >>> int_to_bin_list(x, 4)
+    >>> int_to_bin_tuple(x, 4)
     >>> (0, 1, 0, 0)
     """
     return tuple(int_to_bin_list(x, pad))

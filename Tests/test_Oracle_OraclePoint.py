@@ -146,12 +146,15 @@ class OraclePointTestCase(unittest.TestCase):
 
         for p in p1:
             self.assertTrue(fora1(p))
+            self.assertTrue(p in ora1)
 
         for p in p2:
             self.assertTrue(fora1(p))
+            self.assertTrue(p in ora1)
 
         for p in p3:
             self.assertFalse(fora1(p))
+            self.assertTrue(p in ora1)
 
         # Read/Write Oracle from file
         print('Reading from {0}'.format(nfile))
@@ -165,6 +168,7 @@ class OraclePointTestCase(unittest.TestCase):
         print('Oracle 2: {0}'.format(ora2))
 
         self.assertEqual(ora1, ora2, 'Different oracles')
+        self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
         del ora1
         del ora2
