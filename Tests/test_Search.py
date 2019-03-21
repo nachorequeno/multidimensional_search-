@@ -267,7 +267,7 @@ class SearchOracleSTLTestCase(SearchTestCase):
         self.DELTA = 1e-1
         self.STEPS = 1
 
-    @pytest.mark.timeout(400, method='thread')
+    @pytest.mark.timeout(600, method='thread')
     def test_1D(self):
         # type: (SearchOracleSTLTestCase) -> None
 
@@ -278,7 +278,7 @@ class SearchOracleSTLTestCase(SearchTestCase):
         list_test_files = sorted(list_test_files)[:num_files_test]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
-    @pytest.mark.timeout(400, method='thread')
+    @pytest.mark.timeout(600, method='thread')
     def test_2D(self):
         # type: (SearchOracleSTLTestCase) -> None
 

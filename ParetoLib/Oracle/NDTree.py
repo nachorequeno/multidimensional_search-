@@ -19,6 +19,7 @@ https://ieeexplore.ieee.org/document/8274915/
 
 import sys
 import resource
+import os
 import io
 import pickle
 
@@ -199,27 +200,8 @@ class NDTree:
         >>> nd.get_points()
         >>> {(0,0,0), (1,1,1)}
         """
-        points = self.root.get_points_rec() if self.root is not None else set()
+        points = self.root.s() if self.root is not None else set()
         return points
-
-    def remove_point(self, p):
-        # type: (NDTree, tuple) -> None
-        """
-        Deletion of a point from the NDTree.
-
-        Args:
-            self (NDTree): The NDTree.
-            p (tuple): The point
-
-        Returns:
-            None: p is deleted from the NDTree (if p is inside self).
-
-        Example:
-        >>> x = (0,0,0)
-        >>> nd = NDTree()
-        >>> nd.remove_point(x)
-        """
-        self.root.remove_point_rec(p) if self.root is not None else None
 
     def update_point(self, p):
         # type: (NDTree, tuple) -> None
@@ -273,6 +255,38 @@ class NDTree:
         return self.root.dominates(p)
 
     # Read/Write file functions
+    def from_file(self, fname='', human_readable=False):
+        # type: (NDTree, str, bool) -> None
+        """
+        Loading an NDTree from a file.
+
+        Args:
+            self (NDTree): The NDTree.
+            fname (string): The file name where the NDTree is saved.
+            human_readable (bool): Boolean indicating if the
+                           NDTree will be loaded from a binary or
+                           text file.
+
+        Returns:
+            None: The NDTree is loaded from fname.
+
+        Example:
+        >>> ndt = NDTree()
+        >>> ndt.from_file('filename')
+        """
+        assert (fname != ''), 'Filename should not be null'
+        assert os.path.isfile(fname), 'File {0} does not exists or it is not a file'.format(fname)
+
+        mode = 'r'
+        if human_readable:
+            finput = open(fname, mode)
+            self.from_file_text(finput)
+        else:
+            mode = mode + 'b'
+            finput = open(fname, mode)
+            self.from_file_binary(finput)
+        finput.close()
+
     def from_file_binary(self, finput=None):
         # type: (NDTree, io.BinaryIO) -> None
         """
@@ -337,6 +351,44 @@ class NDTree:
         point_list = (_line2tuple(line) for line in finput)
         for point in point_list:
             self.update_point(point)
+
+    def to_file(self, fname='', append=False, human_readable=False):
+        # type: (NDTree, str, bool, bool) -> None
+        """
+        Writing of an NDTree to a file.
+
+        Args:
+            self (NDTree): The NDTree.
+            fname (string): The file name where the NDTree will
+                            be saved.
+            append (bool): Boolean indicating if the NDTree will
+                           be appended at the end of the file.
+            human_readable (bool): Boolean indicating if the
+                           NDTree will be saved in a binary or
+                           text file.
+
+        Returns:
+            None: The NDTree is saved in fname.
+
+        Example:
+        >>> ndt = NDTree()
+        >>> ndt.to_file('filename')
+        """
+        assert (fname != ''), 'Filename should not be null'
+
+        if append:
+            mode = 'a'
+        else:
+            mode = 'w'
+
+        if human_readable:
+            foutput = open(fname, mode)
+            self.to_file_text(foutput)
+        else:
+            mode = mode + 'b'
+            foutput = open(fname, mode)
+            self.to_file_binary(foutput)
+        foutput.close()
 
     def to_file_binary(self, foutput=None):
         # type: (NDTree, io.BinaryIO) -> None
@@ -575,15 +627,6 @@ class Node:
             self.nodes.remove(n)
             del n
 
-    def remove_node_rec(self, n):
-        # type: (Node, Node) -> None
-        """
-        Removal of a descendant Node n from the tree
-        rooted by self.
-        """
-        [npr.remove_node_rec(n) for npr in self.nodes]
-        self.remove_node(n)
-
     def replace_node(self, n, npr):
         # type: (Node, Node, Node) -> None
         """
@@ -593,15 +636,6 @@ class Node:
             index = self.nodes.index(n)
             self.add_node(npr, index)
             self.remove_node(n)
-
-    def replace_node_rec(self, n, npr):
-        # type: (Node, Node) -> None
-        """
-        Replacement of a descendant Node n by Node npr
-        in the tree rooted by self.
-        """
-        [x.replace_node_rec(n, npr) for x in self.nodes]
-        self.replace_node(n, npr)
 
     def get_subnode(self, pos=0):
         # type: (Node, int) -> Node
@@ -616,15 +650,6 @@ class Node:
         Set of direct descendant.
         """
         return set(self.nodes)
-
-    def get_subnodes_rec(self):
-        # type: (Node) -> set
-        """
-        Set of all descendant.
-        """
-        subnode_list = [n.get_subnodes_rec() for n in self.nodes]
-        nodes = set.union(*subnode_list)
-        return nodes.union(self.get_subnodes())
 
     def num_subnodes(self):
         # type: (Node) -> int
@@ -662,15 +687,6 @@ class Node:
             self.L.remove(x)
             del x
 
-    def remove_point_rec(self, x):
-        # type: (Node, tuple) -> None
-        """
-        Removal of point x from current Node (if it is in),
-        and from all the descendants.
-        """
-        [n.remove_point_rec(x) for n in self.nodes]
-        self.remove_point(x)
-
     def replace_point(self, x, xp):
         # type: (Node, tuple, tuple) -> None
         """
@@ -680,15 +696,6 @@ class Node:
             index = self.L.index(x)
             self.add_point(xp, index)
             self.remove_point(x)
-
-    def replace_point_rec(self, x, xp):
-        # type: (Node, tuple, tuple) -> None
-        """
-        Replacement of point x by point xp if x is in the current
-        Node or in any descendant.
-        """
-        [n.replace_point_rec(x, xp) for n in self.nodes]
-        self.replace_point(x, xp)
 
     def get_point(self, pos=0):
         # type: (Node, int) -> tuple
@@ -704,19 +711,12 @@ class Node:
         """
         return set(self.L)
 
-    def get_points_rec(self):
-        # type: (Node) -> set
-        """
-        Getting set of points from the current Node and from
-        its descendants.
-        """
-        return self.s()
-
     # Set of points
     def s(self):
         # type: (Node) -> set
         """
-        Synonym of self.get_points_rec().
+        Getting set of points from the current Node and from
+        its descendants.
         """
         # if n == leaf, S(n) == L(n)
         if self.is_leaf():

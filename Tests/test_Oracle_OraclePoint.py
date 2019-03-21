@@ -28,9 +28,9 @@ class OraclePointTestCase(unittest.TestCase):
         self.files_to_clean.add(filename)
 
     # Test ND-Tree structure
-    def test_NDTree(self,
-                    min_corner=0.0,
-                    max_corner=1.0):
+    def test_populating_NDTree(self,
+                               min_corner=0.0,
+                               max_corner=1.0):
         # type: (OraclePointTestCase, float, float) -> None
 
         def f1(x):
@@ -50,6 +50,7 @@ class OraclePointTestCase(unittest.TestCase):
         ND1 = NDTree()
         ND2 = NDTree()
 
+        self.assertTrue(ND1.is_empty())
         self.assertEqual(ND1, ND2)
 
         for x, y in zip(xs, y3s):
@@ -65,6 +66,9 @@ class OraclePointTestCase(unittest.TestCase):
             ND1.update_point(point)
 
         self.assertEqual(ND1, ND2)
+        self.assertEqual(ND1.dim(), ND2.dim())
+        self.assertEqual(ND1.get_points(), ND2.get_points())
+        self.assertEqual(ND1.get_rectangle(), ND2.get_rectangle())
 
         # ND1 should change when we insert new dominanting points
         for x, y in zip(xs, y2s):
@@ -90,13 +94,60 @@ class OraclePointTestCase(unittest.TestCase):
         self.assertEqual(ND1, oldND1)
         self.assertNotEqual(ND1, ND2)
 
+    def test_files_NDTree(self):
+        # type: (OraclePointTestCase) -> None
+        self.read_write_ndtree_files(human_readable=False)
+        self.read_write_ndtree_files(human_readable=True)
+
+    def read_write_ndtree_files(self,
+                                min_corner=0.0,
+                                max_corner=1.0,
+                                human_readable=False):
+        # type: (OraclePointTestCase, float, float, bool) -> None
+
+        def f1(x):
+            return 1 / x if x > 0.0 else 1000
+
+        tmpfile = tf.NamedTemporaryFile(delete=False)
+        nfile = tmpfile.name
+
+        xs = np.arange(min_corner, max_corner, 0.1)
+        y1s = [f1(x) for x in xs]
+
+        ND1 = NDTree()
+        ND2 = NDTree()
+
+        for x, y in zip(xs, y1s):
+            point = (x, y)
+            ND1.update_point(point)
+
+        # Read/Write NDTree from file
+        print('Reading from {0}'.format(nfile))
+        print('Writing to {0}'.format(nfile))
+
+        ND1.to_file(nfile, append=False, human_readable=human_readable)
+        ND2.from_file(nfile, human_readable=human_readable)
+
+        print('NDTree 1: {0}'.format(ND1))
+        print('NDTree 2: {0}'.format(ND2))
+
+        self.assertEqual(ND1, ND2, 'Different oracles')
+        self.assertEqual(hash(ND1), hash(ND2), 'Different oracles')
+
+        del ND1
+        del ND2
+
+        # Remove tempfile
+        # os.unlink(nfile)
+        self.add_file_to_clean(nfile)
+
     # Test OraclePoint
     def test_OraclePoints(self):
         # type: (OraclePointTestCase) -> None
-        self.read_write_files(human_readable=False)
-        self.read_write_files(human_readable=True)
+        self.read_write_oracle_files(human_readable=False)
+        self.read_write_oracle_files(human_readable=True)
 
-    def read_write_files(self,
+    def read_write_oracle_files(self,
                          min_corner=0.0,
                          max_corner=1.0,
                          human_readable=False):
