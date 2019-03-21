@@ -58,6 +58,8 @@ class OracleFunctionTestCase(unittest.TestCase):
         # type: (OracleFunctionTestCase) -> None
         c1 = Condition('x', '>', '2')
         c2 = Condition('y', '<', '0.75')
+        hash(c1)
+        hash(c2)
 
         # Oracle
         ora = OracleFunction()
@@ -80,12 +82,47 @@ class OracleFunctionTestCase(unittest.TestCase):
 
         self.assertNotEqual(c1, c2)
 
-    def test_files(self):
+    def test_files_Condition(self):
         # type: (OracleFunctionTestCase) -> None
-        self.read_write_files(False)
-        self.read_write_files(True)
+        self.read_write_condition_files(human_readable=False)
+        self.read_write_condition_files(human_readable=True)
 
-    def read_write_files(self,
+    def read_write_condition_files(self,
+                                human_readable=False):
+        # type: (OracleFunctionTestCase, bool) -> None
+
+        tmpfile = tf.NamedTemporaryFile(delete=False)
+        nfile = tmpfile.name
+
+        c1 = Condition('x', '>', '0.5')
+        c2 = Condition()
+
+        # Read/Write Condition from file
+        print('Reading from {0}'.format(nfile))
+        print('Writing to {0}'.format(nfile))
+
+        c1.to_file(nfile, append=False, human_readable=human_readable)
+        c2.from_file(nfile, human_readable=human_readable)
+
+        print('Condition 1: {0}'.format(c1))
+        print('Condition 2: {0}'.format(c2))
+
+        self.assertEqual(c1, c2, 'Different condition')
+        self.assertEqual(hash(c1), hash(c2), 'Different condition')
+
+        del c1
+        del c2
+
+        # Remove tempfile
+        # os.unlink(nfile)
+        self.add_file_to_clean(nfile)
+
+    def test_files_OracleFunction(self):
+        # type: (OracleFunctionTestCase) -> None
+        self.read_write_oracle_files(False)
+        self.read_write_oracle_files(True)
+
+    def read_write_oracle_files(self,
                          human_readable=False):
         # type: (OracleFunctionTestCase, bool) -> None
         tmpfile = tf.NamedTemporaryFile(delete=False)

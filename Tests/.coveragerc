@@ -9,6 +9,8 @@ omit =
     ParetoLib/Geometry/Point_Decimal.py
     ParetoLib/Geometry/Point_Float.py
     ParetoLib/Search
+    ParetoLib/_py3k
+
 [report]
 # Show ParetoLib lines that are not executed during testing
 show_missing = True

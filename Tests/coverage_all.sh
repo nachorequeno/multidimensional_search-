@@ -5,6 +5,7 @@ coverage run -m --parallel-mode pytest test_Oracle_OracleSTL.py
 coverage run -m --parallel-mode pytest test_Oracle_OracleSTLe.py
 coverage run -m --parallel-mode pytest test_Geometry_Point.py
 coverage run -m --parallel-mode pytest test_Geometry_Rectangle.py
+coverage run -m --parallel-mode pytest test_Geometry_Segment.py
 coverage run -m --parallel-mode pytest test_Search_ResultSet.py
 coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleFunctionTestCase::test_2D
 coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleFunctionTestCase::test_3D

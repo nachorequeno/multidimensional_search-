@@ -131,8 +131,8 @@ class OraclePointTestCase(unittest.TestCase):
         print('NDTree 1: {0}'.format(ND1))
         print('NDTree 2: {0}'.format(ND2))
 
-        self.assertEqual(ND1, ND2, 'Different oracles')
-        self.assertEqual(hash(ND1), hash(ND2), 'Different oracles')
+        self.assertEqual(ND1, ND2, 'Different NDTree')
+        self.assertEqual(hash(ND1), hash(ND2), 'Different NDTree')
 
         del ND1
         del ND2
@@ -142,7 +142,7 @@ class OraclePointTestCase(unittest.TestCase):
         self.add_file_to_clean(nfile)
 
     # Test OraclePoint
-    def test_OraclePoints(self):
+    def test_files_OraclePoint(self):
         # type: (OraclePointTestCase) -> None
         self.read_write_oracle_files(human_readable=False)
         self.read_write_oracle_files(human_readable=True)
