@@ -38,6 +38,43 @@ class RectangleTestCase(unittest.TestCase):
         self.assertNotEqual(r2, r3)
         self.assertEqual(r4, r5)
 
+    def test_inclusion(self):
+        # type: (RectangleTestCase) -> None
+        p1 = (0.0, 0.75)
+        p2 = (1.0, 1.75)
+        r1 = Rectangle(p1, p2)
+
+        p3 = (0.5, 0.0)
+        p4 = (1.5, 1.0)
+        r2 = Rectangle(p3, p4)
+
+        p5 = (1.0, 1.0)
+        p6 = (2.0, 2.0)
+        r3 = Rectangle(p5, p6)
+
+        # Inclusion
+        self.assertTrue(r1.inside(p1))
+        self.assertTrue(r1.inside(p2))
+
+        self.assertTrue(r2.inside(p3))
+        self.assertTrue(r2.inside(p4))
+
+        self.assertTrue(r3.inside(p5))
+        self.assertTrue(r3.inside(p6))
+
+        self.assertFalse(p1 in r1)
+        self.assertFalse(p2 in r1)
+
+        self.assertFalse(p3 in r2)
+        self.assertFalse(p4 in r2)
+
+        self.assertFalse(p5 in r3)
+        self.assertFalse(p6 in r3)
+
+        self.assertTrue(p5 in r1)
+        self.assertFalse(p6 in r1)
+        self.assertFalse(p1 in r3)
+
     def test_distance_to_center(self):
         # type: (RectangleTestCase) -> None
         p5 = (1.0, 1.0)

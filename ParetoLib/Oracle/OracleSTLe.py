@@ -26,7 +26,7 @@ from ctypes import c_double
 
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.STLe.STLe import STLeLibInterface, STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_OK, MAX_STLE_CALLS
+from ParetoLib.STLe.STLe import STLeLibInterface, STLE_BIN, STLE_INTERACTIVE, STLE_READ_SIGNAL, STLE_EVAL, STLE_RESET, STLE_VERSION, STLE_OK, MAX_STLE_CALLS
 
 
 class OracleSTLe(Oracle):
@@ -215,6 +215,26 @@ class OracleSTLe(Oracle):
         if elem is None:
             raise AttributeError
         return elem
+
+    def version(self):
+        # type: (OracleSTLe) -> str
+        """
+        Version of STLe.
+        """
+        assert self.stle_oracle is not None
+        assert not self.stle_oracle.stdin.closed
+        assert not self.stle_oracle.stdout.closed
+
+        res1 = '0'
+        # Version of STLe formula
+        # (version)
+        expression = '({0})'.format(STLE_VERSION)
+        RootOracle.logger.debug('Running: {0}'.format(expression))
+        self.stle_oracle.stdin.write(expression)
+        self.stle_oracle.stdin.flush()
+        res1 = self.stle_oracle.stdout.readline()
+        RootOracle.logger.debug('result: {0}'.format(res1))
+        return res1
 
     def dim(self):
         # type: (OracleSTLe) -> int
@@ -473,7 +493,6 @@ class OracleSTLe(Oracle):
 
 
 class OracleSTLeLib(OracleSTLe):
-    #
     def __init__(self, stl_prop_file='', csv_signal_file='', stl_param_file=''):
         # type: (OracleSTLeLib, str, str, str) -> None
         """
@@ -597,7 +616,7 @@ class OracleSTLeLib(OracleSTLe):
         RootOracle.logger.debug('Monitor created: {0}'.format(self.monitor))
 
     def _to_str(self):
-        # type: (OracleSTLe) -> str
+        # type: (OracleSTLeLib) -> str
         """
         Printer.
         """
@@ -606,6 +625,13 @@ class OracleSTLeLib(OracleSTLe):
         s += 'STL parameters: {0}\n'.format(self.stl_parameters)
         s += 'CSV signal file: {0}\n'.format(self.csv_signal_file)
         return s
+
+    def version(self):
+        # type: (OracleSTLeLib) -> str
+        """
+        Version of STLeLib.
+        """
+        return self.stle.stl_version()
 
     def __copy__(self):
         # type: (OracleSTLeLib) -> OracleSTLeLib

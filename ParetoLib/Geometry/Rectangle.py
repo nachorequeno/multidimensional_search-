@@ -225,6 +225,34 @@ class Rectangle(object):
         """
         return not self.__eq__(other)
 
+    def __lt__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        """
+        self < other
+        """
+        return less(self.max_corner, other.min_corner)
+
+    def __le__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        """
+        self <= other
+        """
+        return less_equal(self.max_corner, other.min_corner)
+
+    def __gt__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        """
+        self > other
+        """
+        return not self.__le__(other)
+
+    def __ge__(self, other):
+        # type: (Rectangle, Rectangle) -> bool
+        """
+        self >= other
+        """
+        return not self.__lt__(other)
+
     def __hash__(self):
         # type: (Rectangle) -> int
         """

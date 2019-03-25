@@ -47,7 +47,15 @@ class OracleSTLeTestCase(unittest.TestCase):
         return test_txt
 
     # Test OracleSTLe
-    def test_OracleSTLe(self):
+    def test_version(self):
+        # type: (OracleSTLeTestCase) -> None
+        infile = self.files_to_load[0]
+        print('Reading from {0}'.format(infile))
+        ora = OracleSTLe()
+        ora.from_file(infile, human_readable=True)
+        print('Version {0}'.format(ora.version()))
+
+    def test_files_OracleSTLe(self):
         # type: (OracleSTLeTestCase) -> None
         self.read_write_files(human_readable=False)
         self.read_write_files(human_readable=True)
@@ -134,7 +142,15 @@ class OracleSTLeLibTestCase(unittest.TestCase):
         return test_txt
 
     # Test OracleSTLeLib
-    def test_OracleSTLeLib(self):
+    def test_version(self):
+        # type: (OracleSTLeLibTestCase) -> None
+        infile = self.files_to_load[0]
+        print('Reading from {0}'.format(infile))
+        ora = OracleSTLeLib()
+        ora.from_file(infile, human_readable=True)
+        print('Version {0}'.format(ora.version()))
+
+    def test_files_OracleSTLeLib(self):
         # type: (OracleSTLeLibTestCase) -> None
         self.read_write_files(human_readable=False)
         self.read_write_files(human_readable=True)
@@ -169,6 +185,7 @@ class OracleSTLeLibTestCase(unittest.TestCase):
             print('Oracle 2: {0}'.format(ora2))
 
             self.assertEqual(ora1, ora2, 'Different oracles')
+            self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
             del ora1
             del ora2

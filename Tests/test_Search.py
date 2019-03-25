@@ -362,7 +362,7 @@ class SearchOracleSTLeLibTestCase(SearchTestCase):
     def test_2D(self):
         # type: (SearchOracleSTLeLibTestCase) -> None
 
-        test_dir = os.path.join(self.this_dir, '1D')
+        test_dir = os.path.join(self.this_dir, '2D')
         files_path = os.listdir(test_dir)
         list_test_files = [os.path.join(test_dir, x) for x in files_path if x.endswith('.txt')]
         num_files_test = min(self.numfiles_test, len(list_test_files))

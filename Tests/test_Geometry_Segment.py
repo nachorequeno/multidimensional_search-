@@ -37,6 +37,7 @@ class SegmentTestCase(unittest.TestCase):
         self.assertNotEqual(s2, s3)
         self.assertEqual(s1, s1)
         self.assertEqual(s1, s1p)
+        self.assertEqual(hash(s1), hash(s1p))
 
     def test_inclusion(self):
         # type: (SegmentTestCase) -> None

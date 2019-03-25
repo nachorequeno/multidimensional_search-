@@ -111,6 +111,7 @@ STLE_OPT_IN_FILE_STL = '-ff'
 STLE_OPT_TIMESTAMP = '-os'
 STLE_OPT_TIME = '0'
 STLE_OPT_HELP = '-h'
+STLE_OPT_VERSION = '-v'
 
 ###################
 # Online commands #
@@ -123,6 +124,7 @@ STLE_READ_SIGNAL = 'read-signal-csv'
 STLE_EVAL = 'eval'
 STLE_RESET = 'clear-monitor'
 STLE_OK = 'ok'
+STLE_VERSION = 'version'
 MAX_STLE_CALLS = 50
 
 # -------------------------------------------------------------------------------
@@ -267,12 +269,14 @@ class STLeLibInterface:
         return STLeLibInterface()
 
     def stl_version(self):
-        # type: (STLeLibInterface) -> c_char_p
-        return self._stl_version(None)
-
+        # type: (STLeLibInterface) -> str
+        version = self._stl_version(None)
+        return str(version.decode("utf-8"))
+            
     def stl_read_pcsignal_csv_fname(self, csv_signal_file, val=0):
         # type: (STLeLibInterface, str, int) -> c_void_p
-        return self._stl_read_pcsignal_csv_fname(c_char_p(bytes(csv_signal_file, 'utf-8')), c_int(val))
+        fname = csv_signal_file.encode('utf-8')
+        return self._stl_read_pcsignal_csv_fname(c_char_p(fname), c_int(val))
 
     def stl_delete_pcsignal(self, signal):
         # type: (STLeLibInterface, c_void_p) -> None
