@@ -49,11 +49,11 @@ class OracleSTLeTestCase(unittest.TestCase):
     # Test OracleSTLe
     def test_version(self):
         # type: (OracleSTLeTestCase) -> None
-        infile = self.files_to_load[0]
-        print('Reading from {0}'.format(infile))
-        ora = OracleSTLe()
-        ora.from_file(infile, human_readable=True)
-        print('Version {0}'.format(ora.version()))
+        for infile in self.files_to_load:
+            print('Reading from {0}'.format(infile))
+            ora = OracleSTLe()
+            ora.from_file(infile, human_readable=True)
+            print('Version {0}'.format(ora.version()))
 
     def test_files_OracleSTLe(self):
         # type: (OracleSTLeTestCase) -> None

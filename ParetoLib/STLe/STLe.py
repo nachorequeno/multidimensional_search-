@@ -301,8 +301,9 @@ class STLeLibInterface:
     def stl_parse_sexpr_str(self, exprset, stl_formula, val=0):
         # type: (STLeLibInterface, c_void_p, str, int) -> c_void_p
         pos = c_int(val)
+        stl_formula_utf = stl_formula.encode('utf-8')
         # expr = stl_parse_sexpr_str(self.exprset, stl_formula, c_void_p(pos))
-        return self._stl_parse_sexpr_str(exprset, c_char_p(bytes(stl_formula, 'utf-8')), pointer(pos))
+        return self._stl_parse_sexpr_str(exprset, c_char_p(stl_formula_utf), pointer(pos))
 
     def stl_pcsignal_size(self, signal):
         # type: (STLeLibInterface, c_void_p) -> c_int
