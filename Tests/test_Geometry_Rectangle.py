@@ -38,6 +38,13 @@ class RectangleTestCase(unittest.TestCase):
         self.assertNotEqual(r2, r3)
         self.assertEqual(r4, r5)
 
+        self.assertGreater(r3, r1)
+        self.assertGreaterEqual(r3, r1)
+        self.assertGreaterEqual(r1, r1)
+        self.assertLess(r1, r3)
+        self.assertLessEqual(r1, r3)
+        self.assertLessEqual(r1, r1)
+
     def test_inclusion(self):
         # type: (RectangleTestCase) -> None
         p1 = (0.0, 0.75)

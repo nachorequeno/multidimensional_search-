@@ -342,7 +342,7 @@ class ResultSet:
         return self.xspace.get_points(n)
 
     def set_points_pareto(self, l):
-        # type: (ResultSet, list) -> None
+        # type: (ResultSet, iter) -> None
         self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
         self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
         self.border = [Rectangle(p, p) for p in l]

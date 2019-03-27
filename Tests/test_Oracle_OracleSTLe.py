@@ -1,6 +1,7 @@
 import os
 import tempfile as tf
 import unittest
+import copy
 
 from ParetoLib.Oracle.OracleSTLe import OracleSTLe, OracleSTLeLib
 
@@ -89,11 +90,29 @@ class OracleSTLeTestCase(unittest.TestCase):
             print('Oracle 1: {0}'.format(ora1))
             print('Oracle 2: {0}'.format(ora2))
 
+            param1 = ora1.get_var_names()
+            param2 = ora2.get_var_names()
+
+            self.assertNotEqual(param1, [])
+            self.assertEqual(param1, param2)
+
+            print('Oracle 1 Parameters: {0}'.format(param1))
+            print('Oracle 2 Parameters: {0}'.format(param2))
+
             self.assertEqual(ora1, ora2, 'Different files')
             self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
+            ora3 = copy.copy(ora1)
+            self.assertEqual(ora1, ora3, 'Different oracles')
+            self.assertEqual(hash(ora1), hash(ora3), 'Different oracles')
+
+            ora3 = copy.deepcopy(ora1)
+            self.assertEqual(ora1, ora3, 'Different oracles')
+            self.assertEqual(hash(ora1), hash(ora3), 'Different oracles')
+
             del ora1
             del ora2
+            del ora3
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -184,11 +203,29 @@ class OracleSTLeLibTestCase(unittest.TestCase):
             print('Oracle 1: {0}'.format(ora1))
             print('Oracle 2: {0}'.format(ora2))
 
+            param1 = ora1.get_var_names()
+            param2 = ora2.get_var_names()
+
+            self.assertNotEqual(param1, [])
+            self.assertEqual(param1, param2)
+
+            print('Oracle 1 Parameters: {0}'.format(param1))
+            print('Oracle 2 Parameters: {0}'.format(param2))
+
             self.assertEqual(ora1, ora2, 'Different oracles')
             self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
 
+            ora3 = copy.copy(ora1)
+            self.assertEqual(ora1, ora3, 'Different oracles')
+            self.assertEqual(hash(ora1), hash(ora3), 'Different oracles')
+
+            ora3 = copy.deepcopy(ora1)
+            self.assertEqual(ora1, ora3, 'Different oracles')
+            self.assertEqual(hash(ora1), hash(ora3), 'Different oracles')
+
             del ora1
             del ora2
+            del ora3
 
         # Remove tempfile
         # os.unlink(nfile)

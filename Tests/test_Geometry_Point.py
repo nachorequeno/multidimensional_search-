@@ -40,6 +40,7 @@ class PointTestCase(unittest.TestCase):
         r2 = random.randint(0, 10)
 
         print('Point (tuple)')
+        self.time_for_n_iterations(lambda z: p.r(x[0]), rep)
         self.time_for_n_iterations(lambda z: p.dim(x), rep)
         self.time_for_n_iterations(lambda z: p.norm(x), rep)
         self.time_for_n_iterations(lambda z: p.distance(x, xprime), rep)
@@ -66,6 +67,7 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.is_dominated(x, xprime), rep)
 
         print('Point (numpy)')
+        self.time_for_n_iterations(lambda z: pp.r(x[0]), rep)
         self.time_for_n_iterations(lambda z: pp.dim(x), rep)
         self.time_for_n_iterations(lambda z: pp.norm(x), rep)
         self.time_for_n_iterations(lambda z: pp.distance(x, xprime), rep)
@@ -101,6 +103,7 @@ class PointTestCase(unittest.TestCase):
         r = random.randint(0, len(x)-1)
         sel = (0,)*(len(x)-1) + (1,)
 
+        self.assertEqual(p.r(x[0]), pp.r(x[0]))
         self.assertEqual(p.dim(x), pp.dim(x))
         self.assertEqual(p.norm(x), pp.norm(x))
         self.assertEqual(p.distance(x, xprime), pp.distance(x, xprime))

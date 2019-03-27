@@ -126,9 +126,15 @@ class ResultSetTestCase(unittest.TestCase):
         self.rs_2D.to_file(nfile)
         self.rs2.from_file(nfile)
 
-        self.assertTrue(self.rs_2D == self.rs2)
         self.assertEqual(self.rs_2D, self.rs2)
         self.assertEqual(hash(self.rs_2D), hash(self.rs2))
+
+        temp_rs = ResultSet()
+        self.assertNotEqual(self.rs_2D, temp_rs)
+        self.assertNotEqual(self.rs2, temp_rs)
+        del temp_rs
+
+        print('ResultSet: {0}'.format(self.rs_2D))
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -142,9 +148,15 @@ class ResultSetTestCase(unittest.TestCase):
         self.rs_3D.to_file(nfile)
         self.rs2.from_file(nfile)
 
-        self.assertTrue(self.rs_3D == self.rs2)
         self.assertEqual(self.rs_3D, self.rs2)
         self.assertEqual(hash(self.rs_3D), hash(self.rs2))
+
+        temp_rs = ResultSet()
+        self.assertNotEqual(self.rs_3D, temp_rs)
+        self.assertNotEqual(self.rs2, temp_rs)
+        del temp_rs
+
+        print('ResultSet: {0}'.format(self.rs_3D))
 
         # Remove tempfile
         # os.unlink(nfile)
@@ -185,6 +197,15 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(s2, self.rs_2D.vertices_ylow())
         self.assertEqual(s3, self.rs_2D.vertices_border())
         self.assertEqual(s1.union(s2).union(s3), self.rs_2D.vertices())
+
+        pareto_points = set(self.rs_2D.get_points_pareto())
+        for p in pareto_points:
+            self.assertTrue(p in self.rs_2D)
+
+        rs = ResultSet(xspace=self.rs_2D.xspace)
+        rs.set_points_pareto(pareto_points)
+        pareto_points2 = set(rs.get_points_pareto())
+        self.assertEqual(pareto_points, pareto_points2)
 
     def test_vertices_3D(self):
         # type: (ResultSetTestCase) -> None
@@ -328,6 +349,15 @@ class ResultSetTestCase(unittest.TestCase):
         self.assertEqual(s2, self.rs_3D.vertices_ylow())
         self.assertEqual(s3, self.rs_3D.vertices_border())
         self.assertEqual(s1.union(s2).union(s3), self.rs_3D.vertices())
+
+        pareto_points = set(self.rs_3D.get_points_pareto())
+        for p in pareto_points:
+            self.assertTrue(p in self.rs_3D)
+
+        rs = ResultSet(xspace=self.rs_3D.xspace)
+        rs.set_points_pareto(pareto_points)
+        pareto_points2 = set(rs.get_points_pareto())
+        self.assertEqual(pareto_points, pareto_points2)
 
     def test_min_max_dimension_values_2D(self):
         # type: (ResultSetTestCase) -> None
