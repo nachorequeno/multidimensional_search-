@@ -135,3 +135,32 @@ elif (sys.version_info[0] >= 3):
 else:  # sys.version_info[0] <= 2
     # Use commands.getoutput on Python 2
     from commands import getoutput
+
+
+def cmp_to_key(mycmp):
+    """
+    Convert a cmp= function (2 input parameters) into a key= function (1 input parameter).
+    Useful for sorting functions (i.e., sorted(_, key=cmp_to_key())
+    """
+    class K:
+        def __init__(self, obj, *args):
+            self.obj = obj
+
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K

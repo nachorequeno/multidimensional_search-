@@ -89,6 +89,8 @@ class Rectangle(object):
         """
         assert dim(min_corner) == dim(max_corner)
 
+
+
         # min_corner, max_corner
         self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
         self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
@@ -230,14 +232,14 @@ class Rectangle(object):
         """
         self < other
         """
-        return less(self.max_corner, other.min_corner)
+        return less(self.max_corner, other.max_corner)
 
     def __le__(self, other):
         # type: (Rectangle, Rectangle) -> bool
         """
         self <= other
         """
-        return less_equal(self.max_corner, other.min_corner)
+        return less_equal(self.max_corner, other.max_corner)
 
     def __gt__(self, other):
         # type: (Rectangle, Rectangle) -> bool

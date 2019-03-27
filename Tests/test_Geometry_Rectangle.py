@@ -71,7 +71,8 @@ class RectangleTestCase(unittest.TestCase):
         self.assertFalse(p5 in r3)
         self.assertFalse(p6 in r3)
 
-        self.assertTrue(p5 in r1)
+        # p5 is in the edge of r1, so no strictly inside r1
+        self.assertFalse(p5 in r1)
         self.assertFalse(p6 in r1)
         self.assertFalse(p1 in r3)
 
