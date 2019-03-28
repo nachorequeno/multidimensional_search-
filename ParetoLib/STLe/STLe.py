@@ -71,7 +71,7 @@ def get_stle_bin():
     stle_exec_name = get_stle_exec_name()
     path = os.path.join(stle_path, stle_exec_name)
     # Making binary file executable for owner, group and others
-    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
     return path
 
 
@@ -93,7 +93,7 @@ def get_stle_lib():
     stle_lib_name = get_stle_lib_name()
     path = os.path.join(stle_path, stle_lib_name)
     # Making binary file executable for owner, group and others
-    os.chmod(path, stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+    os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
     return path
 
 

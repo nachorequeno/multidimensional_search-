@@ -416,12 +416,10 @@ class ResultSet:
                 xaxe=0,
                 yaxe=1,
                 var_names=list(),
-                targetx=list(),
-                targety=list(),
                 blocking=False,
                 sec=0.0,
                 opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal')
         ax1 = fig1.add_subplot(111)
@@ -447,18 +445,9 @@ class ResultSet:
         for pathpatch_i in pathpatch:
             ax1.add_patch(pathpatch_i)
 
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-
-        targetx += [min(xs), max(xs)]
-        targety += [min(ys), max(ys)]
-
-        plt.plot(targetx, targety, 'kp')
-        # ax1.scatter(targetx, targety, c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
 
         #
         fig1.tight_layout()
@@ -488,12 +477,10 @@ class ResultSet:
                       xaxe=0,
                       yaxe=1,
                       var_names=list(),
-                      targetx=list(),
-                      targety=list(),
                       blocking=False,
                       sec=0.0,
                       opacity=1.0):
-        # type: (ResultSet, str, int, int, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, list, bool, float, float) -> plt
 
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal')
@@ -520,18 +507,9 @@ class ResultSet:
         for pathpatch_i in pathpatch:
             ax1.add_patch(pathpatch_i)
 
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-
-        targetx += [min(xs), max(xs)]
-        targety += [min(ys), max(ys)]
-
-        plt.plot(targetx, targety, 'kp')
-        # ax1.scatter(targetx, targety,  c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
 
         #
         fig1.tight_layout()
@@ -585,20 +563,20 @@ class ResultSet:
         xs = []
         ys = []
         for pi in points_lower_closure:
-            xs.append(pi[0])
-            ys.append(pi[1])
+            xs.append(pi[xaxe])
+            ys.append(pi[yaxe])
         ax1.scatter(xs, ys, c='r', marker='p')
 
         xs = []
         ys = []
         for pi in points_upper_closure:
-            xs.append(pi[0])
-            ys.append(pi[1])
+            xs.append(pi[xaxe])
+            ys.append(pi[yaxe])
         ax1.scatter(xs, ys, c='g', marker='p')
 
-        # plt.plot(xs, ys, 'kp')
-        # ax1.scatter(targetx, targety,  c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
 
         #
         fig1.tight_layout()
@@ -649,13 +627,10 @@ class ResultSet:
                 yaxe=1,
                 zaxe=2,
                 var_names=list(),
-                targetx=list(),
-                targety=list(),
-                targetz=list(),
                 blocking=False,
                 sec=0.0,
                 opacity=1.0):
-        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, int, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
@@ -681,20 +656,10 @@ class ResultSet:
         for faces_i in faces:
             ax1.add_collection3d(faces_i)
 
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-        zs = [vi[2] for vi in rs_vertices]
-
-        targetx += [min(xs), max(xs)]
-        targety += [min(ys), max(ys)]
-        targetz += [min(zs), max(zs)]
-
-        plt.plot(targetx, targety, targetz, 'kp')
-        # ax1.scatter(targetx, targety, targetz, c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
+        ax1.set_zlim(self.xspace.min_corner[zaxe], self.xspace.max_corner[zaxe])
 
         #
         fig1.tight_layout()
@@ -725,13 +690,10 @@ class ResultSet:
                       yaxe=1,
                       zaxe=2,
                       var_names=list(),
-                      targetx=list(),
-                      targety=list(),
-                      targetz=list(),
                       blocking=False,
                       sec=0.0,
                       opacity=1.0):
-        # type: (ResultSet, str, int, int, int, list, list, list, list, bool, float, float) -> plt
+        # type: (ResultSet, str, int, int, int, list, bool, float, float) -> plt
         fig1 = plt.figure()
         # ax1 = fig1.add_subplot(111, aspect='equal', projection='3d')
         ax1 = fig1.add_subplot(111, projection='3d')
@@ -757,20 +719,10 @@ class ResultSet:
         for faces_i in faces:
             ax1.add_collection3d(faces_i)
 
-        # Include the vertices of the rectangles of the ResultSet in the plotting
-        # The inclusion of explicit points forces the autoscaling of the image
-        rs_vertices = self.vertices()
-        xs = [vi[0] for vi in rs_vertices]
-        ys = [vi[1] for vi in rs_vertices]
-        zs = [vi[2] for vi in rs_vertices]
-
-        targetx += [min(xs), max(xs)]
-        targety += [min(ys), max(ys)]
-        targetz += [min(zs), max(zs)]
-
-        plt.plot(targetx, targety, targetz, 'kp')
-        # ax1.scatter(targetx, targety, targetz, c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
+        ax1.set_zlim(self.xspace.min_corner[zaxe], self.xspace.max_corner[zaxe])
 
         #
         fig1.tight_layout()
@@ -825,23 +777,24 @@ class ResultSet:
         ys = []
         zs = []
         for pi in points_lower_closure:
-            xs.append(pi[0])
-            ys.append(pi[1])
-            zs.append(pi[2])
+            xs.append(pi[xaxe])
+            ys.append(pi[yaxe])
+            zs.append(pi[zaxe])
         ax1.scatter3D(xs, ys, zs, c='r', marker='p')
 
         xs = []
         ys = []
         zs = []
         for pi in points_upper_closure:
-            xs.append(pi[0])
-            ys.append(pi[1])
-            zs.append(pi[2])
+            xs.append(pi[xaxe])
+            ys.append(pi[yaxe])
+            zs.append(pi[zaxe])
         ax1.scatter3D(xs, ys, zs, c='g', marker='p')
 
-        # plt.plot(xs, ys, zs, 'kp')
-        # ax1.scatter(targetx, targety, targetz, c='k')
-        # ax1.autoscale_view()
+        # Set limits in the axes
+        ax1.set_xlim(self.xspace.min_corner[xaxe], self.xspace.max_corner[xaxe])
+        ax1.set_ylim(self.xspace.min_corner[yaxe], self.xspace.max_corner[yaxe])
+        ax1.set_zlim(self.xspace.min_corner[zaxe], self.xspace.max_corner[zaxe])
 
         #
         fig1.tight_layout()
