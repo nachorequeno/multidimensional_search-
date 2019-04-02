@@ -228,8 +228,8 @@ The size of this gap depends on the accuracy of the learning process, which can 
 the EPS and DELTA parameters during the invocation of the learning method.
 
 The ResultSet class provides functions for:
-- Testing the membership of a new point *y* to any of the closures.
-- Plotting 2D and 3D spaces
+- Testing the membership of a point *y* to any of the closures.
+- Plotting 2D and 3D spaces.
 - Exporting/Importing the results to text and binary files. 
 
 

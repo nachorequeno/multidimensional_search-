@@ -20,6 +20,6 @@ coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search
 #coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleSTLTestCase::test_2D
 #coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py
 coverage combine
-coverage report
+coverage report --omit=*ParetoLib/_py3k*
 #coverage html -d coverage/report-python
 coverage erase
