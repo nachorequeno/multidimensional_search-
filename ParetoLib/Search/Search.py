@@ -85,7 +85,8 @@ def create_3D_space(minx, miny, minz, maxx, maxy, maxz):
     return xyspace
 
 
-def create_ND_space(*args):
+#def create_ND_space(*args):
+def create_ND_space(args):
     # type: (iter) -> Rectangle
     # args = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
     RootSearch.logger.debug('Creating Space')

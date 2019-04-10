@@ -28,15 +28,15 @@ class PointTestCase(unittest.TestCase):
         end = time.time()
         print(str(end - start))
 
-    def operation_performance(self,
-                              rep=REP,
-                              dim=DIM):
+    def operation_performance_tuple(self,
+                                    rep=REP,
+                                    dim=DIM):
         # type: (PointTestCase, int, int) -> None
         xxprime = np.random.rand(2, dim)
 
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
-        r1 = random.randint(0, len(x)-1)
+        r1 = random.randint(0, len(x) - 1)
         r2 = random.randint(0, 10)
 
         print('Point (tuple)')
@@ -65,6 +65,17 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.int_to_bin_tuple(r2), rep)
         self.time_for_n_iterations(lambda z: p.dominates(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.is_dominated(x, xprime), rep)
+
+    def operation_performance_numpy(self,
+                                    rep=REP,
+                                    dim=DIM):
+        # type: (PointTestCase, int, int) -> None
+        xxprime = np.random.rand(2, dim)
+
+        x = tuple(xxprime[0])
+        xprime = tuple(xxprime[1])
+        r1 = random.randint(0, len(x) - 1)
+        r2 = random.randint(0, 10)
 
         print('Point (numpy)')
         self.time_for_n_iterations(lambda z: pp.r(x[0]), rep)
@@ -100,8 +111,8 @@ class PointTestCase(unittest.TestCase):
         x = tuple(xxprime[0])
         xprime = tuple(xxprime[1])
 
-        r = random.randint(0, len(x)-1)
-        sel = (0,)*(len(x)-1) + (1,)
+        r = random.randint(0, len(x) - 1)
+        sel = (0,) * (len(x) - 1) + (1,)
 
         self.assertEqual(p.r(x[0]), pp.r(x[0]))
         self.assertEqual(p.dim(x), pp.dim(x))
@@ -129,7 +140,8 @@ class PointTestCase(unittest.TestCase):
     def test_point_operations_performance(self):
         # type: (PointTestCase) -> None
         for dim in range(2, 10):
-            self.operation_performance(rep=self.REP, dim=dim)
+            self.operation_performance_tuple(rep=self.REP, dim=dim)
+            self.operation_performance_numpy(rep=self.REP, dim=dim)
 
     def test_point_operations_correctness(self):
         # type: (PointTestCase) -> None
