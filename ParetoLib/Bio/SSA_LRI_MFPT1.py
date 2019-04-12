@@ -9,7 +9,7 @@ import numba
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import time
+# import time
 import copy
 
 # This is to enable inline displays for the purposes of the tutorial 
@@ -173,14 +173,16 @@ def gillespie_fn(args):
 
 
 def gillespie_parallel(fn, params, population_size, ntime_points,
-                       start_time_points, end_time_points, n_simulations, n_threads):
+                       start_time_points, end_time_points, n_simulations):
     """
     Convenience function to do parallel Gillespie simulations for simple
     gene expression.
     """
     input_args = (params, population_size, ntime_points, start_time_points, end_time_points)
 
+    n_threads = multiprocessing.cpu_count()
     p = multiprocessing.Pool(n_threads)
+
     # Explicit copy of population_0 when creating arguments
     # in order to remove concurrent problems (race conditions)
     # when accessing the elements of the np.full array.
@@ -195,33 +197,26 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     return np.array(list(populations))
 
 
-def main(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
-    start = time.time()
-    # Calculation for N = 10 and e = 5
+def sim(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
+    return simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10)
 
-    # N_MF10 = 10 # Number of nucleosomes (population)
-    # n_simulations_MF10 = 1000
-    # params_MF10 = np.array([1, 5, 0])  # k,e, gamma, N
+
+@numba.jit(nopython=True)
+def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
+    # N_MF10 = Number of nucleosomes (population)
+    # n_simulations_MF10
+
     params_MF10 = np.array([k, e, gamma])  # k,e, gamma, N
     ntime_points_MF10 = 40001
     start_time_points_MF10 = 0
     end_time_points_MF10 = 40000
 
     # Initialize output array
-    # pops_MF10 = np.empty((n_simulations_MF10, len(time_points_MF10), N_MF10))
-    nthreads = multiprocessing.cpu_count()
-    pops_MF10 = gillespie_parallel(gillespie_fn, params_MF10, N_MF10, ntime_points_MF10, start_time_points_MF10, end_time_points_MF10, n_simulations_MF10, nthreads)
+    pops_MF10 = gillespie_parallel(gillespie_fn, params_MF10, N_MF10, ntime_points_MF10, start_time_points_MF10, end_time_points_MF10, n_simulations_MF10)
 
-    end = time.time()
-    time0 = end - start
-    RootOracle.logger.info('Simulation time: {0}'.format(time0))
-
-    start = time.time()
     U_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     A_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     I_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
-
-    # Mag_MF10 = np.empty([n_simulations_MF10, len(time_points_MF10)], dtype=np.int64)
 
     for n in range(0, n_simulations_MF10):
         for t in range(0, ntime_points_MF10):
@@ -231,7 +226,6 @@ def main(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
 
     Mag_MF10 = A_MF10 - I_MF10
     Mag_MF10 = Mag_MF10 / float(N_MF10)
-    # Mag_MF10
 
     time_points_MF10 = np.linspace(start_time_points_MF10, end_time_points_MF10, ntime_points_MF10)
     MFPT10 = np.empty(n_simulations_MF10)
@@ -240,16 +234,6 @@ def main(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
         while Mag_MF10[n, tc] < 0:
             tc = tc + 1
         MFPT10[n] = time_points_MF10[tc]
-
-    MFPT10_avg = np.mean(MFPT10)
-    MFPT10_std = np.std(MFPT10)
-
-    RootOracle.logger.info('Average: {0}'.format(MFPT10_avg))
-    RootOracle.logger.info('STD: {0}'.format(MFPT10_std))
-
-    end = time.time()
-    time0 = end - start
-    RootOracle.logger.info('Time for compiling results: {0}'.format(time0))
 
     return Mag_MF10, MFPT10
 
@@ -324,9 +308,10 @@ def bistable_test(Mag_MF10):
 if __name__ == '__main__':
     # from SSA_LRI_MFPT1_opt import *
     # Force just-in-time compilation
-    main = numba.jit(main)
+    main = numba.jit(simulation)
     m1, m2 = main(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=100)
-    # m1, m2 = main(k=1, e=5, gamma=1.75, N_MF10=10, n_simulations_MF10=100)
-    # m1, m2 = main()
+    # m1, m2 = simulation(k=1, e=5, gamma=1.75, N_MF10=10, n_simulations_MF10=100)
+    # m1, m2 = simulation()
+    bistable_test(m1)
     plot_histogram(m1)
     plot_distribution(m1)

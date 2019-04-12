@@ -11,4 +11,4 @@ that are available to OracleBio.
 """
 
 __name__ = 'Bio'
-__all__ = ['Bio']
+__all__ = ['SSA_LRI_MFPT1']

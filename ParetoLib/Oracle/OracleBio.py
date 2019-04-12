@@ -7,56 +7,63 @@
 """OracleBio.
 
 This module instantiate the abstract interface Oracle.
-It encapsulates the simulation of biological models.*****
+It encapsulates the simulation of biological model SSA_LRI_MFPT1.
 """
 
-import os
+import sys
 import io
+import pickle
 
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
-from ParetoLib.Bio.Bio import *
+from ParetoLib.Bio.SSA_LRI_MFPT1 import sim, bistable_test
+from ParetoLib.Geometry.ParRectangle import dim
 
 
 class OracleBio(Oracle):
 
-    def __init__(self):
-        pass
+    def __init__(self, N_MF10=10, n_simulations_MF10=100):
+        # type: (OracleBio, int, int) -> None
+        Oracle.__init__(self)
+        self.N_MF10 = N_MF10
+        self.n_simulations_MF10 = n_simulations_MF10
 
     def __repr__(self):
         # type: (OracleBio) -> str
         """
         Printer.
         """
-        return ''
+        return self._to_str()
 
     def __str__(self):
         # type: (OracleBio) -> str
         """
         Printer.
         """
-        return ''
+        return self._to_str()
+
+    def _to_str(self):
+        # type: (OracleBio) -> str
+        """
+        Printer.
+        """
+        s = 'Number of nucleosomes: {0}\n'.format(self.N_MF10)
+        s += 'Number of simulations: {0}'.format(self.n_simulations_MF10)
+        return s
 
     def __eq__(self, other):
         # type: (OracleBio, OracleBio) -> bool
         """
         self == other
         """
-        return False
-
-    def __ne__(self, other):
-        # type: (OracleBio, OracleBio) -> bool
-        """
-        self != other
-        """
-        return not self.__eq__(other)
+        return (self.N_MF10 == other.N_MF10) and (self.n_simulations_MF10 == other.n_simulations_MF10)
 
     def __hash__(self):
         # type: (OracleBio) -> int
         """
         Identity function (via hashing).
         """
-        return 0
+        return hash(tuple(self.N_MF10, self.n_simulations_MF10))
 
     def dim(self):
         # type: (OracleBio) -> int
@@ -75,7 +82,7 @@ class OracleBio(Oracle):
         >>> ora.dim()
         >>> 3
         """
-        return 0
+        return 3
 
     def get_var_names(self):
         # type: (OracleBio) -> list
@@ -95,14 +102,7 @@ class OracleBio(Oracle):
         >>> ['x', 'y', 'z']
         """
         # If parameter names are not provided, then we use lexicographic characters by default.
-        return [chr(i) for i in range(ord('a'), ord('z') + 1)]
-
-    def __contains__(self, point):
-        # type: (OracleBio, tuple) -> bool
-        """
-        Synonym of self.member(point)
-        """
-        return self.member(point) is True
+        return ['k', 'e', 'gamma']
 
     def member(self, point):
         # type: (OracleBio, tuple) -> bool
@@ -118,116 +118,63 @@ class OracleBio(Oracle):
             bool: True if the point belongs to the upward closure.
 
         Example:
-        >>> x = (0.0, 0.0)
-        >>> ora = Oracle()
+        >>> x = (0.0, 0.0, 0.0)
+        >>> ora = OracleBio()
         >>> ora.member(x)
         >>> False
         """
-        return False
+        assert dim(point) == self.dim()
 
-    def membership(self):
-        # type: (OracleBio) -> callable
-        """
-        Returns a function that answers membership queries.
-        Later on, this function is used as input parameter of
-        ParetoLib.Search algorithms for guiding the discovery of the
-        Pareto front.
+        k, e, gamma = point
+        m1, _ = sim(k=k, e=e, gamma=gamma, N_MF10=self.N_MF10, n_simulations_MF10=self.n_simulations_MF10)
 
-        Args:
-            self (Oracle): The Oracle.
-
-        Returns:
-            callable: Function that answers whether a point belongs
-                      to the upward closure or not.
-
-        Example:
-        >>> x = (0.0, 0.0)
-        >>> ora = Oracle()
-        >>> f = ora.membership()
-        >>> f(x)
-        >>> False
-        """
-        return lambda point: self.member(point)
+        return bistable_test(m1)
 
     # Read/Write file functions
-     def from_file_binary(self, finput=None):
-        # type: (Oracle, io.BinaryIO) -> None
+    def from_file_binary(self, finput=None):
+        # type: (OracleBio, io.BinaryIO) -> None
         """
-        Loading an Oracle from a binary file.
-
-        Args:
-            self (Oracle): The Oracle.
-            finput (io.BinaryIO): The file where the Oracle is saved.
-
-        Returns:
-            None: The Oracle is loaded from finput.
-
-        Example:
-        >>> ora = Oracle()
-        >>> infile = open('filename', 'rb')
-        >>> ora.from_file_binary(infile)
-        >>> infile.close()
+        See Oracle.from_file_binary().
         """
-        pass
+        assert (finput is not None), 'File object should not be null'
+
+        try:
+            self.N_MF10 = pickle.load(finput)
+            self.n_simulations_MF10 = pickle.load(finput)
+
+        except EOFError:
+            RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def from_file_text(self, finput=None):
-        # type: (Oracle, io.BinaryIO) -> None
+        # type: (OracleBio, io.BinaryIO) -> None
         """
-        Loading an Oracle from a text file.
-
-        Args:
-            self (Oracle): The Oracle.
-            finput (io.BinaryIO): The file where the Oracle is saved.
-
-        Returns:
-            None: The Oracle is loaded from finput.
-
-        Example:
-        >>> ora = Oracle()
-        >>> infile = open('filename', 'r')
-        >>> ora.from_file_text(infile)
-        >>> infile.close()
+        See Oracle.from_file_text().
         """
-        pass
+        assert (finput is not None), 'File object should not be null'
+
+        try:
+            self.N_MF10 = finput.readline().strip(' \n\t')
+            self.n_simulations_MF10 = finput.readline().strip(' \n\t')
+        except EOFError:
+            RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
     def to_file_binary(self, foutput=None):
-        # type: (Oracle, io.BinaryIO) -> None
+        # type: (OracleBio, io.BinaryIO) -> None
         """
-        Writing of an Oracle to a binary file.
-
-        Args:
-            self (Oracle): The Oracle.
-            foutput (io.BinaryIO): The file where the Oracle will
-                                   be saved.
-
-        Returns:
-            None: The Oracle is saved in foutput.
-
-        Example:
-        >>> ora = Oracle()
-        >>> outfile = open('filename', 'wb')
-        >>> ora.to_file_binary(outfile)
-        >>> outfile.close()
+        See Oracle.to_file_binary().
         """
-        pass
+        assert (foutput is not None), 'File object should not be null'
+
+        pickle.dump(str(self.N_MF10), foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(str(self.n_simulations_MF10), foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
-        # type: (Oracle, io.BinaryIO) -> None
+        # type: (OracleBio, io.BinaryIO) -> None
         """
-        Writing of an Oracle to a text file.
-
-        Args:
-            self (Oracle): The Oracle.
-            foutput (io.BinaryIO): The file where the Oracle will
-                                   be saved.
-
-        Returns:
-            None: The Oracle is saved in foutput.
-
-        Example:
-        >>> ora = Oracle()
-        >>> outfile = open('filename', 'w')
-        >>> ora.to_file_text(outfile)
-        >>> outfile.close()
+        See Oracle.to_file_text().
         """
-        pass
+        assert (foutput is not None), 'File object should not be null'
+
+        foutput.write(str(self.N_MF10) + '\n')
+        foutput.write(str(self.n_simulations_MF10) + '\n')
+
