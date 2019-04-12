@@ -1,16 +1,17 @@
-import multiprocessing
-
-# NumPy and odeint, our workhorses 
+# NumPy and odeint, our workhorses
+import numba
 import numpy as np
 import scipy.stats as st
-import numba
 
 # Plotting modules 
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
 
-# import time
+import time
 import copy
+import multiprocessing
+
+import ParetoLib.Bio as LogBio
 
 # This is to enable inline displays for the purposes of the tutorial 
 # %matplotlib inline
@@ -201,11 +202,14 @@ def sim(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
     return simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10)
 
 
-@numba.jit(nopython=True)
+@numba.jit(nopython=False)
 def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
+    assert N_MF10 != 0
+
     # N_MF10 = Number of nucleosomes (population)
     # n_simulations_MF10
 
+    start = time.time()
     params_MF10 = np.array([k, e, gamma])  # k,e, gamma, N
     ntime_points_MF10 = 40001
     start_time_points_MF10 = 0
@@ -214,6 +218,11 @@ def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
     # Initialize output array
     pops_MF10 = gillespie_parallel(gillespie_fn, params_MF10, N_MF10, ntime_points_MF10, start_time_points_MF10, end_time_points_MF10, n_simulations_MF10)
 
+    end = time.time()
+    time0 = end - start
+    LogBio.logger.info('Simulation time: {0}'.format(time0))
+
+    start = time.time()
     U_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     A_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     I_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
@@ -234,6 +243,10 @@ def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
         while Mag_MF10[n, tc] < 0:
             tc = tc + 1
         MFPT10[n] = time_points_MF10[tc]
+
+    end = time.time()
+    time0 = end - start
+    LogBio.logger.info('Time for compiling results: {0}'.format(time0))
 
     return Mag_MF10, MFPT10
 

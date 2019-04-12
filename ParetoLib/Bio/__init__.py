@@ -10,5 +10,11 @@ This module acts as an interface to all biological models
 that are available to OracleBio.
 """
 
+import logging
+
 __name__ = 'Bio'
 __all__ = ['SSA_LRI_MFPT1']
+
+# Logging configuration
+logging.basicConfig(format='%(message)s', level=logging.ERROR)
+logger = logging.getLogger(__name__)

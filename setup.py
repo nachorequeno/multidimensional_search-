@@ -68,21 +68,33 @@ def check_dependencies():
     """
     # Check if NumPy, Sympy, SortedContainers or matplotlib are missing, as they are required for
     # ParetoLib to work properly
+    if (not can_import('matplotlib')):
+        print('Matplotlib is not installed.\nThis package is required for ' \
+              'ParetoLib.\n\nYou can find Matplotlib at https://matplotlib.org/')
+        return (False)
+    if (not can_import('numba')):
+        print('Numba is not installed.\nThis package is required for ' \
+              'ParetoLib.\n\nYou can find Numba at https://numba.pydata.org/')
+        return (False)
     if (not can_import('numpy')):
         print('Numerical Python (NumPy) is not installed.\nThis package is required for ' \
               'ParetoLib.\n\nYou can find NumPy at http://www.numpy.org')
         return (False)
-    if (not can_import('sympy')):
-        print('Symbolic Python (SymPy) is not installed.\nThis package is required for ' \
-              'ParetoLib.\n\nYou can find SymPy at http://www.sympy.org')
+    if (not can_import('seaborn')):
+        print('Seaborn is not installed.\nThis package is required for ' \
+              'ParetoLib.\n\nYou can find Seaborn at https://seaborn.pydata.org/')
+        return (False)
+    if (not can_import('scipy')):
+        print('SciPy is not installed.\nThis package is required for ' \
+              'ParetoLib.\n\nYou can find SciPy at https://www.scipy.org/')
         return (False)
     if (not can_import('sortedcontainers')):
         print('SortedContainers is not installed.\nThis package is required for ' \
               'ParetoLib.\n\nYou can find SortedContainers at https://pypi.org/project/sortedcontainers/')
         return (False)
-    if (not can_import('matplotlib')):
-        print('Matplotlib is not installed.\nThis package is required for ' \
-              'ParetoLib.\n\nYou can find Matplotlib at https://matplotlib.org/')
+    if (not can_import('sympy')):
+        print('Symbolic Python (SymPy) is not installed.\nThis package is required for ' \
+              'ParetoLib.\n\nYou can find SymPy at http://www.sympy.org')
         return (False)
     # Exit automatically if running as part of some script
     # if (not sys.stdout.isatty()):
@@ -200,6 +212,7 @@ setup_args = {'name': 'ParetoLib',
                            'ParetoLib.Oracle',
                            'ParetoLib.Search',
                            'ParetoLib.STLe',
+                           'ParetoLib.Bio',
                            'ParetoLib._py3k'],
               'package_data': {'ParetoLib.JAMT': ['*.jar'],
                                'ParetoLib.STLe': ['*.bin', '*.exe', '*.so.1', '*.dll']},
