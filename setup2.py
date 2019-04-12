@@ -23,13 +23,13 @@ if __name__ == '__main__':
         url='https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search',
         install_requires=[
             'matplotlib>=2.0.2,<=3.0.3',
-            'numba>=0.43',
             'numpy>=1.15',
             'pytest>=2.0',
             'seaborn >= 0.9',
             'scipy >= 1.2.1',
             'sortedcontainers>=1.5.10',
-            'sympy>=1.1.1'
+            'sympy>=1.1.1',
+            'numba>=0.43'
         ],
         #packages_dir={'': 'ParetoLib'},
         #packages=setuptools.find_packages(exclude=['ParetoLib._py3k', 'Tests']),
