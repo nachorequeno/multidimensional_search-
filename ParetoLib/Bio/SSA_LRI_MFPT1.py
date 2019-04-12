@@ -303,15 +303,3 @@ def normal_test(Mag_MF10):
 def bistable_test(Mag_MF10):
     # return not normal_test(Mag_MF10)
     return 9.0 * bimodality_coeff(Mag_MF10) > 5.0
-
-
-if __name__ == '__main__':
-    # from SSA_LRI_MFPT1_opt import *
-    # Force just-in-time compilation
-    main = numba.jit(simulation)
-    m1, m2 = main(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=100)
-    # m1, m2 = simulation(k=1, e=5, gamma=1.75, N_MF10=10, n_simulations_MF10=100)
-    # m1, m2 = simulation()
-    bistable_test(m1)
-    plot_histogram(m1)
-    plot_distribution(m1)

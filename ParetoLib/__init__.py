@@ -9,7 +9,7 @@ ParetoLib package.
 """
 __version__ = "1.1.1"
 __name__ = 'ParetoLib'
-__all__ = ['Geometry', 'JAMT', 'Oracle', 'Search', 'STLe', '_py3k']
+__all__ = ['Geometry', 'JAMT', 'Oracle', 'Search', 'STLe', 'Bio', '_py3k']
 
 
 # -------------------------------------------------------------------------------

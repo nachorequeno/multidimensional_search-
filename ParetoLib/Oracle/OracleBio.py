@@ -17,7 +17,7 @@ import pickle
 import ParetoLib.Oracle as RootOracle
 from ParetoLib.Oracle.Oracle import Oracle
 from ParetoLib.Bio.SSA_LRI_MFPT1 import sim, bistable_test
-from ParetoLib.Geometry.ParRectangle import dim
+from ParetoLib.Geometry.Point import dim
 
 
 class OracleBio(Oracle):
