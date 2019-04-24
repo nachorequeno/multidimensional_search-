@@ -77,6 +77,8 @@ def simple_propensity(params, population):
 def sample_discrete(probs, probs_sum):
     q = np.random.rand() * probs_sum
     p_sum = 0.0
+    rxn = 0
+    nuc = 0
     for nuc in range(0, probs.shape[1]):
         for rxn in range(0, probs.shape[0]):
             p_sum += probs[rxn, nuc]
@@ -99,12 +101,12 @@ def gillespie_draw(params, population):
     props_sum = sum_numba(props)
 
     # Compute time
-    time = np.random.exponential(1.0 / float(props_sum))
+    temp = np.random.exponential(1.0 / float(props_sum))
 
     # Draw reaction given propensities
     rxn, nuc = sample_discrete(props, props_sum)
 
-    return rxn, nuc, time
+    return rxn, nuc, temp
 
 
 @numba.jit(nopython=True)
@@ -198,12 +200,14 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     return np.array(list(populations))
 
 
-def sim(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
-    return simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10)
+def sim(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000):
+    pops_MF10 = simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10)
+    m1, m2 = compile_results(pops_MF10)
+    return m1, m2
 
 
 @numba.jit(nopython=False)
-def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
+def simulation(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000):
     assert N_MF10 != 0
 
     # N_MF10 = Number of nucleosomes (population)
@@ -222,19 +226,32 @@ def simulation(k=1, e=5, gamma=0, N_MF10=10, n_simulations_MF10=1000):
     time0 = end - start
     LogBio.logger.info('Simulation time: {0}'.format(time0))
 
+    return pops_MF10
+
+
+@numba.jit(nopython=False, parallel=True)
+def compile_results(pops_MF10):
+    # pops_MF10 = np.empty((n_simulations_MF10, ntime_points_MF10, N_MF10), dtype=np.int8)
+    n_simulations_MF10 = pops_MF10.shape[0]
+    ntime_points_MF10 = pops_MF10.shape[1]
+    N_MF10 = pops_MF10.shape[2]
+
     start = time.time()
     U_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     A_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
     I_MF10 = np.empty([n_simulations_MF10, ntime_points_MF10], dtype=np.int64)
 
-    for n in range(0, n_simulations_MF10):
-        for t in range(0, ntime_points_MF10):
+    for n in numba.prange(0, n_simulations_MF10):
+        for t in numba.prange(0, ntime_points_MF10):
             U_MF10[n, t] = (pops_MF10[n, t, :] == 0).sum()
             A_MF10[n, t] = (pops_MF10[n, t, :] == 1).sum()
             I_MF10[n, t] = (pops_MF10[n, t, :] == -1).sum()
 
     Mag_MF10 = A_MF10 - I_MF10
     Mag_MF10 = Mag_MF10 / float(N_MF10)
+
+    start_time_points_MF10 = 0
+    end_time_points_MF10 = ntime_points_MF10 - 1
 
     time_points_MF10 = np.linspace(start_time_points_MF10, end_time_points_MF10, ntime_points_MF10)
     MFPT10 = np.empty(n_simulations_MF10)
