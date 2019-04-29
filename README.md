@@ -178,7 +178,7 @@ will analyze, in case of the stopping condition *delta* is not reached yet.
 be minimized. 
 * opt_level: an integer specifying which version of the learning algorithm to use
  (i.e., 0, 1 or 2; use 2 for fast convergence).
-* parallel: boolean that specifies if the user desire to take advantage of the 
+* parallel: boolean that specifies if the user desires to take advantage of the 
 multithreading capabilities of the computer.
 * logging: boolean that specifies if the algorithm must print traces for
 debugging options.
