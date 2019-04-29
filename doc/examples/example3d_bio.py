@@ -6,6 +6,8 @@ from ParetoLib.Search.Search import Search3D, EPS, DELTA, STEPS
 min_x, min_y, min_z = (1.0, 1.0, 0.0)
 max_x, max_y, max_z = (2.0, 5.0, 2.0)
 
+# alpha = relative recruitement strength
+# alpha = e/k
 oracle = OracleBio(N_MF10=10, n_simulations_MF10=100)
 rs = Search3D(ora=oracle,
               min_cornerx=min_x,
