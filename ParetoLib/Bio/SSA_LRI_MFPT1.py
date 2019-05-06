@@ -176,14 +176,14 @@ def gillespie_fn(args):
 
 
 def gillespie_parallel(fn, params, population_size, ntime_points,
-                       start_time_points, end_time_points, n_simulations):
+                       start_time_points, end_time_points, n_simulations, nthreads):
     """
     Convenience function to do parallel Gillespie simulations for simple
     gene expression.
     """
     input_args = (params, population_size, ntime_points, start_time_points, end_time_points)
 
-    n_threads = multiprocessing.cpu_count()
+    n_threads = min(nthreads, multiprocessing.cpu_count())
     p = multiprocessing.Pool(n_threads)
 
     # Explicit copy of population_0 when creating arguments
@@ -200,14 +200,14 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     return np.array(list(populations))
 
 
-def sim(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000):
-    pops_MF10 = simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10)
+def sim(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000, nthreads=float('inf')):
+    pops_MF10 = simulation(k=k, e=e, gamma=gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10, nthreads=nthreads)
     m1, m2 = compile_results(pops_MF10)
     return m1, m2
 
 
 @numba.jit(nopython=False)
-def simulation(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000):
+def simulation(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000, nthreads=float('inf')):
     assert N_MF10 != 0
 
     # N_MF10 = Number of nucleosomes (population)
@@ -220,7 +220,7 @@ def simulation(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000):
     end_time_points_MF10 = 40000
 
     # Initialize output array
-    pops_MF10 = gillespie_parallel(gillespie_fn, params_MF10, N_MF10, ntime_points_MF10, start_time_points_MF10, end_time_points_MF10, n_simulations_MF10)
+    pops_MF10 = gillespie_parallel(gillespie_fn, params_MF10, N_MF10, ntime_points_MF10, start_time_points_MF10, end_time_points_MF10, n_simulations_MF10, nthreads)
 
     end = time.time()
     time0 = end - start

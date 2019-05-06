@@ -22,11 +22,12 @@ from ParetoLib.Geometry.Point import dim
 
 class OracleBio(Oracle):
 
-    def __init__(self, N_MF10=10, n_simulations_MF10=100):
+    def __init__(self, N_MF10=10, n_simulations_MF10=100, nthreads=float('inf')):
         # type: (OracleBio, int, int) -> None
         Oracle.__init__(self)
         self.N_MF10 = N_MF10
         self.n_simulations_MF10 = n_simulations_MF10
+        self.nthreads = nthreads
 
     def __repr__(self):
         # type: (OracleBio) -> str
@@ -49,6 +50,7 @@ class OracleBio(Oracle):
         """
         s = 'Number of nucleosomes: {0}\n'.format(self.N_MF10)
         s += 'Number of simulations: {0}'.format(self.n_simulations_MF10)
+        s += 'Number of threads: {0}\n'.format(self.nthreads)
         return s
 
     def __eq__(self, other):
@@ -56,14 +58,14 @@ class OracleBio(Oracle):
         """
         self == other
         """
-        return (self.N_MF10 == other.N_MF10) and (self.n_simulations_MF10 == other.n_simulations_MF10)
+        return (self.nthreads == other.nthreads) and (self.N_MF10 == other.N_MF10) and (self.n_simulations_MF10 == other.n_simulations_MF10)
 
     def __hash__(self):
         # type: (OracleBio) -> int
         """
         Identity function (via hashing).
         """
-        return hash(tuple(self.N_MF10, self.n_simulations_MF10))
+        return hash(tuple(self.N_MF10, self.n_simulations_MF10, self.nthreads))
 
     def dim(self):
         # type: (OracleBio) -> int
@@ -126,7 +128,7 @@ class OracleBio(Oracle):
         assert dim(point) == self.dim()
 
         k, e, gamma = point
-        m1, _ = sim(k=k, e=e, gamma=gamma, N_MF10=self.N_MF10, n_simulations_MF10=self.n_simulations_MF10)
+        m1, _ = sim(k=k, e=e, gamma=gamma, N_MF10=self.N_MF10, n_simulations_MF10=self.n_simulations_MF10, nthreads=self.nthreads)
 
         return bistable_test(m1)
 
