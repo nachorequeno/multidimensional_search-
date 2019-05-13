@@ -23,7 +23,6 @@ if __name__ == '__main__':
         url='https://gricad-gitlab.univ-grenoble-alpes.fr/verimag/tempo/multidimensional_search',
         install_requires=[
             'matplotlib>=2.0.2,<=3.0.3',
-            'numba>=0.43',
             'numpy>=1.15',
             'pytest>=2.0',
             'sortedcontainers>=1.5.10',
