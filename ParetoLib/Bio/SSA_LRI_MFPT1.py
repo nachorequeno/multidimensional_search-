@@ -197,6 +197,7 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     # return np.array(populations)
     populations = p.imap_unordered(fn, input_args_list)
     # populations = p.imap_unordered(fn, [input_args] * n_simulations)
+    p.close()
     return np.array(list(populations))
 
 
@@ -317,8 +318,8 @@ def bimodality_coeff(Mag_MF10):
     kur = st.kurtosis(lc)
     n = sample_size(lc)
     #
-    bc = sk**2 + 1
-    den = 3*((n-1)**2)/((n-2) * (n-3))
+    bc = sk**2.0 + 1.0
+    den = 3.0*((n-1)**2.0)/((n-2) * (n-3))
     bc = bc / (kur + den)
     return bc
 

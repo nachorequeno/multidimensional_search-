@@ -7,7 +7,7 @@
 """Bio package.
 
 This module acts as an interface to all biological models
-that are available to OracleBio.
+that are available to OracleBio3D.
 """
 
 import logging
