@@ -35,6 +35,9 @@ simple_update = np.array([[-1, 1, 0],
                           [1, -1, 0],
                           [1, 0, -1]], dtype=np.int)
 
+# Multiprocessing pool
+p = None
+
 
 @numba.jit(nopython=True)
 def sum_numba(ar):
@@ -183,8 +186,10 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     """
     input_args = (params, population_size, ntime_points, start_time_points, end_time_points)
 
+    global p
     n_threads = min(nthreads, multiprocessing.cpu_count())
-    p = multiprocessing.Pool(n_threads)
+    if p is None:
+        p = multiprocessing.Pool(n_threads)
 
     # Explicit copy of population_0 when creating arguments
     # in order to remove concurrent problems (race conditions)
@@ -197,7 +202,7 @@ def gillespie_parallel(fn, params, population_size, ntime_points,
     # return np.array(populations)
     populations = p.imap_unordered(fn, input_args_list)
     # populations = p.imap_unordered(fn, [input_args] * n_simulations)
-    p.close()
+    ## p.close()
     return np.array(list(populations))
 
 

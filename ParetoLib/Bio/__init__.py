@@ -16,5 +16,17 @@ __name__ = 'Bio'
 __all__ = ['SSA_LRI_MFPT1']
 
 # Logging configuration
-logging.basicConfig(format='%(message)s', level=logging.ERROR)
+# logging.basicConfig(format='%(message)s', level=logging.ERROR)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+# Create handlers
+handler = logging.StreamHandler()
+#handler.setLevel(logging.ERROR)
+
+# Create formatter and add it to handler
+form = logging.Formatter('%(message)s')
+handler.setFormatter(form)
+
+# Add handler to the logger
+logger.addHandler(handler)
