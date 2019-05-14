@@ -16,5 +16,17 @@ __name__ = 'Search'
 __all__ = ['CommonSearch', 'SeqSearch', 'ParSearch', 'Search', 'ResultSet', 'ParResultSet']
 
 # Logging configuration
-logging.basicConfig(format='%(message)s', level=logging.INFO)
+# logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create handlers
+handler = logging.StreamHandler()
+#handler.setLevel(logging.INFO)
+
+# Create formatter and add it to handler
+form = logging.Formatter('%(message)s')
+handler.setFormatter(form)
+
+# Add handler to the logger
+logger.addHandler(handler)

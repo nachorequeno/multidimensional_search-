@@ -14,4 +14,4 @@ Temporal Logic (STL) over them.
 """
 
 __name__ = 'STLe'
-__all__ = ['STLe.py']
+__all__ = ['STLe']
