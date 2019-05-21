@@ -230,7 +230,7 @@ def simulation(k=1.0, e=5.0, gamma=0.0, N_MF10=10, n_simulations_MF10=1000, nthr
 
     end = time.time()
     time0 = end - start
-    LogBio.logger.info('Simulation time: {0}'.format(time0))
+    LogBio.logger.debug('Simulation time: {0}'.format(time0))
 
     return pops_MF10
 
@@ -269,7 +269,7 @@ def compile_results(pops_MF10):
 
     end = time.time()
     time0 = end - start
-    LogBio.logger.info('Time for compiling results: {0}'.format(time0))
+    LogBio.logger.debug('Time for compiling results: {0}'.format(time0))
 
     return Mag_MF10, MFPT10
 
@@ -336,6 +336,10 @@ def normal_test(Mag_MF10):
     return norm_test.pvalue < 0.05
 
 
-def bistable_test(Mag_MF10):
+def bistable_test(Mag_MF10, offset=0.0):
     # return not normal_test(Mag_MF10)
-    return 9.0 * bimodality_coeff(Mag_MF10) > 5.0
+    # return 9.0 * bimodality_coeff(Mag_MF10) > 5.0
+    bc = bimodality_coeff(Mag_MF10)
+    test = 9.0 * (bimodality_coeff(Mag_MF10) - offset) > 5.0
+    LogBio.logger.info('Bimodality coeff: {0}, {1}'.format(bc, test))
+    return test

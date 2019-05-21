@@ -22,7 +22,7 @@ from ParetoLib.Geometry.Point import dim
 
 class OracleBio3D(Oracle):
 
-    def __init__(self, max_k, max_e, max_gamma, N_MF10=10, n_simulations_MF10=100, nthreads=float('inf')):
+    def __init__(self, max_k, max_e, max_gamma, N_MF10=10, n_simulations_MF10=100, nthreads=float('inf'), offset=0.0):
         # type: (OracleBio3D, float, float, float, int, int, float) -> None
         Oracle.__init__(self)
         self.max_k = max_k
@@ -31,6 +31,7 @@ class OracleBio3D(Oracle):
         self.N_MF10 = N_MF10
         self.n_simulations_MF10 = n_simulations_MF10
         self.nthreads = nthreads
+        self.offset = offset
 
     def __repr__(self):
         # type: (OracleBio3D) -> str
@@ -57,6 +58,7 @@ class OracleBio3D(Oracle):
         s += 'Max value of k: {0}\n'.format(self.max_k)
         s += 'Max value of e: {0}\n'.format(self.max_e)
         s += 'Max value of gamma: {0}\n'.format(self.max_gamma)
+        s += 'Offset bisimulation coeff: {0}\n'.format(self.offset)
         return s
 
     def __eq__(self, other):
@@ -69,14 +71,15 @@ class OracleBio3D(Oracle):
                (self.max_gamma == other.max_gamma) and \
                (self.nthreads == other.nthreads) and \
                (self.N_MF10 == other.N_MF10) and\
-               (self.n_simulations_MF10 == other.n_simulations_MF10)
+               (self.n_simulations_MF10 == other.n_simulations_MF10) and \
+               (self.offset == other.offset)
 
     def __hash__(self):
         # type: (OracleBio3D) -> int
         """
         Identity function (via hashing).
         """
-        return hash(tuple(self.max_k, self.max_e, self.max_gamma, self.N_MF10, self.n_simulations_MF10, self.nthreads))
+        return hash(tuple(self.max_k, self.max_e, self.max_gamma, self.N_MF10, self.n_simulations_MF10, self.nthreads, self.offset))
 
     def dim(self):
         # type: (OracleBio3D) -> int
@@ -141,7 +144,7 @@ class OracleBio3D(Oracle):
         k, e, gamma = point
         m1, _ = sim(k=self.max_k - k, e=e, gamma=self.max_gamma - gamma, N_MF10=self.N_MF10, n_simulations_MF10=self.n_simulations_MF10, nthreads=self.nthreads)
 
-        return bistable_test(m1)
+        return bistable_test(m1, self.offset)
 
     # Read/Write file functions
     def from_file_binary(self, finput=None):
@@ -158,6 +161,7 @@ class OracleBio3D(Oracle):
             self.max_k = pickle.load(finput)
             self.max_e = pickle.load(finput)
             self.max_gamma = pickle.load(finput)
+            self.offset = pickle.load(finput)
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
@@ -175,6 +179,7 @@ class OracleBio3D(Oracle):
             self.max_k = float(finput.readline().strip(' \n\t'))
             self.max_e = float(finput.readline().strip(' \n\t'))
             self.max_gamma = float(finput.readline().strip(' \n\t'))
+            self.offset = float(finput.readline().strip(' \n\t'))
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
 
@@ -191,6 +196,7 @@ class OracleBio3D(Oracle):
         pickle.dump(str(self.max_k), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(str(self.max_e), foutput, pickle.HIGHEST_PROTOCOL)
         pickle.dump(str(self.max_gamma), foutput, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(str(self.offset), foutput, pickle.HIGHEST_PROTOCOL)
 
     def to_file_text(self, foutput=None):
         # type: (OracleBio3D, io.BinaryIO) -> None
@@ -205,13 +211,13 @@ class OracleBio3D(Oracle):
         foutput.write(str(self.max_k) + '\n')
         foutput.write(str(self.max_e) + '\n')
         foutput.write(str(self.max_gamma) + '\n')
-
+        foutput.write(str(self.offset) + '\n')
 
 class OracleBio2D(OracleBio3D):
 
-    def __init__(self, max_alpha, max_gamma, N_MF10=10, n_simulations_MF10=100, nthreads=float('inf')):
+    def __init__(self, max_alpha, max_gamma, N_MF10=10, n_simulations_MF10=100, nthreads=float('inf'), offset=0.0):
         # type: (OracleBio2D, float, float, int, int, float) -> None
-        super(OracleBio2D, self).__init__(max_k=1, max_e=max_alpha, max_gamma=max_gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10, nthreads=nthreads)
+        super(OracleBio2D, self).__init__(max_k=1, max_e=max_alpha, max_gamma=max_gamma, N_MF10=N_MF10, n_simulations_MF10=n_simulations_MF10, nthreads=nthreads, offset=offset)
 
     def dim(self):
         # type: (OracleBio2D) -> int
@@ -276,4 +282,4 @@ class OracleBio2D(OracleBio3D):
         alpha, gamma = point
         m1, _ = sim(k=1.0, e=alpha, gamma=self.max_gamma - gamma, N_MF10=self.N_MF10, n_simulations_MF10=self.n_simulations_MF10, nthreads=self.nthreads)
 
-        return bistable_test(m1)
+        return bistable_test(m1, self.offset)
