@@ -87,6 +87,9 @@ def pborder_dominatedby_bi(args):
 # Multidimensional search
 # The search returns a set of Rectangles in Yup, Ylow and Border
 def multidim_search(xspace,
+                    yup,
+                    ylow,
+                    border,
                     oracle,
                     epsilon=EPS,
                     delta=DELTA,
@@ -95,7 +98,7 @@ def multidim_search(xspace,
                     sleep=0.0,
                     opt_level=2,
                     logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, int, bool) -> ParResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, int, bool, float, int, bool) -> ParResultSet
     md_search = [multidim_search_deep_first_opt_0,
                  multidim_search_deep_first_opt_1,
                  multidim_search_deep_first_opt_2]
@@ -103,6 +106,9 @@ def multidim_search(xspace,
     RootSearch.logger.info('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
+                              yup,
+                              ylow,
+                              border,
                               oracle,
                               epsilon=epsilon,
                               delta=delta,
@@ -126,6 +132,9 @@ def multidim_search(xspace,
 ########################################################################################################################
 # Multidimensional search prioritizing the analysis of rectangles with highest volume
 def multidim_search_deep_first_opt_2(xspace,
+                                     yup,
+                                     ylow,
+                                     border,
                                      oracle,
                                      epsilon=EPS,
                                      delta=DELTA,
@@ -133,7 +142,7 @@ def multidim_search_deep_first_opt_2(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -154,19 +163,30 @@ def multidim_search_deep_first_opt_2(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    # border = SortedListWithKey(key=Rectangle.volume)
-
-    border = SortedSet([], key=Rectangle.volume)
-    border.add(xspace)
-
+    #
+    # border = SortedSet([], key=Rectangle.volume)
+    # border.add(xspace)
+    #
     # Upper and lower clausure
-    ylow = []
-    yup = []
+    # ylow = []
+    # yup = []
+
+    border = SortedSet(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ParResultSet(border, ylow, yup, xspace)
 
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
     remaining_steps = max_step
 
@@ -341,6 +361,9 @@ def multidim_search_deep_first_opt_2(xspace,
 
 
 def multidim_search_deep_first_opt_1(xspace,
+                                     yup,
+                                     ylow,
+                                     border,
                                      oracle,
                                      epsilon=EPS,
                                      delta=DELTA,
@@ -348,7 +371,7 @@ def multidim_search_deep_first_opt_1(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -369,19 +392,30 @@ def multidim_search_deep_first_opt_1(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    # border = SortedListWithKey(key=Rectangle.volume)
-
-    border = SortedSet([], key=Rectangle.volume)
-    border.add(xspace)
-
+    #
+    # border = SortedSet([], key=Rectangle.volume)
+    # border.add(xspace)
+    #
     # Upper and lower clausure
-    ylow = []
-    yup = []
+    # ylow = []
+    # yup = []
+
+    border = SortedSet(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ParResultSet(border, ylow, yup, xspace)
 
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
     remaining_steps = max_step - step
 
@@ -528,6 +562,9 @@ def multidim_search_deep_first_opt_1(xspace,
 
 
 def multidim_search_deep_first_opt_0(xspace,
+                                     yup,
+                                     ylow,
+                                     border,
                                      oracle,
                                      epsilon=EPS,
                                      delta=DELTA,
@@ -535,7 +572,7 @@ def multidim_search_deep_first_opt_0(xspace,
                                      blocking=False,
                                      sleep=0.0,
                                      logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, bool) -> ParResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, int, bool, float, bool) -> ParResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -556,19 +593,30 @@ def multidim_search_deep_first_opt_0(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    # border = SortedListWithKey(key=Rectangle.volume)
-
-    border = SortedSet([], key=Rectangle.volume)
-    border.add(xspace)
-
+    #
+    # border = SortedSet([], key=Rectangle.volume)
+    # border.add(xspace)
+    #
     # Upper and lower clausure
-    ylow = []
-    yup = []
+    # ylow = []
+    # yup = []
+
+    border = SortedSet(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ParResultSet(border, ylow, yup, xspace)
 
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
     remaining_steps = max_step
 

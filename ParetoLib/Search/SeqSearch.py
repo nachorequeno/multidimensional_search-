@@ -32,6 +32,9 @@ from ParetoLib.Geometry.Rectangle import Rectangle, irect, comp, incomp
 # Multidimensional search
 # The search returns a set of Rectangles in Yup, Ylow and Border
 def multidim_search(xspace,
+                    yup,
+                    ylow,
+                    border,
                     oracle,
                     epsilon=EPS,
                     delta=DELTA,
@@ -40,7 +43,7 @@ def multidim_search(xspace,
                     sleep=0.0,
                     opt_level=2,
                     logging=True):
-    # type: (Rectangle, Oracle, float, float, int, bool, float, int, bool) -> ResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, int, bool, float, int, bool) -> ResultSet
     md_search = [multidim_search_opt_0,
                  multidim_search_opt_1,
                  multidim_search_opt_2]
@@ -48,6 +51,9 @@ def multidim_search(xspace,
     RootSearch.logger.info('Starting multidimensional search')
     start = time.time()
     rs = md_search[opt_level](xspace,
+                              yup,
+                              ylow,
+                              border,
                               oracle,
                               epsilon=epsilon,
                               delta=delta,
@@ -70,6 +76,9 @@ def multidim_search(xspace,
 
 ########################################################################################################################
 def multidim_search_opt_2(xspace,
+                          yup,
+                          ylow,
+                          border,
                           oracle,
                           epsilon=EPS,
                           delta=DELTA,
@@ -77,7 +86,7 @@ def multidim_search_opt_2(xspace,
                           blocking=False,
                           sleep=0.0,
                           logging=True):
-    # type: (Rectangle, Oracle, float, float, float, bool, float, bool) -> ResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, float, bool, float, bool) -> ResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -98,21 +107,33 @@ def multidim_search_opt_2(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    # border = SortedListWithKey(key=Rectangle.volume)
-    border = SortedSet([], key=Rectangle.volume)
-    border.add(xspace)
+    #
+    # border = SortedSet([], key=Rectangle.volume)
+    # border.add(xspace)
+    #
+    # ylow = []
+    # yup = []
 
-    ylow = []
-    yup = []
+    border = SortedSet(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ResultSet(border, ylow, yup, xspace)
 
     # oracle function
     f = oracle.membership()
 
     error = (epsilon,) * n
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -276,6 +297,9 @@ def multidim_search_opt_2(xspace,
 
 
 def multidim_search_opt_1(xspace,
+                          yup,
+                          ylow,
+                          border,
                           oracle,
                           epsilon=EPS,
                           delta=DELTA,
@@ -283,7 +307,7 @@ def multidim_search_opt_1(xspace,
                           blocking=False,
                           sleep=0.0,
                           logging=True):
-    # type: (Rectangle, Oracle, float, float, float, bool, float, bool) -> ResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, float, bool, float, bool) -> ResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -304,21 +328,33 @@ def multidim_search_opt_1(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    border = SortedListWithKey([], key=Rectangle.volume)
-    # border = SortedSet(key=Rectangle.volume)
-    border.add(xspace)
+    #
+    # border = SortedListWithKey([], key=Rectangle.volume)
+    # border.add(xspace)
+    #
+    # ylow = []
+    # yup = []
 
-    ylow = []
-    yup = []
+    border = SortedListWithKey(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ResultSet(border, ylow, yup, xspace)
 
     # oracle function
     f = oracle.membership()
 
     error = (epsilon,) * n
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -431,6 +467,9 @@ def multidim_search_opt_1(xspace,
 
 
 def multidim_search_opt_0(xspace,
+                          yup,
+                          ylow,
+                          border,
                           oracle,
                           epsilon=EPS,
                           delta=DELTA,
@@ -438,7 +477,7 @@ def multidim_search_opt_0(xspace,
                           blocking=False,
                           sleep=0.0,
                           logging=True):
-    # type: (Rectangle, Oracle, float, float, float, bool, float, bool) -> ResultSet
+    # type: (Rectangle, list, list, list, Oracle, float, float, float, bool, float, bool) -> ResultSet
 
     # Xspace is a particular case of maximal rectangle
     # Xspace = [min_corner, max_corner]^n = [0, 1]^n
@@ -459,21 +498,33 @@ def multidim_search_opt_0(xspace,
 
     # List of incomparable rectangles
     # border = [xspace]
-    border = SortedListWithKey(key=Rectangle.volume)
-    # border = SortedSet(key=Rectangle.volume)
-    border.add(xspace)
+    #
+    # border = SortedListWithKey(key=Rectangle.volume)
+    # border.add(xspace)
+    #
+    # ylow = []
+    # yup = []
 
-    ylow = []
-    yup = []
+    border = SortedListWithKey(list(border), key=Rectangle.volume)
+    if len(border) == 0:
+        border.add(xspace)
+
+    ylow = list(ylow)
+    yup = list(yup)
+
+    rs = ResultSet(border, ylow, yup, xspace)
 
     # oracle function
     f = oracle.membership()
 
     error = (epsilon,) * n
     vol_total = xspace.volume()
-    vol_yup = 0
-    vol_ylow = 0
-    vol_border = vol_total
+    # vol_yup = 0
+    # vol_ylow = 0
+    # vol_border = vol_total
+    vol_yup = rs.volume_yup()
+    vol_ylow = rs.volume_ylow()
+    vol_border = vol_total - vol_yup - vol_ylow
     step = 0
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))

@@ -116,11 +116,14 @@ def Search2D(ora,
              simplify=True):
     # type: (Oracle, float, float, float, float, float, float, int, bool, float, int, bool, bool, bool) -> ResultSet
     xyspace = create_2D_space(min_cornerx, min_cornery, max_cornerx, max_cornery)
+    yup = []
+    ylow = []
+    border = []
     if parallel:
-        rs = ParSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = ParSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     else:
-        rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = SeqSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     # n = int((max_cornerx - min_cornerx) / 0.1)
@@ -158,12 +161,14 @@ def Search3D(ora,
              simplify=True):
     # type: (Oracle, float, float, float, float, float, float, float, float, int, bool, float, int, bool, bool, bool) -> ResultSet
     xyspace = create_3D_space(min_cornerx, min_cornery, min_cornerz, max_cornerx, max_cornery, max_cornerz)
-
+    yup = []
+    ylow = []
+    border = []
     if parallel:
-        rs = ParSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = ParSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     else:
-        rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = SeqSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     # Explicitly print a set of n points in the Pareto boundary for emphasizing the front
     # n = int((max_cornerx - min_cornerx) / 0.1)
@@ -202,12 +207,14 @@ def SearchND(ora,
     minc = (min_corner,) * d
     maxc = (max_corner,) * d
     xyspace = Rectangle(minc, maxc)
-
+    yup = []
+    ylow = []
+    border = []
     if parallel:
-        rs = ParSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = ParSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     else:
-        rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = SeqSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     if simplify:
         rs.simplify()
@@ -230,12 +237,43 @@ def SearchND_2(ora,
 
     # list_intervals = [(minx, maxx), (miny, maxy),..., (minz, maxz)]
     xyspace = create_ND_space(list_intervals)
-
+    yup = []
+    ylow = []
+    border = []
     if parallel:
-        rs = ParSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = ParSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     else:
-        rs = SeqSearch.multidim_search(xyspace, ora, epsilon, delta, max_step,
+        rs = SeqSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
+                                       blocking, sleep, opt_level, logging)
+    if simplify:
+        rs.simplify()
+        rs.fusion()
+    return rs
+
+
+def RestartSearch(prev_rs,
+               ora,
+               epsilon=EPS,
+               delta=DELTA,
+               max_step=STEPS,
+               blocking=False,
+               sleep=0.0,
+               opt_level=2,
+               parallel=False,
+               logging=True,
+               simplify=True):
+    # type: (ResultSet, Oracle, float, float, int, bool, float, int, bool, bool, bool) -> ResultSet
+
+    xyspace = prev_rs.xspace
+    yup = prev_rs.yup
+    ylow = prev_rs.ylow
+    border = prev_rs.border
+    if parallel:
+        rs = ParSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
+                                       blocking, sleep, opt_level, logging)
+    else:
+        rs = SeqSearch.multidim_search(xyspace, yup, ylow, border, ora, epsilon, delta, max_step,
                                        blocking, sleep, opt_level, logging)
     if simplify:
         rs.simplify()

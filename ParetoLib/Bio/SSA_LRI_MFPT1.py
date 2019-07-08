@@ -2,6 +2,7 @@
 import numba
 import numpy as np
 import scipy.stats as st
+import math
 
 # Plotting modules 
 import seaborn as sns
@@ -38,6 +39,8 @@ simple_update = np.array([[-1, 1, 0],
 # Multiprocessing pool
 p = None
 
+# Influence of neighbours depending of the strength of gamma
+prec = 0.01
 
 @numba.jit(nopython=True)
 def sum_numba(ar):
@@ -45,7 +48,8 @@ def sum_numba(ar):
 
 
 @numba.jit(nopython=True)
-def simple_propensity(params, population):
+#def simple_propensity(params, population):
+def simple_propensity_no_error(params, population):
     """
     Returns an array of propensities given a set of parameters
     and an array of populations.
@@ -68,6 +72,52 @@ def simple_propensity(params, population):
             if j != i:
                 Ac[i] = Ac[i] + pow(abs(j - i), - gamma) * (St[j] == 1)
                 Ic[i] = Ic[i] + pow(abs(j - i), - gamma) * (St[j] == -1)
+
+        Pr[0, i] = (St[i] == 0) * (k + e * Ac[i] / float(N))
+        Pr[1, i] = (St[i] == 0) * (k + e * Ic[i] / float(N))
+        Pr[2, i] = (St[i] == 1) * (k + e * Ic[i] / float(N))
+        Pr[3, i] = (St[i] == -1) * (k + e * Ac[i] / float(N))
+    return Pr
+
+
+@numba.jit(nopython=True)
+#def simple_propensity_window(params, population):
+def simple_propensity(params, population):
+    """
+    Returns an array of propensities given a set of parameters
+    and an array of populations.
+    """
+    # Unpack parameters
+    k, e, gamma = params
+
+    # Unpack population state
+    St = population
+    # St = population.copy()
+    N = len(St)
+
+    if gamma == 0.0:
+        d = N
+    else:
+        # Window width depending on gamma for computing influence of neighbours
+        d = pow(prec, -1.0/gamma)
+        # Round number to a integer; required for loop indexing
+        d = int(math.ceil(d))
+        # If gamma is very small, d > N may happen
+        d = min(N, d)
+
+    Ac = np.zeros((N,), dtype=np.float64)
+    Ic = np.zeros((N,), dtype=np.float64)
+
+    Pr = np.empty((4, N), dtype=np.float64)
+
+    for i in range(0, N):
+        for j in range(1, d):
+            if i + j < N:
+                Ac[i] = Ac[i] + pow(j, - gamma) * (St[i + j] == 1)
+                Ic[i] = Ic[i] + pow(j, - gamma) * (St[i + j] == -1)
+            if i - j >= 0:
+                Ac[i] = Ac[i] + pow(j, - gamma) * (St[i - j] == 1)
+                Ic[i] = Ic[i] + pow(j, - gamma) * (St[i - j] == -1)
 
         Pr[0, i] = (St[i] == 0) * (k + e * Ac[i] / float(N))
         Pr[1, i] = (St[i] == 0) * (k + e * Ic[i] / float(N))
@@ -275,6 +325,7 @@ def compile_results(pops_MF10):
 
 
 def last_column(Mag_MF10):
+    # Getting the values of the last time point for all the simulations
     last_column_index = len(Mag_MF10[0]) - 1
     last_col = Mag_MF10[:, last_column_index]
     return last_col
@@ -285,6 +336,18 @@ def sample_size(Mag_MF10):
 
 
 def plot_histogram(Mag_MF10):
+    plot_histogram_rec(last_column(Mag_MF10))
+
+
+def plot_histogram_rec(last_column_Mag_MF10):
+    sns.distplot(last_column_Mag_MF10, hist=True, kde=False,
+                 bins=10000, color='red',
+                 hist_kws={'edgecolor': 'black'},
+                 kde_kws={'linewidth': 2})
+    plt.show()
+
+
+def plot_histogram_old(Mag_MF10):
     sns.distplot(last_column(Mag_MF10), hist=True, kde=False,
                  bins=10000, color='red',
                  hist_kws={'edgecolor': 'black'},
@@ -293,6 +356,18 @@ def plot_histogram(Mag_MF10):
 
 
 def plot_distribution(Mag_MF10):
+    plot_distribution_rec(last_column(Mag_MF10))
+
+
+def plot_distribution_rec(last_column_Mag_MF10):
+    sns.distplot(last_column_Mag_MF10, hist=False, kde=True,
+                 bins=10000, color='red',
+                 hist_kws={'edgecolor': 'black'},
+                 kde_kws={'linewidth': 2})
+    plt.show()
+
+
+def plot_distribution_old(Mag_MF10):
     sns.distplot(last_column(Mag_MF10), hist=False, kde=True,
                  bins=10000, color='red',
                  hist_kws={'edgecolor': 'black'},
@@ -329,8 +404,38 @@ def bimodality_coeff(Mag_MF10):
     return bc
 
 
+# Computation of the bimodality coeff according to paper of "K. Sneppen and I. B. Dodd (2012)"
+#
+# N = number of nucleosomes
+# N_E1 = number of nucleosomes in state E1
+# N_E2 = number of nucleosomes in state E1
+#
+# pE1 = p(N_E1 - N_E2 > N/2)
+# pE1 = p((N_E1 - N_E2)/N > 1/2)
+#
+# Continuous version
+def bimodality_coeff_2(Mag_MF10):
+    histo = np.histogram(Mag_MF10, bins=20, range=(-1.0, 1.0))
+    # histogram[0] == frequencies associated to each entry of histogram[1]
+    # histogram[1] == range(-1.0, 1.0), that corresponds to the categories,
+    # i.e., mean number of nucleosomes Actives (max, 1.0) or Inactives (max. -1.0)
+    n = histo[0].sum() # Total number of simulations
+    pE1 = histo[0][15:].sum()/n
+    pE2 = histo[0][:6].sum()/n
+    return 4.0*pE1*pE2
+
+
+# Discrete version
+def bimodality_coeff_3(Mag_MF10):
+    g = distribution_function(Mag_MF10)
+    pE1 = g.integrate_box(0.5, float('inf'))
+    pE2 = g.integrate_box(-float('inf'), -0.5)
+    return 4.0*pE1*pE2
+
+
 def normal_test(Mag_MF10):
-    norm_test = st.mstats.normaltest(last_column(Mag_MF10))
+    lc = last_column(Mag_MF10)
+    norm_test = st.mstats.normaltest(lc)
     # By convention, the data passes the statistical test (i.e., data is 'normal')
     # if pvalue is less or equal to 0.05, 0.01, 0.005, or 0.001
     return norm_test.pvalue < 0.05
@@ -340,6 +445,18 @@ def bistable_test(Mag_MF10, offset=0.0):
     # return not normal_test(Mag_MF10)
     # return 9.0 * bimodality_coeff(Mag_MF10) > 5.0
     bc = bimodality_coeff(Mag_MF10)
-    test = 9.0 * (bimodality_coeff(Mag_MF10) - offset) > 5.0
+    test = 9.0 * (bc - offset) > 5.0
     LogBio.logger.info('Bimodality coeff: {0}, {1}'.format(bc, test))
+    return test
+
+
+def bistable_test_2(Mag_MF10):
+    bc = bimodality_coeff_2(Mag_MF10)
+    test = bc > .75
+    return test
+
+
+def bistable_test_3(Mag_MF10):
+    bc = bimodality_coeff_3(Mag_MF10)
+    test = bc > .75
     return test
