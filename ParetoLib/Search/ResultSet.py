@@ -305,7 +305,18 @@ class ResultSet:
         return self.xspace.inside(xpoint)
 
     # Points of closure
-    def get_points_yup(self, n):
+    def get_points_yup(self, n=-1):
+        # type: (ResultSet, int) -> list
+        if n >= 0:
+            return self._get_n_points_yup(n)
+        else:
+            return self._get_points_yup()
+
+    def _get_points_yup(self):
+        # type: (ResultSet) -> list
+        return [r.min_corner for r in self.yup]
+
+    def _get_n_points_yup(self, n):
         # type: (ResultSet, int) -> list
         m = int(n / len(self.yup))
         m = 1 if m < 1 else m
@@ -319,7 +330,14 @@ class ResultSet:
         merged = list(chain.from_iterable(point_list))
         return merged
 
-    def get_points_ylow(self, n):
+    def get_points_ylow(self, n=-1):
+        # type: (ResultSet, int) -> list
+        if n >= 0:
+            return self._get_n_points_ylow(n)
+        else:
+            return self._get_points_ylow()
+
+    def _get_n_points_ylow(self, n):
         # type: (ResultSet, int) -> list
         m = int(n / len(self.ylow))
         m = 1 if m < 1 else m
@@ -327,6 +345,9 @@ class ResultSet:
         point_list = (rect.get_points(m) for rect in self.ylow)
         merged = list(chain.from_iterable(point_list))
         return merged
+
+    def _get_points_ylow(self):
+        return [r.max_corner for r in self.ylow]
 
     def get_points_border(self, n):
         # type: (ResultSet, int) -> list
