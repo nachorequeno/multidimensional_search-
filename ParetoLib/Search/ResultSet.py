@@ -349,7 +349,14 @@ class ResultSet:
     def _get_points_ylow(self):
         return [r.max_corner for r in self.ylow]
 
-    def get_points_border(self, n):
+    def get_points_border(self, n=-1):
+        # type: (ResultSet, int) -> list
+        if n >= 0:
+            return self._get_n_points_border(n)
+        else:
+            return self._get_points_ylow()
+
+    def _get_n_points_border(self, n):
         # type: (ResultSet, int) -> list
         m = int(n / len(self.border))
         m = 1 if m < 1 else m
@@ -357,6 +364,9 @@ class ResultSet:
         point_list = (rect.get_points(m) for rect in self.border)
         merged = list(chain.from_iterable(point_list))
         return merged
+
+    def _get_points_border(self):
+        return self.get_points_pareto()
 
     def get_points_space(self, n):
         # type: (ResultSet, int) -> list
