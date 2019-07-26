@@ -72,7 +72,7 @@ from itertools import product, tee
 
 from ParetoLib.Geometry.Segment import Segment
 from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
-    incomparables, select, subt, int_to_bin_tuple
+    incomparables, select, subt, int_to_bin_tuple #, r
 from ParetoLib._py3k import red
 
 
@@ -88,8 +88,6 @@ class Rectangle(object):
         smaller than x'.
         """
         assert dim(min_corner) == dim(max_corner)
-
-
 
         # min_corner, max_corner
         self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
@@ -133,6 +131,18 @@ class Rectangle(object):
         if name != str_vol:
             # self.__dict__[str_vol] = None
             object.__setattr__(self, str_vol, None)
+
+        # Round the elements of 'value' when assigning them to self.min_corner or self.max_corner
+        # if type(value) == tuple:
+        #     value = tuple(r(vi) for vi in value)
+
+        # Round the elements of 'value' when assigning them to self.vol
+        # if type(value) == float:
+        #     value = r(value)
+
+        # Round the elements of 'value' when assigning them to self.vertx
+        # if type(value) == list:
+        #     value = [tuple(r(vi) for vi in vertex) for vertex in value]
 
         # self.__dict__[name] = None
         object.__setattr__(self, name, value)
@@ -729,7 +739,6 @@ class Rectangle(object):
     """
     Synonym of intersection(self, other).
     """
-
     def difference(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
@@ -1015,6 +1024,7 @@ class Rectangle(object):
                 if b.overlaps(a):
                     # Add the set of cubes 'a' - 'b'
                     temp = temp.union(a - b)
+                    # temp = temp.union(a.difference(b))
                     # Remove 'a'
                     temp.discard(a)
             new_rect = temp
@@ -1153,3 +1163,101 @@ def irect(alphaincomp, yrectangle, xspace):
     # assert (dim(alphaincomp_list) == dim(yrectangle.max_corner)), \
     #    'alphaincomp_list and yrectangle.max_corner do not share the same dimension'
     return [brect(alphaincomp_i, yrectangle, xspace) for alphaincomp_i in alphaincomp]
+
+
+def idwc(y, z):
+    # type: (Rectangle, Rectangle) -> iter
+    assert z.dim() == y.dim(), 'Rectangles should have the same dimension'
+    # y = [0, y_]
+    # assert y.min_corner <= z.min_corner, 'Minimal corner of {0} must be at the origin of the xspace ' \
+    #                                      '(i.e., {0} <= {1})'.format(y.min_corner, z.min_corner)
+    assert less_equal(y.min_corner, z.min_corner) or incomparables(y.min_corner, z.min_corner),\
+        'Minimal corner of {0} must be at the origin of the xspace (i.e., {0} <= {1})'\
+            .format(y.min_corner, z.min_corner)
+    # assert z.min_corner <= y.max_corner, 'Rectangles {0} and {1} must intersect'.format(y, z)
+    assert less_equal(z.min_corner, y.max_corner) or incomparables(z.min_corner, y.max_corner), \
+        'Rectangles {0} and {1} must intersect'.format(y, z)
+
+    def w_set(m):
+        # type: (int) -> iter
+        # { 0^{j-1} 1 *^{m-j} } for j in [1, m]
+        return ["0"*(j-1) + "1" + "*"*(m-j) for j in range(1, m+1)]
+
+    def gamma(w, y, z):
+        # type: (iter, Rectangle, Rectangle) -> tuple
+        d = z.dim()
+        j = 0
+
+        alpha = ["*"]*d
+        for i in range(d):
+            if y.max_corner[i] < z.max_corner[i]:
+                alpha[i] = w[j]
+                j += 1
+
+        return tuple(int(alphai) if alphai != "*" else 2 for alphai in alpha)
+
+    # Number of coordinates for which y.max_corner[i] < z.max_corner[i]
+    d = z.dim()
+    m = sum(y.max_corner[i] < z.max_corner[i] for i in range(d))
+    # coor = [y.max_corner[i] < z.max_corner[i] for i in range(d)]
+    # m = coor.count(True)
+
+    yp = Rectangle(y.max_corner, y.max_corner)
+    result = []
+    ws = w_set(m)
+    for w in ws:
+        alpha = gamma(w, y, z)
+        result.append(brect(alpha, yp, z))
+        # brect(alpha, yrectangle, xspace)
+
+    return result
+
+
+def iuwc(y, z):
+    # type: (Rectangle, Rectangle) -> iter
+    assert z.dim() == y.dim(), 'Rectangles should have the same dimension'
+    # y = [y^_, 1]
+    # assert z.max_corner <= y.max_corner, 'Maximal corner of {1} must be the highest value of the xspace ' \
+    #                                      '(i.e., {0} <= {1})'.format(y.min_corner, z.min_corner)
+    assert less_equal(z.max_corner, y.max_corner) or incomparables(z.max_corner, y.max_corner), \
+        'Maximal corner of {1} must be the highest value of the xspace (i.e., {0} <= {1})'\
+            .format(y.min_corner, z.min_corner)
+    # assert y.min_corner <= z.max_corner, 'Rectangles {0} and {1} must intersect'.format(y, z)
+    assert less_equal(y.min_corner, z.max_corner) or incomparables(y.min_corner, z.max_corner), \
+        'Rectangles {0} and {1} must intersect'.format(y, z)
+
+    def w_set(m):
+        # type: (int) -> iter
+        # { 1^{j-1} 0 *^{m-j} } for j in [1, m]
+        return ["1"*(j-1) + "0" + "*"*(m-j) for j in range(1, m+1)]
+
+    def gamma(w, y, z):
+        # type: (iter, Rectangle, Rectangle) -> tuple
+        d = z.dim()
+        j = 0
+
+        alpha = ["*"]*d
+        for i in range(d):
+            # if y.min_corner[i] < z.max_corner[i]:
+            if z.min_corner[i] < y.min_corner[i]:
+                alpha[i] = w[j]
+                j += 1
+
+        return tuple(int(alphai) if alphai != "*" else 2 for alphai in alpha)
+
+    # Number of coordinates for which y.max_corner[i] < z.max_corner[i]
+    d = z.dim()
+    m = sum(z.min_corner[i] < y.min_corner[i] for i in range(d))
+    # m = sum(y.min_corner[i] < z.max_corner[i] for i in range(d))
+    # coor = [z.min_corner[i] < y.min_corner[i] for i in range(d)]
+    # m = coor.count(True)
+
+    yp = Rectangle(y.min_corner, y.min_corner)
+    result = []
+    ws = w_set(m)
+    for w in ws:
+        alpha = gamma(w, y, z)
+        result.append(brect(alpha, yp, z))
+        # brect(alpha, yrectangle, xspace)
+
+    return result

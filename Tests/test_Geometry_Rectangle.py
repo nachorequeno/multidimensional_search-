@@ -1,6 +1,6 @@
 import unittest
 
-from ParetoLib.Geometry.Rectangle import Rectangle
+from ParetoLib.Geometry.Rectangle import Rectangle, iuwc, idwc
 
 
 #############
@@ -289,6 +289,43 @@ class RectangleTestCase(unittest.TestCase):
         self.assertLessEqual(len(r4 - r3), len(diff_result22))
         self.assertLessEqual(len(r4 - r5), len(diff_result31))
         self.assertLessEqual(len(r5 - r4), len(diff_result32))
+
+    def test_idwc_iuwc(self):
+        # type: (RectangleTestCase) -> None
+        p1 = (0.0,)*4
+        p2 = (0.5,)*4
+        p3 = (0.2, 0.6, 0.2, 0.2)
+
+        z = Rectangle(p1, p2)
+        y = Rectangle(p1, p3)
+
+        r = [Rectangle((0.2, 0.0, 0.0, 0.0), p2), Rectangle((0.0, 0.0, 0.2, 0.0), (0.2, 0.5, 0.5, 0.5)),
+             Rectangle((0.0, 0.0, 0.0, 0.2), (0.2, 0.5, 0.2, 0.5))]
+
+        self.assertSetEqual(set(r), set(idwc(y, z)))
+
+        p1 = (0.0,) * 3
+        p2 = (0.5,) * 3
+        p3 = (0.2, 0.6, 0.2)
+        p4 = (0.2, ) * 3
+        p5 = (1.0,) * 3
+
+        z = Rectangle(p1, p2)
+        y1 = Rectangle(p1, p3)
+        y2 = Rectangle(p4, p5)
+        # y_interval = Rectangle
+        p6 = (0.2, 0.0, 0.0)
+        p7 = (0.2, 0.5, 0.5)
+
+        r1 = [Rectangle(p6, p2), Rectangle((0.0, 0.0, 0.2), p7)]
+        r2 = [Rectangle(p1, p7), Rectangle(p6, (0.5, 0.2, 0.5)),
+              Rectangle((0.2, 0.2, 0.0), (0.5, 0.5, 0.2))]
+
+        self.assertSetEqual(set(r1), set(idwc(y1, z)))
+        self.assertSetEqual(set(r2), set(iuwc(y2, z)))
+
+        self.assertSetEqual(set(), set(idwc(y1, z)) & set(y1 - z))
+        self.assertSetEqual(set(), set(iuwc(y2, z)) & set(y2 - z))
 
 
 if __name__ == '__main__':
