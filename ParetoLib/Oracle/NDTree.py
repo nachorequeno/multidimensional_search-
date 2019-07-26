@@ -24,7 +24,7 @@ import io
 import pickle
 
 from ParetoLib.Geometry.Rectangle import Rectangle
-from ParetoLib.Geometry.Point import less, less_equal, distance, dim
+from ParetoLib.Geometry.Point import less, less_equal, distance, dim, r
 import ParetoLib.Oracle as RootOracle
 
 
@@ -66,6 +66,7 @@ class NDTree:
         >>> x in nd
         >>> True
         """
+        p = tuple(r(pi) for pi in p)
         return self.root.has_point_rec(p) if not self.is_empty() else False
         # return item in self.root
 
@@ -223,6 +224,7 @@ class NDTree:
         >>> nd = NDTree()
         >>> nd.update_point(x)
         """
+        p = tuple(r(pi) for pi in p)
         n = self.root
         if n is None:
             n = Node(max_points=self.max_points, min_children=self.min_children)
@@ -252,6 +254,7 @@ class NDTree:
         >>> nd.dominates(y)
         >>> True
         """
+        p = tuple(r(pi) for pi in p)
         return self.root.dominates(p)
 
     # Read/Write file functions
