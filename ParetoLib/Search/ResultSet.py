@@ -31,11 +31,12 @@ import tempfile
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from ParetoLib.Oracle.NDTree import NDTree
 from ParetoLib.Geometry.Rectangle import Rectangle
 import ParetoLib.Search as RootSearch
 
 
-class ResultSet:
+class ResultSet(object):
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
         # type: (ResultSet, iter, iter, iter, Rectangle) -> None
         # self.border = list(border) is required for forcing the creation of a local list.
@@ -58,6 +59,52 @@ class ResultSet:
         self.filename_ylow = 'low'
         self.filename_border = 'border'
         self.filename_space = 'space'
+
+        self.ylow_pareto = NDTree()
+        self.yup_pareto = NDTree()
+
+    def __setattr__(self, name, value):
+        # type: (ResultSet, str, None) -> None
+        """
+        Assignation of a value to a class attribute.
+
+        Args:
+            self (ResultSet): The ResultSet.
+            name (str): The attribute.
+            value (None): The value
+
+        Returns:
+            None: self.name = value.
+
+        Example:
+        >>> xspace = Rectangle((0.0,0.0), (1.0,1.0))
+        >>> ylow = [Rectangle((0.0,0.0), (0.5,0.5))]
+        >>> yup = [Rectangle((0.5,0.5), (1.0,1.0))]
+        >>> border = [Rectangle((0.0,0.5), (0.5,1.0)), Rectangle((0.5,1.0), (1.0,1.0))]
+        >>> rs = ResultSet(border, ylow, yup, xspace)
+        >>> rs.min_corner = x
+        """
+        str_xspace = 'xspace'
+        str_border = 'border'
+        str_ylow = 'ylow'
+        str_yup = 'yup'
+
+        str_ylow_pareto = 'ylow_pareto'
+        str_yup_pareto = 'yup_pareto'
+
+        # Every time a closure is changed (yup, ylow or border), the Pareto archive is marked as 'outdated'
+        # and reinitialized.
+        # It is used for a lazy computation of volume when requested by the user,
+        # and therefore avoiding unecessary computations
+
+        if name in [str_xspace, str_border, str_ylow, str_yup]:
+            # self.__dict__[str_ylow_pareto] = NDTree()
+            # self.__dict__[str_yup_pareto] = NDTree()
+            object.__setattr__(self, str_ylow_pareto, NDTree())
+            object.__setattr__(self, str_yup_pareto, NDTree())
+
+        # self.__dict__[name] = None
+        object.__setattr__(self, name, value)
 
     # Printers
     def _to_str(self):
@@ -137,6 +184,15 @@ class ResultSet:
     # overlapping_volume_border() == 0 and overlapping_volume_total() == 0
     def simplify(self):
         # type: (ResultSet) -> None
+        extended_ylow = [Rectangle(self.xspace.min_corner, ylow_point) for ylow_point in self.get_points_pareto_ylow()]
+        extended_yup = [Rectangle(yup_point, self.xspace.max_corner) for yup_point in self.get_points_pareto_yup()]
+
+        self.border = Rectangle.difference_rectangles(self.xspace, extended_ylow + extended_yup)
+        self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
+        self.ylow = Rectangle.difference_rectangles(self.xspace, extended_yup + self.border)
+
+    def simplify_func(self):
+        # type: (ResultSet) -> None
         # Remove single points from the yup and ylow closures, i.e., rectangles rect with:
         # rect.min_corner == rect.max_corner
         # These kind of rectangles appear when the dicothomic search cannot find an intersection of the diagonal
@@ -152,18 +208,6 @@ class ResultSet:
         self.border = Rectangle.difference_rectangles(self.xspace, extended_ylow + extended_yup)
         self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
         self.ylow = Rectangle.difference_rectangles(self.xspace, extended_yup + self.border)
-
-        ##new_yup = []
-        ##for a in extended_yup:
-        ##    temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_yup if a.overlaps(b) and a != b))
-        ##    new_yup.extend(temp)
-        ##self.yup.extend(new_yup)
-
-        ##new_ylow = []
-        ##for a in extended_ylow:
-        ##    temp = Rectangle.difference_rectangles(a, (a.intersection(b) for b in extended_ylow if a.overlaps(b) and a != b))
-        ##    new_ylow.extend(temp)
-        ##self.ylow.extend(new_ylow)
 
     def fusion(self):
         # type: (ResultSet) -> None
@@ -202,7 +246,7 @@ class ResultSet:
     def overlapping_volume_yup(self):
         # type: (ResultSet) -> float
         # self.yup = [rect1, rect2,..., rectn]
-        # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
+        # pairs_of_rect = [(rect1, rect2), (rect1, rect3),..., (rectn-1, rectn)]
         pairs_of_rect = combinations(self.yup, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
@@ -210,7 +254,7 @@ class ResultSet:
     def overlapping_volume_ylow(self):
         # type: (ResultSet) -> float
         # self.ylow = [rect1, rect2,..., rectn]
-        # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
+        # pairs_of_rect = [(rect1, rect2), (rect1, rect3),..., (rectn-1, rectn)]
         pairs_of_rect = combinations(self.ylow, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
@@ -218,7 +262,7 @@ class ResultSet:
     def overlapping_volume_border(self):
         # type: (ResultSet) -> float
         # self.border = [rect1, rect2,..., rectn]
-        # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
+        # pairs_of_rect = [(rect1, rect2), (rect1, rect3),..., (rectn-1, rectn)]
         pairs_of_rect = combinations(self.border, 2)
         # return self._overlapping_volume(pairs_of_rect)
         return ResultSet._overlapping_volume(pairs_of_rect)
@@ -226,7 +270,7 @@ class ResultSet:
     def overlapping_volume_total(self):
         # type: (ResultSet) -> float
         # total_rectangles = [rect1, rect2,..., rectn]
-        # pairs_of_rect = [(rect1, rect1), (rect1, rect2),..., (rectn, rectn)]
+        # pairs_of_rect = [(rect1, rect2), (rect1, rect3),..., (rectn-1, rectn)]
         total_rectangles = []
         total_rectangles.extend(self.border)
         total_rectangles.extend(self.yup)
@@ -372,15 +416,39 @@ class ResultSet:
         # type: (ResultSet, int) -> list
         return self.xspace.get_points(n)
 
-    def set_points_pareto(self, l):
+    def set_points_pareto_func(self, l):
         # type: (ResultSet, iter) -> None
         self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
         self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
         self.border = [Rectangle(p, p) for p in l]
 
+    def set_points_pareto(self, l):
+        # type: (ResultSet, iter) -> None
+        self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
+        self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
+        self.border = [Rectangle(p, p) for p in l]
+        # self.simplify()
+
+    def get_points_pareto_yup(self):
+        # type: (ResultSet) -> set
+        if self.yup_pareto.is_empty():
+            for p in (r.min_corner for r in self.yup):
+                self.yup_pareto.update_point(p)
+
+        return self.yup_pareto.get_points()
+
+    def get_points_pareto_ylow(self):
+        # type: (ResultSet) -> set
+        if self.ylow_pareto.is_empty():
+            for p in (r.max_corner for r in self.ylow):
+                self.ylow_pareto.update_point(p)
+
+        return self.ylow_pareto.get_points()
+
     def get_points_pareto(self):
         # type: (ResultSet) -> list
-        return [r.max_corner for r in self.ylow] + [r.min_corner for r in self.yup]
+        return list(self.get_points_pareto_yup() | self.get_points_pareto_ylow())
+        # return [r.max_corner for r in self.ylow] + [r.min_corner for r in self.yup]
 
     # Maximum/minimum values for each parameter
     @staticmethod
@@ -801,8 +869,11 @@ class ResultSet:
         ax1.set_ylabel(var_names[yaxe % len(var_names)])
         ax1.set_zlabel(var_names[zaxe % len(var_names)])
 
-        points_lower_closure = (r.max_corner for r in self.ylow)
-        points_upper_closure = (r.min_corner for r in self.yup)
+        # points_lower_closure = (r.max_corner for r in self.ylow)
+        # points_upper_closure = (r.min_corner for r in self.yup)
+
+        points_lower_closure = self.get_points_pareto_ylow()
+        points_upper_closure = self.get_points_pareto_yup()
 
         xs = []
         ys = []
