@@ -197,8 +197,8 @@ class ResultSet(object):
         # rect.min_corner == rect.max_corner
         # These kind of rectangles appear when the dicothomic search cannot find an intersection of the diagonal
         # with the Pareto front
-        self.ylow = [li for li in self.ylow if li.diag_length() != 0.0]
-        self.yup = [li for li in self.yup if li.diag_length() != 0.0]
+        self.ylow = [li for li in self.ylow if li.diag_vector() != 0.0]
+        self.yup = [li for li in self.yup if li.diag_vector() != 0.0]
         # Single points may appear in the boundary, so we don't remove them
         # self.border = [li for li in self.border if li.diag_length() != 0]
 

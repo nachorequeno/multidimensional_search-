@@ -47,7 +47,6 @@ def r(i):
     >>> r(i)
     >>> 0.5
     """
-
     return round(i, ParetoLib.Geometry.__numdigits__)
 
 

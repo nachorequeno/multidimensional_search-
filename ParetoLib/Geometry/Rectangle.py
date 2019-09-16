@@ -293,47 +293,6 @@ class Rectangle(object):
         """
         return dim(self.min_corner)
 
-    def diag_length(self):
-        # type: (Rectangle) -> tuple
-        """
-        Maximal distance between corners of the Rectangle.
-
-        Args:
-            self (Rectangle): The Rectangle.
-
-        Returns:
-            tuple: Maximal distance between corners of the Rectangle.
-
-        Example:
-        >>> x = (0,0,0)
-        >>> y = (2,2,2)
-        >>> r = Rectangle(x,y)
-        >>> r.diag_length()
-        >>> (2.0,2.0,2.0)
-        """
-        return subtract(self.max_corner, self.min_corner)
-
-    def norm(self):
-        # type: (Rectangle) -> float
-        """
-        Norm of the diagonal.
-
-        Args:
-            self (Rectangle): The Rectangle.
-
-        Returns:
-            float: Norm of the diagonal.
-
-        Example:
-        >>> x = (0,0,0)
-        >>> y = (2,2,2)
-        >>> r = Rectangle(x,y)
-        >>> r.norm()
-        >>> 3.464
-        """
-        diagonal = self.diag()
-        return diagonal.norm()
-
     def _volume(self):
         # type: (Rectangle) -> float
         diagonal_length = self.diag_length()
@@ -439,6 +398,47 @@ class Rectangle(object):
         >>> (1.0,1.0)
         """
         return Segment(self.min_corner, self.max_corner)
+
+    def diag_vector(self):
+        # type: (Rectangle) -> tuple
+        """
+        Maximal distance between corners of the Rectangle.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            tuple: Maximal distance between corners of the Rectangle.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.diag_vector()
+        >>> (2.0,2.0,2.0)
+        """
+        return subtract(self.max_corner, self.min_corner)
+
+    def norm(self):
+        # type: (Rectangle) -> float
+        """
+        Norm of the diagonal.
+
+        Args:
+            self (Rectangle): The Rectangle.
+
+        Returns:
+            float: Norm of the diagonal.
+
+        Example:
+        >>> x = (0,0,0)
+        >>> y = (2,2,2)
+        >>> r = Rectangle(x,y)
+        >>> r.norm()
+        >>> 3.464
+        """
+        diagonal = self.diag()
+        return diagonal.norm()
 
     def center(self):
         # type: (Rectangle) -> tuple
