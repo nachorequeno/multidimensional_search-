@@ -344,7 +344,7 @@ class Rectangle(object):
 
     def _vertices(self):
         # type: (Rectangle) -> list
-        deltas = self.diag_length()
+        deltas = self.diag_vector()
         vertex = self.min_corner
         num_vertex = self.num_vertices()
         d = self.dim()
@@ -458,7 +458,7 @@ class Rectangle(object):
         >>> r.center()
         >>> (0.5,0.5)
         """
-        offset = div(self.diag_length(), 2.0)
+        offset = div(self.diag_vector(), 2.0)
         return add(self.min_corner, offset)
 
     def distance_to_center(self, xpoint):
@@ -505,7 +505,7 @@ class Rectangle(object):
         """
         # n internal points = n + 1 internal segments
         m = float(n + 1)  # Type conversion required for point operations
-        diag_step = div(self.diag_length(), m)
+        diag_step = div(self.diag_vector(), m)
         min_point = add(self.min_corner, diag_step)
         point_list = [add(min_point, mult(diag_step, i)) for i in range(n)]
         return point_list
@@ -879,8 +879,8 @@ class Rectangle(object):
         """
         assert (self.dim() >= 2), 'Dimension required >= 2'
         mc = (self.min_corner[xaxe], self.min_corner[yaxe],)
-        width = self.diag_length()[xaxe]
-        height = self.diag_length()[yaxe]
+        width = self.diag_vector()[xaxe]
+        height = self.diag_vector()[yaxe]
         return patches.Rectangle(
             mc,  # (x,y)
             width,  # width
