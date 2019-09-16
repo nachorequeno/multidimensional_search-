@@ -295,7 +295,7 @@ class Rectangle(object):
 
     def _volume(self):
         # type: (Rectangle) -> float
-        diagonal_length = self.diag_length()
+        diagonal_length = self.diag_vector()
         _prod = red(lambda si, sj: si * sj, diagonal_length)
         return abs(_prod)
 

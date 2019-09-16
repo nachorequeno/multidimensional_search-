@@ -200,7 +200,7 @@ class ResultSet(object):
         self.ylow = [li for li in self.ylow if li.diag_vector() != 0.0]
         self.yup = [li for li in self.yup if li.diag_vector() != 0.0]
         # Single points may appear in the boundary, so we don't remove them
-        # self.border = [li for li in self.border if li.diag_length() != 0]
+        # self.border = [li for li in self.border if li.diag_vector() != 0]
 
         extended_ylow = [Rectangle(self.xspace.min_corner, r.max_corner) for r in self.ylow]
         extended_yup = [Rectangle(r.min_corner, self.xspace.max_corner) for r in self.yup]
