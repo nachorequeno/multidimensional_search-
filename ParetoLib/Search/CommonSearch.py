@@ -32,6 +32,7 @@ EPS = 1e-5
 DELTA = 1e-5
 STEPS = float('inf')
 
+
 def binary_search(x,
                   member,
                   error):
@@ -49,16 +50,18 @@ def binary_search(x,
         y.high = x.high
     else:
         # We don't know. We search for a point in the diagonal
-        dist = subtract(y.high, y.low)
-        # while greater_equal(dist, error):
-        # while any(dist_i > error[0] for dist_i in dist):
-        while not less_equal(dist, error):
+        # dist = subtract(y.high, y.low)
+        dist = y.norm()
+        # while not less_equal(dist, error):
+        while dist > error[0]:
             i += 1
-            yval = div(add(y.low, y.high), 2.0)
+            # yval = div(add(y.low, y.high), 2.0)
+            yval = y.center()
             # We need a oracle() for guiding the search
             if member(yval):
                 y.high = yval
             else:
                 y.low = yval
-            dist = subtract(y.high, y.low)
+            # dist = subtract(y.high, y.low)
+            dist = y.norm()
     return y, i

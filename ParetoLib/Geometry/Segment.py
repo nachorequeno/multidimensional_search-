@@ -18,7 +18,7 @@ Pareto point is located.
 
 import math
 
-from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal, r
+from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal, div, add, r
 import ParetoLib.Geometry.Point as Point
 
 
@@ -196,7 +196,6 @@ class Segment (object):
         >>> s.diag()
         >>> (3.0, 3.0, 3.0)
         """
-
         return Point.subtract(self.high, self.low)
 
     def norm(self):
@@ -217,6 +216,26 @@ class Segment (object):
         >>> s.norm()
         >>> 5.196
         """
-
         diagonal = self.diag()
         return Point.norm(diagonal)
+
+    def center(self):
+        # type: (Segment) -> tuple
+        """
+        Center of the Segment.
+
+        Args:
+            self (Segment): The Segment.
+
+        Returns:
+            tuple: Center of the Segment.
+
+        Example:
+        >>> x = (0,0)
+        >>> y = (1,1)
+        >>> s = Segment(x,y)
+        >>> s.center()
+        >>> (0.5,0.5)
+        """
+        offset = div(self.diag(), 2.0)
+        return add(self.low, offset)

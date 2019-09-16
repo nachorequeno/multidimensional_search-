@@ -47,7 +47,6 @@ def r(i):
     >>> r(i)
     >>> 0.5
     """
-
     return round(i, ParetoLib.Geometry.__numdigits__)
 
 
@@ -329,7 +328,6 @@ def incomparables(x, xprime):
     >>> incomparables(x, xprime)
     >>> True
     """
-
     return (not greater_equal(x, xprime)) and (not greater_equal(xprime, x))
 
 
@@ -456,7 +454,6 @@ def int_to_bin_list(x, pad=0):
     >>> int_to_bin_list(x, 4)
     >>> [0, 1, 0, 0]
     """
-
     temp1 = [int(i) for i in bin(x)[2:]]
     pad_temp = pad if pad > 0 else len(temp1)
     temp2 = [0] * (pad_temp - len(temp1)) + temp1
