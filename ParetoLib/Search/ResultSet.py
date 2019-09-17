@@ -82,7 +82,7 @@ class ResultSet(object):
         >>> yup = [Rectangle((0.5,0.5), (1.0,1.0))]
         >>> border = [Rectangle((0.0,0.5), (0.5,1.0)), Rectangle((0.5,1.0), (1.0,1.0))]
         >>> rs = ResultSet(border, ylow, yup, xspace)
-        >>> rs.min_corner = x
+        >>> rs.min_corner = (0.0, 0.0)
         """
         str_xspace = 'xspace'
         str_border = 'border'
@@ -184,26 +184,22 @@ class ResultSet(object):
     # overlapping_volume_border() == 0 and overlapping_volume_total() == 0
     def simplify(self):
         # type: (ResultSet) -> None
-        extended_ylow = [Rectangle(self.xspace.min_corner, ylow_point) for ylow_point in self.get_points_pareto_ylow()]
-        extended_yup = [Rectangle(yup_point, self.xspace.max_corner) for yup_point in self.get_points_pareto_yup()]
-
-        self.border = Rectangle.difference_rectangles(self.xspace, extended_ylow + extended_yup)
-        self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
-        self.ylow = Rectangle.difference_rectangles(self.xspace, extended_yup + self.border)
-
-    def simplify_func(self):
-        # type: (ResultSet) -> None
         # Remove single points from the yup and ylow closures, i.e., rectangles rect with:
         # rect.min_corner == rect.max_corner
         # These kind of rectangles appear when the dicothomic search cannot find an intersection of the diagonal
         # with the Pareto front
-        self.ylow = [li for li in self.ylow if li.diag_vector() != 0.0]
-        self.yup = [li for li in self.yup if li.diag_vector() != 0.0]
+        self.ylow = [li for li in self.ylow if li.norm() != 0.0]
+        self.yup = [li for li in self.yup if li.norm() != 0.0]
         # Single points may appear in the boundary, so we don't remove them
-        # self.border = [li for li in self.border if li.diag_vector() != 0]
+        # self.border = [li for li in self.border if li.norm() != 0]
 
+        # Get the highest (upper right) values of self.ylow; i.e., those points that are closer to self.yup
         extended_ylow = [Rectangle(self.xspace.min_corner, r.max_corner) for r in self.ylow]
-        extended_yup = [Rectangle(r.min_corner, self.xspace.max_corner) for r in self.yup]
+        # extended_yup = [Rectangle(r.min_corner, self.xspace.max_corner) for r in self.yup]
+
+        # Get the lowest (lower left) values of self.yup; i.e., those points that are closer to self.ylow
+        # extended_ylow = [Rectangle(self.xspace.min_corner, ylow_point) for ylow_point in self.get_points_pareto_ylow()]
+        extended_yup = [Rectangle(yup_point, self.xspace.max_corner) for yup_point in self.get_points_pareto_yup()]
 
         self.border = Rectangle.difference_rectangles(self.xspace, extended_ylow + extended_yup)
         self.yup = Rectangle.difference_rectangles(self.xspace, extended_ylow + self.border)
@@ -416,18 +412,11 @@ class ResultSet(object):
         # type: (ResultSet, int) -> list
         return self.xspace.get_points(n)
 
-    def set_points_pareto_func(self, l):
-        # type: (ResultSet, iter) -> None
-        self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
-        self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
-        self.border = [Rectangle(p, p) for p in l]
-
     def set_points_pareto(self, l):
         # type: (ResultSet, iter) -> None
         self.yup = [Rectangle(p, self.xspace.max_corner) for p in l]
         self.ylow = [Rectangle(self.xspace.min_corner, p) for p in l]
         self.border = [Rectangle(p, p) for p in l]
-        # self.simplify()
 
     def get_points_pareto_yup(self):
         # type: (ResultSet) -> set
@@ -447,7 +436,9 @@ class ResultSet(object):
 
     def get_points_pareto(self):
         # type: (ResultSet) -> list
-        return list(self.get_points_pareto_yup() | self.get_points_pareto_ylow())
+        # Pareto points of Ylow will always dominate Pareto points from Yup
+        return list(self.get_points_pareto_ylow())
+        # return list(self.get_points_pareto_yup() | self.get_points_pareto_ylow())
         # return [r.max_corner for r in self.ylow] + [r.min_corner for r in self.yup]
 
     # Maximum/minimum values for each parameter
