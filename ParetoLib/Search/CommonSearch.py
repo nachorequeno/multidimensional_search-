@@ -32,6 +32,7 @@ EPS = 1e-5
 DELTA = 1e-5
 STEPS = float('inf')
 
+
 def binary_search(x,
                   member,
                   error):
