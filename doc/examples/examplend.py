@@ -22,3 +22,4 @@ rs = SearchND(ora=oracle,
               parallel=False,
               logging=True,
               simplify=True)
+rs.to_file("result.zip")
