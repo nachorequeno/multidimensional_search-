@@ -14,7 +14,7 @@ of the module.
 import logging
 
 __name__ = 'Oracle'
-__all__ = ['NDTree', 'Oracle', 'OracleFunction', 'OraclePoint', 'OracleSTL', 'OracleSTLe']
+__all__ = ['NDTree', 'Oracle', 'OracleFunction', 'OraclePoint', 'OracleSTL', 'OracleSTLe', 'OracleMatlab']
 
 # Logging configuration
 # logging.basicConfig(format='%(message)s', level=logging.INFO)
