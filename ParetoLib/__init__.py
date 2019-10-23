@@ -7,7 +7,7 @@
 """
 ParetoLib package.
 """
-__version__ = "2.0.0-dev0"
+__version__ = "2.0.0"
 __name__ = 'ParetoLib'
 __all__ = ['Geometry', 'JAMT', 'Oracle', 'Search', 'STLe', '_py3k']
 
