@@ -5,11 +5,18 @@ import copy
 
 from ParetoLib.Oracle.OracleMatlab import OracleMatlab
 
+MATLAB_INSTALLED = True
+try:
+    import matlab
+except ImportError:
+    MATLAB_INSTALLED = False
 
 ################
 # OracleMatlab #
 ################
 
+
+@unittest.skipIf(not MATLAB_INSTALLED, reason='Matlab is not installed')
 class OracleMatlabTestCase(unittest.TestCase):
     def setUp(self):
         # type: (OracleMatlabTestCase) -> None

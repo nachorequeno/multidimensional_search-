@@ -21,7 +21,7 @@ build_test:
     ## Installing
     - ./install.sh
     ## Testing
-    - pytest --ignore=Tests/test_Search.py
+    - pytest --ignore=Tests/test_Search.py --ignore=Tests/test_Oracle_OracleMatlab.py
     - cd Tests
     - pytest test_Search.py::SearchOracleFunctionTestCase
 

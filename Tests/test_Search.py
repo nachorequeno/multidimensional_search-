@@ -198,6 +198,16 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
 
+MATLAB_INSTALLED = True
+try:
+    import matlab
+except ImportError:
+    MATLAB_INSTALLED = False
+
+@pytest.mark.skipif(
+    not MATLAB_INSTALLED,
+    reason='Matlab is not installed'
+)
 class SearchOracleMatlabTestCase(SearchOracleFunctionTestCase):
 
     def setUp(self):
