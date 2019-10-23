@@ -197,6 +197,30 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
 
 
+MATLAB_INSTALLED = True
+try:
+    from ParetoLib.Oracle.OracleMatlab import OracleMatlab
+except ImportError:
+    MATLAB_INSTALLED = False
+
+@pytest.mark.skipif(
+    not MATLAB_INSTALLED,
+    reason='Matlab is not installed'
+)
+class SearchOracleMatlabTestCase(SearchOracleFunctionTestCase):
+
+    def setUp(self):
+        # type: (SearchOracleMatlabTestCase) -> None
+
+        super(SearchOracleMatlabTestCase, self).setUp()
+        self.this_dir = 'Oracle/OracleMatlab'
+        self.oracle = OracleMatlab()
+        # OracleFunction/[2|3]D/test3.txt contains '1/x', so x > 0
+        self.min_c = 0.0001
+        # OracleFunction/[2|3]D/test[3|4|5].txt requires max_c > 1.0 for reaching y_up
+        self.max_c = 2.0
+
+
 class SearchOraclePointTestCase(SearchTestCase):
 
     def setUp(self):

@@ -47,6 +47,15 @@ if (sys.version_info[0] >= 3):
         return dictionary.items()
 
 
+    def get_stdout_matlab():
+        """Return a Standard output stream for Matlab."""
+        return io.StringIO()
+
+
+    def get_stderr_matlab():
+        """Return a Standard error stream for Matlab."""
+        return io.StringIO()
+
     # On Python 3 urllib, urllib2, and urlparse were merged
     from urllib.request import urlopen, Request, urlretrieve, urlparse
     from urllib.parse import urlencode, quote
@@ -63,6 +72,7 @@ else:  # sys.version_info[0] < 3
     from future_builtins import zip, map, filter
     from __builtin__ import xrange as range
     from __builtin__ import raw_input as input
+    import StringIO
 
     def red(function, sequence):
         """Call 'reduce', which applies 'function' over all the elements of the sequence"""
@@ -89,6 +99,13 @@ else:  # sys.version_info[0] < 3
         """Return a view of the items of 'dictionary'."""
         return dictionary.viewitems()
 
+    def get_stdout_matlab():
+        """Return a Standard output stream for Matlab."""
+        return StringIO.StringIO()
+
+    def get_stderr_matlab():
+        """Return a Standard error stream for Matlab."""
+        return StringIO.StringIO()
 
     # Under urllib.request on Python 3:
     from urllib2 import urlopen, Request
@@ -104,14 +121,14 @@ else:  # sys.version_info[0] < 3
     # On Python 2 this will be a (bytes) string based handle.
     # Note this doesn't work as it is unicode based:
     # from io import StringIO
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
-    try:
-        input = raw_input
-    except NameError:
-        pass
+    # try:
+    #     from cStringIO import StringIO
+    # except ImportError:
+    #     from StringIO import StringIO
+    # try:
+    #     input = raw_input
+    # except NameError:
+    #     pass
     # There is no TemporaryDirectory class in the temp library
     from TemporaryDirectory import TemporaryDirectory
 

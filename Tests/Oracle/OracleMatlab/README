@@ -1,0 +1,34 @@
+
+    README file of the Test suite for ParetoLib
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+This README contains information about every data file used in the test
+suite of ParetoLib for OracleMatlab. Each file defines a OracleMatlab:
+
+2D/3D
+- test1.txt: Oracle that specifies the closure membership using a linear function (diagonal)
+- test2.txt: Oracle that specifies the closure membership using a quadratic function (parabola)
+- test3.txt: Oracle that specifies the closure membership using an inverse function (hyperbola)
+- test4.txt: Oracle that specifies the closure membership using a circumference/sphere
+- test5.txt: Oracle that specifies the closure membership using a simplex
+
+ND
+- simplex-4d.txt: Oracle that specifies the closure membership using a 4D simplex
+- simplex-5d.txt: Oracle that specifies the closure membership using a 5D simplex
+- sphere-4d.txt: Oracle that specifies the closure membership using a 4D sphere
+- sphere-5d.txt: Oracle that specifies the closure membership using a 5D sphere
+
+By default, all the Oracles consider n-dimensional spaces where the range of each axe is [0,1].
+
+    File format
+"""""""""""""""""
+There are two kind of files (*.txt, *.m):
+- *.txt are textual human-readable files.
+They point to the corresponding *.m Matlab file containing the definition of the Oracle.
+
+- *.m are Matlab files.
+The dimension of the n-dimensional space is implicitly defined by the set of equations.
+Every variable is associated with a dimension of the space by lexicographical order of the
+variable names.
+For instance, in equation 'x + y + z > 0' variable 'x' will correspond to dimension 1,
+variable 'y' will correspond to dimension 2 and variable 'z' will correspond to dimension 3.

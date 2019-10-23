@@ -1,0 +1,22 @@
+To install the engine API, choose one of the following.
+
+At a Windows operating system prompt —
+
+cd "matlabroot\extern\engines\python"
+python setup.py install
+You might need administrator privileges to execute these commands.
+
+At a macOS or Linux operating system prompt —
+
+cd "matlabroot/extern/engines/python"
+python setup.py install
+You might need administrator privileges to execute these commands.
+
+At the MATLAB command prompt —
+
+cd (fullfile(matlabroot,'extern','engines','python'))
+system('python setup.py install')
+Use one of the nondefault options described in Install MATLAB Engine API for Python in Nondefault Locations.
+
+Note
+You must call this python command in the specified folder.

@@ -209,8 +209,9 @@ def multidim_search_deep_first_opt_3(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc.name: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
+        RootSearch.logger.debug('cloning: {0}'.format(oracle))
         dict_man[proc.name] = copy.deepcopy(oracle)
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -457,8 +458,9 @@ def multidim_search_deep_first_opt_2(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc.name: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
+        RootSearch.logger.debug('cloning: {0}'.format(oracle))
         dict_man[proc.name] = copy.deepcopy(oracle)
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -678,8 +680,9 @@ def multidim_search_deep_first_opt_1(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc.name: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
+        RootSearch.logger.debug('cloning: {0}'.format(oracle))
         dict_man[proc.name] = copy.deepcopy(oracle)
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -896,8 +899,9 @@ def multidim_search_deep_first_opt_inf(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc.name: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
+        RootSearch.logger.debug('cloning: {0}'.format(oracle))
         dict_man[proc.name] = copy.deepcopy(oracle)
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
@@ -1083,8 +1087,9 @@ def multidim_search_deep_first_opt_0(xspace,
     # 'f = oracle.membership()' is not thread safe!
     # Create a copy of 'oracle' for each concurrent process
 
-    # dict_man = {proc: copy.deepcopy(oracle) for proc in mp.active_children()}
+    # dict_man = {proc.name: copy.deepcopy(oracle) for proc in mp.active_children()}
     for proc in mp.active_children():
+        RootSearch.logger.debug('cloning: {0}'.format(oracle))
         dict_man[proc.name] = copy.deepcopy(oracle)
 
     RootSearch.logger.debug('xspace: {0}'.format(xspace))
