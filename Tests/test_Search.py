@@ -8,6 +8,7 @@ import pytest
 from ParetoLib.Search.Search import Search2D, Search3D, SearchND
 from ParetoLib.Search.ResultSet import ResultSet
 
+from ParetoLib.Oracle.OracleMatlab import OracleMatlab
 from ParetoLib.Oracle.OracleFunction import OracleFunction
 from ParetoLib.Oracle.OraclePoint import OraclePoint
 from ParetoLib.Oracle.OracleSTL import OracleSTL
@@ -195,6 +196,20 @@ class SearchOracleFunctionTestCase(SearchTestCase):
         num_files_test = min(self.numfiles_test, len(list_test_files))
         list_test_files = sorted(list_test_files)[:num_files_test]
         self.search_verify_ND(human_readable=True, list_test_files=list_test_files)
+
+
+class SearchOracleMatlabTestCase(SearchOracleFunctionTestCase):
+
+    def setUp(self):
+        # type: (SearchOracleMatlabTestCase) -> None
+
+        super(SearchOracleMatlabTestCase, self).setUp()
+        self.this_dir = 'Oracle/OracleMatlab'
+        self.oracle = OracleMatlab()
+        # OracleFunction/[2|3]D/test3.txt contains '1/x', so x > 0
+        self.min_c = 0.0001
+        # OracleFunction/[2|3]D/test[3|4|5].txt requires max_c > 1.0 for reaching y_up
+        self.max_c = 2.0
 
 
 class SearchOraclePointTestCase(SearchTestCase):

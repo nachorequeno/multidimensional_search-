@@ -31,9 +31,9 @@ class OracleMatlab(Oracle):
         Oracle.__init__(self)
 
         # Initialize the Matlab Engine
-        self.out = get_stdout_matlab()
-        self.err = get_stderr_matlab()
-        self.eng = matlab.engine.start_matlab()
+        self.out = None
+        self.err = None
+        self.eng = None
 
         # Matlab function 'f' not loaded yet.
         # Dimension of the space unknown
@@ -42,12 +42,28 @@ class OracleMatlab(Oracle):
 
         self.matlab_model_file = matlab_model_file
 
-    def _lazy_init(self):
+    def _load_matlab_engine(self):
         # type: (OracleMatlab) -> None
         assert self.matlab_model_file != ''
 
-        # Lazy initialization of the OracleMatlab
-        RootOracle.logger.debug('Initializing OracleMatlab')
+        # Lazy initialization of the Matlab engine
+        RootOracle.logger.debug('Initializing Matlab engine')
+
+        self.out = get_stdout_matlab()
+        self.err = get_stderr_matlab()
+        self.eng = matlab.engine.start_matlab()
+
+        RootOracle.logger.debug('Matlab engine {0}'.format(self.eng))
+
+    def _load_function(self):
+        # type: (OracleMatlab) -> None
+        assert self.matlab_model_file != '', 'Matlab function not defined'
+        # assert self.eng is not None, 'Matlab engine not started'
+
+        RootOracle.logger.debug('Loading Matlab function')
+
+        if self.eng is None:
+            self._load_matlab_engine()
 
         # Include the path of the Matlab model in the Matlab workspace
         self.eng.addpath(os.path.dirname(self.matlab_model_file))
@@ -73,6 +89,7 @@ class OracleMatlab(Oracle):
         self.d = int(self.eng.nargin(func_name))
 
         RootOracle.logger.debug('Function {0} with {1} parameters'.format(func_name, self.d))
+        RootOracle.logger.debug('Matlab function {0}'.format(self.f))
 
     def __setattr__(self, name, value):
         # type: (OracleMatlab, str, None) -> None
@@ -97,7 +114,8 @@ class OracleMatlab(Oracle):
 
         str_matlab_file = 'matlab_model_file'
         if (name == str_matlab_file) and (value.strip() != ''):
-            self._lazy_init()
+            self.f = None
+            self.d = None
 
     def __repr__(self):
         # type: (OracleMatlab) -> str
@@ -147,6 +165,7 @@ class OracleMatlab(Oracle):
         """
         other = copy.copy(self)
         """
+        RootOracle.logger.debug('__copy__: {0}'.format(self))
         return OracleMatlab(matlab_model_file=self.matlab_model_file)
 
     def __deepcopy__(self, memo):
@@ -155,8 +174,39 @@ class OracleMatlab(Oracle):
         other = copy.deepcopy(self)
         """
         # deepcopy function is required for creating multiple instances of the Oracle in ParSearch.
-        # deepcopy cannot handle neither regex nor Popen processes
+        # deepcopy cannot handle neither matlab.engine nor matlab.func
+        RootOracle.logger.debug('__deeopcopy__: {0}'.format(self))
         return OracleMatlab(matlab_model_file=self.matlab_model_file)
+
+    def __getattr__(self, name):
+        # type: (OracleMatlab, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
+        elem = object.__getattribute__(self, name)
+
+        if (elem is None) and (name in ['f', 'd']):
+            self._load_function()
+            elem = object.__getattribute__(self, name)
+        # elif (elem is None) and (name == 'eng'):
+        #     self._load_matlab_engine()
+        #     elem = object.__getattribute__(self, name)
+
+        RootOracle.logger.debug('__getattr__: {0}, {1}'.format(name, elem))
+        return elem
+
+    def __getattribute__(self, name):
+        # type: (OracleMatlab, str) -> _
+        """
+        Returns:
+            self.name (object attribute)
+        """
+        elem = object.__getattribute__(self, name)
+        RootOracle.logger.debug('__getattribute__: {0}, {1}'.format(name, elem))
+        if elem is None:
+            raise AttributeError
+        return elem
 
     def dim(self):
         # type: (OracleMatlab) -> int
@@ -210,7 +260,7 @@ class OracleMatlab(Oracle):
             if not os.path.isfile(matlab_model_file):
                 RootOracle.logger.info('File {0} does not exists or it is not a file'.format(matlab_model_file))
 
-            self.__init__(matlab_model_file=matlab_model_file)
+            self.matlab_model_file = matlab_model_file
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))
@@ -226,7 +276,7 @@ class OracleMatlab(Oracle):
             # The file contains the path to the Matlab file containing the parametrized model.
             #
             # os.path.join creates absolute path from relative path "./something.txt"
-            # os.path.realpath uniforms path "2D/./signal.csv" by "2D/signal.csv"
+            # os.path.realpath uniforms path "2D/./test.m" by "2D/test.m"
             #
             current_path = os.path.dirname(os.path.abspath(finput.name))
             path = finput.readline().strip(' \n\t')
@@ -236,7 +286,7 @@ class OracleMatlab(Oracle):
             if not os.path.isfile(matlab_model_file):
                 RootOracle.logger.info('File {0} does not exists or it is not a file'.format(matlab_model_file))
 
-            self.__init__(matlab_model_file=matlab_model_file)
+            self.matlab_model_file = matlab_model_file
 
         except EOFError:
             RootOracle.logger.error('Unexpected error when loading {0}: {1}'.format(finput, sys.exc_info()[0]))

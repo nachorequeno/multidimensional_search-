@@ -1,0 +1,31 @@
+Start Python, import the module, and start the MATLAB engine:
+
+import matlab.engine
+eng = matlab.engine.start_matlab()
+
+Stop Engine
+Call either the exit or the quit function.
+
+eng.quit()
+If you exit Python with an engine still running, then Python automatically stops the engine and its MATLAB process.
+
+Start Engine with Startup Options
+Start the engine and pass the options as an input argument string to matlab.engine.start_matlab. For example, start MATLAB with the desktop.
+
+eng = matlab.engine.start_matlab("-desktop")
+You can define multiple startup options with a single string. For example, start the desktop and set the numeric display format to short.
+
+eng = matlab.engine.start_matlab("-desktop -r 'format short'")
+You also can start the desktop after you start the engine.
+
+import matlab.engine
+eng = matlab.engine.start_matlab()
+eng.desktop(nargout=0)
+Start Engine Asynchronously
+Start the engine asynchronously. While MATLAB starts, you can enter commands at the Python command line.
+
+import matlab.engine
+future = matlab.engine.start_matlab(background=True)
+Create the MATLAB instance so you can perform computations in MATLAB.
+
+eng = future.result()

@@ -197,7 +197,7 @@ class OracleSTLe(Oracle):
         """
         elem = object.__getattribute__(self, name)
         if elem is None:
-            RootOracle.logger.debug('Initializing OracleSTLe')
+            RootOracle.logger.debug('Initializing Oracle')
             self._lazy_init()
             elem = object.__getattribute__(self, name)
             RootOracle.logger.debug('Initialized Oracle')

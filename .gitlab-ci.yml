@@ -64,3 +64,7 @@ test:
     - pip install *.whl --user
     - cd ../Tests
     - ./coverage_all.sh
+  artifacts:
+    when: on_success
+    paths:
+      - coverage/report-python/*
