@@ -3,11 +3,9 @@ import tempfile as tf
 import unittest
 import copy
 
-from ParetoLib.Oracle.OracleMatlab import OracleMatlab
-
 MATLAB_INSTALLED = True
 try:
-    import matlab
+    from ParetoLib.Oracle.OracleMatlab import OracleMatlab
 except ImportError:
     MATLAB_INSTALLED = False
 

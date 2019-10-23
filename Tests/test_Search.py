@@ -8,7 +8,6 @@ import pytest
 from ParetoLib.Search.Search import Search2D, Search3D, SearchND
 from ParetoLib.Search.ResultSet import ResultSet
 
-from ParetoLib.Oracle.OracleMatlab import OracleMatlab
 from ParetoLib.Oracle.OracleFunction import OracleFunction
 from ParetoLib.Oracle.OraclePoint import OraclePoint
 from ParetoLib.Oracle.OracleSTL import OracleSTL
@@ -200,7 +199,7 @@ class SearchOracleFunctionTestCase(SearchTestCase):
 
 MATLAB_INSTALLED = True
 try:
-    import matlab
+    from ParetoLib.Oracle.OracleMatlab import OracleMatlab
 except ImportError:
     MATLAB_INSTALLED = False
 
