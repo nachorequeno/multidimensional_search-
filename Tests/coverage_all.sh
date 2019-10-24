@@ -31,9 +31,9 @@ coverage combine
 if [ !  $MATLAB_INSTALLED ]
 then
   coverage report --omit=*ParetoLib/_py3k*
-  coverage html --omit=*ParetoLib/_py3k* -d ./coverage/report-python
+  coverage html --omit=*ParetoLib/_py3k* -d coverage/
 else
   coverage report --omit=*ParetoLib/_py3k*,*ParetoLib/Oracle/OracleMatlab*
-  coverage html --omit=*ParetoLib/_py3k*,*ParetoLib/Oracle/OracleMatlab* -d ./coverage/report-python
+  coverage html --omit=*ParetoLib/_py3k*,*ParetoLib/Oracle/OracleMatlab* -d coverage/
 fi
 coverage erase
