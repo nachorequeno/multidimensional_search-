@@ -4,10 +4,6 @@ coverage run -m --parallel-mode pytest test_Oracle_OraclePoint.py
 coverage run -m --parallel-mode pytest test_Oracle_OracleFunction.py
 coverage run -m --parallel-mode pytest test_Oracle_OracleSTL.py
 coverage run -m --parallel-mode pytest test_Oracle_OracleSTLe.py
-if [ !  $MATLAB_INSTALLED ]
-then
-  coverage run -m --parallel-mode pytest test_Oracle_OracleMatlab.py
-fi
 coverage run -m --parallel-mode pytest test_Geometry_Point.py
 coverage run -m --parallel-mode pytest test_Geometry_Rectangle.py
 coverage run -m --parallel-mode pytest test_Geometry_Segment.py
@@ -29,8 +25,15 @@ then
   coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleMatlabTestCase::test_2D
   coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleMatlabTestCase::test_3D
   coverage run -m --parallel-mode --concurrency=multiprocessing pytest test_Search.py::SearchOracleMatlabTestCase::test_ND
+  coverage run -m --parallel-mode pytest test_Oracle_OracleMatlab.py
 fi
 coverage combine
-coverage report --omit=*ParetoLib/_py3k*
-coverage html -d coverage/report-python
+if [ !  $MATLAB_INSTALLED ]
+then
+  coverage report --omit=*ParetoLib/_py3k*
+  coverage html --omit=*ParetoLib/_py3k* -d ./coverage/report-python
+else
+  coverage report --omit=*ParetoLib/_py3k*,*ParetoLib/Oracle/OracleMatlab*
+  coverage html --omit=*ParetoLib/_py3k*,*ParetoLib/Oracle/OracleMatlab* -d ./coverage/report-python
+fi
 coverage erase

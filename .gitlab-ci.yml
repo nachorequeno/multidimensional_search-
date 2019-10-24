@@ -67,4 +67,4 @@ test:
   artifacts:
     when: on_success
     paths:
-      - coverage/report-python/*
+      - ./coverage/report-python/*

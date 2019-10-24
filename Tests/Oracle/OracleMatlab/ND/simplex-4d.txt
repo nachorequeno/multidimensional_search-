@@ -1,1 +1,0 @@
-./simplex-4d.txt

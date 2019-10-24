@@ -18,7 +18,7 @@ except ImportError:
 class OracleMatlabTestCase(unittest.TestCase):
     def setUp(self):
         # type: (OracleMatlabTestCase) -> None
-        self.this_dir = 'Oracle/OracleSTLe'
+        self.this_dir = 'Oracle/OracleMatlab'
         self.files_to_clean = set()
         self.files_to_load = self.add_file_to_load()
 
