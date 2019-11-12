@@ -70,6 +70,7 @@ import matplotlib.patches as patches
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from itertools import product, tee
 
+import ParetoLib.Geometry as RootGeom
 from ParetoLib.Geometry.Segment import Segment
 from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
     incomparables, select, subt, int_to_bin_tuple #, r
@@ -90,8 +91,11 @@ class Rectangle(object):
         assert dim(min_corner) == dim(max_corner)
 
         # min_corner, max_corner
-        self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        # self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        # self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        self.min_corner = min_corner
+        self.max_corner = max_corner
+
         # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
         # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners).
         self.vol = None
@@ -202,11 +206,7 @@ class Rectangle(object):
         """
         Printer.
         """
-        _string = '['
-        _string += str(self.min_corner)
-        _string += ', '
-        _string += str(self.max_corner)
-        _string += ']'
+        _string = '[{0}, {1}]'.format(self.min_corner, self.max_corner)
         return _string
 
     def __repr__(self):
@@ -343,6 +343,23 @@ class Rectangle(object):
         return int(math.pow(2, self.dim()))
 
     def _vertices(self):
+        # type: (Rectangle) -> list
+        deltas = self.diag_vector()
+        vertex = self.min_corner
+        vertices = []
+        # For dim = 3, indexes =
+        # (0, 0, 0)
+        # (0, 0, 1)
+        # (0, 1, 0)
+        # ....
+        indexes = product([0, 1], repeat=self.dim())
+        for delta_index in indexes:
+            deltai = select(deltas, delta_index)
+            vertices.append(add(vertex, deltai))
+        assert (len(vertices) == self.num_vertices()), 'Error in the number of vertices'
+        return vertices
+
+    def _vertices_func(self):
         # type: (Rectangle) -> list
         deltas = self.diag_vector()
         vertex = self.min_corner
@@ -527,7 +544,46 @@ class Rectangle(object):
          >>> x = (0,0)
          >>> y = (1,1)
          >>> z = (1,0)
-         >>> t = (2,2)
+         >>> t = (2,1)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.is_concatenable(r1)
+         >>> True
+        """
+        assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
+
+        concatenable = False
+
+        # Two rectangles are concatenable if d-1 coordinates are aligned and they only differ in 1 coordinate
+        min_corner_eq = (self_i == other_i for self_i, other_i in zip(self.min_corner, other.min_corner))
+        max_corner_eq = (self_i == other_i for self_i, other_i in zip(self.max_corner, other.max_corner))
+        corner_eq = [min_c and max_c for min_c, max_c in zip(min_corner_eq, max_corner_eq)]
+
+        if sum(corner_eq) == (self.dim() - 1):
+            # Besides, the mismatching coordinate must have continuous interval
+            mismatching_index = corner_eq.index(False)
+            concatenable = (self.max_corner[mismatching_index] == other.min_corner[mismatching_index]) or \
+                         (other.max_corner[mismatching_index] == self.min_corner[mismatching_index])
+
+        return concatenable
+
+    def is_concatenable_func(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Adjacency of two rectangles.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             bool: True if self and other are adjacent.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,1)
          >>> r1 = Rectangle(x,y)
          >>> r2 = Rectangle(z,t)
          >>> r2.is_concatenable(r1)
@@ -563,14 +619,49 @@ class Rectangle(object):
          >>> x = (0,0)
          >>> y = (1,1)
          >>> z = (1,0)
-         >>> t = (2,2)
+         >>> t = (2,1)
          >>> r1 = Rectangle(x,y)
          >>> r2 = Rectangle(z,t)
          >>> r2.concatenate(r1)
-         >>> [(0.0,0.0), (2.0,2.0)]
+         >>> [(0.0,0.0), (2.0,1.0)]
         """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
-        assert (not self.overlaps(other)), 'Rectangles should not overlap'
+        assert (not self.overlaps(other)), 'Rectangles should not overlap: {0}, {1}'.format(self, other)
+
+        rect = Rectangle(self.min_corner, self.max_corner)
+
+        if self.is_concatenable(other):
+            rect.min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            rect.max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+
+        return rect
+
+    def concatenate_func(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the concatenation of two adjacent
+         rectangles (if possible).
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Concatenation of self and other, if possible.
+             Else, self.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,1)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.concatenate(r1)
+         >>> [(0.0,0.0), (2.0,1.0)]
+        """
+        assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
+        assert (not self.overlaps(other)), 'Rectangles should not overlap: {0}, {1}'.format(self, other)
 
         vert_self = set(self.vertices())
         vert_other = set(other.vertices())
@@ -584,7 +675,7 @@ class Rectangle(object):
         if self.is_concatenable(other):
             new_union_vertices = (vert_self.union(vert_other)) - inter
             assert len(new_union_vertices) > 0, \
-                'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
+                'Error in computing vertices for the concatenation of "{0}" and "{1}"'.format(self, other)
 
             rect.min_corner = min(new_union_vertices)
             rect.max_corner = max(new_union_vertices)
@@ -611,15 +702,55 @@ class Rectangle(object):
          >>> x = (0,0)
          >>> y = (1,1)
          >>> z = (1,0)
-         >>> t = (2,2)
+         >>> t = (2,1)
          >>> r1 = Rectangle(x,y)
          >>> r2 = Rectangle(z,t)
-         >>> r2.concatenate(r1)
-         >>> [(0.0,0.0), (2.0,2.0)]
+         >>> r2.concatenate_update(r1)
+         >>> [(0.0,0.0), (2.0,1.0)]
         """
 
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
-        assert (not self.overlaps(other)), 'Rectangles should not overlap'
+        assert (not self.overlaps(other)), 'Rectangles should not overlap: {0}, {1}'.format(self, other)
+
+        # if 'self' and 'other' are concatenable
+        if self.is_concatenable(other):
+            min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+
+            self.min_corner = min_corner
+            self.max_corner = max_corner
+        return self
+
+    def concatenate_update_func(self, other):
+        # type: (Rectangle, Rectangle) -> Rectangle
+        """
+         Rectangle resulting from the concatenation of two adjacent
+         rectangles (if possible).
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             Rectangle: Concatenation of self and other, if possible.
+             Else, self.
+             Side effect: self is updated with the concatenation
+             of self and other, if possible.
+             Else, self keeps unchanged.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,1)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> r2.concatenate_update(r1)
+         >>> [(0.0,0.0), (2.0,1.0)]
+        """
+
+        assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
+        assert (not self.overlaps(other)), 'Rectangles should not overlap: {0}, {1}'.format(self, other)
 
         vert_self = set(self.vertices())
         vert_other = set(other.vertices())
@@ -629,15 +760,11 @@ class Rectangle(object):
         if self.is_concatenable(other):
             new_union_vertices = (vert_self.union(vert_other)) - inter
             assert len(new_union_vertices) > 0, \
-                'Error in computing vertices for the concatenation of "' + str(self) + '" and "' + str(other) + '"'
+                'Error in computing vertices for the concatenation of "{0}" and "{1}"'.format(self, other)
 
             self.min_corner = min(new_union_vertices)
             self.max_corner = max(new_union_vertices)
         return self
-
-    @staticmethod
-    def _overlaps(minc, maxc):
-        return less(minc, maxc)
 
     def overlaps(self, other):
         # type: (Rectangle, Rectangle) -> bool
@@ -664,8 +791,7 @@ class Rectangle(object):
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        # return less(minc, maxc)
-        return self._overlaps(minc, maxc)
+        return less(minc, maxc)
 
     def intersection(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
@@ -693,8 +819,7 @@ class Rectangle(object):
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        # if less(minc, maxc):
-        if self._overlaps(minc, maxc):
+        if less(minc, maxc):
             return Rectangle(minc, maxc)
         else:
             return Rectangle(self.min_corner, self.max_corner)
@@ -729,8 +854,7 @@ class Rectangle(object):
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        # if less(minc, maxc):
-        if self._overlaps(minc, maxc):
+        if less(minc, maxc):
             self.min_corner = minc
             self.max_corner = maxc
         return self
@@ -740,6 +864,68 @@ class Rectangle(object):
     Synonym of intersection(self, other).
     """
     def difference(self, other):
+        # type: (Rectangle, Rectangle) -> iter
+        """
+         Set of rectangles resulting from the difference of two rectangles (if any).
+         If there is no intersection, returns self.
+
+         Args:
+             self (Rectangle): The Rectangle.
+             other (Rectangle): Other Rectangle.
+
+         Returns:
+             iter: Iterator for reading the set of rectangles.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (2,2)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(x,z)
+         >>> r2.difference(r1)
+         >>> [[(1.0,0.0), (2.0,2.0)]]
+        """
+        assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
+
+        diff_set = set()
+
+        inter = self & other
+        if inter == self:
+            diff_set.add(inter)
+        else:
+            ground = self.min_corner
+            ceil = self.max_corner
+
+            # The maximum number of sub-cubes is 2*d (2 boxes per coordinate)
+            for i in range(self.dim()):
+                # new_ground = ground[:i] + (max(ground[i], inter.min_corner[i]),) + ground[i+1:]
+                # new_ceil = ceil[:i] + (min(ceil[i], inter.max_corner[i]),) + ceil[i+1:]
+                #
+                # r1 = Rectangle(ground, new_ground)
+                # r2 = Rectangle(new_ceil, ceil)
+                #
+                # diff_set.add(r1)
+                # diff_set.add(r2)
+                #
+                # ground = new_ground
+                # ceil = new_ceil
+
+                inner_ground = ground[:i] + (max(ground[i], inter.max_corner[i]),) + ground[i+1:]
+                inner_ceil = ceil[:i] + (min(ceil[i], inter.min_corner[i]),) + ceil[i+1:]
+
+                r1 = Rectangle(ground, inner_ceil)
+                r2 = Rectangle(inner_ground, ceil)
+
+                if r1.volume() > 0:
+                    diff_set.add(r1)
+                if r2.volume() > 0:
+                    diff_set.add(r2)
+
+                ground = ground[:i] + (max(ground[i], inter.min_corner[i]),) + ground[i+1:]
+                ceil = ceil[:i] + (min(ceil[i], inter.max_corner[i]),) + ceil[i+1:]
+        return list(diff_set)
+
+    def difference_func(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
          Set of rectangles resulting from the difference of two rectangles (if any).
@@ -781,7 +967,7 @@ class Rectangle(object):
             d = [{self.min_corner[i], self.max_corner[i]} for i in range(dimension)]
 
             # At maximum:
-            # d[i] = {self.min_corner[i], self.max_corner[i], other.min_corner[i], other.max_corner[i]}
+            # d[i] = {self.min_corner[i], other.min_corner[i], other.max_corner[i], self.max_corner[i]}
             for i in range(dimension):
                 if self.min_corner[i] < other.min_corner[i] < self.max_corner[i]:
                     d[i].add(other.min_corner[i])
@@ -940,6 +1126,48 @@ class Rectangle(object):
 
     @staticmethod
     def fusion_rectangles(list_rect):
+        # type: (iter) -> list
+        """
+         Concatenation of the rectangles in a list,
+         whenever it is possible. If no concatenation is possible,
+         returns the original list.
+
+         Args:
+             list_rect (list): List of rectangles.
+
+         Returns:
+             list: list of rectangles obtained by concatenation.
+
+         Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> z = (1,0)
+         >>> t = (2,1)
+         >>> r1 = Rectangle(x,y)
+         >>> r2 = Rectangle(z,t)
+         >>> Rectangle.fusion_rectangles([r1, r2])
+         >>> [[(0.0,0.0), (2.0,1.0)]]
+        """
+
+        not_processed = set(list_rect)
+        output = []
+        while not_processed:
+            r1 = not_processed.pop()
+            processed = set()
+            for r2 in not_processed:
+                if r1.is_concatenable(r2):
+                    # Concatenate rectangle r1 and r2
+                    r1.concatenate_update(r2)
+                    processed.add(r2)
+            if len(processed) == 0:
+                output.append(r1)
+            else:
+                not_processed = not_processed - processed
+                not_processed.add(r1)
+        return output
+
+    @staticmethod
+    def fusion_rectangles_func(list_rect):
         # type: (iter) -> list
         """
          Concatenation of the rectangles in a list,

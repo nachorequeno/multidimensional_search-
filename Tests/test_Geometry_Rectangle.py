@@ -255,14 +255,17 @@ class RectangleTestCase(unittest.TestCase):
         p6 = (0.0, 1.0)
         p7 = (0.5, 1.75)
         r5 = Rectangle(p6, p7)
+        r6 = Rectangle(p1, p7)
 
         diff_result = set(r1.difference(r2))
 
         # Difference
-        self.assertTrue(r3 in diff_result)
+        self.assertTrue(r6 in diff_result)
+        # self.assertTrue(r3 in diff_result)
         self.assertTrue(r4 in diff_result)
-        self.assertTrue(r5 in diff_result)
-        self.assertTrue(len(diff_result) == 3)
+        # self.assertTrue(r5 in diff_result)
+        # self.assertTrue(len(diff_result) == 3)
+        self.assertTrue(len(diff_result) == 2)
 
         diff_result21 = set(r3.difference(r4))
         diff_result22 = set(r4.difference(r3))

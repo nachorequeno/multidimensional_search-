@@ -18,7 +18,7 @@ Pareto point is located.
 
 import math
 
-from ParetoLib.Geometry.Point import maximum, minimum, greater_equal, less_equal, div, add, r
+from ParetoLib.Geometry.Point import maxi, mini, greater_equal, less_equal, div, add, r
 import ParetoLib.Geometry.Point as Point
 
 
@@ -54,8 +54,8 @@ class Segment (object):
         >>> s = Segment(x, y)
         """
 
-        self.low = minimum(low, high)
-        self.high = maximum(low, high)
+        self.low = mini(low, high)
+        self.high = maxi(low, high)
         assert Point.dim(self.low) == Point.dim(self.high)
         assert greater_equal(self.high, self.low)
 
@@ -105,20 +105,16 @@ class Segment (object):
         >>> s.high = y
         """
         # Round the elements of 'value' when assigning them to self.low or self.high
-        val = tuple(r(vi) for vi in value)
+        # value = tuple(r(vi) for vi in value)
         # self.__dict__[name] = val
-        object.__setattr__(self, name, val)
+        object.__setattr__(self, name, value)
 
     def _to_str(self):
         # type: (Segment) -> str
         """
         Printer.
         """
-        _string = '<'
-        _string += str(self.low)
-        _string += ', '
-        _string += str(self.high)
-        _string += '>'
+        _string = '<{0}, {1}>'.format(self.low, self.high)
         return _string
 
     def __repr__(self):
