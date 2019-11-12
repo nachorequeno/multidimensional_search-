@@ -272,6 +272,12 @@ def multidim_search_opt_3(xspace,
         lattice_border_ylow.add_list(i)
         lattice_border_yup.add_list(i)
 
+        # Remove boxes in the boundary with volume 0
+        boxes_null_vol = border[:border.bisect_key_left(0.0)]
+        border -= boxes_null_vol
+        lattice_border_ylow.remove_list(boxes_null_vol)
+        lattice_border_yup.remove_list(boxes_null_vol)
+
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}'
@@ -461,6 +467,9 @@ def multidim_search_opt_2(xspace,
 
         border |= i
         RootSearch.logger.debug('irect: {0}'.format(i))
+
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
 
         vol_border = vol_total - vol_yup - vol_ylow
 
@@ -670,6 +679,9 @@ def multidim_search_opt_1(xspace,
         border |= i
         RootSearch.logger.debug('irect: {0}'.format(i))
 
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
+
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}'
@@ -828,6 +840,10 @@ def multidim_search_opt_inf(xspace,
         border += i
         RootSearch.logger.debug('irect: {0}'.format(i))
 
+        # Remove boxes in the boundary with volume 0
+        # border = border[border.bisect_key_right(0.0):]
+        del border[:border.bisect_key_left(0.0)]
+
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}'
@@ -945,6 +961,10 @@ def multidim_search_opt_0(xspace,
 
         border += i
         RootSearch.logger.debug('irect: {0}'.format(i))
+
+        # Remove boxes in the boundary with volume 0
+        # border = border[border.bisect_key_right(0.0):]
+        del border[:border.bisect_key_left(0.0)]
 
         vol_border = vol_total - vol_yup - vol_ylow
 

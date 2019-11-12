@@ -367,6 +367,12 @@ def multidim_search_deep_first_opt_3(xspace,
         lattice_border_ylow.add_list(list(new_incomp_rects))
         lattice_border_yup.add_list(list(new_incomp_rects))
 
+        # Remove boxes in the boundary with volume 0
+        boxes_null_vol = border[:border.bisect_key_left(0.0)]
+        border -= boxes_null_vol
+        lattice_border_ylow.remove_list(boxes_null_vol)
+        lattice_border_yup.remove_list(boxes_null_vol)
+
         ################################
         # Every rectangle in 'new_incomp_rects' is incomparable for current B0 and for all B0 included in Ylow
         # Every rectangle in 'new_incomp_rects' is incomparable for current B1 and for all B1 included in Yup
@@ -593,6 +599,9 @@ def multidim_search_deep_first_opt_2(xspace,
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
 
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
+
         ################################
         # Every rectangle in 'new_incomp_rects' is incomparable for current B0 and for all B0 included in Ylow
         # Every rectangle in 'new_incomp_rects' is incomparable for current B1 and for all B1 included in Yup
@@ -809,6 +818,9 @@ def multidim_search_deep_first_opt_1(xspace,
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
 
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
+
         ################################
         # Every rectangle in 'new_incomp_rects' is incomparable for current B0 and for all B0 included in Ylow
         # Every rectangle in 'new_incomp_rects' is incomparable for current B1 and for all B1 included in Yup
@@ -1005,6 +1017,9 @@ def multidim_search_deep_first_opt_inf(xspace,
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
 
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
+
         vol_border = vol_total - vol_yup - vol_ylow
 
         RootSearch.logger.info('{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}'
@@ -1154,6 +1169,9 @@ def multidim_search_deep_first_opt_0(xspace,
 
         # Add new incomparable rectangles to the border
         border |= new_incomp_rects
+
+        # Remove boxes in the boundary with volume 0
+        border -= border[:border.bisect_key_left(0.0)]
 
         vol_border = vol_total - vol_yup - vol_ylow
 
