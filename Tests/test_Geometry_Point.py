@@ -55,6 +55,10 @@ class PointTestCase(unittest.TestCase):
         self.time_for_n_iterations(lambda z: p.greater_equal(xprime, x), rep)
         self.time_for_n_iterations(lambda z: p.less(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.less_equal(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.maxi(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.maxi(xprime, x), rep)
+        self.time_for_n_iterations(lambda z: p.mini(x, xprime), rep)
+        self.time_for_n_iterations(lambda z: p.mini(xprime, x), rep)
         self.time_for_n_iterations(lambda z: p.maximum(x, xprime), rep)
         self.time_for_n_iterations(lambda z: p.maximum(xprime, x), rep)
         self.time_for_n_iterations(lambda z: p.minimum(x, xprime), rep)
@@ -72,8 +76,10 @@ class PointTestCase(unittest.TestCase):
         # type: (PointTestCase, int, int) -> None
         xxprime = np.random.rand(2, dim)
 
-        x = tuple(xxprime[0])
-        xprime = tuple(xxprime[1])
+        # x = tuple(xxprime[0])
+        # xprime = tuple(xxprime[1])
+        x = xxprime[0]
+        xprime = xxprime[1]
         r1 = random.randint(0, len(x) - 1)
         r2 = random.randint(0, 10)
 
@@ -127,6 +133,8 @@ class PointTestCase(unittest.TestCase):
         self.assertEqual(p.greater_equal(x, xprime), pp.greater_equal(x, xprime))
         self.assertEqual(p.less(x, xprime), pp.less(x, xprime))
         self.assertEqual(p.less_equal(x, xprime), pp.less_equal(x, xprime))
+        self.assertEqual(p.maxi(x, xprime), pp.maxi(x, xprime))
+        self.assertEqual(p.mini(x, xprime), pp.mini(x, xprime))
         self.assertEqual(p.maximum(x, xprime), pp.maximum(x, xprime))
         self.assertEqual(p.minimum(x, xprime), pp.minimum(x, xprime))
         self.assertEqual(p.incomparables(x, xprime), pp.incomparables(x, xprime))

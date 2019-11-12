@@ -330,7 +330,7 @@ def incomparables(x, xprime):
     return (not greater_equal(x, xprime)) and (not greater_equal(xprime, x))
 
 
-def maximum(x, xprime):
+def maxi(x, xprime):
     # type: (tuple, tuple) -> tuple
     """
     Component wise comparison of two Cartesian points.
@@ -345,7 +345,7 @@ def maximum(x, xprime):
     Example:
     >>> x = (5, 6, 7)
     >>> xprime = (3, 2, 1)
-    >>> maximum(x, xprime)
+    >>> maxi(x, xprime)
     >>> (5, 6, 7)
     """
     if greater_equal(x, xprime):
@@ -354,7 +354,7 @@ def maximum(x, xprime):
         return xprime
 
 
-def minimum(x, xprime):
+def mini(x, xprime):
     # type: (tuple, tuple) -> tuple
     """
     Component wise comparison of two Cartesian points.
@@ -369,13 +369,55 @@ def minimum(x, xprime):
     Example:
     >>> x = (5, 6, 7)
     >>> xprime = (3, 2, 1)
-    >>> minimum(x, xprime)
+    >>> mini(x, xprime)
     >>> (3, 2, 1)
     """
     if less_equal(x, xprime):
         return x
     else:
         return xprime
+
+
+def maximum(x, xprime):
+    # type: (tuple, tuple) -> tuple
+    """
+    Component wise maximum of two Cartesian points.
+
+    Args:
+        x (tuple): The first point.
+        xprime (tuple): The second point.
+
+    Returns:
+        tuple: max(x[i], xprime[i]) for i = 0..dim(x)-1
+
+    Example:
+    >>> x = (1, 2, 3)
+    >>> xprime = (3, 2, 1)
+    >>> maximum(x, xprime)
+    >>> (3, 2, 3)
+    """
+    return tuple(max(xi[0], xi[1]) for xi in zip(x, xprime))
+
+
+def minimum(x, xprime):
+    # type: (tuple, tuple) -> tuple
+    """
+    Component wise minimum of two Cartesian points.
+
+    Args:
+        x (tuple): The first point.
+        xprime (tuple): The second point.
+
+    Returns:
+        tuple: min(x[i], xprime[i]) for i = 0..dim(x)-1
+
+    Example:
+    >>> x = (1, 2, 3)
+    >>> xprime = (3, 2, 1)
+    >>> mininum(x, xprime)
+    >>> (1, 2, 1)
+    """
+    return tuple(min(xi[0], xi[1]) for xi in zip(x, xprime))
 
 
 def subt(i, x, xprime):
