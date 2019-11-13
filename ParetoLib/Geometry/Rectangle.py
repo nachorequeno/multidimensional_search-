@@ -80,7 +80,7 @@ from ParetoLib._py3k import red
 class Rectangle(object):
     def __init__(self,
                  min_corner=(float('-inf'),) * 2,
-                 max_corner=(float('-inf'),) * 2):
+                 max_corner=(float('+inf'),) * 2):
         # type: (Rectangle, tuple, tuple) -> None
         """
         A Rectangle is represented by a couple of points (x, x'), i.e., the
@@ -91,10 +91,10 @@ class Rectangle(object):
         assert dim(min_corner) == dim(max_corner)
 
         # min_corner, max_corner
-        # self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        # self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        self.min_corner = min_corner
-        self.max_corner = max_corner
+        self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        # self.min_corner = min_corner
+        # self.max_corner = max_corner
 
         # Volume (self.vol) is calculated on demand the first time is accessed, and cached afterwards.
         # Using 'None' for indicating that attribute vol is outdated (e.g., user changes min_corner or max_corners).
