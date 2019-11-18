@@ -72,8 +72,8 @@ from itertools import product, tee
 
 import ParetoLib.Geometry as RootGeom
 from ParetoLib.Geometry.Segment import Segment
-from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, add, subtract, div, mult, distance, dim, \
-    incomparables, select, subt, int_to_bin_tuple #, r
+from ParetoLib.Geometry.Point import greater, greater_equal, less, less_equal, equal, add, subtract, div, mult, distance, dim, \
+    incomparables, select, subt, int_to_bin_tuple, minimum, maximum#, r
 from ParetoLib._py3k import red
 
 
@@ -91,8 +91,10 @@ class Rectangle(object):
         assert dim(min_corner) == dim(max_corner)
 
         # min_corner, max_corner
-        self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
-        self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        # self.min_corner = tuple(min(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        # self.max_corner = tuple(max(mini, maxi) for mini, maxi in zip(min_corner, max_corner))
+        self.min_corner = minimum(min_corner, max_corner)
+        self.max_corner = maximum(min_corner, max_corner)
         # self.min_corner = min_corner
         # self.max_corner = max_corner
 
@@ -228,7 +230,8 @@ class Rectangle(object):
         """
         self == other
         """
-        return (other.min_corner == self.min_corner) and (other.max_corner == self.max_corner)
+        # return (other.min_corner == self.min_corner) and (other.max_corner == self.max_corner)
+        return equal(other.min_corner, self.min_corner) and equal(other.max_corner, self.max_corner)
 
     def __ne__(self, other):
         # type: (Rectangle, Rectangle) -> bool
@@ -270,7 +273,8 @@ class Rectangle(object):
         """
         Identity function (via hashing).
         """
-        return hash((self.min_corner, self.max_corner))
+        # return hash((self.min_corner, self.max_corner))
+        return hash((str(self.min_corner), str(self.max_corner)))
 
     # Rectangle properties
     def dim(self):
@@ -631,8 +635,10 @@ class Rectangle(object):
         rect = Rectangle(self.min_corner, self.max_corner)
 
         if self.is_concatenable(other):
-            rect.min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            rect.max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            # rect.min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            # rect.max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            rect.min_corner = minimum(self.min_corner, other.min_corner)
+            rect.max_corner = maximum(self.max_corner, other.max_corner)
 
         return rect
 
@@ -714,8 +720,10 @@ class Rectangle(object):
 
         # if 'self' and 'other' are concatenable
         if self.is_concatenable(other):
-            min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-            max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            # min_corner = tuple(min(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+            # max_corner = tuple(max(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+            min_corner = minimum(self.min_corner, other.min_corner)
+            max_corner = maximum(self.max_corner, other.max_corner)
 
             self.min_corner = min_corner
             self.max_corner = max_corner
@@ -791,6 +799,8 @@ class Rectangle(object):
 
         minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
         maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # minc = maximum(self.min_corner, other.min_corner)
+        # maxc = minimum(self.max_corner, other.max_corner)
         return less(minc, maxc)
 
     def intersection(self, other):
@@ -817,8 +827,10 @@ class Rectangle(object):
         """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        # maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        minc = maximum(self.min_corner, other.min_corner)
+        maxc = minimum(self.max_corner, other.max_corner)
         if less(minc, maxc):
             return Rectangle(minc, maxc)
         else:
@@ -852,8 +864,10 @@ class Rectangle(object):
         """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        # minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        # maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        minc = maximum(self.min_corner, other.min_corner)
+        maxc = minimum(self.max_corner, other.max_corner)
         if less(minc, maxc):
             self.min_corner = minc
             self.max_corner = maxc
@@ -863,7 +877,7 @@ class Rectangle(object):
     """
     Synonym of intersection(self, other).
     """
-    def difference(self, other):
+    def difference_func(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
          Set of rectangles resulting from the difference of two rectangles (if any).
@@ -893,8 +907,10 @@ class Rectangle(object):
         if inter == self:
             diff_set.add(inter)
         else:
-            ground = self.min_corner
-            ceil = self.max_corner
+            # ground = self.min_corner
+            # ceil = self.max_corner
+            ground = tuple(self.min_corner)
+            ceil = tuple(self.max_corner)
 
             # The maximum number of sub-cubes is 2*d (2 boxes per coordinate)
             for i in range(self.dim()):
@@ -925,7 +941,7 @@ class Rectangle(object):
                 ceil = ceil[:i] + (min(ceil[i], inter.max_corner[i]),) + ceil[i+1:]
         return list(diff_set)
 
-    def difference_func(self, other):
+    def difference(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
          Set of rectangles resulting from the difference of two rectangles (if any).
@@ -1125,7 +1141,7 @@ class Rectangle(object):
     #####################
 
     @staticmethod
-    def fusion_rectangles(list_rect):
+    def fusion_rectangles_beta(list_rect):
         # type: (iter) -> list
         """
          Concatenation of the rectangles in a list,
@@ -1167,7 +1183,7 @@ class Rectangle(object):
         return output
 
     @staticmethod
-    def fusion_rectangles_func(list_rect):
+    def fusion_rectangles(list_rect):
         # type: (iter) -> list
         """
          Concatenation of the rectangles in a list,

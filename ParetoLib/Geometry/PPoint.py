@@ -16,6 +16,7 @@ optimising vector operations.
 
 import numpy as np
 from numpy import linalg as la
+from numpy import array as point
 
 import ParetoLib.Geometry
 from ParetoLib._py3k import red
@@ -51,12 +52,12 @@ def r(i):
 
 
 def dim(x):
-    # type: (tuple) -> int
+    # type: (point) -> int
     """
     Dimension of a Cartesian point.
 
     Args:
-        x (tuple): A Cartesian point.
+        x (point): A Cartesian point.
 
     Returns:
         int: len(x).
@@ -70,12 +71,12 @@ def dim(x):
 
 
 def norm(x):
-    # type: (tuple) -> float
+    # type: (point) -> float
     """
     Norm of a vector.
 
     Args:
-        x (tuple): A vector.
+        x (point): A vector.
 
     Returns:
         float: sqrt(sum(x[i]**2)) for i = 0..dim(x)-1.
@@ -89,13 +90,13 @@ def norm(x):
 
 
 def distance(x, xprime):
-    # type: (tuple, tuple) -> float
+    # type: (point, point) -> float
     """
     Euclidean distance between two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         float: norm(x - xprime).
@@ -111,13 +112,13 @@ def distance(x, xprime):
 
 
 def hamming_distance(x, xprime):
-    # type: (tuple, tuple) -> float
+    # type: (point, point) -> float
     """
     Hamming distance between two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         float: sum(x[i] - xprime[i]) for i = 0..dim(x)-1.
@@ -137,16 +138,16 @@ def hamming_distance(x, xprime):
 # a Cartesian point and a scale factor.
 
 def subtract(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise subtraction of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: x[i] - xprime[i] for i = 0..dim(x)-1.
+        point: x[i] - xprime[i] for i = 0..dim(x)-1.
 
     Example:
     >>> x = (5, 6, 7)
@@ -154,20 +155,20 @@ def subtract(x, xprime):
     >>> subtract(x, xprime)
     >>> (2, 4, 6)
     """
-    return tuple(np.array(x) - np.array(xprime))
+    return x - xprime
 
 
 def add(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise addition of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: x[i] + xprime[i] for i = 0..dim(x)-1.
+        point: x[i] + xprime[i] for i = 0..dim(x)-1.
 
     Example:
     >>> x = (5, 6, 7)
@@ -175,20 +176,20 @@ def add(x, xprime):
     >>> add(x, xprime)
     >>> (8, 8, 8)
     """
-    return tuple(np.array(x) + np.array(xprime))
+    return x + xprime
 
 
 def mult(x, i):
-    # type: (tuple, float) -> tuple
+    # type: (point, float) -> point
     """
     Multiplication of a Cartesian point by a scale factor.
 
     Args:
-        x (tuple): A Cartesian point.
+        x (point): A Cartesian point.
         i (float): The scale factor.
 
     Returns:
-        tuple: x[j]*i for j = 0..dim(x)-1.
+        point: x[j]*i for j = 0..dim(x)-1.
 
     Example:
     >>> x = (5, 6, 7)
@@ -196,20 +197,20 @@ def mult(x, i):
     >>> mult(x, i)
     >>> (10.0, 12.0, 14.0)
     """
-    return tuple(np.array(x) * i)
+    return x * i
 
 
 def div(x, i):
-    # type: (tuple, float) -> tuple
+    # type: (point, float) -> point
     """
     Division of a Cartesian point by a scale factor.
 
     Args:
-        x (tuple): A Cartesian point.
+        x (point): A Cartesian point.
         i (float): The scale factor.
 
     Returns:
-        tuple: x[j]/i for j = 0..dim(x)-1.
+        point: x[j]/i for j = 0..dim(x)-1.
 
     Example:
     >>> x = (5, 6, 7)
@@ -217,18 +218,18 @@ def div(x, i):
     >>> div(x, i)
     >>> (2.5, 3.0, 3.5)
     """
-    return tuple(np.array(x) / i)
+    return x / i
 
 
 # Comparison of two points
 def greater(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         bool: x[i] > xprime[i] for i = 0..dim(x)-1.
@@ -239,17 +240,17 @@ def greater(x, xprime):
     >>> greater(x, xprime)
     >>> True
     """
-    return all(np.array(x) > np.array(xprime))
+    return all(x > xprime)
 
 
 def greater_equal(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         bool: x[i] >= xprime[i] for i = 0..dim(x)-1.
@@ -260,17 +261,17 @@ def greater_equal(x, xprime):
     >>> greater_equal(x, xprime)
     >>> True
     """
-    return all(np.array(x) >= np.array(xprime))
+    return all(x >= xprime)
 
 
 def less(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         bool: x[i] < xprime[i] for i = 0..dim(x)-1.
@@ -281,17 +282,17 @@ def less(x, xprime):
     >>> less(x, xprime)
     >>> False
     """
-    return all(np.array(x) < np.array(xprime))
+    return all(x < xprime)
 
 
 def less_equal(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         bool: x[i] <= xprime[i] for i = 0..dim(x)-1.
@@ -302,17 +303,38 @@ def less_equal(x, xprime):
     >>> less_equal(x, xprime)
     >>> False
     """
-    return all(np.array(x) <= np.array(xprime))
+    return all(x <= xprime)
 
 
-def incomparables(x, xprime):
-    # type: (tuple, tuple) -> bool
+def equal(x, xprime):
+    # type: (point, point) -> bool
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
+
+    Returns:
+        bool: x[i] == xprime[i] for i = 0..dim(x)-1.
+
+    Example:
+    >>> x = (5, 6, 7)
+    >>> xprime = (3, 2, 1)
+    >>> equal(x, xprime)
+    >>> False
+    """
+    return all(x == xprime)
+
+
+def incomparables(x, xprime):
+    # type: (point, point) -> bool
+    """
+    Component wise comparison of two Cartesian points.
+
+    Args:
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
         bool: (not greater_equal(x, xprime)) and
@@ -332,16 +354,16 @@ def incomparables(x, xprime):
 
 
 def maxi(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: x if x[i] > xprime[i] for i = 0..dim(x)-1, else xprime.
+        point: x if x[i] > xprime[i] for i = 0..dim(x)-1, else xprime.
 
     Example:
     >>> x = (5, 6, 7)
@@ -356,16 +378,16 @@ def maxi(x, xprime):
 
 
 def mini(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise comparison of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: x if x[i] < xprime[i] for i = 0..dim(x)-1, else xprime.
+        point: x if x[i] < xprime[i] for i = 0..dim(x)-1, else xprime.
 
     Example:
     >>> x = (5, 6, 7)
@@ -380,16 +402,16 @@ def mini(x, xprime):
 
 
 def maximum(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise maximum of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: max(x[i], xprime[i]) for i = 0..dim(x)-1
+        point: max(x[i], xprime[i]) for i = 0..dim(x)-1
 
     Example:
     >>> x = (1, 2, 3)
@@ -397,47 +419,43 @@ def maximum(x, xprime):
     >>> maximum(x, xprime)
     >>> (3, 2, 3)
     """
-    x = np.array(x)
-    xprime = np.array(xprime)
-    return tuple(np.maximum(x, xprime))
+    return np.maximum(x, xprime)
 
 
 def minimum(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Component wise minimum of two Cartesian points.
 
     Args:
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Returns:
-        tuple: min(x[i], xprime[i]) for i = 0..dim(x)-1
+        point: min(x[i], xprime[i]) for i = 0..dim(x)-1
 
     Example:
     >>> x = (1, 2, 3)
     >>> xprime = (3, 2, 1)
-    >>> mininum(x, xprime)
+    >>> minimum(x, xprime)
     >>> (1, 2, 1)
     """
-    x = np.array(x)
-    xprime = np.array(xprime)
-    return tuple(np.minimum(x, xprime))
+    return np.minimum(x, xprime)
 
 
 def subt(i, x, xprime):
-    # type: (int, tuple, tuple) -> tuple
+    # type: (int, point, point) -> point
     """
     Substitution of the i-th component of a Cartesian point
     by the i-th component of another Cartesian point.
 
     Args:
         i (int): Index
-        x (tuple): The first point.
-        xprime (tuple): The second point.
+        x (point): The first point.
+        xprime (point): The second point.
 
     Return:
-        tuple: (x[0],...,x[i-1], xprime[i], x[i+1],..., x[dim(x)-1]).
+        point: (x[0],...,x[i-1], xprime[i], x[i+1],..., x[dim(x)-1]).
 
     Example:
     >>> i = 3
@@ -449,23 +467,23 @@ def subt(i, x, xprime):
     n = len(x)
     m = len(xprime)
     assert ((0 <= i) and (i < n) and (i < m)), 'index out of range'
-    out = np.array(x)
+    out = point(x)
     out[i] = xprime[i]
-    return tuple(out)
+    return out
 
 
 def select(x, xprime):
-    # type: (tuple, tuple) -> tuple
+    # type: (point, point) -> point
     """
     Selection of components from a Cartesian point
     according to an index vector.
 
     Args:
-        x (tuple): A Cartesian point.
-        xprime (tuple): An index vector.
+        x (point): A Cartesian point.
+        xprime (point): An index vector.
 
     Return:
-        tuple: Components of x selected by xprime.
+        point: Components of x selected by xprime.
 
     Example:
     >>> x = (5, 6, 7)
@@ -476,7 +494,7 @@ def select(x, xprime):
     n = len(x)
     m = len(xprime)
     assert (n == m), 'index out of range'
-    return tuple(np.array(x) * np.array(xprime))
+    return x * xprime
 
 
 # Integer to binary notation
@@ -507,9 +525,9 @@ def int_to_bin_list(x, pad=0):
 
 
 def int_to_bin_tuple(x, pad=0):
-    # type: (int, int) -> tuple
+    # type: (int, int) -> point
     """ Equivalent to int_to_bin_list(x, pad=0).
-    Returns a tuple instead of a list.
+    Returns a point instead of a list.
 
     Args:
         x (int): A Cartesian point.
@@ -517,7 +535,7 @@ def int_to_bin_tuple(x, pad=0):
                    By default, 0 (i.e., no need of padding).
 
     Return:
-        tuple: Representation of x as a tuple of binary digits.
+        point: Representation of x as a point of binary digits.
 
     Example:
     >>> x = 4
@@ -531,7 +549,7 @@ def int_to_bin_tuple(x, pad=0):
 
 # Domination
 def dominates(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Synonym of less_equal(x, xprime).
     """
@@ -539,7 +557,7 @@ def dominates(x, xprime):
 
 
 def is_dominated(x, xprime):
-    # type: (tuple, tuple) -> bool
+    # type: (point, point) -> bool
     """
     Synonym of less_equal(xprime, x).
     """

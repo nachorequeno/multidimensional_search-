@@ -303,6 +303,28 @@ def less_equal(x, xprime):
     return all(xi[0] <= xi[1] for xi in zip(x, xprime))
 
 
+def equal(x, xprime):
+    # type: (tuple, tuple) -> bool
+    """
+    Component wise comparison of two Cartesian points.
+
+    Args:
+        x (tuple): The first point.
+        xprime (tuple): The second point.
+
+    Returns:
+        bool: x[i] == xprime[i] for i = 0..dim(x)-1.
+
+    Example:
+    >>> x = (5, 6, 7)
+    >>> xprime = (3, 2, 1)
+    >>> equal(x, xprime)
+    >>> False
+    """
+    # return all(xi[0] == xi[1] for xi in zip(x, xprime))
+    return x == xprime
+
+
 def incomparables(x, xprime):
     # type: (tuple, tuple) -> bool
     """
