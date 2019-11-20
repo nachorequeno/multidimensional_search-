@@ -99,7 +99,7 @@ class OraclePoint(Oracle):
         Example:
         >>> xset = {(0,0,0), (1,1,1)}
         >>> ora = OraclePoint()
-        >>> ora.add_point(xset)
+        >>> ora.add_points(xset)
         """
         for point in setpoints:
             self.add_point(point)
@@ -119,7 +119,8 @@ class OraclePoint(Oracle):
         Example:
         >>> xset = {(0,0,0), (1,1,1)}
         >>> ora = OraclePoint()
-        >>> ora.add_point(xset)
+        >>> ora.add_points(xset)
+        >>> ora.get_points(()
         """
         return self.oracle.get_points()
 

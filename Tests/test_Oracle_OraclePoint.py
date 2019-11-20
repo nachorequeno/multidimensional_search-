@@ -106,7 +106,7 @@ class OraclePointTestCase(unittest.TestCase):
         # type: (OraclePointTestCase, float, float, bool) -> None
 
         def f1(x):
-            return 1 / x if x > 0.0 else 1000
+            return 1 / x if x > 0.0 else 1000.0
 
         tmpfile = tf.NamedTemporaryFile(delete=False)
         nfile = tmpfile.name
@@ -157,7 +157,7 @@ class OraclePointTestCase(unittest.TestCase):
 
         # Points
         def f1(x):
-            return 1 / x if x > 0.0 else 1000
+            return 1 / x if x > 0.0 else 1000.0
 
         def f2(x):
             return 0.1 + (1 / x) if x > 0.0 else 1000.1
@@ -225,6 +225,13 @@ class OraclePointTestCase(unittest.TestCase):
 
         print('Oracle 1 Parameters: {0}'.format(param1))
         print('Oracle 2 Parameters: {0}'.format(param2))
+
+        points1 = sorted(ora1.get_points())
+        points2 = sorted(ora2.get_points())
+
+        print('Oracle 1 Points: {0}'.format(points1))
+        print('Oracle 2 Points: {0}'.format(points2))
+        self.assertEqual(points1, points2, 'Different oracles')
 
         self.assertEqual(ora1, ora2, 'Different oracles')
         self.assertEqual(hash(ora1), hash(ora2), 'Different oracles')
