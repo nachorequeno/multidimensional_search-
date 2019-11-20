@@ -273,8 +273,8 @@ class Rectangle(object):
         """
         Identity function (via hashing).
         """
-        # return hash((self.min_corner, self.max_corner))
-        return hash((str(self.min_corner), str(self.max_corner)))
+        return hash((self.min_corner, self.max_corner))
+        # return hash((tuple(self.min_corner), tuple(self.max_corner)))
 
     # Rectangle properties
     def dim(self):
@@ -797,10 +797,10 @@ class Rectangle(object):
         """
         assert self.dim() == other.dim(), 'Rectangles should have the same dimension'
 
-        minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
-        maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
-        # minc = maximum(self.min_corner, other.min_corner)
-        # maxc = minimum(self.max_corner, other.max_corner)
+        # minc = tuple(max(self_i, other_i) for self_i, other_i in zip(self.min_corner, other.min_corner))
+        # maxc = tuple(min(self_i, other_i) for self_i, other_i in zip(self.max_corner, other.max_corner))
+        minc = maximum(self.min_corner, other.min_corner)
+        maxc = minimum(self.max_corner, other.max_corner)
         return less(minc, maxc)
 
     def intersection(self, other):
@@ -877,7 +877,7 @@ class Rectangle(object):
     """
     Synonym of intersection(self, other).
     """
-    def difference_func(self, other):
+    def difference(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
          Set of rectangles resulting from the difference of two rectangles (if any).
@@ -941,7 +941,7 @@ class Rectangle(object):
                 ceil = ceil[:i] + (min(ceil[i], inter.max_corner[i]),) + ceil[i+1:]
         return list(diff_set)
 
-    def difference(self, other):
+    def difference_func(self, other):
         # type: (Rectangle, Rectangle) -> iter
         """
          Set of rectangles resulting from the difference of two rectangles (if any).
@@ -1141,7 +1141,7 @@ class Rectangle(object):
     #####################
 
     @staticmethod
-    def fusion_rectangles_beta(list_rect):
+    def fusion_rectangles(list_rect):
         # type: (iter) -> list
         """
          Concatenation of the rectangles in a list,
@@ -1183,7 +1183,7 @@ class Rectangle(object):
         return output
 
     @staticmethod
-    def fusion_rectangles(list_rect):
+    def fusion_rectangles_func(list_rect):
         # type: (iter) -> list
         """
          Concatenation of the rectangles in a list,
