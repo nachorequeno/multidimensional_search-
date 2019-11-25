@@ -23,7 +23,6 @@ logger.setLevel(logging.INFO)
 
 # Create handlers
 handler = logging.StreamHandler()
-#handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
 form = logging.Formatter('%(message)s')
