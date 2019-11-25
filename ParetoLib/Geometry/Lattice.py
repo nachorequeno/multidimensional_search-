@@ -10,7 +10,7 @@ This module introduces the Lattice class. It includes a set of
 operations for creating and handling partial ordered sets.
 """
 
-from sortedcontainers import SortedKeyList
+from sortedcontainers import SortedSet
 from operator import getitem
 
 
@@ -21,16 +21,15 @@ class Lattice(object):
         # type: (Lattice, int, callable) -> None
         assert dim > 0
         self.key = key
-        # self.list_of_lists = [SortedKeyList([], key=lambda x, j=i: self.key(x)[j]) for i in range(dim)]
-        self.list_of_lists = [SortedKeyList([], key=lambda x, j=i: getitem(self.key(x), j)) for i in range(dim)]
-        # TODO: Change SortedList by SortedSet?
+        # self.list_of_lists = [SortedSet([], key=lambda x, j=i: self.key(x)[j]) for i in range(dim)]
+        self.list_of_sets = [SortedSet([], key=lambda x, j=i: getitem(self.key(x), j)) for i in range(dim)]
 
     def _to_str(self):
         # type: (Lattice) -> str
         """
         Printer.
         """
-        return str(self.list_of_lists)
+        return str(self.list_of_sets)
 
     def __repr__(self):
         # type: (Lattice) -> str
@@ -51,7 +50,7 @@ class Lattice(object):
         """
         self == other
         """
-        return (other.list_of_lists == self.list_of_lists) and (other.key == self.key)
+        return (other.list_of_lists == self.list_of_sets) and (other.key == self.key)
 
     def __ne__(self, other):
         # type: (Lattice, Lattice) -> bool
@@ -65,7 +64,7 @@ class Lattice(object):
         """
         Identity function (via hashing).
         """
-        return hash((tuple(self.list_of_lists), self.key))
+        return hash((tuple(self.list_of_sets), self.key))
 
     def __len__(self):
         # type: (Lattice) -> int
@@ -93,31 +92,31 @@ class Lattice(object):
         >>> l.dim()
         >>> 3
         """
-        return len(self.list_of_lists)
+        return len(self.list_of_sets)
 
     def get_elements(self):
-        # type: (Lattice) -> set
-        return set(self.list_of_lists[0])
+        # type: (Lattice) -> iter
+        return self.list_of_sets[0]
 
     def add(self, elem):
         # type: (Lattice, object) -> None
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             l.add(elem)
 
     def add_list(self, lst):
         # type: (Lattice, iter) -> None
-        for elem in lst:
-            self.add(elem)
+        for l in self.list_of_sets:
+            l += lst
 
     def remove(self, elem):
         # type: (Lattice, object) -> None
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             l.discard(elem)
 
     def remove_list(self, lst):
         # type: (Lattice, iter) -> None
-        for elem in lst:
-            self.remove(elem)
+        for l in self.list_of_sets:
+            l -= lst
 
     def less(self, elem):
         # type: (Lattice, object) -> set
@@ -125,7 +124,7 @@ class Lattice(object):
         Elements 'x' of the Lattice having x_i < elem_i for all i with i in [1, dim(elem)].
         """
         s = self.get_elements()
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             index = l.bisect_left(elem)
             s = s.intersection(l[:index])
         return s
@@ -136,7 +135,7 @@ class Lattice(object):
         Elements 'x' of the Lattice having x_i <= elem_i for all i with i in [1, dim(elem)].
         """
         s = self.get_elements()
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             index = l.bisect_right(elem)
             s = s.intersection(l[:index])
         return s
@@ -147,7 +146,7 @@ class Lattice(object):
         Elements 'x' of the Lattice having x_i > elem_i for all i with i in [1, dim(elem)].
         """
         s = self.get_elements()
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             index = l.bisect_right(elem)
             s = s.intersection(l[index:])
         return s
@@ -158,7 +157,7 @@ class Lattice(object):
         Elements 'x' of the Lattice having x_i >= elem_i for all i with i in [1, dim(elem)].
         """
         s = self.get_elements()
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             index = l.bisect_left(elem)
             s = s.intersection(l[index:])
         return s
@@ -169,7 +168,7 @@ class Lattice(object):
         Elements 'x' of the Lattice having x_i == elem_i for all i with i in [1, dim(elem)].
         """
         s = self.get_elements()
-        for l in self.list_of_lists:
+        for l in self.list_of_sets:
             index1 = l.bisect_left(elem)
             index2 = l.bisect_right(elem)
             s = s.intersection(l[index1:index2])
