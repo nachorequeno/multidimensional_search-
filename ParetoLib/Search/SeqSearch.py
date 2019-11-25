@@ -143,7 +143,8 @@ def multidim_search_opt_3(xspace,
         'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # RootSearch.logger.debug('border: {0}'.format(border))
+        # if RootSearch.logger.isEnabledFor(RootSearch.logger.DEBUG):
+        #    RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
@@ -363,7 +364,8 @@ def multidim_search_opt_2(xspace,
         'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # RootSearch.logger.debug('border: {0}'.format(border))
+        # if RootSearch.logger.isEnabledFor(RootSearch.logger.DEBUG):
+        #    RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
@@ -552,7 +554,8 @@ def multidim_search_opt_1(xspace,
         'Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch, nBorder dominated by Ylow, nBorder dominated by Yup')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # RootSearch.logger.debug('border: {0}'.format(border))
+        # if RootSearch.logger.isEnabledFor(RootSearch.logger.DEBUG):
+        #    RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
@@ -766,7 +769,8 @@ def multidim_search_opt_inf(xspace,
                            'BinSearch, volYlowOpt1, volYlowOpt2, volYupOpt1, volYupOpt2')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # RootSearch.logger.debug('border: {0}'.format(border))
+        # if RootSearch.logger.isEnabledFor(RootSearch.logger.DEBUG):
+        #    RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
@@ -924,7 +928,8 @@ def multidim_search_opt_0(xspace,
     RootSearch.logger.info('Report\nStep, Ylow, Yup, Border, Total, nYlow, nYup, nBorder, BinSearch')
     while (vol_border >= delta) and (step <= max_step) and (len(border) > 0):
         step = step + 1
-        # RootSearch.logger.debug('border: {0}'.format(border))
+        # if RootSearch.logger.isEnabledFor(RootSearch.logger.DEBUG):
+        #    RootSearch.logger.debug('border: {0}'.format(border))
         # l.sort(key=Rectangle.volume)
 
         xrectangle = border.pop()
