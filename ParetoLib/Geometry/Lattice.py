@@ -106,7 +106,7 @@ class Lattice(object):
     def add_list(self, lst):
         # type: (Lattice, iter) -> None
         for l in self.list_of_sets:
-            l += lst
+            l |= lst
 
     def remove(self, elem):
         # type: (Lattice, object) -> None
