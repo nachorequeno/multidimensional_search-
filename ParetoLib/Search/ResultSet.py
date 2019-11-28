@@ -480,6 +480,17 @@ class ResultSet(object):
         # type: (ResultSet, int) -> float
         return ResultSet._get_max_val_dimension_rect_list(i, self.border)
 
+    # Composition of two Pareto Fronts
+    def intersection(self, other):
+        # type: (ResultSet, ResultSet) -> ResultSet
+        xspace = self.xspace.intersection(other.xspace)
+        border = list(set(self.border) | set(other.border))
+        ylow = list(set(self.ylow) | set(other.ylow))
+        yup = list(set(self.yup) | set(other.yup))
+
+        res = ResultSet(border=border, ylow=ylow, yup=yup, xspace=xspace)
+        return res
+
     # MatPlot Graphics
     def _plot_space_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
