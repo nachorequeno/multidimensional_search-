@@ -1090,8 +1090,11 @@ class Rectangle(object):
         self.min_corner = f(self.min_corner)
         self.max_corner = f(self.max_corner)
 
-        self.min_corner = minimum(self.min_corner, self.max_corner)
-        self.max_corner = maximum(self.min_corner, self.max_corner)
+        min_c = minimum(self.min_corner, self.max_corner)
+        max_c = maximum(self.min_corner, self.max_corner)
+
+        self.min_corner = min_c
+        self.max_corner = max_c
 
     # Matplot functions
     def plot_2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):
