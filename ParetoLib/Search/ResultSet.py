@@ -537,6 +537,7 @@ class ResultSet(object):
          >>> rs.xspace
          >>> [(0.0,-1.0), (0.5,0.0)]
         """
+        self.scale_xspace(f)
         self.scale_yup(f)
         self.scale_ylow(f)
         self.scale_border(f)
