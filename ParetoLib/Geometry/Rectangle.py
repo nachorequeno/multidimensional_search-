@@ -106,6 +106,10 @@ class Rectangle(object):
 
         assert greater_equal(self.max_corner, self.min_corner) or incomparables(self.min_corner, self.max_corner)
 
+    def reset(self):
+        self.vol = None
+        self.vertx = None
+
     def __setattr__(self, name, value):
         # type: (Rectangle, str, None) -> None
         """
@@ -1060,6 +1064,31 @@ class Rectangle(object):
         Synonym of Rectangle.dominates(other, self).
         """
         return other.dominates_rect(self)
+
+    # Scaling functions
+    def scale(self, f=lambda x: x):
+        # type: (Rectangle, callable) -> None
+        """
+         Function that scales the current rectangle according to a scaling function f.
+
+         Args:
+             self (Rectangle): The Rectangle,
+             f (callable): The scaling factor
+
+         Returns:
+             None: Current rectangle is scaled.
+
+        Example:
+         >>> x = (0,0)
+         >>> y = (1,1)
+         >>> r = Rectangle(x,y)
+         >>> def f(p):
+         >>>     return (70-p[0], -p[1])
+         >>> r.scale(f)
+         >>> [(70.0,-1.0), (70.0,0.0)]
+        """
+        self.min_corner = f(self.min_corner)
+        self.max_corner = f(self.max_corner)
 
     # Matplot functions
     def plot_2D(self, c='red', xaxe=0, yaxe=1, opacity=1.0):

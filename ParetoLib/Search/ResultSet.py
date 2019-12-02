@@ -491,6 +491,56 @@ class ResultSet(object):
         res = ResultSet(border=border, ylow=ylow, yup=yup, xspace=xspace)
         return res
 
+    # Scaling functions
+    def scale_xspace(self, f=lambda x: x):
+        # type: (ResultSet, callable) -> None
+        self.xspace.scale(f)
+
+    def scale_yup(self, f=lambda x: x):
+        # type: (ResultSet, callable) -> None
+        for r in self.yup:
+            r.scale(f)
+
+    def scale_ylow(self, f=lambda x: x):
+        # type: (ResultSet, callable) -> None
+        for r in self.ylow:
+            r.scale(f)
+
+    def scale_border(self, f=lambda x: x):
+        # type: (ResultSet, callable) -> None
+        for r in self.border:
+            r.scale(f)
+
+    def scale(self, f=lambda x: x):
+        # type: (ResultSet, callable) -> None
+        """
+         Function that scales all the rectangles in the current result set according to a scaling function f.
+
+         Args:
+             self (ResultSet): The ResultSet,
+             f (callable): The scaling factor
+
+         Returns:
+             None: Current ResultSet is scaled.
+
+        Example:
+        >>> xspace = Rectangle((0.0,0.0), (1.0,1.0))
+        >>> ylow = [Rectangle((0.0,0.0), (0.5,0.5))]
+        >>> yup = [Rectangle((0.5,0.5), (1.0,1.0))]
+        >>> border = [Rectangle((0.0,0.5), (0.5,1.0)), Rectangle((0.5,1.0), (1.0,1.0))]
+        >>> rs = ResultSet(border, ylow, yup, xspace)
+        >>> rs.min_corner = (0.0, 0.0)
+
+         >>> def f(p):
+         >>>     return (0.5*p[0], -p[1])
+         >>> rs.scale(f)
+         >>> rs.xspace
+         >>> [(0.0,-1.0), (0.5,0.0)]
+        """
+        self.scale_yup(f)
+        self.scale_ylow(f)
+        self.scale_border(f)
+
     # MatPlot Graphics
     def _plot_space_2D(self, xaxe=0, yaxe=1, opacity=1.0):
         # type: (ResultSet, int, int, float) -> list
