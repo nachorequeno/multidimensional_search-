@@ -39,6 +39,8 @@ import ParetoLib.Search as RootSearch
 class ResultSet(object):
     def __init__(self, border=list(), ylow=list(), yup=list(), xspace=Rectangle()):
         # type: (ResultSet, iter, iter, iter, Rectangle) -> None
+        assert xspace is not None, 'xspace is None, it must be defined'
+
         # self.border = list(border) is required for forcing the creation of a local list.
         # If two ResultSets are created by making an empty call to ResultSet() (i.e., rs1, rs2),
         # then rs1.border and rs2.border will point to the same list. Modifications in rs1.border
@@ -115,13 +117,7 @@ class ResultSet(object):
         #    if i != dim(self.low) - 1:
         #        _string += ', '
         # _string += ')'
-        _string = '<'
-        _string += str(self.yup)
-        _string += ', '
-        _string += str(self.ylow)
-        _string += ', '
-        _string += str(self.border)
-        _string += '>'
+        _string = '<{0}, {1}, {2}>'.format(self.yup, self.ylow, self.border)
         return _string
 
     def __repr__(self):

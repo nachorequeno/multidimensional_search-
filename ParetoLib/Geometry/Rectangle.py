@@ -818,7 +818,7 @@ class Rectangle(object):
 
          Returns:
              Rectangle: Intersection of self and other, if any.
-             Else, self.
+             Else, None.
 
          Example:
          >>> x = (0,0)
@@ -837,8 +837,8 @@ class Rectangle(object):
         maxc = minimum(self.max_corner, other.max_corner)
         if less(minc, maxc):
             return Rectangle(minc, maxc)
-        else:
-            return Rectangle(self.min_corner, self.max_corner)
+        # else:
+        #     return Rectangle(self.min_corner, self.max_corner)
 
     def intersection_update(self, other):
         # type: (Rectangle, Rectangle) -> Rectangle
@@ -907,9 +907,12 @@ class Rectangle(object):
 
         diff_set = set()
 
-        inter = self & other
-        if inter == self:
-            diff_set.add(inter)
+        # inter = self & other
+        # if inter == self:
+        #    diff_set.add(inter)
+        inter = self.intersection(other)
+        if inter is None:
+            diff_set.add(self)
         else:
             # ground = self.min_corner
             # ceil = self.max_corner
@@ -975,8 +978,10 @@ class Rectangle(object):
             next(b, None)
             return zip(a, b)
 
-        inter = self & other
-        if inter == self:
+        # inter = self & other
+        # if inter == self:
+        inter = self.intersection(other)
+        if inter is None:
             yield self
         else:
             # d is a list with dimension equal to the rectangle dimension.
